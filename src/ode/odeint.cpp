@@ -6,16 +6,12 @@ using namespace boost::numeric::odeint;
 
 namespace SOS {
     namespace ODE {
-        Odeint::Odeint(const Ode_spec& ode_spec)
+        State Odeint::solve(Context&& context) const
         {
-
-        }
-
-        State Odeint::solve(const Context& context)
-        {
-            State x = context._x_init;
+            State x = move(context._x_init);
             /*size_t steps = */
-            integrate([](const State & x_, State & dx, const Time t){},
+            integrate([&](const State& x_, State& dx, Time t)
+                        { eval_ode(context._ode_id, dx, x, t); },
                       x,
                       context._t_bounds.first,
                       context._t_bounds.second,

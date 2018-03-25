@@ -16,10 +16,12 @@ using std::vector;
 using std::pair;
 using std::ostream;
 using std::istringstream;
+using std::regex;
+
 using std::find;
+using std::for_each;
 using std::begin;
 using std::end;
-using std::regex;
 
 using namespace std::string_literals;
 
@@ -38,7 +40,7 @@ namespace SOS {
             Error(const string& msg = "") : _msg(msg) { }
 
             friend ostream& operator <<(ostream& os, const Error& rhs)
-              { return (os << rhs); }
+                { return (os << rhs); }
         private:
             string _msg;
         };

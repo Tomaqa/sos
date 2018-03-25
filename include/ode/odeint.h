@@ -10,9 +10,7 @@ namespace SOS {
             using Times  = vector<Time>;
             using States = vector<State>;
 
-            Odeint(const Ode_spec& ode_spec);
-
-            virtual State solve(const Context& context) final;
+            virtual State solve(Context&& context) const override final;
         };
     }
 }
