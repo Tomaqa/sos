@@ -1,0 +1,6 @@
+build/
+lib/*
+bin/*
+
+data/smt2/benchmarks/
+.backup/
