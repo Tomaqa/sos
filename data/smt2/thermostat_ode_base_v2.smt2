@@ -104,15 +104,15 @@
 
 ;;; Integration
 
-;(dt-int x (t_0 t_1) (x_0 x_1) (on_0))
-;(dt-int x (t_1 t_2) (x_1 x_2) (on_1))
-;(dt-int x (t_2 t_3) (x_2 x_3) (on_2))
-;(dt-int x (t_3 t_4) (x_3 x_4) (on_3))
-;(dt-int x (t_4 t_5) (x_4 x_5) (on_4))
-;(dt-int x (t_5 t_6) (x_5 x_6) (on_5))
-;(dt-int x (t_6 t_7) (x_6 x_7) (on_6))
-;(dt-int x (t_7 t_8) (x_7 x_8) (on_7))
-;(dt-int x (t_8 t_9) (x_8 x_9) (on_8))
+;(int-ode x (t_0 t_1) (x_0 x_1) (on_0))
+;(int-ode x (t_1 t_2) (x_1 x_2) (on_1))
+;(int-ode x (t_2 t_3) (x_2 x_3) (on_2))
+;(int-ode x (t_3 t_4) (x_3 x_4) (on_3))
+;(int-ode x (t_4 t_5) (x_4 x_5) (on_4))
+;(int-ode x (t_5 t_6) (x_5 x_6) (on_5))
+;(int-ode x (t_6 t_7) (x_6 x_7) (on_6))
+;(int-ode x (t_7 t_8) (x_7 x_8) (on_7))
+;(int-ode x (t_8 t_9) (x_8 x_9) (on_8))
 
 (assert (and (_connect _dx_0 on_0)
              (_connect _dx_1 on_1)
