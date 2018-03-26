@@ -48,15 +48,25 @@
 (declare-fun on_8 () Bool)
 (declare-fun on_9 () Bool)
 
-(declare-fun dx_0 () Real)
-(declare-fun dx_1 () Real)
-(declare-fun dx_2 () Real)
-(declare-fun dx_3 () Real)
-(declare-fun dx_4 () Real)
-(declare-fun dx_5 () Real)
-(declare-fun dx_6 () Real)
-(declare-fun dx_7 () Real)
-(declare-fun dx_8 () Real)
+(declare-fun _dx_0 () Real)
+(declare-fun _dx_1 () Real)
+(declare-fun _dx_2 () Real)
+(declare-fun _dx_3 () Real)
+(declare-fun _dx_4 () Real)
+(declare-fun _dx_5 () Real)
+(declare-fun _dx_6 () Real)
+(declare-fun _dx_7 () Real)
+(declare-fun _dx_8 () Real)
+
+(declare-fun _dx_0_int () Real)
+(declare-fun _dx_1_int () Real)
+(declare-fun _dx_2_int () Real)
+(declare-fun _dx_3_int () Real)
+(declare-fun _dx_4_int () Real)
+(declare-fun _dx_5_int () Real)
+(declare-fun _dx_6_int () Real)
+(declare-fun _dx_7_int () Real)
+(declare-fun _dx_8_int () Real)
 
 ;;; Initializations
 
@@ -75,35 +85,55 @@
              (= t_9 (+ t_8 T))
 ))
 
-;;; Derivatives definition
+;;; Derivatives declaration and definition
 
-;(define-dt dx_on  x (- 100.0 x))
-;(define-dt dx_off x (-  50.0 x))
-(define-fun dx_on  () Real 1.0)
-(define-fun dx_off () Real 0.0)
+;(declare-ode x ((dx_on mode_on) (dx_off mode_off)))
 
-;;; Derivatives connection
+;(define-dt dx_on  (- 100.0 x))
+;(define-dt dx_off (-  50.0 x))
+(define-fun _dx_on  () Real 1.0)
+(define-fun _dx_off () Real 0.0)
 
-(declare-fun dt-int (Real Real Real Real) Real)
+(define-fun mode_on  ((on Bool)) Bool on)
+(define-fun mode_off ((on Bool)) Bool (not on))
 
-(define-fun connect ((on1 Bool) (dx1 Real)
-                     (t1 Real)  (t2 Real)
-                     (x1 Real)  (x2 Real)) Bool
-    (and (or (and      on1  (= dx1 dx_on ))
-             (and (not on1) (= dx1 dx_off)) )
-         (= x2 (dt-int dx1 t1 t2 x1))
-    )
+(define-fun _connect ((dx Real) (on Bool)) Bool
+    (or (and (mode_on  on) (= dx _dx_on))
+        (and (mode_off on) (= dx _dx_off)))
 )
 
-(assert (and (connect on_0 dx_0 t_0 t_1 x_0 x_1)
-             (connect on_1 dx_1 t_1 t_2 x_1 x_2)
-             (connect on_2 dx_2 t_2 t_3 x_2 x_3)
-             (connect on_3 dx_3 t_3 t_4 x_3 x_4)
-             (connect on_4 dx_4 t_4 t_5 x_4 x_5)
-             (connect on_5 dx_5 t_5 t_6 x_5 x_6)
-             (connect on_6 dx_6 t_6 t_7 x_6 x_7)
-             (connect on_7 dx_7 t_7 t_8 x_7 x_8)
-             (connect on_8 dx_8 t_8 t_9 x_8 x_9)
+;;; Integration
+
+;(dt-int x (t_0 t_1) (x_0 x_1) (on_0))
+;(dt-int x (t_1 t_2) (x_1 x_2) (on_1))
+;(dt-int x (t_2 t_3) (x_2 x_3) (on_2))
+;(dt-int x (t_3 t_4) (x_3 x_4) (on_3))
+;(dt-int x (t_4 t_5) (x_4 x_5) (on_4))
+;(dt-int x (t_5 t_6) (x_5 x_6) (on_5))
+;(dt-int x (t_6 t_7) (x_6 x_7) (on_6))
+;(dt-int x (t_7 t_8) (x_7 x_8) (on_7))
+;(dt-int x (t_8 t_9) (x_8 x_9) (on_8))
+
+(assert (and (_connect _dx_0 on_0)
+             (_connect _dx_1 on_1)
+             (_connect _dx_2 on_2)
+             (_connect _dx_3 on_3)
+             (_connect _dx_4 on_4)
+             (_connect _dx_5 on_5)
+             (_connect _dx_6 on_6)
+             (_connect _dx_7 on_7)
+             (_connect _dx_8 on_8)
+))
+
+(assert (and (= x_1 _dx_0_int)
+             (= x_2 _dx_1_int)
+             (= x_3 _dx_2_int)
+             (= x_4 _dx_3_int)
+             (= x_5 _dx_4_int)
+             (= x_6 _dx_5_int)
+             (= x_7 _dx_6_int)
+             (= x_8 _dx_7_int)
+             (= x_9 _dx_8_int)
 ))
 
 ;;; Jump conditions

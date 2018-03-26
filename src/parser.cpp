@@ -16,7 +16,10 @@ namespace SOS {
             if (!regex_match(expr, re)) {
                 throw Error("Invalid format of input expression: " + expr);
             }
-
+            for (auto c : expr) {
+                if (isspace(c)) continue;
+                if (c == '(') /* ... */;
+            }
         }
     }
 }

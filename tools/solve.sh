@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# SMT_SOLVER=(cvc4 -L smt2 --incremental)
-SMT_SOLVER=(z3 -smt2 -in)
+SMT_SOLVER=(cvc4 -L smt2 --incremental)
+# SMT_SOLVER=(z3 -smt2 -in)
 
 if [[ -z $1 ]]; then
   INPUT=`cat`
@@ -76,7 +76,7 @@ function get_smt_values {
     printf -- "%s\n" "$sat"
     return 1
   fi
-  
+
   local args=(${T_ID}_${1} ${T_ID}_$(($1+1)) ${F_IDS[@]/%/_$1} ${DT_IDS[@]/%/_$1})
   for var in ${args[@]}; do
     append_smt "(get-value ($var))"
@@ -105,10 +105,11 @@ function compute_odes {
       )
 
       (define-fun eval-dx ((dx1 Real) (t1 Real) (t2 Real) (x1 Real)) Real
-      (let ((C (ite (= dx1 dx_on) 100.0 50.0)))
+      (let ((C (ite (= dx1 _dx_on) 100.0 50.0)))
           (- C (* (- C x1) (e^-t (- t2 t1)) ) )
       ))
 KONEC`"
+      # (let ((C (ite (= dx1 dx_on) 100.0 50.0)))
   }
   ODE_VALUE=()
   for i in ${!F_IDS[@]}; do
@@ -119,7 +120,8 @@ KONEC`"
 # 1 - step
 function add_asserts {
   for i in ${!F_IDS[@]}; do
-    append_smt "(assert (= (dt-int ${DT_IDS[$i]}_${1} ${T_ID}_${1} ${T_ID}_$(($1+1)) ${F_IDS[$i]}_${1}) ${ODE_VALUE[$i]}))"
+    # append_smt "(assert (= (dt-int ${DT_IDS[$i]}_${1} ${T_ID}_${1} ${T_ID}_$(($1+1)) ${F_IDS[$i]}_${1}) ${ODE_VALUE[$i]}))"
+    append_smt "(assert (= _dx_${1}_int ${ODE_VALUE[$i]}))"
   done
 }
 
@@ -145,7 +147,8 @@ MIN_STEP=0
 MAX_STEP=8
 
 F_IDS+=(x)
-DT_IDS+=(dx)
+# DT_IDS+=(dx)
+DT_IDS+=(_dx)
 T_ID=t
 
 for (( s=$MIN_STEP; $s <= $MAX_STEP; s++ )); do

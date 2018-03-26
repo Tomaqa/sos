@@ -2,6 +2,7 @@
 #define ___SOS_H_G73H38ODIHG5GH54GT95H8J549JFG430
 
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <vector>
 #include <map>

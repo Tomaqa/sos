@@ -41,7 +41,7 @@ namespace SOS {
         Value Solver::eval_dt(const Ode_spec& ode_spec, Dt_id dt_id,
                               const State& x, Time t) const
         {
-            auto& spec = dt_spec(ode_spec, dt_id);
+            // auto& spec = dt_spec(ode_spec, dt_id);
             return 0.0;
         }
     }
