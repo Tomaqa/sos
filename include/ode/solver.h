@@ -9,7 +9,7 @@ namespace SOS {
         public:
             using Dt_spec = string;
             using Ode_spec = vector<Dt_spec>;
-            using Odes_spec = vector<Ode_spec>;
+            using Odes_spec = const vector<Ode_spec>;
             using Dt_id = int;
             using Ode_id = int;
 
@@ -30,11 +30,12 @@ namespace SOS {
             Odes_spec _odes_spec;
             Time _step_size{1.0};
 
-            const Ode_spec& ode_spec(Ode_id ode_id) const
-                { return _odes_spec[ode_id]; }
             void eval_ode(Ode_id ode_id, State& dx, const State& x, Time t) const;
             State eval_ode(Ode_id ode_id, const State& x, Time t) const
                 { State dx; eval_ode(ode_id, dx, x, t); return dx; }
+        private:
+            const Ode_spec& ode_spec(Ode_id ode_id) const
+                { return _odes_spec[ode_id]; }
             const Dt_spec& dt_spec(const Ode_spec& ode_spec, Dt_id dt_id) const
                 { return ode_spec[dt_id]; }
             Value eval_dt(const Ode_spec& ode_spec, Dt_id dt_id,
@@ -53,6 +54,8 @@ namespace SOS {
             Interval<Time> _t_bounds;
             State _x_init;
         };
+
+        istringstream extract_brackets(istringstream & iss);
     }
 }
 
