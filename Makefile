@@ -7,6 +7,10 @@ SRC_DIR   := $(ROOT_DIR)/src
 BUILD_DIR := $(ROOT_DIR)/build
 BIN_DIR   := $(ROOT_DIR)/bin
 
+TEST_DIR   := $(ROOT_DIR)/test
+TEST_SRC_DIR := $(TEST_DIR)/src
+TEST_BIN_DIR := $(TEST_DIR)/bin
+
 TOOLS_DIR := $(ROOT_DIR)/tools
 DOC_DIR   := $(ROOT_DIR)/doc
 DATA_DIR  := $(ROOT_DIR)/data
@@ -14,7 +18,8 @@ DATA_DIR  := $(ROOT_DIR)/data
 LIBS := -lm
 INCL := -I $(INCL_DIR)
 LDFLAGS := -Wl,--no-undefined
-FLAGS := $(INCL) -Wall -pedantic -fopenmp -O3 -Wfatal-errors -Wshadow
+# FLAGS := $(INCL) -Wall -pedantic -fopenmp -O3 -Wfatal-errors -Wshadow
+FLAGS := $(INCL) -Wall -pedantic -O3 -Wshadow
 CPPFLAGS := $(FLAGS) -std=c++14
 CFLAGS   := $(FLAGS) -std=gnu99
 
@@ -49,11 +54,14 @@ CPP_SOURCES := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.cpp)
 C_SOURCES   := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.c)
 SOURCES := $(CPP_SOURCES) $(C_SOURCES)
 
+TEST_SOURCES := $(shell find $(TEST_SRC_DIR)  $(FIND_FLAGS) *.cpp)
+
 CPP_OBJECTS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(CPP_SOURCES:.cpp=.o))
 C_OBJECTS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(C_SOURCES:.c=.o))
 OBJECTS := $(CPP_OBJECTS) $(C_OBJECTS)
 
-CMDS :=
+TEST_CMDS := $(patsubst $(TEST_SRC_DIR)/%, $(TEST_BIN_DIR)/%, $(TEST_SOURCES:.cpp=))
+CMDS := $(TEST_CMDS)
 
 ###################################################
 
@@ -67,6 +75,8 @@ debug:
 	@echo HEADERS ${HEADERS}
 	@echo SOURCES ${SOURCES}
 	@echo OBJECTS ${OBJECTS}
+	@echo TEST_SOURCES ${TEST_SOURCES}
+	@echo TEST_CMDS ${TEST_CMDS}
 	@echo CMDS ${CMDS}
 	@echo MKDIR_DIRS ${MKDIR_DIRS}
 
@@ -94,6 +104,10 @@ $(BIN_DIR)/%: ${C_OBJECTS} $(SRC_DIR)/%.c
 $(BIN_DIR)/%: ${OBJECTS} $(SRC_DIR)/%.cpp
 	${CPP} ${LDFLAGS} ${CPPFLAGS} ${LIBS} -o $@ $^
 
+$(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
+	${CPP} ${LDFLAGS} ${CPPFLAGS} ${LIBS} -o $@ $^
+
+
 ## Cleans object files and executables
 # clean:
-	# rm -fr $(BUILD_DIR)/* $(BIN_DIR)/*
+# rm -fr $(BUILD_DIR)/* $(BIN_DIR)/*

@@ -63,15 +63,16 @@ function get_value {
 # 1 - step
 function get_smt_values {
   local sat values
-  append_smt "(check-sat)"
+  append_smt "(push 1)" "(check-sat)"
   read sat <&4
   if [[ $sat == sat ]]; then
     :
   elif [[ $sat == unsat ]]; then
-    printf -- "%s\n" "$sat"
-    append_smt "(get-proof)" "(exit)"
-    cat <&4
-    return 2
+    # printf -- "%s\n" "$sat"
+    printf -- "%s\nBacktrack ...\n" "$sat"
+    # append_smt "(get-proof)" "(exit)"
+    # cat <&4
+    return 100
   else
     printf -- "%s\n" "$sat"
     return 1
@@ -121,8 +122,38 @@ KONEC`"
 function add_asserts {
   for i in ${!F_IDS[@]}; do
     # append_smt "(assert (= (dt-int ${DT_IDS[$i]}_${1} ${T_ID}_${1} ${T_ID}_$(($1+1)) ${F_IDS[$i]}_${1}) ${ODE_VALUE[$i]}))"
-    append_smt "(assert (= _dx_${1}_int ${ODE_VALUE[$i]}))"
+    # append_smt "(assert (= _dx_${1}_int ${ODE_VALUE[$i]}))"
+    append_smt "(assert (=> (and
+                   (= ${DT_IDS[$i]}_${1} ${VALUES[${DT_IDS[$i]}_${1}]})
+                   (= ${T_ID}_${1} ${VALUES[${T_ID}_${1}]})
+                   (= ${T_ID}_$(($1+1)) ${VALUES[${T_ID}_$(($1+1))]})
+                   (= ${F_IDS[$i]}_${1} ${VALUES[${F_IDS[$i]}_${1}]})
+                 ) (= _dx_${1}_int ${ODE_VALUE[$i]}) ))"
+    # podle me nedostatecne - pri nalezeni konfliktu a jineho DT, prip. i pocatecnich podminek je nutne pocitat ODE znovu
+    #   * no mozna je to OK - pri konfliktu se prida konfliktni klauzule a ziska se nova hodnota ..
   done
+}
+
+# 1 - step
+function do_step {
+  local s=$1
+  printf -- "Step %d ...\n" $s
+  get_smt_values $s
+  local ret=$?
+  case $ret in
+    1) return 1;;
+    100)  if (( $s > 0 )); then
+            do_step $(($s-1))
+            return $?
+          else
+            printf -- "Not satisfiable!\n"
+            append_smt "(get-proof)" "(exit)"
+            cat <&4
+            return 2
+          fi;;
+  esac
+  compute_odes $s
+  add_asserts $s
 }
 
 ##########################
@@ -138,23 +169,22 @@ mkfifo -m 600 "$SMT_OFIFO"
 
 # "${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
 "${SMT_SOLVER[@]}" <"$SMT_IFIFO" >"$SMT_OFIFO" 2>/dev/null &
-exec 3>"$SMT_IFIFO"
+# exec 3>"$SMT_IFIFO"
+exec 3> >(tee log >"$SMT_IFIFO")
 exec 4<"$SMT_OFIFO"
 
 append_smt "$INPUT"
 
 MIN_STEP=0
-MAX_STEP=8
+MAX_STEP=9
 
 F_IDS+=(x)
 # DT_IDS+=(dx)
 DT_IDS+=(_dx)
 T_ID=t
 
-for (( s=$MIN_STEP; $s <= $MAX_STEP; s++ )); do
-  get_smt_values $s
-  compute_odes $s
-  add_asserts $s
+for (( s=$MIN_STEP; $s < $MAX_STEP; s++ )); do
+  do_step $s
 done
 
 append_smt "(check-sat)" "(get-model)" "(exit)"

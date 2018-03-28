@@ -46,16 +46,14 @@ namespace SOS {
             Context(Ode_id ode_id,
                     Interval<Time> t_bounds,
                     State x_init)
-            : _ode_id(ode_id),
-              _t_bounds(move(t_bounds)), _x_init(move(x_init))
+                : _ode_id(ode_id),
+                  _t_bounds(move(t_bounds)), _x_init(move(x_init))
             {}
 
             Ode_id _ode_id;
             Interval<Time> _t_bounds;
             State _x_init;
         };
-
-        istringstream extract_brackets(istringstream & iss);
     }
 }
 

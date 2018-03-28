@@ -8,6 +8,7 @@
 #include <map>
 #include <iostream>
 #include <sstream>
+#include <memory>
 #include <iterator>
 #include <algorithm>
 
@@ -18,9 +19,20 @@ using std::pair;
 using std::make_pair;
 using std::map;
 
+using std::cout;
+using std::cerr;
+using std::endl;
+
 using std::string;
+using std::to_string;
 using std::ostream;
+using std::ostringstream;
 using std::istringstream;
+
+using std::unique_ptr;
+using std::make_unique;
+using std::shared_ptr;
+using std::make_shared;
 
 using std::find;
 using std::for_each;
@@ -35,7 +47,7 @@ namespace SOS {
         Error(const string& msg = "") : _msg(msg) { }
 
         friend ostream& operator <<(ostream& os, const Error& rhs)
-            { return (os << rhs); }
+            { return (os << rhs._msg); }
     private:
         string _msg;
     };
