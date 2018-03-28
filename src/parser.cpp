@@ -9,39 +9,21 @@ namespace SOS {
         return istringstream(str);
     }
 
-    // Parser::Expr::Expr(istringstream& iss, int depth)
-        // : Token("")
     Parser::Exprs::Exprs(istringstream& iss, int depth)
     {
-        cout << "I:>" << iss.str() << "<" << endl;
-        iss >> std::noskipws;
-        // ostringstream oss;
         char c;
         string str;
+        ostringstream oss;
         bool closed = false;
-        // while (iss >> c) {
-        // while (iss.get(c).good()) {
-        // while (!iss.get(c).eof()) {
-        int k = 0;
-        while (iss.good() && !iss.eof()) {
-            cout << ++k << endl;
-            iss >> c;
-            cout << "<" << iss.rdstate() << ">" << endl;
-            cout << "[" << c << "]" << "(" << (int)c << ")" << endl;
-            if (!iss.good() || iss.eof()) break;
+        iss >> std::noskipws;
+        while (iss >> c) {
             if (!isprint(c)) {
                 if (!c) break;
                 throw Error("Unexpected non-printable character ("s + to_string((int)c) + ")");
             }
-            if (isspace(c)) {
-                // if (!oss.str().empty()) {
-                //     _contents.emplace_back(oss.str());
-                //     oss.str("");
-                // }
-                continue;
-            }
+            if (isspace(c)) continue;
             if (c == '(') {
-                // _contents.emplace_back(Expr(iss, depth+1));
+                add_expr(Exprs(iss, depth+1));
                 continue;
             }
             if (c == ')') {
@@ -51,73 +33,76 @@ namespace SOS {
                 }
                 throw Error("Unexpected closing brace in top level expression.");
             }
-            // oss << c;
-            // cout << "O:>" << oss.str() << "<" << endl;
-            iss.unget() >> str;
-            // add_token(str);
-            // add_expr(Token(str));
-            // _contents.emplace_back(Token(str));
-            // _contents.emplace_back(make_unique<Token>(Token(str)));
-            add_expr(Token(str));
+            oss << c;
+            char c2 = iss.peek();
+            if (isspace(c2) || c2 == '(') {
+                add_expr(Token(oss.str()));
+                oss.str("");
+            }
         }
 
         if (!closed && depth > 0) {
             throw Error("Closing brace at level " + to_string(depth) + " not found.");
         }
 
-        // if (!oss.str().empty()) {
-        //     _contents.emplace_back(oss.str());
-        // }
+        if (!oss.str().empty()) {
+            add_expr(Token(oss.str()));
+        }
 
-        cout << "{" << size() << "}" << endl;
-
-        // simplify();
+        simplify();
     }
 
-    // void Parser::Expr::simplify()
     void Parser::Exprs::simplify() noexcept
     {
         if (empty()) return;
-        for (auto& e : _contents) {
+        // for (auto& e : _contents) {
             // e.simplify();
         // for (auto e : _contents) {
-            e->simplify();
+            // e->simplify();
             // auto ptr = dynamic_cast<Parser::Expr*>(&e);
             // if (ptr) ptr->simplify();
-        }
+        // }
         // if (is_token() && !first().empty()) {
         //     _contents = move(first()._contents);
         // }
-        if (size() > 1) return;
+        // if (size() > 1) return;
         // ! potrebuju byt o uroven vys, jinak bych prirazoval sam sobe ..
         // if (first().empty()) {
             // _contents = move(first()._contents);
         // }
+        // if (size() > 1) return;
+        for (auto& e : _contents) {
+            e->simplify();
+            if (!e->is_token()) {
+                // auto& e_cast = static_cast<Expr_ptr<Exprs>>(e);
+                // auto& e_cast = dynamic_cast<Expr_ptr<Exprs>>(e);
+                // if (e_cast->size() == 1) {
+                    // e_cast = move(e_cast->first());
+                // }
+                // auto& e_cast = static_cast<const Exprs&>(*e);
+
+                // const auto& e_cast = static_cast<const Expr_ptr<Exprs>&>(e);
+                auto& e_cast = static_cast<Exprs&>(*e);
+                if (e_cast.size() == 1) {
+                    cout << "?" << (string)*e << endl;
+                    // e = move(e_cast.first());
+                    // *e = move(e_cast.first());
+                    // *e = e_cast.first();
+                    // e = make_unique(e_cast.first());
+                    // e = e_cast.first();
+                    e = move(e_cast.first());
+                    cout << "!" << (string)*e << endl;
+                }
+            }
+        }
     }
 
-    // ostream& operator <<(ostream& os, const Parser::Expr& rhs)
-    // Parser::Exprs::print(ostream& os) const
-    // {
-    //     if (rhs.is_token()) {
-    //         os << rhs.first();
-    //     }
-    //     else {
-    //         os << "( ";
-    //         for (auto& e : rhs._contents) {
-    //             os << e << " ";
-    //         }
-    //         os << ")";
-    //     }
-    //     return os;
-    // }
-    void Parser::Exprs::print(ostream& os) const
+    Parser::Exprs::operator string () const noexcept
     {
-        os << "( ";
+        string str("( ");
         for (auto& e : _contents) {
-            // os << e << " ";
-        // for (auto e : _contents) {
-            os << *e << " ";
+            str += (string)*e + " ";
         }
-        os << ")";
+        return (str += ")");
     }
 }

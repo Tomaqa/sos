@@ -19,7 +19,7 @@ LIBS := -lm
 INCL := -I $(INCL_DIR)
 LDFLAGS := -Wl,--no-undefined
 # FLAGS := $(INCL) -Wall -pedantic -fopenmp -O3 -Wfatal-errors -Wshadow
-FLAGS := $(INCL) -Wall -pedantic -O3 -Wshadow
+FLAGS := $(INCL) -Wall -pedantic -O2 -Wshadow
 CPPFLAGS := $(FLAGS) -std=c++14
 CFLAGS   := $(FLAGS) -std=gnu99
 

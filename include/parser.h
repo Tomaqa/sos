@@ -11,13 +11,6 @@ using std::regex_match;
 namespace SOS {
     class Parser {
     public:
-        // using Token = string;
-        // using Tokens = vector<Token>;
-        // using Expr = vector<Tokens>;
-        // using TokenType = string;
-        // template <typename T>
-        // using ExprContainer = vector<T>;
-
         class Expr;
         class Token;
         class Exprs;
@@ -37,67 +30,30 @@ namespace SOS {
             { return move(flat_extract_braces(iss)); }
     protected:
         using Token_t = string;
-        // template <typename T>
-        // using ExprContainer = vector<T>;
-        // using Exprs_t = vector<unique_ptr<Expr>>;
     };
-
-    // class Parser::Token {
-    // public:
-    //     Token(const string& input) : _token(input) { }
-
-    //     friend ostream& operator <<(ostream& os, const Parser::Token& rhs)
-    //         { return (os << rhs._token); }
-    // protected:
-    //     Token_t _token;
-    // };
-
-
-    // // class Parser::Expr {
-    // class Parser::Expr : public Parser::Token {
-    // public:
-    //     Expr(const string& input) : Expr(istringstream(input)) { }
-
-    //     size_t size() const { return _contents.size(); }
-    //     bool empty() const { return size() == 0; }
-    //     bool is_token() const { return size() == 1; }
-    //     // const Expr& first() const { return _contents[0]; }
-    //     const Token& first() const { return _contents[0]; }
-
-    //     friend ostream& operator <<(ostream& os, const Parser::Expr& rhs);
-    // protected:
-    //     Expr(istringstream& iss, int depth = 0);
-    //     Expr(istringstream&& iss) : Expr(iss) { }
-
-    //     void add_token (const string& token)
-    //         { _contents.emplace_back(Token(token)); }
-    //     // Expr& first() { return _contents[0]; }
-    //     Token& first() { return _contents[0]; }
-    //     void simplify();
-    // private:
-    //     // ExprContainer<Expr> _contents;
-    //     ExprContainer<Token> _contents;
-    // };
 
     class Parser::Expr {
     public:
+        virtual ~Expr() = default;
+
         virtual bool is_token() const noexcept = 0;
         virtual void simplify() noexcept = 0;
-        virtual void print(ostream& os) const = 0;
+        virtual explicit operator string () const noexcept = 0;
 
         friend ostream& operator <<(ostream& os, const Expr& rhs)
-            { rhs.print(os); return os; }
+            { return (os << (string)rhs); }
     };
 
     class Parser::Token : public Parser::Expr {
     public:
         Token(const string& input) : _token(input) { }
+        virtual ~Token() = default;
 
         virtual bool is_token() const noexcept override final
             { return true; }
         virtual void simplify() noexcept override final { }
-        virtual void print(ostream& os) const override final
-            { os << _token; }
+        virtual explicit operator string () const noexcept override final
+            { return _token; }
     private:
         Token_t _token;
     };
@@ -105,29 +61,41 @@ namespace SOS {
 
     class Parser::Exprs : public Parser::Expr {
     public:
+        template <typename T>
+        using Expr_ptr = unique_ptr<T>;
+        using Expr_t = Expr_ptr<Expr>;
+
         Exprs(const string& input) : Exprs(istringstream(input)) { }
+        virtual ~Exprs() = default;
+        Exprs(const Exprs& rhs) = delete;
+        Exprs& operator =(const Exprs& rhs) = delete;
+        Exprs(Exprs&& rhs) = default;
+        Exprs& operator =(Exprs&& rhs) = default;
 
         virtual bool is_token() const noexcept override
             { return false; }
         virtual void simplify() noexcept override;
-        virtual void print(ostream& os) const override;
+        virtual explicit operator string () const noexcept override;
 
         size_t size() const noexcept { return _contents.size(); }
         bool empty() const noexcept { return size() == 0; }
-        // const Expr& first() const noexcept { return _contents[0]; }
-        const Expr& first() const { return *_contents[0]; }
+        // const Expr& first() const { return *_contents[0]; }
+        // const Expr* first() const { return _contents[0]; }
+        const Expr_t& first() const { return _contents[0]; }
     protected:
+        using Exprs_t = vector<Expr_t>;
+
         Exprs(istringstream& iss, int depth = 0);
         Exprs(istringstream&& iss) : Exprs(iss) { }
 
         template <typename T>
         void add_expr(T&& expr)
             { _contents.emplace_back(make_unique<T>(move(expr))); }
-        // Expr& first() noexcept { return _contents[0]; }
-        Expr& first() { return *_contents[0]; }
+        // Expr& first() { return *_contents[0]; }
+        // Expr* first() { return _contents[0]; }
+        Expr_t& first() { return _contents[0]; }
     private:
-        // ExprContainer<Expr*> _contents;
-        vector<unique_ptr<Expr>> _contents;
+        Exprs_t _contents;
     };
 }
 
