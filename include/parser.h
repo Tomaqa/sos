@@ -34,68 +34,76 @@ namespace SOS {
 
     class Parser::Expr {
     public:
+        template <typename T>
+        using Expr_ptr_t = unique_ptr<T>;
+        using Expr_ptr = Expr_ptr_t<Expr>;
+
         virtual ~Expr() = default;
+        virtual Expr_ptr clone() const = 0;
 
         virtual bool is_token() const noexcept = 0;
-        virtual void simplify() noexcept = 0;
         virtual explicit operator string () const noexcept = 0;
 
         friend ostream& operator <<(ostream& os, const Expr& rhs)
             { return (os << (string)rhs); }
+    protected:
+        template <typename T>
+        static Expr_ptr_t<T> new_expr(T&& expr)
+            { return make_unique<T>(std::forward<T>(expr)); }
     };
 
     class Parser::Token : public Parser::Expr {
     public:
         Token(const string& input) : _token(input) { }
         virtual ~Token() = default;
+        virtual Expr_ptr clone() const override final
+            { return new_expr(Token(*this)); }
 
         virtual bool is_token() const noexcept override final
             { return true; }
-        virtual void simplify() noexcept override final { }
         virtual explicit operator string () const noexcept override final
             { return _token; }
     private:
         Token_t _token;
     };
 
-
     class Parser::Exprs : public Parser::Expr {
     public:
-        template <typename T>
-        using Expr_ptr = unique_ptr<T>;
-        using Expr_t = Expr_ptr<Expr>;
-
-        Exprs(const string& input) : Exprs(istringstream(input)) { }
+        Exprs() = default;
         virtual ~Exprs() = default;
-        Exprs(const Exprs& rhs) = delete;
-        Exprs& operator =(const Exprs& rhs) = delete;
+        virtual Expr_ptr clone() const override
+            { return new_expr(Exprs(*this)); }
+        Exprs(const string& input) : Exprs(istringstream(input)) { }
+        Exprs(const Exprs& rhs);
+        Exprs& operator =(const Exprs& rhs);
         Exprs(Exprs&& rhs) = default;
         Exprs& operator =(Exprs&& rhs) = default;
 
         virtual bool is_token() const noexcept override
             { return false; }
-        virtual void simplify() noexcept override;
         virtual explicit operator string () const noexcept override;
 
-        size_t size() const noexcept { return _contents.size(); }
+        size_t size() const noexcept { return _exprs.size(); }
         bool empty() const noexcept { return size() == 0; }
-        // const Expr& first() const { return *_contents[0]; }
-        // const Expr* first() const { return _contents[0]; }
-        const Expr_t& first() const { return _contents[0]; }
+        const Expr_ptr& first() const { return _exprs[0]; }
+
+        void simplify() noexcept;
+        void to_binary(const Token_t& neutral = "0");
     protected:
-        using Exprs_t = vector<Expr_t>;
+        using Exprs_t = vector<Expr_ptr>;
 
         Exprs(istringstream& iss, int depth = 0);
         Exprs(istringstream&& iss) : Exprs(iss) { }
 
         template <typename T>
-        void add_expr(T&& expr)
-            { _contents.emplace_back(make_unique<T>(move(expr))); }
-        // Expr& first() { return *_contents[0]; }
-        // Expr* first() { return _contents[0]; }
-        Expr_t& first() { return _contents[0]; }
+        void add_expr_ptr(T&& expr_ptr)
+            { _exprs.emplace_back(std::forward<T>(expr_ptr)); }
+        template <typename T>
+        void add_new_expr(T&& expr)
+            { add_expr_ptr(new_expr(std::forward<T>(expr))); }
+        Expr_ptr& first() { return _exprs[0]; }
     private:
-        Exprs_t _contents;
+        Exprs_t _exprs;
     };
 }
 

@@ -11,8 +11,10 @@
 #include <memory>
 #include <iterator>
 #include <algorithm>
+#include <functional>
 
 using std::move;
+using std::swap;
 
 using std::vector;
 using std::pair;

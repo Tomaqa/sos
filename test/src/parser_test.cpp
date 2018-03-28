@@ -35,16 +35,19 @@ int main(int, const char*[])
       test_expr(" 1 ",     "( 1 )");
       test_expr("1 2 3",    "( 1 2 3 )");
       test_expr("5  1  (-(+ abc 1) 1 2 (- 1))", "( 5 1 ( - ( + abc 1 ) 1 2 ( - 1 ) ) )");
-      test_expr("((()))", "( ( ) )");
+      test_expr("((()))", "( )");
       test_expr("0(1(2(3)4)5)6", "( 0 ( 1 ( 2 3 4 ) 5 ) 6 )");
       test_expr("1 (+ 2 (3))",    "( 1 ( + 2 3 ) )");
-      // test_expr("(1) (+ 2 (3))",    "( 1 ( + 2 3 ) )");
-      // test_expr(" (1 2 3)", "( 1 2 3 )");
+      test_expr("(1) (+ 2 (3))",  "( 1 ( + 2 3 ) )");
+      test_expr(" (1 2 3)", "( 1 2 3 )");
+      test_expr(" ((1) 2) ( ( 3) )", "( ( 1 2 ) 3 )");
     }
     catch (const Error& e) {
         cerr << e << endl;
         throw;
     }
+
+    cout << "Success." << endl;
 
     return 0;
 }
