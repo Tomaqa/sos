@@ -11,25 +11,64 @@ using std::regex_match;
 namespace SOS {
     class Parser {
     public:
+        template <typename Arg>
+        using F_oper = std::function<Arg(Arg,Arg)>;
+        using F_oper_key = const char*;
+        template <typename Arg>
+        using F_oper_map_t = map<F_oper_key, F_oper<Arg>>;
+        template <typename Arg>
+        class F_oper_map;
+        template <typename Arg>
+        static const F_oper_map<Arg> f_oper;
+
+        using Token_t = string;
         class Expr;
         class Token;
         class Exprs;
 
         static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
-        template <typename Arg, typename F>
-        static const map<const char, F> oper = {
-            {'+', [](Arg a, Arg b){ return a + b; }},
-            {'-', [](Arg a, Arg b){ return a - b; }},
-            {'*', [](Arg a, Arg b){ return a * b; }},
-            {'/', [](Arg a, Arg b){ return a / b; }},
-        };
-        // std::function
 
         static istringstream flat_extract_braces(istringstream& iss);
         static istringstream flat_extract_braces(istringstream&& iss)
             { return move(flat_extract_braces(iss)); }
-    protected:
-        using Token_t = string;
+    };
+
+    template <typename Arg>
+    class Parser::F_oper_map {
+    public:
+        F_oper_map(F_oper_map_t<Arg>&& map) : _map(map) { }
+        F_oper_map(initializer_list<pair<const F_oper_key,F_oper<Arg>>> list) : _map{list} { }
+
+        const F_oper<Arg>& operator [] (F_oper_key key) const
+            { return _map.at(key); }
+    private:
+        F_oper_map_t<Arg> _map;
+    };
+
+    // template <typename Arg>
+    // class Parser::F_oper_map : public F_oper_map_t<Arg> {
+    // public:
+    //     // const Arg& operator [] (F_oper_key key) const
+    //     const Arg& operator [] (const F_oper_key& key) const
+    //         { return this->at(key); }
+    // };
+
+    template <typename Arg>
+    const Parser::F_oper_map<Arg> Parser::f_oper {
+        {"+",   [](Arg a, Arg b){ return a + b; }},
+        {"-",   [](Arg a, Arg b){ return a - b; }},
+        {"*",   [](Arg a, Arg b){ return a * b; }},
+        {"/",   [](Arg a, Arg b){ return a / b; }},
+        {"=",   [](Arg a, Arg b){ return a == b; }},
+        {"<",   [](Arg a, Arg b){ return a < b; }},
+        {">",   [](Arg a, Arg b){ return a > b; }},
+        {"<=",  [](Arg a, Arg b){ return a <= b; }},
+        {">=",  [](Arg a, Arg b){ return a >= b; }},
+        {"not", [](Arg a, Arg b){ return !b; }},
+        {"and", [](Arg a, Arg b){ return a && b; }},
+        {"or",  [](Arg a, Arg b){ return a || b; }},
+        // {"xor", [](Arg a, Arg b){ return !a ^ !b; }},
+        {"=>",  [](Arg a, Arg b){ return !a || b; }},
     };
 
     class Parser::Expr {

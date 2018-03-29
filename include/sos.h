@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <iostream>
 #include <sstream>
 #include <memory>
@@ -20,6 +21,7 @@ using std::vector;
 using std::pair;
 using std::make_pair;
 using std::map;
+using std::unordered_map;
 using std::initializer_list;
 
 using std::cout;

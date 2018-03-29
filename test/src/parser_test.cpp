@@ -57,5 +57,7 @@ int main(int, const char*[])
 
     cout << "Success." << endl;
 
+    auto f = Parser::f_oper<double>["+"];
+
     return 0;
 }
