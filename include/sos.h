@@ -20,6 +20,7 @@ using std::vector;
 using std::pair;
 using std::make_pair;
 using std::map;
+using std::initializer_list;
 
 using std::cout;
 using std::cerr;
@@ -40,6 +41,7 @@ using std::find;
 using std::for_each;
 using std::begin;
 using std::end;
+using std::transform;
 
 using namespace std::string_literals;
 

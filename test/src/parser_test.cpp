@@ -14,9 +14,11 @@ void flat_extract_braces_test(istringstream&& iss, const string& expect)
     test(Parser::flat_extract_braces(move(iss)).str(), expect);
 }
 
-void test_expr(const string& str, const string& expect)
+void test_expr(const string& str, const string& expect, bool to_binary = false)
 {
-    test((string)Parser::Exprs(str), expect);
+    Parser::Exprs exprs(str);
+    if (to_binary) exprs.to_binary();
+    test((string)exprs, expect);
 }
 
 int main(int, const char*[])
@@ -41,6 +43,12 @@ int main(int, const char*[])
       test_expr("(1) (+ 2 (3))",  "( 1 ( + 2 3 ) )");
       test_expr(" (1 2 3)", "( 1 2 3 )");
       test_expr(" ((1) 2) ( ( 3) )", "( ( 1 2 ) 3 )");
+      test_expr("+ 1 2",    "( + 1 2 )", true);
+      test_expr("+ 1 2 3",    "( + 1 ( + 2 3 ) )", true);
+      test_expr("+ 1 2 3 4 5",    "( + 1 ( + 2 ( + 3 ( + 4 5 ) ) ) )", true);
+      test_expr("* (+ 1 2 3) (+ 4 5 6) (+ 7 8 9)",    "( * ( + 1 ( + 2 3 ) ) ( * ( + 4 ( + 5 6 ) ) ( + 7 ( + 8 9 ) ) ) )", true);
+      test_expr("+ 1",    "( + 0 1 )", true);
+      test_expr("+ 1 2 (- 3) 4",    "( + 1 ( + 2 ( + ( - 0 3 ) 4 ) ) )", true);
     }
     catch (const Error& e) {
         cerr << e << endl;

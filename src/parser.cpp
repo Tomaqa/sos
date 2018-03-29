@@ -9,6 +9,21 @@ namespace SOS {
         return istringstream(str);
     }
 
+    Parser::Exprs::Exprs(const Exprs& rhs)
+    {
+        _exprs.reserve(rhs.size());
+        for (auto& e : rhs._exprs) {
+            add_expr_ptr(e->clone());
+        }
+    }
+
+    Parser::Exprs& Parser::Exprs::operator =(const Exprs& rhs)
+    {
+        Exprs tmp(rhs);
+        swap(_exprs, tmp._exprs);
+        return *this;
+    }
+
     Parser::Exprs::Exprs(istringstream& iss, int depth)
     {
         char c;
@@ -52,19 +67,11 @@ namespace SOS {
         simplify();
     }
 
-    Parser::Exprs::Exprs(const Parser::Exprs& rhs)
+    Parser::Exprs::Exprs(initializer_list<Expr_ptr> list)
     {
-        _exprs.reserve(rhs.size());
-        for (auto& e : rhs._exprs) {
+        for (auto& e : list) {
             add_expr_ptr(e->clone());
         }
-    }
-
-    Parser::Exprs& Parser::Exprs::operator =(const Parser::Exprs& rhs)
-    {
-        Exprs tmp(rhs);
-        swap(_exprs, tmp._exprs);
-        return *this;
     }
 
     Parser::Exprs::operator string () const noexcept
@@ -76,23 +83,23 @@ namespace SOS {
         return (str += ")");
     }
 
-    void Parser::Exprs::simplify() noexcept
+    Parser::Exprs& Parser::Exprs::simplify() noexcept
     {
-        if (empty()) return;
+        if (empty()) return *this;
         for (auto& e : _exprs) {
             if (e->is_token()) continue;
             auto& e_cast = static_cast<Exprs&>(*e);
-            e_cast.simplify();
-            if (e_cast.size() == 1) {
+            if (e_cast.simplify().size() == 1) {
                 e = move(e_cast.first());
             }
         }
         if (size() == 1 && !first()->is_token()) {
             _exprs = move(static_cast<Exprs&>(*first())._exprs);
         }
+        return *this;
     }
 
-    void Parser::Exprs::to_binary(const Token_t& neutral)
+    Parser::Exprs& Parser::Exprs::to_binary(const Token_t& neutral)
     {
         if (size() <= 1) {
             throw Error("Expression has not at least 2 arguments.");
@@ -100,28 +107,23 @@ namespace SOS {
         if (!first()->is_token()) {
             throw Error("First argument of each expression should be single token.");
         }
+        if (size() == 2) {
+            add_new_expr(Token(neutral));
+            swap(_exprs[1], _exprs[2]);
+        }
+        else if (size() > 3) {
+            Exprs subexpr{first()->clone()};
+            for (auto&& it = begin(_exprs)+2, eit = end(_exprs); it != eit; ++it) {
+                subexpr.add_expr_ptr(move(*it));
+            }
+            _exprs.erase(begin(_exprs)+3, end(_exprs));
+            _exprs[2] = new_expr(move(subexpr.to_binary()));
+        }
         for (auto& e : _exprs) {
             if (e->is_token()) continue;
             auto& e_cast = static_cast<Exprs&>(*e);
             e_cast.to_binary();
         }
-        if (size() == 2){
-            add_new_expr(Token(neutral));
-            return;
-        }
-        if (size() == 3) return;
-        // auto&& b_it = begin(_exprs)+2;
-        // Exprs_t exprs{move(new_expr(*move(begin(_exprs)))), move(new_expr(move(*begin(_exprs)+1)))};
-        // Exprs_t exprs{move(new_expr(Token(""))), move(new_expr(Token("")))};
-        // Exprs_t exprs{new_expr(Token("")), new_expr(Token(""))};
-        // exprs.emplace_back(new_expr(move(_exprs[0])));
-        // const auto& oper = static_cast<Token&>(*first());
-        // const auto& oper = static_cast<const Token&>(*first());
-        // auto&& oper = static_cast<Token&&>(*first());
-        // Exprs_t exprs;
-        // exprs.emplace_back(new_expr(move(oper)));
-        for (auto&& it = begin(_exprs)+2, eit = end(_exprs); it != eit; ++it) {
-
-        }
+        return *this;
     }
 }

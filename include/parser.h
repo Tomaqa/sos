@@ -54,10 +54,10 @@ namespace SOS {
 
     class Parser::Token : public Parser::Expr {
     public:
-        Token(const string& input) : _token(input) { }
         virtual ~Token() = default;
         virtual Expr_ptr clone() const override final
             { return new_expr(Token(*this)); }
+        Token(const string& input) : _token(input) { }
 
         virtual bool is_token() const noexcept override final
             { return true; }
@@ -73,11 +73,12 @@ namespace SOS {
         virtual ~Exprs() = default;
         virtual Expr_ptr clone() const override
             { return new_expr(Exprs(*this)); }
-        Exprs(const string& input) : Exprs(istringstream(input)) { }
         Exprs(const Exprs& rhs);
         Exprs& operator =(const Exprs& rhs);
         Exprs(Exprs&& rhs) = default;
         Exprs& operator =(Exprs&& rhs) = default;
+        Exprs(const string& input) : Exprs(istringstream(input)) { }
+        Exprs(initializer_list<Expr_ptr> list);
 
         virtual bool is_token() const noexcept override
             { return false; }
@@ -87,8 +88,8 @@ namespace SOS {
         bool empty() const noexcept { return size() == 0; }
         const Expr_ptr& first() const { return _exprs[0]; }
 
-        void simplify() noexcept;
-        void to_binary(const Token_t& neutral = "0");
+        Exprs& simplify() noexcept;
+        Exprs& to_binary(const Token_t& neutral = "0");
     protected:
         using Exprs_t = vector<Expr_ptr>;
 
