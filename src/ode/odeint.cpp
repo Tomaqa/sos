@@ -1,4 +1,4 @@
-#include "ode/odeint.h"
+#include "ode/odeint.hpp"
 
 #include <boost/numeric/odeint/integrate/integrate.hpp>     //< the integrate routines.
 

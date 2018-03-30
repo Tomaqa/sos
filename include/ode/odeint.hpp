@@ -1,7 +1,7 @@
 #ifndef ___SOS_ODEINT_H_OUD48937GH34789GH349GHJY54HFG430
 #define ___SOS_ODEINT_H_OUD48937GH34789GH349GHJY54HFG430
 
-#include "ode/solver.h"
+#include "ode/solver.hpp"
 
 namespace SOS {
     namespace ODE {

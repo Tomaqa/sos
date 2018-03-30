@@ -1,13 +1,13 @@
-#include "ode/solver.h"
-#include "parser.h"
+#include "ode/solver.hpp"
+#include "expr.hpp"
 
 namespace SOS {
     namespace ODE {
         State Solver::solve(const string& input) const
         {
             regex re("\\s*\\d+\\s*\\((\\s*"s
-                     + Parser::re_float + "){2}\\) *\\((\\s*"
-                     + Parser::re_float + ")+\\)\\s*");
+                     + Expr::re_float + "){2}\\) *\\((\\s*"
+                     + Expr::re_float + ")+\\)\\s*");
             if (!regex_match(input, re)) {
                 throw Error("Invalid format of input context: " + input);
             }
@@ -19,8 +19,8 @@ namespace SOS {
             istringstream iss(input);
 
             iss >> ode_id;
-            Parser::flat_extract_braces(iss) >> t_bounds.first >> t_bounds.second;
-            iss = Parser::flat_extract_braces(iss);
+            Expr::flat_extract_braces(iss) >> t_bounds.first >> t_bounds.second;
+            iss = Expr::flat_extract_braces(iss);
             State x_init{std::istream_iterator<Value>{iss},
                          std::istream_iterator<Value>{}};
 

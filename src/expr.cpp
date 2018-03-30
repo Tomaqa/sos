@@ -1,7 +1,7 @@
-#include "parser.h"
+#include "expr.hpp"
 
 namespace SOS {
-    istringstream Parser::flat_extract_braces(istringstream& iss)
+    istringstream Expr::flat_extract_braces(istringstream& iss)
     {
         string str;
         iss.ignore(std::numeric_limits<std::streamsize>::max(), '(');
@@ -9,22 +9,22 @@ namespace SOS {
         return istringstream(str);
     }
 
-    Parser::Exprs::Exprs(const Exprs& rhs)
+    Exprs::Exprs(const Exprs& rhs)
     {
         _exprs.reserve(rhs.size());
-        for (auto& e : rhs._exprs) {
+        for (auto& e : rhs) {
             add_expr_ptr(e->clone());
         }
     }
 
-    Parser::Exprs& Parser::Exprs::operator =(const Exprs& rhs)
+    Exprs& Exprs::operator =(const Exprs& rhs)
     {
         Exprs tmp(rhs);
-        swap(_exprs, tmp._exprs);
+        swap(tmp);
         return *this;
     }
 
-    Parser::Exprs::Exprs(istringstream& iss, int depth)
+    Exprs::Exprs(istringstream& iss, int depth)
     {
         char c;
         string str;
@@ -67,26 +67,26 @@ namespace SOS {
         simplify();
     }
 
-    Parser::Exprs::Exprs(initializer_list<Expr_ptr> list)
+    Exprs::Exprs(initializer_list<Expr_ptr> list)
     {
         for (auto& e : list) {
             add_expr_ptr(e->clone());
         }
     }
 
-    Parser::Exprs::operator string () const noexcept
+    Exprs::operator string () const noexcept
     {
         string str("( ");
-        for (auto& e : _exprs) {
+        for (auto& e : *this) {
             str += (string)*e + " ";
         }
         return (str += ")");
     }
 
-    Parser::Exprs& Parser::Exprs::simplify() noexcept
+    Exprs& Exprs::simplify() noexcept
     {
         if (empty()) return *this;
-        for (auto& e : _exprs) {
+        for (auto& e : *this) {
             if (e->is_token()) continue;
             auto& e_cast = static_cast<Exprs&>(*e);
             if (e_cast.simplify().size() == 1) {
@@ -99,7 +99,7 @@ namespace SOS {
         return *this;
     }
 
-    Parser::Exprs& Parser::Exprs::to_binary(const Token_t& neutral)
+    Exprs& Exprs::to_binary(const Token_t& neutral)
     {
         if (size() <= 1) {
             throw Error("Expression has not at least 2 arguments.");
@@ -109,17 +109,17 @@ namespace SOS {
         }
         if (size() == 2) {
             add_new_expr(Token(neutral));
-            swap(_exprs[1], _exprs[2]);
+            std::swap(_exprs[1], _exprs[2]);
         }
         else if (size() > 3) {
             Exprs subexpr{first()->clone()};
-            for (auto&& it = begin(_exprs)+2, eit = end(_exprs); it != eit; ++it) {
+            for (auto&& it = begin()+2, eit = end(); it != eit; ++it) {
                 subexpr.add_expr_ptr(move(*it));
             }
-            _exprs.erase(begin(_exprs)+3, end(_exprs));
+            _exprs.erase(begin()+3, end());
             _exprs[2] = new_expr(move(subexpr.to_binary()));
         }
-        for (auto& e : _exprs) {
+        for (auto& e : *this) {
             if (e->is_token()) continue;
             auto& e_cast = static_cast<Exprs&>(*e);
             e_cast.to_binary();

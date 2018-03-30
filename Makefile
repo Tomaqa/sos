@@ -48,7 +48,7 @@ FIND_FLAGS := -not -path '*/\.*' -type f -name
 # OBJECTS := $(CPP_OBJECTS) $(C_OBJECTS)
 # CMDS := $(basename $(patsubst $(SRC_DIR)/%,$(BIN_DIR)/%, $(filter-out $(HEADERS) $(OBJECT_SOURCES), $(ALL_SOURCES)) ) )
 
-HEADERS     := $(shell find $(INCL_DIR) $(FIND_FLAGS) *.h)
+HEADERS     := $(shell find $(INCL_DIR) $(FIND_FLAGS) *.hpp)
 
 CPP_SOURCES := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.cpp)
 C_SOURCES   := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.c)

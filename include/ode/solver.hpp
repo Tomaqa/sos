@@ -1,7 +1,7 @@
 #ifndef ___SOS_SOLVER_H_OUDH9GH34798GH949T938HJ3409FG430
 #define ___SOS_SOLVER_H_OUDH9GH34798GH949T938HJ3409FG430
 
-#include "ode.h"
+#include "ode.hpp"
 
 namespace SOS {
     namespace ODE {
