@@ -72,6 +72,10 @@ namespace SOS {
     public:
         using Map = map<Key, Value>;
 
+        Const_map(const Const_map& cmap) = default;
+        Const_map& operator =(const Const_map& cmap) = default;
+        Const_map(Const_map&& cmap) = default;
+        Const_map& operator =(Const_map&& cmap) = default;
         Const_map(Map&& map) : _map(map) { }
         Const_map(initializer_list<pair<const Key, Value>> list)
             : _map{list} { }

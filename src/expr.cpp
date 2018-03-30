@@ -112,12 +112,12 @@ namespace SOS {
             std::swap(_exprs[1], _exprs[2]);
         }
         else if (size() > 3) {
-            Exprs subexpr{first()->clone()};
+            Exprs subexprs{first()->clone()};
             for (auto&& it = begin()+2, eit = end(); it != eit; ++it) {
-                subexpr.add_expr_ptr(move(*it));
+                subexprs.add_expr_ptr(move(*it));
             }
             _exprs.erase(begin()+3, end());
-            _exprs[2] = new_expr(move(subexpr.to_binary()));
+            _exprs[2] = new_expr(move(subexprs.to_binary()));
         }
         for (auto& e : *this) {
             if (e->is_token()) continue;

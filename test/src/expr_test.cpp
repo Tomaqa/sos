@@ -51,29 +51,29 @@ int main(int, const char*[])
       test_expr("+ 1",    "( + 0 1 )", true);
       test_expr("+ 1 2 (- 3) 4",    "( + 1 ( + 2 ( + ( - 0 3 ) 4 ) ) )", true);
 
-      // Expr::Eval<double> e1("+ 1 2");
-      // for (auto& k : e1.param_keys()) {
-      //   cout << k << endl;
-      // }
-      // cout << e1({}) << endl;
+      Expr::Eval<double> e1("+ 1 2");
+      for (auto& k : e1.param_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e1({}) << endl << endl;
 
       Expr::Eval<double> e2("+ 10 x");
       for (auto& k : e2.param_keys()) {
-        cout << k << endl;
+        cout << k << " ";
       }
-      cout << e2({10}) << endl;
+      cout << endl << e2({10}) << endl << endl;
 
       Expr::Eval<double> e3("+ x y");
       for (auto& k : e3.param_keys()) {
-        cout << k << endl;
+        cout << k << " ";
       }
-      cout << e3({13,17}) << endl;
+      cout << endl << e3({13,17}) << endl << endl;
 
-      // Expr::Eval<double> e4("(+ x (- 10 y))");
-      // for (auto& k : e4.param_keys()) {
-      //   cout << k << endl;
-      // }
-      // cout << e4({100, 50}) << endl;
+      Expr::Eval<double> e4("(+ x (- 10 y))");
+      for (auto& k : e4.param_keys()) {
+       cout << k << " ";
+      }
+      cout << endl << e4({100, 50}) << endl << endl;
     }
     catch (const Error& e) {
         cerr << e << endl;
@@ -131,8 +131,20 @@ int main(int, const char*[])
     // pv.second.reserve(3);
     // const int& cref = pv.second[1];
     // pv.second = {1, 2, 3};
-
     // cout << cref << endl;
+
+    // using T = vector<int>;
+    // unique_ptr<T> u1,u2;
+    // u1 = make_unique<T>(T{1});
+    // cout << u1.get() << endl;
+    // u2 = move(u1);
+    // cout << u2.get() << endl;
+
+    // vector<int> v1 = {1,2,3,4};
+    // cout << v1.data() << endl;
+    // vector<int> v2;
+    // v2 = move(v1);
+    // cout << v2.data() << endl;
 
     return 0;
 }
