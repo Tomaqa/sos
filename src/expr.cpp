@@ -12,7 +12,7 @@ namespace SOS {
     Exprs::Exprs(const Exprs& rhs)
     {
         _exprs.reserve(rhs.size());
-        for (auto& e : rhs) {
+        for (const auto& e : rhs) {
             add_expr_ptr(e->clone());
         }
     }
@@ -69,7 +69,7 @@ namespace SOS {
 
     Exprs::Exprs(initializer_list<Expr_ptr> list)
     {
-        for (auto& e : list) {
+        for (const auto& e : list) {
             add_expr_ptr(e->clone());
         }
     }
@@ -77,7 +77,7 @@ namespace SOS {
     Exprs::operator string () const noexcept
     {
         string str("( ");
-        for (auto& e : *this) {
+        for (const auto& e : *this) {
             str += (string)*e + " ";
         }
         return (str += ")");

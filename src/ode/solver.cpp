@@ -29,7 +29,7 @@ namespace SOS {
 
         void Solver::eval_ode(Ode_id ode_id, State& dx, const State& x, Time t) const
         {
-            auto& spec = ode_spec(ode_id);
+            const auto& spec = ode_spec(ode_id);
             for (Value& dxi : dx) {
                 Dt_id dt_id = &dxi - &dx[0];
                 dxi = eval_dt(spec, dt_id, x, t);

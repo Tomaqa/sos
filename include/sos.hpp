@@ -48,7 +48,11 @@ using std::for_each;
 using std::iterator;
 using std::begin;
 using std::end;
+using std::cbegin;
+using std::cend;
+using std::distance;
 using std::transform;
+using std::copy;
 
 using namespace std::string_literals;
 
@@ -72,8 +76,14 @@ namespace SOS {
         Const_map(initializer_list<pair<const Key, Value>> list)
             : _map{list} { }
 
+        bool includes(const Key& key) const noexcept
+            { return _map.count(key) == 1; }
         const Value& operator [] (const Key& key) const
             { return _map.at(key); }
+        auto begin() { return _map.begin(); }
+        const auto begin() const { return _map.begin(); }
+        auto end() { return _map.end(); }
+        const auto end() const { return _map.end(); }
     private:
         Map _map;
     };

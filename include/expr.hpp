@@ -24,11 +24,6 @@ namespace SOS {
 
         static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
 
-        template <typename Arg>
-        class Eval;
-        template <typename Arg>
-        class Oper;
-
         virtual ~Expr() = default;
         virtual Expr_ptr clone() const = 0;
 
@@ -42,6 +37,9 @@ namespace SOS {
         static istringstream flat_extract_braces(istringstream&& iss)
             { return move(flat_extract_braces(iss)); }
     protected:
+        template <typename Arg>
+        class Eval;
+
         template <typename T>
         static Expr_ptr_t<T> new_expr(T&& expr)
             { return make_unique<T>(std::forward<T>(expr)); }
@@ -100,6 +98,9 @@ namespace SOS {
 
         Exprs& simplify() noexcept;
         Exprs& to_binary(const Token_t& neutral = "0");
+        // template <typename T>
+        // void set_eval()
+            // {  }
     protected:
         using Exprs_t = vector<Expr_ptr>;
 
@@ -117,6 +118,8 @@ namespace SOS {
         Expr_ptr& first() { return (*this)[0]; }
     private:
         Exprs_t _exprs;
+        template <typename T>
+        static Eval<T> eval;
     };
 }
 

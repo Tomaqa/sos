@@ -92,10 +92,10 @@ ${MKDIR_DIRS}:
 .DUMMY: ${OBJECTS}
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
-	${C} -c ${CFLAGS} -o $@ $^
+	${C} -c $< ${CFLAGS} -o $@
 
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	${CPP} -c ${CPPFLAGS} -o $@ $^
+	${CPP} -c $< ${CPPFLAGS} -o $@
 
 ## Particular executable files
 $(BIN_DIR)/%: ${C_OBJECTS} $(SRC_DIR)/%.c
@@ -111,3 +111,12 @@ $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
 ## Cleans object files and executables
 # clean:
 # rm -fr $(BUILD_DIR)/* $(BIN_DIR)/*
+
+#####################################
+build/expr/eval.o: src/expr/eval.cpp include/expr/eval.hpp \
+ include/expr.hpp include/sos.hpp include/expr/eval.tpp
+build/ode/solver.o: src/ode/solver.cpp include/ode/solver.hpp \
+ include/ode.hpp include/sos.hpp include/expr.hpp
+build/ode/odeint.o: src/ode/odeint.cpp include/ode/odeint.hpp \
+ include/ode/solver.hpp include/ode.hpp include/sos.hpp
+build/expr.o: src/expr.cpp include/expr.hpp include/sos.hpp
