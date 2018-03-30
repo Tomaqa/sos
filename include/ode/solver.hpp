@@ -38,7 +38,7 @@ namespace SOS {
                 { return _odes_spec[ode_id]; }
             const Dt_spec& dt_spec(const Ode_spec& ode_spec, Dt_id dt_id) const
                 { return ode_spec[dt_id]; }
-            Value eval_dt(const Ode_spec& ode_spec, Dt_id dt_id,
+            Real eval_dt(const Ode_spec& ode_spec, Dt_id dt_id,
                           const State& x, Time t) const;
         };
 

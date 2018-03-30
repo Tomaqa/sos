@@ -7,7 +7,6 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <unordered_map>
 #include <iostream>
 #include <sstream>
 #include <memory>
@@ -15,14 +14,11 @@
 #include <algorithm>
 
 using std::move;
-using std::swap;
-using std::ref;
-using std::cref;
+using std::forward;
 
 using std::vector;
 using std::make_pair;
 using std::map;
-using std::unordered_map;
 using std::initializer_list;
 
 using std::pair;
@@ -43,20 +39,18 @@ using std::make_unique;
 using std::shared_ptr;
 using std::make_shared;
 
-using std::find;
 using std::for_each;
 using std::iterator;
-using std::begin;
-using std::end;
-using std::cbegin;
-using std::cend;
 using std::distance;
-using std::transform;
-using std::copy;
 
 using namespace std::string_literals;
 
 namespace SOS {
+    // template <class U, class T,
+    // template <typename T, typename U,
+        // class = std::enable_if_t<std::is_same<std::decay_t<T>, U>::value, T>>
+    // using Limit = T;
+
     class Error {
     public:
         Error(const string& msg = "") : _msg(msg) { }
@@ -84,10 +78,12 @@ namespace SOS {
             { return _map.count(key) == 1; }
         const Value& operator [] (const Key& key) const
             { return _map.at(key); }
-        auto begin() { return _map.begin(); }
-        const auto begin() const { return _map.begin(); }
-        auto end() { return _map.end(); }
-        const auto end() const { return _map.end(); }
+        const auto cbegin() const { return std::cbegin(_map); }
+        const auto cend() const { return std::cend(_map); }
+        const auto begin() const { return std::begin(_map); }
+        const auto end() const { return std::end(_map); }
+        auto begin() { return std::begin(_map); }
+        auto end() { return std::end(_map); }
     private:
         Map _map;
     };

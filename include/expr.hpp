@@ -15,112 +15,123 @@ using std::bind;
 using namespace std::placeholders;
 
 namespace SOS {
-    class Expr {
+    class Expr_place {
     public:
-        using Token_t = string;
+        using Token = string;
         template <typename T>
         using Expr_ptr_t = unique_ptr<T>;
-        using Expr_ptr = Expr_ptr_t<Expr>;
+        using Expr_place_ptr = Expr_ptr_t<Expr_place>;
 
         static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
 
-        virtual ~Expr() = default;
-        virtual Expr_ptr clone() const = 0;
+        virtual ~Expr_place() = default;
+        virtual Expr_place_ptr clone() const = 0;
 
         virtual bool is_token() const noexcept = 0;
         virtual explicit operator string () const noexcept = 0;
 
-        friend ostream& operator <<(ostream& os, const Expr& rhs)
+        friend ostream& operator <<(ostream& os, const Expr_place& rhs)
             { return (os << (string)rhs); }
 
         static istringstream flat_extract_braces(istringstream& iss);
         static istringstream flat_extract_braces(istringstream&& iss)
             { return move(flat_extract_braces(iss)); }
     protected:
-        template <typename Arg>
-        class Eval;
-
         template <typename T>
-        static Expr_ptr_t<T> new_expr(T&& expr)
-            { return make_unique<T>(std::forward<T>(expr)); }
+        static Expr_ptr_t<T> new_place(T&& place)
+            { return make_unique<T>(forward<T>(place)); }
     };
 
-    class Token : public Expr {
+    class Expr_token : public Expr_place {
     public:
-        virtual ~Token() = default;
-        virtual Expr_ptr clone() const override final
-            { return new_expr(Token(*this)); }
-        Token(const string& input) : _token(input) { }
+        virtual ~Expr_token() = default;
+        virtual Expr_place_ptr clone() const override final
+            { return new_place(Expr_token(*this)); }
+        Expr_token(const string& input) : _token(input) { }
 
-        Token_t token() const { return _token; }
-        template <typename T>
-        bool value(T& var) const
-            { istringstream iss(_token); return (bool)(iss >> var); }
-        template <typename T>
+        const Token& token() const { return _token; }
+        template <typename Arg>
+        bool value(Arg& arg) const
+            { istringstream iss(_token); return (bool)(iss >> arg); }
+        template <typename Arg>
         bool is_value() const
-            { T v; return value(v); }
+            { Arg v; return value(v); }
 
         virtual bool is_token() const noexcept override final
             { return true; }
         virtual explicit operator string () const noexcept override final
             { return move(token()); }
     private:
-        Token_t _token;
+        Token _token;
     };
 
-    class Exprs : public Expr {
+    class Expr : public Expr_place {
     public:
-        Exprs() = default;
-        virtual ~Exprs() = default;
-        virtual Expr_ptr clone() const override
-            { return new_expr(Exprs(*this)); }
-        Exprs(const Exprs& rhs);
-        Exprs& operator =(const Exprs& rhs);
-        Exprs(Exprs&& rhs) = default;
-        Exprs& operator =(Exprs&& rhs) = default;
-        Exprs(const string& input) : Exprs(istringstream(input)) { }
-        Exprs(initializer_list<Expr_ptr> list);
-        void swap(Exprs& rhs) { std::swap(_exprs, rhs._exprs); }
+        template <typename Arg>
+        class Eval;
+
+        Expr() = default;
+        virtual ~Expr() = default;
+        virtual Expr_place_ptr clone() const override
+            { return new_place(Expr(*this)); }
+        Expr(const Expr& rhs);
+        Expr& operator =(const Expr& rhs);
+        Expr(Expr&& rhs) = default;
+        Expr& operator =(Expr&& rhs) = default;
+        Expr(const string& input) : Expr(istringstream(input)) { }
+        Expr(initializer_list<Expr_place_ptr> list);
+        void swap(Expr& rhs) { std::swap(_places, rhs._places); }
 
         virtual bool is_token() const noexcept override
             { return false; }
         virtual explicit operator string () const noexcept override;
 
-        size_t size() const noexcept { return _exprs.size(); }
+        size_t size() const noexcept { return _places.size(); }
         bool empty() const noexcept { return size() == 0; }
-        const Expr_ptr& operator [] (size_t idx) const
-            { return _exprs[idx]; }
-        const Expr_ptr& first() const { return (*this)[0]; }
-        auto begin() { return _exprs.begin(); }
-        const auto begin() const { return _exprs.begin(); }
-        auto end() { return _exprs.end(); }
-        const auto end() const { return _exprs.end(); }
+        const Expr_place_ptr& operator [] (size_t idx) const
+            { return _places[idx]; }
+        const Expr_place_ptr& cfirst() const { return (*this)[0]; }
+        const auto cbegin() const { return std::cbegin(_places); }
+        const auto cend() const { return std::cend(_places); }
+        const auto begin() const { return std::begin(_places); }
+        const auto end() const { return std::end(_places); }
+        auto begin() { return std::begin(_places); }
+        auto end() { return std::end(_places); }
 
-        Exprs& simplify() noexcept;
-        Exprs& to_binary(const Token_t& neutral = "0");
-        // template <typename T>
-        // void set_eval()
-            // {  }
+        Expr& simplify() noexcept;
+        Expr& to_binary(const Token& neutral = "0");
+        template <typename Arg>
+        void set_eval(typename Eval<Arg>::Param_keys param_keys = {})
+            { eval_<Arg> = Eval<Arg>(*this, move(param_keys)); }
+        template <typename Arg>
+        Arg eval(initializer_list<Arg> list)
+            { return eval_<Arg>(move(list)); }
+        template <typename Arg>
+        Arg eval(typename Eval<Arg>::Param_values param_values)
+            { return eval_<Arg>(move(param_values)); }
     protected:
-        using Exprs_t = vector<Expr_ptr>;
+        using Places = vector<Expr_place_ptr>;
 
-        Exprs(istringstream& iss, int depth = 0);
-        Exprs(istringstream&& iss) : Exprs(iss) { }
+        Expr(istringstream& iss, int depth = 0);
+        Expr(istringstream&& iss) : Expr(iss) { }
 
         template <typename T>
-        void add_expr_ptr(T&& expr_ptr)
-            { _exprs.emplace_back(std::forward<T>(expr_ptr)); }
+        void add_place_ptr(T&& place_ptr)
+            { _places.emplace_back(forward<T>(place_ptr)); }
         template <typename T>
-        void add_new_expr(T&& expr)
-            { add_expr_ptr(new_expr(std::forward<T>(expr))); }
-        Expr_ptr& operator [] (size_t idx)
-            { return _exprs[idx]; }
-        Expr_ptr& first() { return (*this)[0]; }
+        void add_new_place(T&& place)
+            { add_place_ptr(new_place(forward<T>(place))); }
+        Expr_place_ptr& operator [] (size_t idx)
+            { return _places[idx]; }
+        Expr_place_ptr& first() { return (*this)[0]; }
     private:
-        Exprs_t _exprs;
-        template <typename T>
-        static Eval<T> eval;
+        Places _places;
+        template <typename Arg>
+        static Eval<Arg> eval_;
     };
+
+    template <typename Arg>
+    typename Expr::Eval<Arg> Expr::eval_;
 }
 
 #endif // ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430

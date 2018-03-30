@@ -21,8 +21,8 @@ namespace SOS {
             iss >> ode_id;
             Expr::flat_extract_braces(iss) >> t_bounds.first >> t_bounds.second;
             iss = Expr::flat_extract_braces(iss);
-            State x_init{std::istream_iterator<Value>{iss},
-                         std::istream_iterator<Value>{}};
+            State x_init{std::istream_iterator<Real>{iss},
+                         std::istream_iterator<Real>{}};
 
             return solve(Context{ode_id, t_bounds, x_init});
         }
@@ -30,13 +30,13 @@ namespace SOS {
         void Solver::eval_ode(Ode_id ode_id, State& dx, const State& x, Time t) const
         {
             const auto& spec = ode_spec(ode_id);
-            for (Value& dxi : dx) {
+            for (Real& dxi : dx) {
                 Dt_id dt_id = &dxi - &dx[0];
                 dxi = eval_dt(spec, dt_id, x, t);
             }
         }
 
-        Value Solver::eval_dt(const Ode_spec& ode_spec, Dt_id dt_id,
+        Real Solver::eval_dt(const Ode_spec& ode_spec, Dt_id dt_id,
                               const State& x, Time t) const
         {
             // auto& spec = dt_spec(ode_spec, dt_id);

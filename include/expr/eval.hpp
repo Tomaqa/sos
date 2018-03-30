@@ -7,6 +7,38 @@ namespace SOS {
     template <typename Arg>
     class Expr::Eval {
     public:
+        using Param_key = Token;
+        using Param_keys = vector<Param_key>;
+        using Param_values = vector<Arg>;
+
+        Eval() = default;
+        ~Eval() = default;
+        Eval(const Eval& eval) = delete;
+        Eval& operator =(const Eval& eval) = delete;
+        Eval(Eval&& eval) = default;
+        Eval& operator =(Eval&& eval) = default;
+        Eval(const Expr& expr, Param_keys param_keys = {})
+            : _params{move(param_keys), {}}, _oper(&_params, expr) { }
+        Eval(const string& str, Param_keys param_keys = {})
+            : Eval(Expr(str), move(param_keys)) { }
+
+        size_t size() const
+            { return coper().size(); }
+        const Param_keys& cparam_keys() const
+            { return coper().cparam_keys(); }
+        const Param_values& cparam_values() const
+            { return coper().cparam_values(); }
+
+        Arg operator () (initializer_list<Arg> list)
+            { return call(move(list)); }
+        Arg operator () (Param_values param_values)
+            { return call(move(param_values)); }
+    protected:
+        class Oper;
+        using Param = pair<Param_key, Arg>;
+        using Params = pair<Param_keys, Param_values>;
+        using Oper_ptr = unique_ptr<Oper>;
+
         using Bin_f = function<Arg(Arg, Arg)>;
         using F_key = const string;
         template <typename F>
@@ -16,79 +48,48 @@ namespace SOS {
                                 typename F_pair<F>::second_type>;
         static const F_map<Bin_f> bin_fs;
 
-        using Param_key = Token_t;
-        using Param_keys = vector<Param_key>;
-        using Param_values = vector<Arg>;
-
-        class Oper;
-
-        Eval() = default;
-        ~Eval() = default;
-        Eval(const Eval& eval) = delete;
-        Eval& operator =(const Eval& eval) = delete;
-        Eval(Eval&& eval) = default;
-        Eval& operator =(Eval&& eval) = default;
-        Eval(const Exprs& exprs)
-            // : _oper(&_params, exprs) { }
-            // : _oper(_params, exprs) { }
-            : _oper_ptr(new_oper(Oper(_params, exprs))) { }
-        // Eval(Exprs& exprs, bool is_binary = true)
-            // : Eval(cref(is_binary ? exprs : exprs.to_binary())) { }
-        Eval(const string& str)
-            : Eval(Exprs(str)) { }
-
-        size_t size() const
-            { return oper().size(); }
         Param_keys& param_keys()
-            { return oper().param_keys(); }
-        const Param_keys& param_keys() const
             { return oper().param_keys(); }
         Param_values& param_values()
             { return oper().param_values(); }
-        const Param_values& param_values() const
-            { return oper().param_values(); }
+        const Oper& coper() const { return _oper; }
+        Oper& oper() { return _oper; }
 
-        Arg operator () (initializer_list<Arg> list);
-    protected:
-        using Param = pair<Param_key, Arg>;
-        using Params = pair<Param_keys, Param_values>;
-        using Oper_ptr = unique_ptr<Oper>;
-
-        // const Oper& oper() const { return _oper; }
-        // Oper& oper() { return _oper; }
-        const Oper& oper() const { return *_oper_ptr; }
-        Oper& oper() { return *_oper_ptr; }
         static Oper_ptr new_oper(Oper&& oper_)
             { return make_unique<Oper>(move(oper_)); }
+        static Oper* oper_link(const Oper_ptr& oper_ptr)
+            { return oper_ptr.get(); }
     private:
+        template <typename Cont>
+        Arg call(Cont&& cont);
+
         Params _params;
-        // Oper _oper;
-        Oper_ptr _oper_ptr;
+        Oper _oper;
     };
 
     template <typename Arg>
     class Expr::Eval<Arg>::Oper {
     public:
-        using Params_link = Params&;
+        using Params_link = Params*;
 
-        Oper() = delete;
+        Oper() : _params_l(nullptr), _oper_ptrs{nullptr, nullptr} { }
         ~Oper() = default;
         Oper(const Oper& oper) = delete;
         Oper& operator =(const Oper& oper) = delete;
         Oper(Oper&& oper) = default;
         Oper& operator =(Oper&& oper) = default;
-        Oper(Params_link params, const Exprs& exprs);
+        Oper(Params_link params, const Expr& expr);
 
+        const Param_keys& cparam_keys() const
+            { return cparams().first; }
+        const Param_values& cparam_values() const
+            { return cparams().second; }
         Param_keys& param_keys()
-            { return params().first; }
-        const Param_keys& param_keys() const
             { return params().first; }
         Param_values& param_values()
             { return params().second; }
-        const Param_values& param_values() const
-            { return params().second; }
         size_t size() const
-            { return param_keys().size(); }
+            { return cparam_keys().size(); }
         Arg operator () () const
             { return _f((_arg_fs.first)(), (_arg_fs.second)()); }
     protected:
@@ -96,27 +97,24 @@ namespace SOS {
         using Arg_fs = pair<Arg_f, Arg_f>;
         using Oper_ptrs = pair<Oper_ptr, Oper_ptr>;
 
-        const Params& params() const { return _params_l; }
-        Params& params() { return _params_l; }
+        const Params& cparams() const { return *_params_l; }
+        Params& params() { return *_params_l; }
         Param_keys::iterator set_param_key(const Param_key& key);
     private:
         Param_keys::iterator find_param_key(const Param_key& key)
-            { return find(begin(param_keys()), end(param_keys()), key); }
+            { return std::find(std::begin(param_keys()),
+                               std::end(param_keys()), key); }
         template <size_t idx>
-        Arg_f get_arg_f(const Exprs& exprs);
+        Arg_f get_arg_f(const Expr& expr);
         template <size_t idx>
-        void set_arg_f(const Exprs& exprs)
-            { get<idx>(_arg_fs) = get_arg_f<idx>(exprs); }
-        void set_arg_fs(const Exprs& exprs)
-            { set_arg_f<0>(exprs); set_arg_f<1>(exprs); }
+        void set_arg_f(const Expr& expr)
+            { get<idx>(_arg_fs) = get_arg_f<idx>(expr); }
+        void set_arg_fs(const Expr& expr)
+            { set_arg_f<0>(expr); set_arg_f<1>(expr); }
         Arg_f arg_f(Arg arg)
             { return [arg](){ return arg; }; }
-        Arg_f param_f(const Param_values& params, const size_t idx)
-            { return [&params, idx](){ return params[idx]; }; }
-        // Arg_f oper_f(const Oper& oper)
-        //     { return [&](){ cout << "OPER?" << endl << &oper << endl; return oper(); }; }
-        Arg_f oper_f(const Oper *const oper_ptr)
-            { return [oper_ptr](){ return (*oper_ptr)(); }; }
+        Arg_f param_f(const Param_key& key);
+        Arg_f oper_f(const Oper_ptr& oper_ptr);
 
         Params_link _params_l;
         Bin_f _f;

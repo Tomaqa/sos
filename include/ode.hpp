@@ -7,9 +7,9 @@ namespace SOS {
     namespace ODE {
         using Time = double;
         template <typename T>
-        using Interval = pair<T,T>;
-        using Value = double;
-        using State = vector<Value>;
+        using Interval = pair<T, T>;
+        using Real = double;
+        using State = vector<Real>;
     }
 }
 

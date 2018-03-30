@@ -1,7 +1,7 @@
 #include "expr.hpp"
 
 namespace SOS {
-    istringstream Expr::flat_extract_braces(istringstream& iss)
+    istringstream Expr_place::flat_extract_braces(istringstream& iss)
     {
         string str;
         iss.ignore(std::numeric_limits<std::streamsize>::max(), '(');
@@ -9,22 +9,22 @@ namespace SOS {
         return istringstream(str);
     }
 
-    Exprs::Exprs(const Exprs& rhs)
+    Expr::Expr(const Expr& rhs)
     {
-        _exprs.reserve(rhs.size());
+        _places.reserve(rhs.size());
         for (const auto& e : rhs) {
-            add_expr_ptr(e->clone());
+            add_place_ptr(e->clone());
         }
     }
 
-    Exprs& Exprs::operator =(const Exprs& rhs)
+    Expr& Expr::operator =(const Expr& rhs)
     {
-        Exprs tmp(rhs);
+        Expr tmp(rhs);
         swap(tmp);
         return *this;
     }
 
-    Exprs::Exprs(istringstream& iss, int depth)
+    Expr::Expr(istringstream& iss, int depth)
     {
         char c;
         string str;
@@ -38,7 +38,7 @@ namespace SOS {
             }
             if (isspace(c)) continue;
             if (c == '(') {
-                add_new_expr(Exprs(iss, depth+1));
+                add_new_place(Expr(iss, depth+1));
                 continue;
             }
             if (c == ')') {
@@ -51,7 +51,7 @@ namespace SOS {
             oss << c;
             char c2 = iss.peek();
             if (isspace(c2) || c2 == '(') {
-                add_new_expr(Token(oss.str()));
+                add_new_place(Expr_token(oss.str()));
                 oss.str("");
             }
         }
@@ -61,20 +61,20 @@ namespace SOS {
         }
 
         if (!oss.str().empty()) {
-            add_new_expr(Token(oss.str()));
+            add_new_place(Expr_token(oss.str()));
         }
 
         simplify();
     }
 
-    Exprs::Exprs(initializer_list<Expr_ptr> list)
+    Expr::Expr(initializer_list<Expr_place_ptr> list)
     {
         for (const auto& e : list) {
-            add_expr_ptr(e->clone());
+            add_place_ptr(e->clone());
         }
     }
 
-    Exprs::operator string () const noexcept
+    Expr::operator string () const noexcept
     {
         string str("( ");
         for (const auto& e : *this) {
@@ -83,45 +83,45 @@ namespace SOS {
         return (str += ")");
     }
 
-    Exprs& Exprs::simplify() noexcept
+    Expr& Expr::simplify() noexcept
     {
         if (empty()) return *this;
         for (auto& e : *this) {
             if (e->is_token()) continue;
-            auto& e_cast = static_cast<Exprs&>(*e);
+            auto& e_cast = static_cast<Expr&>(*e);
             if (e_cast.simplify().size() == 1) {
                 e = move(e_cast.first());
             }
         }
-        if (size() == 1 && !first()->is_token()) {
-            _exprs = move(static_cast<Exprs&>(*first())._exprs);
+        if (size() == 1 && !cfirst()->is_token()) {
+            _places = move(static_cast<Expr&>(*first())._places);
         }
         return *this;
     }
 
-    Exprs& Exprs::to_binary(const Token_t& neutral)
+    Expr& Expr::to_binary(const Token& neutral)
     {
         if (size() <= 1) {
             throw Error("Expression has not at least 2 arguments.");
         }
-        if (!first()->is_token()) {
+        if (!cfirst()->is_token()) {
             throw Error("First argument of each expression should be single token.");
         }
         if (size() == 2) {
-            add_new_expr(Token(neutral));
-            std::swap(_exprs[1], _exprs[2]);
+            add_new_place(Expr_token(neutral));
+            std::swap(_places[1], _places[2]);
         }
         else if (size() > 3) {
-            Exprs subexprs{first()->clone()};
+            Expr subexpr{cfirst()->clone()};
             for (auto&& it = begin()+2, eit = end(); it != eit; ++it) {
-                subexprs.add_expr_ptr(move(*it));
+                subexpr.add_place_ptr(move(*it));
             }
-            _exprs.erase(begin()+3, end());
-            _exprs[2] = new_expr(move(subexprs.to_binary()));
+            _places.erase(begin()+3, end());
+            _places[2] = new_place(move(subexpr.to_binary()));
         }
         for (auto& e : *this) {
             if (e->is_token()) continue;
-            auto& e_cast = static_cast<Exprs&>(*e);
+            auto& e_cast = static_cast<Expr&>(*e);
             e_cast.to_binary();
         }
         return *this;
