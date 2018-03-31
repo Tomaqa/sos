@@ -63,7 +63,6 @@ struct Params_eval {
     typename Eval_t<Arg>::Param_keys _keys;
     Param_values _values;
     bool _quiet{false};
-
 };
 
 template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
@@ -118,8 +117,6 @@ Arg expr_get_eval_res(const string& input, Params_eval<Arg, Param_values>& param
     return res1;
 }
 
-      // cout << Expr("- (* y 5 (/ x 3 2))").eval<float>({60, 5}, {"x", "y"}) << endl;
-
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
@@ -146,20 +143,20 @@ int main(int, const char*[])
     };
 
     TestData<Params_eval<double>, double> eval_data_double = {
-        {"+ 1 2",                                      {{}, {}},                                                                         3,        },
-        {"+ 10 x",                                     {{}, {10}},                                                                       20,       },
-        {"+ x y",                                      {{}, {13, 17}},                                                                   30,       },
-        {"+ x ( - 10 y)",                              {{}, {100, 50}},                                                                  60,       },
-        {"(+ x (- (* (/ 3 t) y) 2))",                  {{}, {50, 10, 20}},                                                               54,       },
-        {"(+ x (- (* (/ 3 t) y) 2))",                  {{}, {1, 2, 3}},                                                                  3.5,      },
-        {"(+ x (- (* (/ 3 t) y) 2))",                  {{}, {10, 50, 20}},                                                               9.2,      },
-        {"(+ x (- (* (/ 3 t) y) 2))",                  {{"t", "x", "y"}, {10, 50, 20}},                                                  54,       },
-        {"- (* y 5 (/ x 3 2))",                        {{"x", "y"}, {60, 5}},                                                            -1000,    },
+        {"+ 1 2",                                      {{}, {}},                                                             1+2,                  },
+        {"+ 10 x",                                     {{}, {10}},                                                           10+10,                },
+        {"+ x y",                                      {{}, {13, 17}},                                                       13+17,                },
+        {"+ x ( - 10 y)",                              {{}, {100, 50}},                                                      100+(10-50),          },
+        {"(+ x (- (* (/ 3 t) y) 2))",                  {{}, {50, 10, 20}},                                                   50+(3./10)*20-2,      },
+        {"(+ x (- (* (/ 3 t) y) 2))",                  {{}, {1, 2, 3}},                                                      1+(3./2)*3-2,         },
+        {"(+ x (- (* (/ 3 t) y) 2))",                  {{}, {10, 50, 20}},                                                   10+(3./50)*20-2,      },
+        {"(+ x (- (* (/ 3 t) y) 2))",                  {{"t", "x", "y"}, {10, 50, 20}},                                      50+(3./10)*20-2,      },
+        {"- (* y 5 (/ x 3 2))",                        {{"x", "y"}, {60, 5}},                                                -5*5*(60./(3./2)),    },
     };
 
     TestData<Params_eval<double, initializer_list<double>>, double> eval_data_double_init = {
-        {"+ x ( - 10 y)",                              {{}, {100, 50}, true},                                                            60,       },
-        {"(+ x (- (* (/ 3 t) y) 2))",                  {{"t", "x", "y"}, {10, 50, 20}, true},                                            54,       },
+        {"+ x ( - 10 y)",                              {{}, {100, 50}, true},                                                100+(10-50),          },
+        {"(+ x (- (* (/ 3 t) y) 2))",                  {{"t", "x", "y"}, {10, 50, 20}, true},                                50+(3./10)*20-2,      },
     };
 
 /////////////////////////////////////////////////////////////////
@@ -183,6 +180,7 @@ int main(int, const char*[])
         test<Params_eval<double, initializer_list<double>>,
              double, string>
              (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
+
     }
     catch (const Error& e) {
         cerr << e << endl;

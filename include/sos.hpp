@@ -55,7 +55,7 @@ namespace SOS {
 
     class Error {
     public:
-        Error(const string& msg = "") : _msg(msg) { }
+        Error(const string& msg_ = "") : _msg(msg_) { }
 
         friend ostream& operator <<(ostream& os, const Error& rhs)
             { return (os << rhs._msg); }
@@ -72,14 +72,14 @@ namespace SOS {
         Const_map& operator =(const Const_map& cmap) = default;
         Const_map(Const_map&& cmap) = default;
         Const_map& operator =(Const_map&& cmap) = default;
-        Const_map(Map&& map) : _map(map) { }
+        Const_map(Map&& map_) : _map(map_) { }
         Const_map(initializer_list<pair<const Key, Value>> list)
             : _map{list} { }
 
-        bool includes(const Key& key) const noexcept
-            { return _map.count(key) == 1; }
-        const Value& operator [] (const Key& key) const
-            { return _map.at(key); }
+        bool includes(const Key& key_) const noexcept
+            { return _map.count(key_) == 1; }
+        const Value& operator [](const Key& key_) const
+            { return _map.at(key_); }
         const auto cbegin() const { return std::cbegin(_map); }
         const auto cend() const { return std::cend(_map); }
         const auto begin() const { return std::begin(_map); }

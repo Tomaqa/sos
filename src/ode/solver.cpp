@@ -1,8 +1,25 @@
 #include "ode/solver.hpp"
-#include "expr.hpp"
 
 namespace SOS {
     namespace ODE {
+        Solver::Solver(Odes_spec&& odes_spec_)
+            : _odes_spec(move(odes_spec_)),
+              _odes_eval(size())
+        {
+            for (auto& ode_spec_ : _odes_spec) {
+                Ode_eval ode_eval_(ode_spec_.size());
+                std::transform(std::begin(ode_spec_), std::end(ode_spec_),
+                               std::begin(ode_eval_),
+                               [](auto& dt_spec_){
+                                   //! param_keys
+                                   // return move(dt_spec.get_eval<Real>());
+                                   return Dt_eval(dt_spec_);
+                               });
+                int i = &ode_spec_ - &_odes_spec[0];
+                ode_eval(i) = move(ode_eval_);
+            }
+        }
+
         State Solver::solve(const string& input) const
         {
             regex re("\\s*\\d+\\s*\\((\\s*"s
@@ -25,23 +42,25 @@ namespace SOS {
                          // std::istream_iterator<Real>{}};
             State x_init{};
 
-            return solve(Context{ode_id, t_bounds, x_init});
+            return solve({ode_id, t_bounds, x_init});
         }
 
-        void Solver::eval_ode(Ode_id ode_id, State& dx, const State& x, Time t) const
+        void Solver::eval_ode(Ode_id ode_id,
+                              State& dx, const State& x, Time t) const
         {
-            const auto& spec = ode_spec(ode_id);
-            for (Real& dxi : dx) {
-                Dt_id dt_id = &dxi - &dx[0];
-                dxi = eval_dt(spec, dt_id, x, t);
-            }
+            const auto& eval_ = code_eval(ode_id);
+            std::transform(std::begin(eval_), std::end(eval_), std::begin(dx),
+                          [this, &x, t](const auto& dt_eval_){
+                              return eval_dt(dt_eval_, x, t);
+                          });
         }
 
-        Real Solver::eval_dt(const Ode_spec& ode_spec, Dt_id dt_id,
-                              const State& x, Time t) const
+        Real Solver::eval_dt(const Dt_eval& dt_eval_,
+                             const State& x, Time t) const
         {
-            // auto& spec = dt_spec(ode_spec, dt_id);
-            return 0.0;
+            Dt_params params(x);
+            params.emplace_back(t);
+            return dt_eval_(move(params));
         }
     }
 }

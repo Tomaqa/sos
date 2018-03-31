@@ -10,7 +10,7 @@ namespace SOS {
             using Times  = vector<Time>;
             using States = vector<State>;
 
-            virtual State solve(Context&& context) const override final;
+            virtual State solve(Context context_) const override final;
         };
     }
 }

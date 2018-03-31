@@ -2,7 +2,6 @@
 #define ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430
 
 #include "sos.hpp"
-// #include "expr/eval.hpp"
 
 #include <regex>
 #include <functional>
@@ -35,8 +34,8 @@ namespace SOS {
             { return (os << (string)rhs); }
     protected:
         template <typename T>
-        static Expr_ptr_t<T> new_place(T&& place)
-            { return make_unique<T>(forward<T>(place)); }
+        static Expr_ptr_t<T> new_place(T&& place_)
+            { return make_unique<T>(forward<T>(place_)); }
     };
 
     class Expr_token : public Expr_place {
@@ -85,7 +84,7 @@ namespace SOS {
 
         size_t size() const noexcept { return _places.size(); }
         bool empty() const noexcept { return size() == 0; }
-        const Expr_place_ptr& operator [] (size_t idx) const
+        const Expr_place_ptr& operator [](int idx) const
             { return _places[idx]; }
         const Expr_place_ptr& cfirst() const { return (*this)[0]; }
         const auto cbegin() const { return std::cbegin(_places); }
@@ -98,16 +97,27 @@ namespace SOS {
         Expr& simplify() noexcept;
         Expr& to_binary(const Token& neutral = "0");
         template <typename Arg>
-        Eval<Arg> get_eval(typename Eval<Arg>::Param_keys param_keys = {})
-            { return {to_binary(), move(param_keys)}; }
+        Eval<Arg> get_eval(typename Eval<Arg>::Param_keys param_keys_ = {})
+            { return {to_binary(), move(param_keys_)}; }
+        template <typename Arg>
+        Eval<Arg> cget_eval(typename Eval<Arg>::Param_keys param_keys_ = {}) const
+            { return {*this, move(param_keys_)}; }
         template <typename Arg>
         Arg eval(initializer_list<Arg> list,
-            typename Eval<Arg>::Param_keys param_keys = {})
-            { return get_eval<Arg>(move(param_keys))(move(list)); }
+            typename Eval<Arg>::Param_keys param_keys_ = {})
+            { return get_eval<Arg>(move(param_keys_))(move(list)); }
         template <typename Arg>
-        Arg eval(typename Eval<Arg>::Param_values param_values,
-            typename Eval<Arg>::Param_keys param_keys = {})
-            { return get_eval<Arg>(move(param_keys))(move(param_values)); }
+        Arg eval(typename Eval<Arg>::Param_values param_values_,
+            typename Eval<Arg>::Param_keys param_keys_ = {})
+            { return get_eval<Arg>(move(param_keys_))(move(param_values_)); }
+        template <typename Arg>
+        Arg ceval(initializer_list<Arg> list,
+            typename Eval<Arg>::Param_keys param_keys_ = {}) const
+            { return cget_eval<Arg>(move(param_keys_))(move(list)); }
+        template <typename Arg>
+        Arg ceval(typename Eval<Arg>::Param_values param_values_,
+            typename Eval<Arg>::Param_keys param_keys_ = {}) const
+            { return cget_eval<Arg>(move(param_keys_))(move(param_values_)); }
     protected:
         using Places = vector<Expr_place_ptr>;
 
@@ -115,12 +125,12 @@ namespace SOS {
         Expr(istringstream&& iss) : Expr(iss) { }
 
         template <typename T>
-        void add_place_ptr(T&& place_ptr)
-            { _places.emplace_back(forward<T>(place_ptr)); }
+        void add_place_ptr(T&& place_ptr_)
+            { _places.emplace_back(forward<T>(place_ptr_)); }
         template <typename T>
-        void add_new_place(T&& place)
-            { add_place_ptr(new_place(forward<T>(place))); }
-        Expr_place_ptr& operator [] (size_t idx)
+        void add_new_place(T&& place_)
+            { add_place_ptr(new_place(forward<T>(place_))); }
+        Expr_place_ptr& operator [](int idx)
             { return _places[idx]; }
         Expr_place_ptr& first() { return (*this)[0]; }
     private:

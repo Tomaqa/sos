@@ -20,7 +20,7 @@ namespace SOS {
 
     template <typename Arg>
     template <typename Cont>
-    Arg Expr::Eval<Arg>::call(Cont&& cont)
+    Arg Expr::Eval<Arg>::call(Cont&& cont) const
     {
         if (cont.size() != size()) {
             throw Error("Count of parameters mismatch: expected "s
@@ -28,74 +28,76 @@ namespace SOS {
                         + ", got " + to_string(cont.size()));
         }
         param_values() = forward<Cont>(cont);
-        return (oper())();
+        return (coper())();
     }
 
     template <typename Arg>
-    Expr::Eval<Arg>::Oper::Oper(Params_link params_l, const Expr& expr)
-        : _params_l(params_l)
+    Expr::Eval<Arg>::Oper::Oper(Param_keys_link param_keys_l_,
+                                Param_values_link param_values_l_,
+                                const Expr& expr_)
+        : _param_keys_l(param_keys_l_), _param_values_l(param_values_l_)
     {
-        if (expr.size() != 3) {
+        if (expr_.size() != 3) {
             throw Error("Expression is not binary.");
         }
-        if (!expr.cfirst()->is_token()) {
+        if (!expr_.cfirst()->is_token()) {
             throw Error("First argument of expression must be token.");
         }
-        const F_key key = static_cast<Expr_token&>(*expr.cfirst()).token();
-        if (!bin_fs.includes(key)) {
+        const F_key key_ = static_cast<Expr_token&>(*expr_.cfirst()).token();
+        if (!bin_fs.includes(key_)) {
             throw Error("First argument of expression "
                         "is not operation token: "s
-                        + key);
+                        + key_);
         }
-        _f = bin_fs[key];
-        set_arg_fs(expr);
+        _f = bin_fs[key_];
+        set_arg_fs(expr_);
     }
 
     template <typename Arg>
-    template <size_t idx>
+    template <int idx>
     typename Expr::Eval<Arg>::Oper::Arg_f
-        Expr::Eval<Arg>::Oper::get_arg_f(const Expr& expr)
+        Expr::Eval<Arg>::Oper::get_arg_f(const Expr& expr_)
     {
-        const auto& place = expr[idx+1];
-        if (!place->is_token()) {
-            const auto& subexpr = static_cast<Expr&>(*place);
-            Oper_ptr& oper_ptr = get<idx>(_oper_ptrs);
-            oper_ptr = new_oper(Oper(_params_l, subexpr));
-            return oper_f(oper_ptr);
+        const auto& place_ = expr_[idx+1];
+        if (!place_->is_token()) {
+            const auto& subexpr = static_cast<Expr&>(*place_);
+            Oper_ptr& oper_ptr_ = get<idx>(_oper_ptrs);
+            oper_ptr_ = new_oper(Oper(_param_keys_l, _param_values_l, subexpr));
+            return oper_f(oper_ptr_);
         }
-        const auto& token = static_cast<Expr_token&>(*place);
+        const auto& token_ = static_cast<Expr_token&>(*place_);
         Arg arg;
-        if (token.value(arg)) {
+        if (token_.value(arg)) {
             return arg_f(arg);
         }
-        Param_key key = token.token();
-        return param_f(key);
+        Param_key key_ = token_.token();
+        return param_f(key_);
     }
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Param_keys::iterator
-        Expr::Eval<Arg>::Oper::set_param_key(const Param_key& key)
+        Expr::Eval<Arg>::Oper::set_param_key(const Param_key& key_) const
     {
-        auto pos = find_param_key(key);
-        if (pos != std::end(cparam_keys())) return pos;
-        return param_keys().insert(pos, key);
+        auto pos = find_param_key(key_);
+        if (pos != std::end(param_keys())) return pos;
+        return param_keys().insert(pos, key_);
     }
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Oper::Arg_f
-        Expr::Eval<Arg>::Oper::param_f(const Param_key& key)
+        Expr::Eval<Arg>::Oper::param_f(const Param_key& key_) const
     {
-        const Param_values& param_values_ = cparam_values();
-        auto it = set_param_key(key);
-        size_t idx = distance(std::begin(param_keys()), it);
+        const Param_values& param_values_ = param_values();
+        auto it = set_param_key(key_);
+        int idx = distance(std::begin(param_keys()), it);
         return [&param_values_, idx](){ return param_values_[idx]; };
     }
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Oper::Arg_f
-        Expr::Eval<Arg>::Oper::oper_f(const Oper_ptr& oper_ptr)
+        Expr::Eval<Arg>::Oper::oper_f(const Oper_ptr& oper_ptr_) const
     {
-        const Oper *const oper_link_ = oper_link(oper_ptr);
+        const Oper *const oper_link_ = oper_link(oper_ptr_);
         return [oper_link_](){ return (*oper_link_)(); };
     }
 }
