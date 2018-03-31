@@ -51,67 +51,72 @@ int main(int, const char*[])
       test_expr("+ 1",    "( + 0 1 )", true);
       test_expr("+ 1 2 (- 3) 4",    "( + 1 ( + 2 ( + ( - 0 3 ) 4 ) ) )", true);
 
-      // using Eval_t = Expr_place::Eval<double>;
-      // Eval_t e1(Expr("+ 1 2"));
-      // for (auto& k : e1.cparam_keys()) {
-      //   cout << k << " ";
-      // }
-      // cout << endl << e1({}) << endl << endl;
+      using Eval_t = Expr::Eval<double>;
+      Eval_t e1;
+      e1 = Eval_t(Expr("+ 1 2"));
+      for (auto& k : e1.cparam_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e1({}) << endl << endl;
 
-      // Eval_t e2("+ 10 x");
-      // for (auto& k : e2.cparam_keys()) {
-      //   cout << k << " ";
-      // }
-      // cout << endl << e2({10}) << endl << endl;
+      Eval_t e2("+ 10 x");
+      for (auto& k : e2.cparam_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e2({10}) << endl << endl;
 
-      // Eval_t e3("+ x y");
-      // for (auto& k : e3.cparam_keys()) {
-      //   cout << k << " ";
-      // }
-      // cout << endl << e3({13,17}) << endl << endl;
+      Eval_t e3("+ x y");
+      for (auto& k : e3.cparam_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e3({13,17}) << endl << endl;
 
-      // Eval_t e4("(+ x (- 10 y))");
-      // for (auto& k : e4.cparam_keys()) {
-      //   cout << k << " ";
-      // }
-      // cout << endl << e4({100, 50}) << endl << endl;
+      Eval_t e4("(+ x (- 10 y))");
+      for (auto& k : e4.cparam_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e4({100, 50}) << endl << endl;
 
-      // const string expr_str = "(+ x (- (* (/ 3 t) y) 2))";
-      // Eval_t::Param_values v5 = {10, 50, 20};
-      // Eval_t e5(expr_str);
-      // for (auto& k : e5.cparam_keys()) {
-      //   cout << k << " ";
-      // }
-      // cout << endl << e5({50, 10, 20}) << endl;
-      // cout << endl << e5(Eval_t::Param_values{1,2,3}) << endl;
-      // cout << endl << e5(v5) << endl;
-      // cout << endl;
+      const string expr_str = "(+ x (- (* (/ 3 t) y) 2))";
+      Eval_t::Param_values v5 = {10, 50, 20};
+      Eval_t e5(expr_str);
+      for (auto& k : e5.cparam_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e5({50, 10, 20}) << endl;
+      cout << endl << e5(Eval_t::Param_values{1,2,3}) << endl;
+      cout << endl << e5(v5) << endl;
+      cout << endl;
 
-      // Eval_t e6(expr_str, {"t", "x", "y"});
-      // for (auto& k : e6.cparam_keys()) {
-      //   cout << k << " ";
-      // }
-      // cout << endl << e6(v5) << endl;
-      // cout << endl;
+      Eval_t e6(expr_str, {"t", "x", "y"});
+      for (auto& k : e6.cparam_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e6(v5) << endl;
+      cout << endl;
 
-      // Eval_t::Param_keys k7 = {"t", "x", "y"};
-      // Eval_t e7(expr_str, k7);
-      // for (auto& k : e7.cparam_keys()) {
-      //   cout << k << " ";
-      // }
-      // cout << endl << e7(v5) << endl;
-      // cout << endl;
+      Eval_t::Param_keys k7 = {"t", "x", "y"};
+      Eval_t e7(expr_str, k7);
+      for (auto& k : e7.cparam_keys()) {
+        cout << k << " ";
+      }
+      cout << endl << e7(v5) << endl;
+      cout << endl;
 
-      Expr e1("+ 5 6");
-      e1.set_eval<double>();
-      cout << e1.eval<double>({}) << endl;
+      Expr ex1("+ 5.5 6.5 7 8");
+      Eval_t e1ex1 = ex1.get_eval<double>();
+      auto e2ex1 = ex1.get_eval<int>();
+      cout << e1ex1({}) << endl;
+      cout << e2ex1({}) << endl;
+      cout << ex1.eval<short>({}) << endl;
+      cout << Expr("- (* y 5 (/ x 3 2))").eval<float>({60, 5}, {"x", "y"}) << endl;
     }
     catch (const Error& e) {
         cerr << e << endl;
         throw;
     }
 
-    cout << "Success." << endl;
+    cout << endl << "Success." << endl;
 
     // double arg1=1, arg2=2;
     // auto f = Expr_place::Eval<double>::bin_fs["+"];

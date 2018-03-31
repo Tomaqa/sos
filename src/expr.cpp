@@ -10,6 +10,7 @@ namespace SOS {
     }
 
     Expr::Expr(const Expr& rhs)
+        : _is_binary(rhs._is_binary)
     {
         _places.reserve(rhs.size());
         for (const auto& e : rhs) {
@@ -25,6 +26,7 @@ namespace SOS {
     }
 
     Expr::Expr(istringstream& iss, int depth)
+        : Expr()
     {
         char c;
         string str;
@@ -68,6 +70,7 @@ namespace SOS {
     }
 
     Expr::Expr(initializer_list<Expr_place_ptr> list)
+        : Expr()
     {
         for (const auto& e : list) {
             add_place_ptr(e->clone());
@@ -101,6 +104,7 @@ namespace SOS {
 
     Expr& Expr::to_binary(const Token& neutral)
     {
+        if (_is_binary) return *this;
         if (size() <= 1) {
             throw Error("Expression has not at least 2 arguments.");
         }
@@ -124,6 +128,7 @@ namespace SOS {
             auto& e_cast = static_cast<Expr&>(*e);
             e_cast.to_binary();
         }
+        _is_binary = true;
         return *this;
     }
 }

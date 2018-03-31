@@ -70,7 +70,7 @@ namespace SOS {
         template <typename Arg>
         class Eval;
 
-        Expr() = default;
+        Expr() : _is_binary(false) { }
         virtual ~Expr() = default;
         virtual Expr_place_ptr clone() const override
             { return new_place(Expr(*this)); }
@@ -101,14 +101,16 @@ namespace SOS {
         Expr& simplify() noexcept;
         Expr& to_binary(const Token& neutral = "0");
         template <typename Arg>
-        void set_eval(typename Eval<Arg>::Param_keys param_keys = {})
-            { eval_<Arg> = Eval<Arg>(*this, move(param_keys)); }
+        Eval<Arg> get_eval(typename Eval<Arg>::Param_keys param_keys = {})
+            { return {to_binary(), move(param_keys)}; }
         template <typename Arg>
-        Arg eval(initializer_list<Arg> list)
-            { return eval_<Arg>(move(list)); }
+        Arg eval(initializer_list<Arg> list,
+            typename Eval<Arg>::Param_keys param_keys = {})
+            { return get_eval<Arg>(move(param_keys))(move(list)); }
         template <typename Arg>
-        Arg eval(typename Eval<Arg>::Param_values param_values)
-            { return eval_<Arg>(move(param_values)); }
+        Arg eval(typename Eval<Arg>::Param_values param_values,
+            typename Eval<Arg>::Param_keys param_keys = {})
+            { return get_eval<Arg>(move(param_keys))(move(param_values)); }
     protected:
         using Places = vector<Expr_place_ptr>;
 
@@ -126,12 +128,8 @@ namespace SOS {
         Expr_place_ptr& first() { return (*this)[0]; }
     private:
         Places _places;
-        template <typename Arg>
-        static Eval<Arg> eval_;
+        bool _is_binary;
     };
-
-    template <typename Arg>
-    typename Expr::Eval<Arg> Expr::eval_;
 }
 
 #endif // ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430
