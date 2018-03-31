@@ -19,10 +19,11 @@ namespace SOS {
             istringstream iss(input);
 
             iss >> ode_id;
-            Expr::flat_extract_braces(iss) >> t_bounds.first >> t_bounds.second;
-            iss = Expr::flat_extract_braces(iss);
-            State x_init{std::istream_iterator<Real>{iss},
-                         std::istream_iterator<Real>{}};
+            // Expr::flat_extract_braces(iss) >> t_bounds.first >> t_bounds.second;
+            // iss = Expr::flat_extract_braces(iss);
+            // State x_init{std::istream_iterator<Real>{iss},
+                         // std::istream_iterator<Real>{}};
+            State x_init{};
 
             return solve(Context{ode_id, t_bounds, x_init});
         }

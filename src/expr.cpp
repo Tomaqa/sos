@@ -1,14 +1,6 @@
 #include "expr.hpp"
 
 namespace SOS {
-    istringstream Expr_place::flat_extract_braces(istringstream& iss)
-    {
-        string str;
-        iss.ignore(std::numeric_limits<std::streamsize>::max(), '(');
-        getline(iss, str, ')');
-        return istringstream(str);
-    }
-
     Expr::Expr(const Expr& rhs)
         : _is_binary(rhs._is_binary)
     {

@@ -2,6 +2,7 @@
 #define ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430
 
 #include "sos.hpp"
+// #include "expr/eval.hpp"
 
 #include <regex>
 #include <functional>
@@ -32,10 +33,6 @@ namespace SOS {
 
         friend ostream& operator <<(ostream& os, const Expr_place& rhs)
             { return (os << (string)rhs); }
-
-        static istringstream flat_extract_braces(istringstream& iss);
-        static istringstream flat_extract_braces(istringstream&& iss)
-            { return move(flat_extract_braces(iss)); }
     protected:
         template <typename T>
         static Expr_ptr_t<T> new_place(T&& place)

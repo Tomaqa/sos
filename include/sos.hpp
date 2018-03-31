@@ -22,7 +22,9 @@ using std::map;
 using std::initializer_list;
 
 using std::pair;
+using std::tuple;
 using std::get;
+using std::tie;
 
 using std::cout;
 using std::cerr;
