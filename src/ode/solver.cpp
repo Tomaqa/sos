@@ -6,11 +6,6 @@ namespace SOS {
             : _odes_spec(move(odes_spec_)),
               _odes_eval(size())
         {
-            // std::transform(std::begin(_odes_spec), std::end(_odes_spec),
-            //                std::begin(_odes_eval),
-            //                [this](Ode_spec& ode_spec_){
-            //                    return move(create_ode_eval(ode_spec_));
-            //                });
             std::transform(std::begin(_odes_spec), std::end(_odes_spec),
                            std::begin(_odes_eval),
                            bind(&Solver::create_ode_eval, this, _1));
@@ -25,17 +20,63 @@ namespace SOS {
         Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_)
         {
             Ode_eval ode_eval_(ode_spec_.size());
-            // std::transform(std::begin(ode_spec_), std::end(ode_spec_),
-            //                std::begin(ode_eval_),
-            //                [](Dt_spec& dt_spec_){
-            //                    //! param_keys
-            //                    return move(dt_spec_.get_eval<Real>());
-            //                });
             std::transform(std::begin(ode_spec_), std::end(ode_spec_),
                            std::begin(ode_eval_),
                                //! param_keys
                            bind(&Dt_spec::get_eval<Real>, _1, Param_keys{}));
             return move(ode_eval_);
+        }
+
+        // !! ruzne ODE musi mit jednotne parametry!
+        void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
+                                    State& dx, const State& x, Time t) const
+        {
+            // ! neptat se v kazdem kroku
+            function<Real(const Ode_eval& ode_eval_, Dt_id dt_id_)> f;
+            if (has_param_t()) {
+                f = [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
+                    return eval_dt_step(ode_eval_[dt_id_], x, t);
+                };
+            }
+            else {
+                f = [this, &x](const Ode_eval& ode_eval_, Dt_id dt_id_){
+                    return eval_dt_step(ode_eval_[dt_id_], x);
+                };
+            }
+            std::transform(std::begin(codes_eval()), std::end(codes_eval()),
+                           std::begin(dt_ids_),
+                           std::begin(dx),
+                           f);
+        }
+
+        State Solver::solve_odes(Contexts contexts_) const
+        {
+            State x;
+            int size_ = size();
+            x.reserve(size_);
+            for (int i = 0; i < size_; i++) {
+                x.emplace_back(solve_ode(Context{contexts_._dt_ids[i],
+                                                 contexts_._t_bounds,
+                                                 contexts_._x_init,
+                                                }, i));
+            }
+            return move(x);
+        }
+
+        void Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
+                                   Real& dx, const State& x, Time t) const
+        {
+            dx = has_param_t(ode_eval_)
+                ? eval_dt_step(ode_eval_[dt_id_], x, t)
+                : eval_dt_step(ode_eval_[dt_id_], x);
+        }
+
+        Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
+                                  const State& x, Time t) const
+        {
+            Dt_eval_params params(x);
+            params.emplace_back(t);
+            return eval_dt_step(dt_eval_, move(params));
         }
 
         Solver::Context::Context(const string& input)
@@ -65,42 +106,21 @@ namespace SOS {
             _x_init = move(x_subexpr.flat_transform<Real>());
         }
 
-        // !! ruzne ODE musi mit jednotne parametry!
-        void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
-                                    State& dx, const State& x, Time t) const
+        ostream& operator <<(ostream& os, const Solver::Context& rhs)
         {
-            // ! neptat se v kazdem kroku
-            function<Real(const Ode_eval& ode_eval_, Dt_id dt_id_)> f;
-            if (has_param_t()) {
-                f = [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
-                    return eval_dt_step(ode_eval_[dt_id_], x, t);
-                };
-            }
-            else {
-                f = [this, &x](const Ode_eval& ode_eval_, Dt_id dt_id_){
-                    return eval_dt_step(ode_eval_[dt_id_], x);
-                };
-            }
-            std::transform(std::begin(codes_eval()), std::end(codes_eval()),
-                           std::begin(dt_ids_),
-                           std::begin(dx),
-                           f);
+            os << rhs._dt_id
+               << " ( " << rhs._t_bounds.first << rhs._t_bounds.second << " )"
+               << " (";
+            for (auto x : rhs._x_init) os << " " << x;
+            os << " )";
+            return os;
         }
 
-        void Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
-                                   Real& dx, const State& x, Time t) const
+        bool operator ==(const Solver::Context& lhs, const Solver::Context& rhs)
         {
-            dx = has_param_t(ode_eval_)
-                ? eval_dt_step(ode_eval_[dt_id_], x, t)
-                : eval_dt_step(ode_eval_[dt_id_], x);
-        }
-
-        Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
-                                  const State& x, Time t) const
-        {
-            Dt_eval_params params(x);
-            params.emplace_back(t);
-            return eval_dt_step(dt_eval_, move(params));
+            return lhs._dt_id == rhs._dt_id
+                && lhs._t_bounds == rhs._t_bounds
+                && lhs._x_init == rhs._x_init;
         }
     }
 }

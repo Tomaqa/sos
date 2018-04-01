@@ -2,14 +2,20 @@ C := gcc
 CPP := g++
 
 ROOT_DIR  := ./
-INCL_DIR  := $(ROOT_DIR)/include
-SRC_DIR   := $(ROOT_DIR)/src
-BUILD_DIR := $(ROOT_DIR)/build
-BIN_DIR   := $(ROOT_DIR)/bin
+INCL_DIR_SUFFIX  := include
+SRC_DIR_SUFFIX   := src
+BUILD_DIR_SUFFIX := build
+BIN_DIR_SUFFIX   := bin
+
+INCL_DIR  := $(ROOT_DIR)/$(INCL_DIR_SUFFIX)
+SRC_DIR   := $(ROOT_DIR)/$(SRC_DIR_SUFFIX)
+BUILD_DIR := $(ROOT_DIR)/$(BUILD_DIR_SUFFIX)
+BIN_DIR   := $(ROOT_DIR)/$(BIN_DIR_SUFFIX)
 
 TEST_DIR   := $(ROOT_DIR)/test
-TEST_SRC_DIR := $(TEST_DIR)/src
-TEST_BIN_DIR := $(TEST_DIR)/bin
+TEST_INCL_DIR := $(TEST_DIR)/$(INCL_DIR_SUFFIX)
+TEST_SRC_DIR := $(TEST_DIR)/$(SRC_DIR_SUFFIX)
+TEST_BIN_DIR := $(TEST_DIR)/$(BIN_DIR_SUFFIX)
 
 TOOLS_DIR := $(ROOT_DIR)/tools
 DOC_DIR   := $(ROOT_DIR)/doc
@@ -22,6 +28,7 @@ LDFLAGS := -Wl,--no-undefined
 FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
 CPPFLAGS := $(FLAGS) -std=c++14
 CFLAGS   := $(FLAGS) -std=gnu99
+TEST_FLAGS := -I $(TEST_INCL_DIR)
 
 ###################################################
 
@@ -54,6 +61,7 @@ CPP_SOURCES := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.cpp)
 C_SOURCES   := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.c)
 SOURCES := $(CPP_SOURCES) $(C_SOURCES)
 
+TEST_HEADERS := $(shell find $(TEST_INCL_DIR) $(FIND_FLAGS) *.hpp)
 TEST_SOURCES := $(shell find $(TEST_SRC_DIR)  $(FIND_FLAGS) *.cpp)
 
 CPP_OBJECTS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(CPP_SOURCES:.cpp=.o))
@@ -105,7 +113,7 @@ $(BIN_DIR)/%: ${OBJECTS} $(SRC_DIR)/%.cpp
 	${CPP} ${LDFLAGS} ${CPPFLAGS} ${LIBS} -o $@ $^
 
 $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
-	${CPP} ${LDFLAGS} ${CPPFLAGS} ${LIBS} -o $@ $^
+	${CPP} ${LDFLAGS} ${CPPFLAGS} ${TEST_FLAGS} ${LIBS} -o $@ $^
 
 
 ## Cleans object files and executables
@@ -113,6 +121,7 @@ $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
 # rm -fr $(BUILD_DIR)/* $(BIN_DIR)/*
 
 #####################################
+
 build/expr/eval.o: src/expr/eval.cpp include/expr/eval.hpp \
  include/expr.hpp include/sos.hpp include/expr.tpp include/expr/eval.tpp
 build/ode/solver.o: src/ode/solver.cpp include/ode/solver.hpp \

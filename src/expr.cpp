@@ -58,7 +58,7 @@ namespace SOS {
             add_new_place(Expr_token(oss.str()));
         }
 
-        simplify();
+        if (depth == 0) simplify_top();
     }
 
     Expr::Expr(initializer_list<Expr_place_ptr> list)
@@ -80,18 +80,30 @@ namespace SOS {
 
     Expr& Expr::simplify() noexcept
     {
-        if (empty()) return *this;
-        for (auto& e : *this) {
-            if (e->is_token()) continue;
-            auto& e_cast = ptr_to_expr(e);
-            if (e_cast.simplify().size() == 1) {
-                e = move(e_cast.front());
-            }
-        }
+        if (_is_simplified) return *this;
+        _is_simplified = true;
+        return simplify_rec();
+    }
+
+    Expr& Expr::simplify_top() noexcept
+    {
         if (size() == 1 && !cfront()->is_token()) {
             _places = move(to_expr(0)._places);
         }
         return *this;
+    }
+
+    Expr& Expr::simplify_rec() noexcept
+    {
+        if (empty()) return *this;
+        for (auto& e : *this) {
+            if (e->is_token()) continue;
+            auto& e_cast = ptr_to_expr(e);
+            if (e_cast.simplify_rec().size() == 1) {
+                e = move(e_cast.front());
+            }
+        }
+        return simplify_top();
     }
 
     Expr& Expr::to_binary(const Token& neutral)
@@ -103,6 +115,7 @@ namespace SOS {
         if (!cfront()->is_token()) {
             throw Error("First argument of each expression should be single token.");
         }
+        _is_binary = true;
         if (size() == 2) {
             add_new_place(Expr_token(neutral));
             std::swap(_places[1], _places[2]);
@@ -119,7 +132,24 @@ namespace SOS {
             if (e->is_token()) continue;
             ptr_to_expr(e).to_binary();
         }
-        _is_binary = true;
+        return *this;
+    }
+
+    Expr& Expr::flatten()
+    {
+        if (_is_flatten) return *this;
+        _is_flatten = true;
+        Places places;
+        places.reserve(size()*2);
+        for (auto& e : _places) {
+            if (e->is_token()) {
+                places.emplace_back(move(e));
+                continue;
+            }
+            auto& subexpr = ptr_to_expr(e).flatten();
+            move(subexpr.begin(), subexpr.end(), std::back_inserter(places));
+        }
+        _places = move(places);
         return *this;
     }
 }

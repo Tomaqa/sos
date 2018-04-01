@@ -3,11 +3,7 @@
 
 #include "sos.hpp"
 
-#include <functional>
 #include <regex>
-
-using std::function;
-using std::bind;
 
 using std::regex;
 using std::regex_match;
@@ -30,6 +26,10 @@ namespace SOS {
 
         friend ostream& operator <<(ostream& os, const Expr_place& rhs)
             { return (os << (string)rhs); }
+        friend bool operator ==(const Expr_place& lhs, const Expr_place& rhs)
+            { return (string)lhs == (string)rhs; }
+        friend bool operator !=(const Expr_place& lhs, const Expr_place& rhs)
+            { return !(lhs == rhs); }
     protected:
         template <typename T>
         static Expr_ptr_t<T> new_place(T&& place_)
@@ -71,7 +71,7 @@ namespace SOS {
 
         static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
 
-        Expr() : _is_binary(false) { }
+        Expr() = default;
         virtual ~Expr() = default;
         virtual Expr_place_ptr clone() const override
             { return new_place(Expr(*this)); }
@@ -108,15 +108,15 @@ namespace SOS {
         const Expr& cto_expr(int idx) const
             { return cptr_to_expr((*this)[idx]); }
 
+        Expr& simplify() noexcept;
+        Expr& to_binary(const Token& neutral = "0");
         bool is_flat() const
             { return std::all_of(cbegin(), cend(),
                                  bind(&Expr_place::is_token, _1)); }
-        void flatten();
+        Expr& flatten();
         template <typename Arg>
         Elems<Arg> flat_transform() const;
 
-        Expr& simplify() noexcept;
-        Expr& to_binary(const Token& neutral = "0");
         template <typename Arg>
         Eval<Arg> get_eval(typename Eval<Arg>::Param_keys param_keys_ = {})
             { return {to_binary(), move(param_keys_)}; }
@@ -164,8 +164,13 @@ namespace SOS {
         Expr& to_expr(int idx)
             { return ptr_to_expr((*this)[idx]); }
     private:
+        Expr& simplify_top() noexcept;
+        Expr& simplify_rec() noexcept;
+
         Places _places;
-        bool _is_binary;
+        bool _is_simplified{false};
+        bool _is_binary{false};
+        bool _is_flatten{false};
     };
 }
 

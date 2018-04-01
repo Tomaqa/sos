@@ -12,6 +12,7 @@
 #include <sstream>
 #include <memory>
 #include <algorithm>
+#include <functional>
 
 using std::move;
 using std::forward;
@@ -43,6 +44,9 @@ using std::make_shared;
 
 using std::for_each;
 using std::distance;
+
+using std::function;
+using std::bind;
 
 using namespace std::string_literals;
 

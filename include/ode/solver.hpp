@@ -5,8 +5,6 @@
 #include "expr.hpp"
 #include "expr/eval.hpp"
 
-#include <regex>
-
 namespace SOS {
     namespace ODE {
         class Solver {
@@ -39,9 +37,8 @@ namespace SOS {
                 { _step_size = step_size_; }
             void add_ode_spec(Ode_spec ode_spec_);
             virtual Real solve_ode(Context context_, Ode_id ode_id_ = 0) const = 0;
-            //
-            State solve_odes(Contexts contexts_) const;
             virtual State solve_unif_odes(Contexts contexts_) const = 0;
+            State solve_odes(Contexts contexts_) const;
         protected:
             using Dt_eval = Expr::Eval<Real>;
             using Ode_eval = vector<Dt_eval>;
@@ -83,16 +80,24 @@ namespace SOS {
 
         class Solver::Context {
         public:
+            Context(Dt_id dt_id_, Interval<Time> t_bounds_, State x_init_)
+                : _dt_id(dt_id_),
+                  _t_bounds(move(t_bounds_)),
+                  _x_init(move(x_init_)) { }
             Context(const string& input);
+
+            friend ostream& operator <<(ostream& os, const Context& rhs);
+            friend bool operator ==(const Context& lhs, const Context& rhs);
 
             Dt_id _dt_id;
             Interval<Time> _t_bounds;
             State _x_init;
         protected:
             const regex input_re{
-                "\\s*\\d+\\s*"s
-                + "\\((\\s*" + Expr::re_float + "){2}\\) *"
-                + "\\((\\s*" + Expr::re_float + ")+\\)\\s*"
+                "\\s*\\(?\\s*\\d+\\s*"s
+                + "\\((\\s*" + Expr::re_float + "\\s*){2}\\)\\s*"
+                + "\\((\\s*" + Expr::re_float + "\\s*)*\\)\\s*"
+                + "\\)?\\s*"
             };
             static constexpr size_t input_expr_size = 3;
         };

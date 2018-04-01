@@ -1,57 +1,58 @@
-#include "sos.hpp"
+#include "test.hpp"
 #include "expr.hpp"
 #include "expr/eval.hpp"
 
-using namespace SOS;
-
-template <typename Params, typename Output = string, typename Input = string>
-using TestCase = tuple<const Input, Params, const Output>;
-template <typename Params, typename Output = string, typename Input = string>
-using TestData = vector<TestCase<Params, Output, Input>>;
-
-template <typename Output = string>
-void test_case(const Output& expect, const Output& res)
-{
-    if (res == expect) return;
-    ostringstream oss1, oss2;
-    oss1 << expect;
-    oss2 << res;
-    throw Error("!! Mismatch: expected: '"s + oss1.str()
-                + "', got: '" + oss2.str() + "' !!");
-}
-
-template <typename Params, typename Output = string, typename Input = string>
-void test(TestData<Params, Output, Input>& tdata,
-          function<Output(const Input&, Params&)> f,
-          const string& msg = "")
-{
-    if (!msg.empty()) {
-        cout << "  " << string(msg.size()+16, '-') << "  " << endl;
-        cout << "// Testing " << msg << " ...   \\\\" << endl;
-    }
-    for (auto& t : tdata) {
-        const Input& input = get<0>(t);
-        Params& params = get<1>(t);
-        const Output& expect = get<2>(t);
-        const Output& res = f(input, params);
-        test_case(expect, res);
-    }
-    if (!msg.empty()) {
-        cout << "\\\\ Testing " << msg << " done. //" << endl;
-        cout << "  " << string(msg.size()+16, '-') << "  " << endl;
-        cout << endl;
-    }
-}
+using namespace Test;
 
 /////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
 
-using Params_expr = bool;
-string expr_res(const string& input, Params_expr& to_binary)
+using Params_expr = pair<bool, bool>;
+string expr_res(const string& input, Params_expr& params)
 {
     Expr expr(input);
-    if (to_binary) expr.to_binary();
+    if (params.first) expr.simplify();
+    if (params.second) expr.to_binary();
+    cout << input << " -> " << (string)expr << endl;
     return move((string)expr);
+}
+
+/////////////////////////////////////////////////////////////////
+
+bool is_flat_res(const string& input, Dummy&)
+{
+    return Expr(input).is_flat();
+}
+
+string flatten_res(const string& input, Dummy&)
+{
+    Expr expr(input);
+    Expr expr2(expr);
+    if (!expr.flatten().is_flat()) {
+        throw Error("'is_flat()' is false after 'flatten()': '"s
+                    + (string)expr + "'");
+    }
+    if (!expr2.simplify().flatten().is_flat()) {
+        throw Error("'is_flat()' is false after 'simplify().flatten()': '"s
+                    + (string)expr2 + "'");
+    }
+    if (expr != expr2) {
+        throw Error("Flatten versions with and without 'simplify() differ: '"s
+                    + (string)expr + "' != '"
+                    + (string)expr2 + "'");
+    }
+    cout << input << " -> " << (string)expr << endl;
+    return move((string)expr);
+}
+
+/////////////////////////////////////////////////////////////////
+
+template <typename Arg>
+using Elems = Expr::Elems<Arg>;
+
+template <typename Arg>
+Elems<Arg> flat_trans_res(const string& input, Dummy&)
+{
+    return Expr(input).flatten().flat_transform<Arg>();
 }
 
 /////////////////////////////////////////////////////////////////
@@ -123,23 +124,56 @@ Arg expr_get_eval_res(const string& input, Params_eval<Arg, Param_values>& param
 int main(int, const char*[])
 {
     TestData<Params_expr> expr_data = {
-        {"",                                        false,      "( )",                                                                             },
-        {"  ",                                      false,      "( )",                                                                             },
-        {" 1 ",                                     false,      "( 1 )",                                                                           },
-        {"1 2 3",                                   false,      "( 1 2 3 )",                                                                       },
-        {"5  1  (-(+ abc 1) 1 2 (- 1))",            false,      "( 5 1 ( - ( + abc 1 ) 1 2 ( - 1 ) ) )",                                           },
-        {"((()))",                                  false,      "( )",                                                                             },
-        {"0(1(2(3)4)5)6",                           false,      "( 0 ( 1 ( 2 3 4 ) 5 ) 6 )",                                                       },
-        {"1 (+ 2 (3))",                             false,      "( 1 ( + 2 3 ) )",                                                                 },
-        {"(1) (+ 2 (3))",                           false,      "( 1 ( + 2 3 ) )",                                                                 },
-        {" (1 2 3)",                                false,      "( 1 2 3 )",                                                                       },
-        {" ((1) 2) ( ( 3) )",                       false,      "( ( 1 2 ) 3 )",                                                                   },
-        {"+ 1 2",                                   true,       "( + 1 2 )",                                                                       },
-        {"+ 1 2 3",                                 true,       "( + 1 ( + 2 3 ) )",                                                               },
-        {"+ 1 2 3 4 5",                             true,       "( + 1 ( + 2 ( + 3 ( + 4 5 ) ) ) )",                                               },
-        {"* (+ 1 2 3) (+ 4 5 6) (+ 7 8 9)",         true,       "( * ( + 1 ( + 2 3 ) ) ( * ( + 4 ( + 5 6 ) ) ( + 7 ( + 8 9 ) ) ) )",               },
-        {"+ 1",                                     true,       "( + 0 1 )",                                                                       },
-        {"+ 1 2 (- 3) 4",                           true,       "( + 1 ( + 2 ( + ( - 0 3 ) 4 ) ) )",                                               },
+        {"",                                        {true, false},      "( )",                                                                     },
+        {"  ",                                      {true, false},      "( )",                                                                     },
+        {" 1 ",                                     {true, false},      "( 1 )",                                                                   },
+        {"1 2 3",                                   {true, false},      "( 1 2 3 )",                                                               },
+        {"5  1  (-(+ abc 1) 1 2 (- 1))",            {true, false},      "( 5 1 ( - ( + abc 1 ) 1 2 ( - 1 ) ) )",                                   },
+        {"()",                                      {true, false},      "( )",                                                                     },
+        {"()",                                      {false, false},     "( )",                                                                     },
+        {"(())",                                    {true, false},      "( )",                                                                     },
+        {"(())",                                    {false, false},     "( ( ) )",                                                                 },
+        {"((()))",                                  {true, false},      "( )",                                                                     },
+        {"((()))",                                  {false, false},     "( ( ( ) ) )",                                                             },
+        {"0(1(2(3)4)5)6",                           {true, false},      "( 0 ( 1 ( 2 3 4 ) 5 ) 6 )",                                               },
+        {"0(1(2(3)4)5)6",                           {false, false},      "( 0 ( 1 ( 2 ( 3 ) 4 ) 5 ) 6 )",                                          },
+        {"1 (+ 2 (3))",                             {true, false},      "( 1 ( + 2 3 ) )",                                                         },
+        {"(1) (+ 2 (3))",                           {true, false},      "( 1 ( + 2 3 ) )",                                                         },
+        {"(1) (+ 2 (3))",                           {false, false},     "( ( 1 ) ( + 2 ( 3 ) ) )",                                                 },
+        {" (1 2 3)",                                {true, false},      "( 1 2 3 )",                                                               },
+        {" (1 2 3)",                                {false, false},     "( 1 2 3 )",                                                               },
+        {" ((1) 2) ( ( 3) )",                       {true, false},      "( ( 1 2 ) 3 )",                                                           },
+        {" ((1) 2) ( ( 3) )",                       {false, false},     "( ( ( 1 ) 2 ) ( ( 3 ) ) )",                                               },
+        {"+ 1 2",                                   {true, true},       "( + 1 2 )",                                                               },
+        {"+ 1 2 3",                                 {true, true},       "( + 1 ( + 2 3 ) )",                                                       },
+        {"+ 1 2 3 4 5",                             {true, true},       "( + 1 ( + 2 ( + 3 ( + 4 5 ) ) ) )",                                       },
+        {"* (+ 1 2 3) (+ 4 5 6) (+ 7 8 9)",         {true, true},       "( * ( + 1 ( + 2 3 ) ) ( * ( + 4 ( + 5 6 ) ) ( + 7 ( + 8 9 ) ) ) )",       },
+        {"+ 1",                                     {true, true},       "( + 0 1 )",                                                               },
+        {"+ 1 2 (- 3) 4",                           {true, true},       "( + 1 ( + 2 ( + ( - 0 3 ) 4 ) ) )",                                       },
+    };
+
+    TestData<Dummy, bool> is_flat_data = {
+        {"",                                           {},                                                                   true,                 },
+        {"+ 1 2",                                      {},                                                                   true,                 },
+        {"+ x 2 5 1 +",                                {},                                                                   true,                 },
+        {"+ x (2) 5 1 +",                              {},                                                                   false,                },
+        {"+ (x 2) 5 1 +",                              {},                                                                   false,                },
+    };
+
+    TestData<> flatten_data = {
+        {"",                                                  {},                      "( )",                                                      },
+        {"+ 1 2",                                             {},                      "( + 1 2 )",                                                },
+        {"+ (x (2)) 5 1 +",                                   {},                      "( + x 2 5 1 + )",                                          },
+        {"5  1  (-(+ abc 1) 1 2 (- 1))",                      {},                      "( 5 1 - + abc 1 1 2 - 1 )",                                },
+        {"0(1(2(3)4)5)6",                                     {},                      "( 0 1 2 3 4 5 6 )",                                        },
+        {"* (+ 1 2 3) (+ 4 5 6) (+ 7 8 9)",                   {},                      "( * + 1 2 3 + 4 5 6 + 7 8 9 )",                            },
+    };
+
+    TestData<Dummy, Elems<double>> flat_trans_data = {
+        {"",                                                  {},                      {},                                                         },
+        {"1 2",                                               {},                      {1, 2},                                                     },
+        {"1 x",                                               {},                      {1, 0},                                                     },
+        {"0 (1 2 3) (4 5 6) (7 8 9)",                         {},                      {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},                             },
     };
 
     TestData<Params_eval<double>, double> eval_data_double = {
@@ -162,32 +196,29 @@ int main(int, const char*[])
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
-    try {
-        test<Params_expr, string, string>(expr_data, expr_res, "building of expressions");
+    test<Params_expr, string, string>(expr_data, expr_res, "building of expressions");
 
-        string eval_msg = "evaluation of expressions via evaluation objects";
-        test<Params_eval<double>,
-             double, string>
-             (eval_data_double, eval_res<double>, eval_msg);
-        test<Params_eval<double, initializer_list<double>>,
-             double, string>
-             (eval_data_double_init, eval_res<double, initializer_list<double>>, eval_msg);
+    test<Dummy, bool, string>(is_flat_data, is_flat_res, "checking of flat state");
+    test<Dummy, string, string>(flatten_data, flatten_res, "flattening the expressions");
 
-        string expr_get_eval_msg = "evaluation of expressions from within expression objects";
-        test<Params_eval<double>,
-             double, string>
-             (eval_data_double, expr_get_eval_res<double>, expr_get_eval_msg);
-        test<Params_eval<double, initializer_list<double>>,
-             double, string>
-             (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
+    test<Dummy, Elems<double>, string>(flat_trans_data, flat_trans_res<double>, "transforming expressions to arrays of values");
 
-    }
-    catch (const Error& e) {
-        cerr << e << endl;
-        throw;
-    }
+    string eval_msg = "evaluation of expressions via evaluation objects";
+    test<Params_eval<double>,
+         double, string>
+         (eval_data_double, eval_res<double>, eval_msg);
+    test<Params_eval<double, initializer_list<double>>,
+         double, string>
+         (eval_data_double_init, eval_res<double, initializer_list<double>>, eval_msg);
+
+    string expr_get_eval_msg = "evaluation of expressions from within expression objects";
+    test<Params_eval<double>,
+         double, string>
+         (eval_data_double, expr_get_eval_res<double>, expr_get_eval_msg);
+    test<Params_eval<double, initializer_list<double>>,
+         double, string>
+         (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
 
     cout << endl << "Success." << endl;
-
     return 0;
 }
