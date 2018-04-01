@@ -3,6 +3,11 @@
 
 #include "expr.hpp"
 
+#include <functional>
+
+using std::function;
+using std::bind;
+
 namespace SOS {
     template <typename Arg>
     class Expr::Eval {

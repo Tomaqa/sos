@@ -7,10 +7,11 @@ namespace SOS {
     namespace ODE {
         class Odeint : public Solver {
         public:
-            using Times  = vector<Time>;
-            using States = vector<State>;
-
-            virtual State solve(Context context_) const override final;
+            // virtual State solve(Context context_) const override final;
+            virtual Real solve_ode(Ode_id ode_id_, Context context_)
+                const override final;
+            virtual State solve_odes(Contexts contexts_)
+                const override final;
         };
     }
 }

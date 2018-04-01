@@ -10,7 +10,6 @@
 #include <iostream>
 #include <sstream>
 #include <memory>
-#include <iterator>
 #include <algorithm>
 
 using std::move;
@@ -42,7 +41,6 @@ using std::shared_ptr;
 using std::make_shared;
 
 using std::for_each;
-using std::iterator;
 using std::distance;
 
 using namespace std::string_literals;

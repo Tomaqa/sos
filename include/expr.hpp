@@ -3,16 +3,10 @@
 
 #include "sos.hpp"
 
-#include <regex>
-#include <functional>
+// #include <regex>
 
-using std::regex;
-using std::regex_match;
-
-using std::function;
-using std::bind;
-
-using namespace std::placeholders;
+// using std::regex;
+// using std::regex_match;
 
 namespace SOS {
     class Expr_place {
@@ -22,7 +16,7 @@ namespace SOS {
         using Expr_ptr_t = unique_ptr<T>;
         using Expr_place_ptr = Expr_ptr_t<Expr_place>;
 
-        static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
+        // static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
 
         virtual ~Expr_place() = default;
         virtual Expr_place_ptr clone() const = 0;
