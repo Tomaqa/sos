@@ -49,16 +49,18 @@ namespace SOS {
                            f);
         }
 
-        State Solver::solve_odes(Contexts contexts_) const
+        // State Solver::solve_odes(Contexts contexts_) const
+        State Solver::solve_odes(Dt_ids dt_ids_, Context context_) const
         {
             State x;
             int size_ = size();
             x.reserve(size_);
             for (int i = 0; i < size_; i++) {
-                x.emplace_back(solve_ode(Context{contexts_._dt_ids[i],
-                                                 contexts_._t_bounds,
-                                                 contexts_._x_init,
-                                                }, i));
+                // x.emplace_back(solve_ode(Context{contexts_._dt_ids[i],
+                //                                  contexts_._t_bounds,
+                //                                  contexts_._x_init,
+                //                                 }, i));
+                x.emplace_back(solve_ode(dt_ids_[i], context_, i));
             }
             return move(x);
         }
@@ -81,35 +83,50 @@ namespace SOS {
 
         Solver::Context::Context(const string& input)
         {
-            if (!regex_match(input, input_re)) {
-                throw Error("Invalid format of input context: " + input);
-            }
+            const Error error("Invalid format of input context: " + input);
+            if (!regex_match(input, input_re)) throw error;
             Expr expr(input);
+            if (expr.size() != input_expr_size) throw error;
 
             // ! redundantni, jen pro zacatek
-            assert((expr.size() == input_expr_size));
-            assert((expr[0]->is_token()));
-            assert((!expr[1]->is_token() && expr.cto_expr(1).size() == 2));
-            assert((!expr[2]->is_token()));
+            // assert((expr[0]->is_token()));
+            // assert((!expr[1]->is_token() && expr.cto_expr(1).size() == 2));
+            // assert((!expr[2]->is_token()));
+            assert((!expr[0]->is_token() && expr.cto_expr(0).size() == 2));
+            assert((!expr[1]->is_token()));
 
-            const Expr_token& id_token = expr.cto_token(0);
-            assert((id_token.is_value<Dt_id>()));
-            id_token.get_value_check<Dt_id>(_dt_id);
+            // const Expr_token& id_token = expr.cto_token(0);
+            // assert((id_token.is_value<Dt_id>()));
+            // id_token.get_value_check<Dt_id>(_dt_id);
 
-            const Expr& t_subexpr = expr.cto_expr(1);
+            // const Expr& t_subexpr = expr.cto_expr(1);
+            const Expr& t_subexpr = expr.cto_expr(0);
             assert((t_subexpr.is_flat()));
             _t_bounds = make_pair(t_subexpr.cto_token(0).get_value<Real>(),
                                   t_subexpr.cto_token(1).get_value<Real>());
 
-            const Expr& x_subexpr = expr.cto_expr(2);
+            // const Expr& x_subexpr = expr.cto_expr(2);
+            const Expr& x_subexpr = expr.cto_expr(1);
             assert((x_subexpr.is_flat()));
             _x_init = move(x_subexpr.flat_transform<Real>());
+
+            check_values();
+        }
+
+        void Solver::Context::check_values() const
+        {
+            if (_t_bounds.first > _t_bounds.second) {
+                throw Error("Invalid time interval: "s
+                            + to_string(_t_bounds.first) + ", "
+                            + to_string(_t_bounds.second));
+            }
         }
 
         ostream& operator <<(ostream& os, const Solver::Context& rhs)
         {
-            os << rhs._dt_id
-               << " ( " << rhs._t_bounds.first << rhs._t_bounds.second << " )"
+            // os << rhs._dt_id
+               // << " ( " << rhs._t_bounds.first << rhs._t_bounds.second << " )"
+            os << "( " << rhs._t_bounds.first << rhs._t_bounds.second << " )"
                << " (";
             for (auto x : rhs._x_init) os << " " << x;
             os << " )";
@@ -118,8 +135,9 @@ namespace SOS {
 
         bool operator ==(const Solver::Context& lhs, const Solver::Context& rhs)
         {
-            return lhs._dt_id == rhs._dt_id
-                && lhs._t_bounds == rhs._t_bounds
+            // return lhs._dt_id == rhs._dt_id
+                // && lhs._t_bounds == rhs._t_bounds
+            return lhs._t_bounds == rhs._t_bounds
                 && lhs._x_init == rhs._x_init;
         }
     }
