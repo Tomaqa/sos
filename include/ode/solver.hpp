@@ -5,6 +5,8 @@
 #include "expr.hpp"
 #include "expr/eval.hpp"
 
+#include <regex>
+
 namespace SOS {
     namespace ODE {
         class Solver {
@@ -17,14 +19,12 @@ namespace SOS {
             using Dt_ids = vector<Dt_id>;
             using Param_keys = Expr::Eval<Real>::Param_keys;
 
-            struct Context;
+            class Context;
             struct Contexts;
 
             /// KONVENCE: 1. parametr je samotna funkce, posledni parametr je cas
 
             Solver() = default;
-            // Solver(Odes_spec&& odes_spec_);
-            // Solver(Ode_spec&& ode_spec_) : _odes_spec{ode_spec_} { }
             Solver(Odes_spec odes_spec_);
             Solver(Ode_spec ode_spec_) : Solver(Odes_spec{move(ode_spec_)}) { }
             virtual ~Solver() = default;
@@ -38,14 +38,10 @@ namespace SOS {
             void set_step_size(Time step_size_) noexcept
                 { _step_size = step_size_; }
             void add_ode_spec(Ode_spec ode_spec_);
-            // rozlisit pripady kdy chci resit celou soustavu rovnic nebo jen dilci
-                // - teoreticky mohou mit ruzne casove intervaly
-            // virtual State solve(Context context_) const = 0;
-            // State solve(const string& input) const;
-            virtual Real solve_ode(Ode_id ode_id_, Context context_) const = 0;
-            // Real solve_ode(Ode_id ode_id_, const string& input) const;
-            virtual State solve_odes(Contexts contexts_) const = 0;
-            // Real solve_odes(const string& input) const;
+            virtual Real solve_ode(Context context_, Ode_id ode_id_ = 0) const = 0;
+            //
+            State solve_odes(Contexts contexts_) const;
+            virtual State solve_unif_odes(Contexts contexts_) const = 0;
         protected:
             using Dt_eval = Expr::Eval<Real>;
             using Ode_eval = vector<Dt_eval>;
@@ -61,12 +57,8 @@ namespace SOS {
                 { return _odes_eval; }
 
             Ode_eval create_ode_eval(Ode_spec& ode_spec_);
-            // void eval_ode(Ode_id ode_id,
-            //               State& dx, const State& x, Time t) const;
-            // State eval_ode(Ode_id ode_id, const State& x, Time t) const
-            //     { State dx; eval_ode(ode_id, dx, x, t); return move(dx); }
-            void eval_odes_step(const Dt_ids& dt_ids_,
-                                State& dx, const State& x, Time t) const;
+            void eval_unif_odes_step(const Dt_ids& dt_ids_,
+                                     State& dx, const State& x, Time t) const;
             void eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
                                Real& dx, const State& x, Time t) const;
         private:
@@ -89,11 +81,20 @@ namespace SOS {
             Odes_eval _odes_eval;
         };
 
-        struct Solver::Context {
-            // Ode_id _ode_id;
+        class Solver::Context {
+        public:
+            Context(const string& input);
+
             Dt_id _dt_id;
             Interval<Time> _t_bounds;
             State _x_init;
+        protected:
+            const regex input_re{
+                "\\s*\\d+\\s*"s
+                + "\\((\\s*" + Expr::re_float + "){2}\\) *"
+                + "\\((\\s*" + Expr::re_float + ")+\\)\\s*"
+            };
+            static constexpr size_t input_expr_size = 3;
         };
 
         struct Solver::Contexts {

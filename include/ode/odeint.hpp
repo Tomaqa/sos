@@ -7,11 +7,15 @@ namespace SOS {
     namespace ODE {
         class Odeint : public Solver {
         public:
-            // virtual State solve(Context context_) const override final;
-            virtual Real solve_ode(Ode_id ode_id_, Context context_)
+            virtual Real solve_ode(Context context_, Ode_id ode_id_ = 0)
                 const override final;
-            virtual State solve_odes(Contexts contexts_)
+            virtual State solve_unif_odes(Contexts contexts_)
                 const override final;
+        protected:
+            using Integrate_f = function<void(const State&, State&, Time)>;
+
+            size_t integrate(Integrate_f f, State& x,
+                             Interval<Time> t_bounds_) const;
         };
     }
 }

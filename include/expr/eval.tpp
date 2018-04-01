@@ -40,10 +40,10 @@ namespace SOS {
         if (expr_.size() != 3) {
             throw Error("Expression is not binary.");
         }
-        if (!expr_.cfirst()->is_token()) {
+        if (!expr_.cfront()->is_token()) {
             throw Error("First argument of expression must be token.");
         }
-        const F_key key_ = static_cast<Expr_token&>(*expr_.cfirst()).token();
+        const F_key key_ = expr_.cto_token(0).token();
         if (!bin_fs.includes(key_)) {
             throw Error("First argument of expression "
                         "is not operation token: "s
@@ -60,14 +60,14 @@ namespace SOS {
     {
         const auto& place_ = expr_[idx+1];
         if (!place_->is_token()) {
-            const auto& subexpr = static_cast<Expr&>(*place_);
+            const auto& subexpr = cptr_to_expr(place_);
             Oper_ptr& oper_ptr_ = get<idx>(_oper_ptrs);
             oper_ptr_ = new_oper(Oper(_param_keys_l, _param_values_l, subexpr));
             return oper_f(oper_ptr_);
         }
-        const auto& token_ = static_cast<Expr_token&>(*place_);
+        const auto& token_ = cptr_to_token(place_);
         Arg arg;
-        if (token_.value(arg)) {
+        if (token_.get_value_check(arg)) {
             return arg_f(arg);
         }
         Param_key key_ = token_.token();

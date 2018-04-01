@@ -3,10 +3,7 @@
 
 #include "expr.hpp"
 
-#include <functional>
-
-using std::function;
-using std::bind;
+// ! <numeric> accumulate
 
 namespace SOS {
     template <typename Arg>

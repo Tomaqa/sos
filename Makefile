@@ -114,9 +114,12 @@ $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
 
 #####################################
 build/expr/eval.o: src/expr/eval.cpp include/expr/eval.hpp \
- include/expr.hpp include/sos.hpp include/expr/eval.tpp
+ include/expr.hpp include/sos.hpp include/expr.tpp include/expr/eval.tpp
 build/ode/solver.o: src/ode/solver.cpp include/ode/solver.hpp \
- include/ode.hpp include/sos.hpp include/expr.hpp
+ include/ode.hpp include/sos.hpp include/expr.hpp include/expr.tpp \
+ include/expr/eval.hpp include/expr/eval.tpp
 build/ode/odeint.o: src/ode/odeint.cpp include/ode/odeint.hpp \
- include/ode/solver.hpp include/ode.hpp include/sos.hpp
-build/expr.o: src/expr.cpp include/expr.hpp include/sos.hpp
+ include/ode/solver.hpp include/ode.hpp include/sos.hpp include/expr.hpp \
+ include/expr.tpp include/expr/eval.hpp include/expr/eval.tpp
+build/expr.o: src/expr.cpp include/expr.hpp include/sos.hpp \
+ include/expr.tpp

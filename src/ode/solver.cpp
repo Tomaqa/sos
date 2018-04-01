@@ -2,16 +2,18 @@
 
 namespace SOS {
     namespace ODE {
-        // Solver::Solver(Odes_spec&& odes_spec_)
         Solver::Solver(Odes_spec odes_spec_)
             : _odes_spec(move(odes_spec_)),
               _odes_eval(size())
         {
+            // std::transform(std::begin(_odes_spec), std::end(_odes_spec),
+            //                std::begin(_odes_eval),
+            //                [this](Ode_spec& ode_spec_){
+            //                    return move(create_ode_eval(ode_spec_));
+            //                });
             std::transform(std::begin(_odes_spec), std::end(_odes_spec),
                            std::begin(_odes_eval),
-                           [this](Ode_spec& ode_spec_){
-                               return move(create_ode_eval(ode_spec_));
-                           });
+                           bind(&Solver::create_ode_eval, this, _1));
         }
 
         void Solver::add_ode_spec(Ode_spec ode_spec_)
@@ -23,53 +25,48 @@ namespace SOS {
         Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_)
         {
             Ode_eval ode_eval_(ode_spec_.size());
+            // std::transform(std::begin(ode_spec_), std::end(ode_spec_),
+            //                std::begin(ode_eval_),
+            //                [](Dt_spec& dt_spec_){
+            //                    //! param_keys
+            //                    return move(dt_spec_.get_eval<Real>());
+            //                });
             std::transform(std::begin(ode_spec_), std::end(ode_spec_),
                            std::begin(ode_eval_),
-                           [](Dt_spec& dt_spec_){
                                //! param_keys
-                               return move(dt_spec_.get_eval<Real>());
-                           });
+                           bind(&Dt_spec::get_eval<Real>, _1, Param_keys{}));
             return move(ode_eval_);
         }
 
-        // State Solver::solve(const string& input) const
-        // {
-        //     // regex re("\\s*\\d+\\s*\\((\\s*"s
-        //     //          + Expr::re_float + "){2}\\) *\\((\\s*"
-        //     //          + Expr::re_float + ")+\\)\\s*");
-        //     // if (!regex_match(input, re)) {
-        //     //     throw Error("Invalid format of input context: " + input);
-        //     // }
+        Solver::Context::Context(const string& input)
+        {
+            if (!regex_match(input, input_re)) {
+                throw Error("Invalid format of input context: " + input);
+            }
+            Expr expr(input);
 
-        //     Ode_id ode_id;
-        //     Interval<Time> t_bounds;
+            // ! redundantni, jen pro zacatek
+            assert((expr.size() == input_expr_size));
+            assert((expr[0]->is_token()));
+            assert((!expr[1]->is_token() && expr.cto_expr(1).size() == 2));
+            assert((!expr[2]->is_token()));
 
-        //     string str;
-        //     istringstream iss(input);
+            const Expr_token& id_token = expr.cto_token(0);
+            assert((id_token.is_value<Dt_id>()));
+            id_token.get_value_check<Dt_id>(_dt_id);
 
-        //     iss >> ode_id;
-        //     // Expr::flat_extract_braces(iss) >> t_bounds.first >> t_bounds.second;
-        //     // iss = Expr::flat_extract_braces(iss);
-        //     // State x_init{std::istream_iterator<Real>{iss},
-        //                  // std::istream_iterator<Real>{}};
-        //     State x_init{};
+            const Expr& t_subexpr = expr.cto_expr(1);
+            assert((t_subexpr.is_flat()));
+            _t_bounds = make_pair(t_subexpr.cto_token(0).get_value<Real>(),
+                                  t_subexpr.cto_token(1).get_value<Real>());
 
-        //     return solve({ode_id, t_bounds, x_init});
-        // }
-
-        // void Solver::eval_ode(Ode_id ode_id,
-        //                       State& dx, const State& x, Time t) const
-        // {
-        //     const auto& ode_eval_ = code_eval(ode_id);
-        //     std::transform(std::begin(ode_eval_), std::end(ode_eval_),
-        //                    std::begin(dx),
-        //                   [this, &x, t](const Dt_eval& dt_eval_){
-        //                       return eval_dt(dt_eval_, x, t);
-        //                   });
-        // }
+            const Expr& x_subexpr = expr.cto_expr(2);
+            assert((x_subexpr.is_flat()));
+            _x_init = move(x_subexpr.flat_transform<Real>());
+        }
 
         // !! ruzne ODE musi mit jednotne parametry!
-        void Solver::eval_odes_step(const Dt_ids& dt_ids_,
+        void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
                                     State& dx, const State& x, Time t) const
         {
             // ! neptat se v kazdem kroku

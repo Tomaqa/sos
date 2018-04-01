@@ -3,10 +3,16 @@
 
 #include "sos.hpp"
 
-// #include <regex>
+#include <functional>
+#include <regex>
 
-// using std::regex;
-// using std::regex_match;
+using std::function;
+using std::bind;
+
+using std::regex;
+using std::regex_match;
+
+using namespace std::placeholders;
 
 namespace SOS {
     class Expr_place {
@@ -15,8 +21,6 @@ namespace SOS {
         template <typename T>
         using Expr_ptr_t = unique_ptr<T>;
         using Expr_place_ptr = Expr_ptr_t<Expr_place>;
-
-        // static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
 
         virtual ~Expr_place() = default;
         virtual Expr_place_ptr clone() const = 0;
@@ -41,11 +45,14 @@ namespace SOS {
 
         const Token& token() const { return _token; }
         template <typename Arg>
-        bool value(Arg& arg) const
+        bool get_value_check(Arg& arg) const
             { istringstream iss(_token); return (bool)(iss >> arg); }
         template <typename Arg>
+        Arg get_value() const
+            { Arg arg; get_value_check(arg); return arg; }
+        template <typename Arg>
         bool is_value() const
-            { Arg v; return value(v); }
+            { Arg v; return get_value_check(v); }
 
         virtual bool is_token() const noexcept override final
             { return true; }
@@ -59,6 +66,10 @@ namespace SOS {
     public:
         template <typename Arg>
         class Eval;
+        template <typename Arg>
+        using Elems = vector<Arg>;
+
+        static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
 
         Expr() : _is_binary(false) { }
         virtual ~Expr() = default;
@@ -80,13 +91,29 @@ namespace SOS {
         bool empty() const noexcept { return size() == 0; }
         const Expr_place_ptr& operator [](int idx) const
             { return _places[idx]; }
-        const Expr_place_ptr& cfirst() const { return (*this)[0]; }
+        Expr_place_ptr& operator [](int idx)
+            { return _places[idx]; }
+        const Expr_place_ptr& cfront() const { return _places.front(); }
+        const Expr_place_ptr& cback() const { return _places.back(); }
+        Expr_place_ptr& front() { return _places.front(); }
+        Expr_place_ptr& back() { return _places.back(); }
         const auto cbegin() const { return std::cbegin(_places); }
         const auto cend() const { return std::cend(_places); }
         const auto begin() const { return std::begin(_places); }
         const auto end() const { return std::end(_places); }
         auto begin() { return std::begin(_places); }
         auto end() { return std::end(_places); }
+        const Expr_token& cto_token(int idx) const
+            { return cptr_to_token((*this)[idx]); }
+        const Expr& cto_expr(int idx) const
+            { return cptr_to_expr((*this)[idx]); }
+
+        bool is_flat() const
+            { return std::all_of(cbegin(), cend(),
+                                 bind(&Expr_place::is_token, _1)); }
+        void flatten();
+        template <typename Arg>
+        Elems<Arg> flat_transform() const;
 
         Expr& simplify() noexcept;
         Expr& to_binary(const Token& neutral = "0");
@@ -113,7 +140,7 @@ namespace SOS {
             typename Eval<Arg>::Param_keys param_keys_ = {}) const
             { return cget_eval<Arg>(move(param_keys_))(move(param_values_)); }
     protected:
-        using Places = vector<Expr_place_ptr>;
+        using Places = Elems<Expr_place_ptr>;
 
         Expr(istringstream& iss, int depth = 0);
         Expr(istringstream&& iss) : Expr(iss) { }
@@ -124,13 +151,24 @@ namespace SOS {
         template <typename T>
         void add_new_place(T&& place_)
             { add_place_ptr(new_place(forward<T>(place_))); }
-        Expr_place_ptr& operator [](int idx)
-            { return _places[idx]; }
-        Expr_place_ptr& first() { return (*this)[0]; }
+        static const Expr_token& cptr_to_token(const Expr_place_ptr& place_ptr)
+            { return static_cast<Expr_token&>(*place_ptr); }
+        static const Expr& cptr_to_expr(const Expr_place_ptr& place_ptr)
+            { return static_cast<Expr&>(*place_ptr); }
+        static Expr_token& ptr_to_token(Expr_place_ptr& place_ptr)
+            { return static_cast<Expr_token&>(*place_ptr); }
+        static Expr& ptr_to_expr(Expr_place_ptr& place_ptr)
+            { return static_cast<Expr&>(*place_ptr); }
+        Expr_token& to_token(int idx)
+            { return ptr_to_token((*this)[idx]); }
+        Expr& to_expr(int idx)
+            { return ptr_to_expr((*this)[idx]); }
     private:
         Places _places;
         bool _is_binary;
     };
 }
+
+#include "expr.tpp"
 
 #endif // ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430

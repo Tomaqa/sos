@@ -3,6 +3,7 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <cassert>
 
 #include <string>
 #include <vector>
@@ -46,11 +47,6 @@ using std::distance;
 using namespace std::string_literals;
 
 namespace SOS {
-    // template <class U, class T,
-    // template <typename T, typename U,
-        // class = std::enable_if_t<std::is_same<std::decay_t<T>, U>::value, T>>
-    // using Limit = T;
-
     class Error {
     public:
         Error(const string& msg_ = "") : _msg(msg_) { }

@@ -83,13 +83,13 @@ namespace SOS {
         if (empty()) return *this;
         for (auto& e : *this) {
             if (e->is_token()) continue;
-            auto& e_cast = static_cast<Expr&>(*e);
+            auto& e_cast = ptr_to_expr(e);
             if (e_cast.simplify().size() == 1) {
-                e = move(e_cast.first());
+                e = move(e_cast.front());
             }
         }
-        if (size() == 1 && !cfirst()->is_token()) {
-            _places = move(static_cast<Expr&>(*first())._places);
+        if (size() == 1 && !cfront()->is_token()) {
+            _places = move(to_expr(0)._places);
         }
         return *this;
     }
@@ -100,7 +100,7 @@ namespace SOS {
         if (size() <= 1) {
             throw Error("Expression has not at least 2 arguments.");
         }
-        if (!cfirst()->is_token()) {
+        if (!cfront()->is_token()) {
             throw Error("First argument of each expression should be single token.");
         }
         if (size() == 2) {
@@ -108,7 +108,7 @@ namespace SOS {
             std::swap(_places[1], _places[2]);
         }
         else if (size() > 3) {
-            Expr subexpr{cfirst()->clone()};
+            Expr subexpr{cfront()->clone()};
             for (auto&& it = begin()+2, eit = end(); it != eit; ++it) {
                 subexpr.add_place_ptr(move(*it));
             }
@@ -117,8 +117,7 @@ namespace SOS {
         }
         for (auto& e : *this) {
             if (e->is_token()) continue;
-            auto& e_cast = static_cast<Expr&>(*e);
-            e_cast.to_binary();
+            ptr_to_expr(e).to_binary();
         }
         _is_binary = true;
         return *this;
