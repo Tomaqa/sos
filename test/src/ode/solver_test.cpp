@@ -8,7 +8,7 @@ using Context = Solver::Context;
 
 /////////////////////////////////////////////////////////////////
 
-Context context_res(const string& input, Dummy&)
+Context context_res(const string& input, bool, Dummy&)
 {
     return Context(input);
 }
@@ -22,7 +22,7 @@ Context context_res(const string& input, Dummy&)
 
 int main(int, const char*[])
 {
-    TestData<Dummy, Context> context_data = {
+    Test_data<Dummy, Context> context_data = {
         {"( (0 10) (0))",                                            {},        {{0, 10}, {0}}                                               },
         {" ( (0 10) (0)) ",                                          {},        {{0, 10}, {0}}                                               },
         {" ((0 10) (0) ) ",                                          {},        {{0, 10}, {0}}                                               },

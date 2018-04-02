@@ -58,8 +58,10 @@ namespace SOS {
     public:
         Error(const string& msg_ = "") : _msg(msg_) { }
 
+        explicit operator string () const
+            { return _msg; }
         friend ostream& operator <<(ostream& os, const Error& rhs)
-            { return (os << rhs._msg); }
+            { return (os << (string)rhs); }
     private:
         string _msg;
     };
