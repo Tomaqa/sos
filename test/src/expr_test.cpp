@@ -186,6 +186,8 @@ int main(int, const char*[])
         {"(+ x (- (* (/ 3 t) y) 2))",                  {{}, {10, 50, 20}},                                                   10+(3./50)*20-2,      },
         {"(+ x (- (* (/ 3 t) y) 2))",                  {{"t", "x", "y"}, {10, 50, 20}},                                      50+(3./10)*20-2,      },
         {"- (* y 5 (/ x 3 2))",                        {{"x", "y"}, {60, 5}},                                                -5*5*(60./(3./2)),    },
+        {"+ 1 2",                                      {{"t"}, {1}},                                                         1+2,                  },
+        {"+ 1 x",                                      {{"t"}, {1, 5}},                                                      1+5,                  },
     };
 
     TestData<Params_eval<double, initializer_list<double>>, double> eval_data_double_init = {
@@ -218,6 +220,8 @@ int main(int, const char*[])
     test<Params_eval<double, initializer_list<double>>,
          double, string>
          (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
+
+    // ! netestuju FAIL pripady, kdy to ma hodit vyjimku
 
     cout << endl << "Success." << endl;
     return 0;

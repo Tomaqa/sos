@@ -2,32 +2,44 @@
 
 namespace SOS {
     namespace ODE {
-        Solver::Solver(Odes_spec odes_spec_)
+        Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_)
             : _odes_spec(move(odes_spec_)),
               _odes_eval(size())
         {
+            size_t n_odes = size();
+            size_t n_keyss = param_keyss_.size();
+            bool unif_keys = n_keyss == 1;
+            if (!unif_keys && n_keyss != n_odes) {
+                throw Error("Size of ODEs and set of parameter keys mismatch: "s
+                            + to_string(n_odes) + " != "
+                            + to_string(n_keyss));
+            }
+            if (unif_keys) param_keyss_.resize(n_odes, param_keyss_.front());
             std::transform(std::begin(_odes_spec), std::end(_odes_spec),
+                           std::make_move_iterator(std::begin(param_keyss_)),
                            std::begin(_odes_eval),
-                           bind(&Solver::create_ode_eval, this, _1));
+                           bind(&Solver::create_ode_eval, this, _1, _2));
         }
 
-        void Solver::add_ode_spec(Ode_spec ode_spec_)
+        void Solver::add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_)
         {
             _odes_spec.emplace_back(move(ode_spec_));
-            _odes_eval.emplace_back(create_ode_eval(_odes_spec.back()));
+            _odes_eval.emplace_back(move(create_ode_eval(_odes_spec.back(),
+                                                         move(param_keys_))
+                                        ));
         }
 
-        Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_)
+        Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_,
+                                                 Param_keys param_keys_)
         {
             Ode_eval ode_eval_(ode_spec_.size());
             std::transform(std::begin(ode_spec_), std::end(ode_spec_),
                            std::begin(ode_eval_),
-                               //! param_keys
-                           bind(&Dt_spec::get_eval<Real>, _1, Param_keys{}));
+                           bind(&Dt_spec::get_eval<Real>,
+                                _1, param_keys_));
             return move(ode_eval_);
         }
 
-        // !! ruzne ODE musi mit jednotne parametry!
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
                                     State& dx, const State& x, Time t) const
         {
@@ -49,18 +61,13 @@ namespace SOS {
                            f);
         }
 
-        // State Solver::solve_odes(Contexts contexts_) const
-        State Solver::solve_odes(Dt_ids dt_ids_, Context context_) const
+        State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
         {
             State x;
             int size_ = size();
             x.reserve(size_);
             for (int i = 0; i < size_; i++) {
-                // x.emplace_back(solve_ode(Context{contexts_._dt_ids[i],
-                //                                  contexts_._t_bounds,
-                //                                  contexts_._x_init,
-                //                                 }, i));
-                x.emplace_back(solve_ode(dt_ids_[i], context_, i));
+                x.emplace_back(solve_ode(dt_ids_[i], move(contexts_[i]), i));
             }
             return move(x);
         }
@@ -89,23 +96,14 @@ namespace SOS {
             if (expr.size() != input_expr_size) throw error;
 
             // ! redundantni, jen pro zacatek
-            // assert((expr[0]->is_token()));
-            // assert((!expr[1]->is_token() && expr.cto_expr(1).size() == 2));
-            // assert((!expr[2]->is_token()));
             assert((!expr[0]->is_token() && expr.cto_expr(0).size() == 2));
             assert((!expr[1]->is_token()));
 
-            // const Expr_token& id_token = expr.cto_token(0);
-            // assert((id_token.is_value<Dt_id>()));
-            // id_token.get_value_check<Dt_id>(_dt_id);
-
-            // const Expr& t_subexpr = expr.cto_expr(1);
             const Expr& t_subexpr = expr.cto_expr(0);
             assert((t_subexpr.is_flat()));
             _t_bounds = make_pair(t_subexpr.cto_token(0).get_value<Real>(),
                                   t_subexpr.cto_token(1).get_value<Real>());
 
-            // const Expr& x_subexpr = expr.cto_expr(2);
             const Expr& x_subexpr = expr.cto_expr(1);
             assert((x_subexpr.is_flat()));
             _x_init = move(x_subexpr.flat_transform<Real>());
@@ -124,10 +122,8 @@ namespace SOS {
 
         ostream& operator <<(ostream& os, const Solver::Context& rhs)
         {
-            // os << rhs._dt_id
-               // << " ( " << rhs._t_bounds.first << rhs._t_bounds.second << " )"
-            os << "( " << rhs._t_bounds.first << rhs._t_bounds.second << " )"
-               << " (";
+            os << "( " << rhs._t_bounds.first << rhs._t_bounds.second
+               << " ) (";
             for (auto x : rhs._x_init) os << " " << x;
             os << " )";
             return os;
@@ -135,8 +131,6 @@ namespace SOS {
 
         bool operator ==(const Solver::Context& lhs, const Solver::Context& rhs)
         {
-            // return lhs._dt_id == rhs._dt_id
-                // && lhs._t_bounds == rhs._t_bounds
             return lhs._t_bounds == rhs._t_bounds
                 && lhs._x_init == rhs._x_init;
         }
