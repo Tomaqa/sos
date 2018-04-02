@@ -25,7 +25,11 @@ namespace SOS {
             using Contexts = vector<Context>;
 
             /// KONVENCE: posledni parametr je cas, aby to slo rychle overit
-            // (pokud jsou obsazeny)
+            // (pokud je obsazen)
+            // + parametr derivovane funkce MUSI byt obsazen:
+            // a) unifikovane klice: pozice [ode_id]
+            // b) pozice [0]
+            // nederivovane parametry musi byt az za temito; "t" je posledni
             // klice jsou bud sdilene mezi vsemi ODE, nebo jsou ruzne,
             // pak se lisi jestli je zadano voladni 'solve_unif_odes' nebo 'solve_odes'
             // Unifikace je ale vec konvence a zodpovednost uzivatele, hlidat to by bylo zbytecne slozite
@@ -52,9 +56,9 @@ namespace SOS {
             virtual Real solve_ode(Dt_id dt_id_,
                                    Context context_,
                                    Ode_id ode_id_ = def_ode_id) const = 0;
-            virtual State solve_unif_odes(Dt_ids dt_ids_,
-                                          Context context_) const = 0;
             State solve_odes(Dt_ids dt_ids_, Contexts contexts_) const;
+            virtual State solve_unif_odes(Dt_ids dt_ids_,
+                                          Context context_) const;
         protected:
             using Dt_eval = Expr::Eval<Real>;
             using Ode_eval = vector<Dt_eval>;
@@ -71,12 +75,25 @@ namespace SOS {
             Odes_eval& odes_eval()
                 { return _odes_eval; }
 
-            Ode_eval create_ode_eval(Ode_spec& ode_spec_,
+            static bool valid_keys(const Param_keys& param_keys_)
+                { return param_keys_.size() >= 1; }
+            static void check_keys(const Param_keys& param_keys_)
+                { expect(valid_keys(param_keys_),
+                         "Invalid parameter keys: "s
+                         + to_string(param_keys_)); }
+            static Ode_eval create_ode_eval(Ode_spec& ode_spec_,
                                      Param_keys param_keys_);
             void eval_unif_odes_step(const Dt_ids& dt_ids_,
                                      State& dx, const State& x, Time t) const;
+            State eval_unif_odes_step(const Dt_ids& dt_ids_,
+                                      const State& x, Time t) const
+                { State dx; eval_unif_odes_step(dt_ids_, dx, x, t);
+                  return move(dx); }
+            Real eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
+                               const State& x, Time t) const;
             void eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
-                               Real& dx, const State& x, Time t) const;
+                               Real& dx, const State& x, Time t) const
+                { dx = eval_ode_step(ode_eval_, dt_id_, x, t); }
         private:
             using Dt_eval_params = Dt_eval::Param_values;
 
@@ -111,13 +128,17 @@ namespace SOS {
                   _x_init(move(x_init_)) { check_values(); }
             Context(const string& input);
 
-            friend ostream& operator <<(ostream& os, const Context& rhs);
+            explicit operator string () const;
+            friend string to_string(const Context& rhs)
+                { return move((string)rhs); }
+            friend ostream& operator <<(ostream& os, const Context& rhs)
+                { return (os << to_string(rhs)); }
             friend bool operator ==(const Context& lhs, const Context& rhs);
 
-            const Interval<Time>& t_bounds() const
-                { return _t_bounds; }
-            const State& x_init() const
-                { return _x_init; }
+            const Interval<Time>& t_bounds() const { return _t_bounds; }
+            Time t_init() const { return t_bounds().first; }
+            Time t_end() const { return t_bounds().second; }
+            const State& x_init() const { return _x_init; }
         protected:
             // ! ~ 7500 allocs ?!
             static const regex input_re;

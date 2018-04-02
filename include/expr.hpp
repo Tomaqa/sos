@@ -24,8 +24,10 @@ namespace SOS {
         virtual bool is_token() const noexcept = 0;
         virtual explicit operator string () const noexcept = 0;
 
+        friend string to_string(const Expr_place& rhs)
+            { return move((string)rhs); }
         friend ostream& operator <<(ostream& os, const Expr_place& rhs)
-            { return (os << (string)rhs); }
+            { return (os << to_string(rhs)); }
         friend bool operator ==(const Expr_place& lhs, const Expr_place& rhs)
             { return (string)lhs == (string)rhs; }
         friend bool operator !=(const Expr_place& lhs, const Expr_place& rhs)

@@ -3,28 +3,6 @@
 using namespace SOS;
 
 namespace Test {
-    namespace Temp {
-        template <typename Cont, typename ostream = std::ostream>
-        ostream& operator <<(ostream& os, const Cont& rhs)
-        {
-            for (const auto& e : rhs) {
-                os << e << " ";
-            }
-            return os;
-        }
-
-        template <typename Cont>
-        bool operator ==(const Cont& lhs, const Cont& rhs)
-        {
-            return std::equal(std::begin(lhs), std::end(lhs),
-                              std::begin(rhs));
-        }
-    }
-
-    template <typename T>
-    ostream& operator <<(ostream& os, const vector<T>& rhs)
-        { return Temp::operator <<(os, rhs); }
-
     struct Dummy{};
     template <typename Params = Dummy, typename Output = string, typename Input = string>
     using TestCase = tuple<const Input, Params, const Output>;
@@ -34,12 +12,9 @@ namespace Test {
     template <typename Output = string>
     void test_case(const Output& expect_, const Output& res)
     {
-        if (res == expect_) return;
-        ostringstream oss1, oss2;
-        oss1 << expect_;
-        oss2 << res;
-        throw Error("Mismatch: expected: '"s + oss1.str()
-                    + "', got: '" + oss2.str() + "'");
+        expect(res == expect_,
+               "Mismatch: expected: '"s + to_string(expect_)
+                + "', got: '" + to_string(res) + "'");
     }
 
     template <typename Params = Dummy, typename Output = string, typename Input = string>

@@ -5,23 +5,33 @@ namespace SOS {
         Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_)
             : _odes_spec(move(odes_spec_))
         {
-            size_t n_odes = size();
-            size_t n_keyss = param_keyss_.size();
-            bool unif_keys = n_keyss == 1;
+            const size_t n_odes = size();
+            const size_t n_keyss = param_keyss_.size();
+            const bool unif_keys = n_keyss == 1 && n_odes > 1;
             expect(unif_keys || n_keyss == n_odes,
-                   "Size of ODEs and set of parameter keys mismatch: "s
-                   + to_string(n_odes) + " != "
-                   + to_string(n_keyss));
+                   "Size of ODEs and set of non-uniformed "s
+                   + "parameter keys mismatch: "
+                   + to_string(n_odes) + " != " + to_string(n_keyss));
+            for_each(std::begin(param_keyss_), std::end(param_keyss_),
+                     bind(&check_keys, _1));
+            const size_t n_keys_front = param_keyss_.front().size();
+            expect(!unif_keys
+                   || (unif_keys && n_keys_front >= n_odes),
+                   "Size of uniformed parameter keys "s
+                   +"must be at least equal to size of ODEs: "
+                   + to_string(n_keys_front) + " < " + to_string(n_odes));
+
             odes_eval().reserve(size());
             if (unif_keys) param_keyss_.resize(n_odes, param_keyss_.front());
             std::transform(std::begin(odes_spec()), std::end(odes_spec()),
                            std::make_move_iterator(std::begin(param_keyss_)),
                            std::back_inserter(odes_eval()),
-                           bind(&Solver::create_ode_eval, this, _1, _2));
+                           bind(&create_ode_eval, _1, _2));
         }
 
         void Solver::add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_)
         {
+            check_keys(param_keys_);
             odes_spec().emplace_back(move(ode_spec_));
             odes_eval().emplace_back(move(create_ode_eval(odes_spec().back(),
                                                           move(param_keys_))
@@ -51,6 +61,23 @@ namespace SOS {
             return _has_param_t;
         }
 
+        State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
+        {
+            State res;
+            int size_ = size();
+            res.reserve(size_);
+            for (int i = 0; i < size_; i++) {
+                res.emplace_back(solve_ode(dt_ids_[i], move(contexts_[i]), i));
+            }
+            return move(res);
+        }
+
+        State Solver::solve_unif_odes(Dt_ids dt_ids_,
+                                      Context context_) const
+        {
+            return move(solve_odes(move(dt_ids_), Contexts(size(), context_)));
+        }
+
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
                                     State& dx, const State& x, Time t) const
         {
@@ -72,23 +99,12 @@ namespace SOS {
                            f);
         }
 
-        State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
+        Real Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
+                                   const State& x, Time t) const
         {
-            State x;
-            int size_ = size();
-            x.reserve(size_);
-            for (int i = 0; i < size_; i++) {
-                x.emplace_back(solve_ode(dt_ids_[i], move(contexts_[i]), i));
-            }
-            return move(x);
-        }
-
-        void Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
-                                   Real& dx, const State& x, Time t) const
-        {
-            dx = ode_has_param_t(ode_eval_)
-                ? eval_dt_step(ode_eval_[dt_id_], x, t)
-                : eval_dt_step(ode_eval_[dt_id_], x);
+            return ode_has_param_t(ode_eval_)
+                   ? eval_dt_step(ode_eval_[dt_id_], x, t)
+                   : eval_dt_step(ode_eval_[dt_id_], x);
         }
 
         Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
@@ -130,13 +146,11 @@ namespace SOS {
                    + to_string(_t_bounds.second));
         }
 
-        ostream& operator <<(ostream& os, const Solver::Context& rhs)
+        Solver::Context::operator string () const
         {
-            os << "( " << rhs._t_bounds.first << rhs._t_bounds.second
-               << " ) (";
-            for (auto x : rhs._x_init) os << " " << x;
-            os << " )";
-            return os;
+            return string("( "s + to_string(t_bounds().first)
+                          + to_string(t_bounds().second) + " ) ("
+                          + to_string(x_init()) + " )");
         }
 
         bool operator ==(const Solver::Context& lhs, const Solver::Context& rhs)
