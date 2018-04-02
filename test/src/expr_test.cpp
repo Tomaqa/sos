@@ -4,7 +4,7 @@
 
 using namespace Test;
 
-/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
 using Params_expr = pair<bool, bool>;
 string expr_res(const string& input, Params_expr& params)
@@ -27,19 +27,15 @@ string flatten_res(const string& input, Dummy&)
 {
     Expr expr(input);
     Expr expr2(expr);
-    if (!expr.flatten().is_flat()) {
-        throw Error("'is_flat()' is false after 'flatten()': '"s
-                    + (string)expr + "'");
-    }
-    if (!expr2.simplify().flatten().is_flat()) {
-        throw Error("'is_flat()' is false after 'simplify().flatten()': '"s
-                    + (string)expr2 + "'");
-    }
-    if (expr != expr2) {
-        throw Error("Flatten versions with and without 'simplify() differ: '"s
-                    + (string)expr + "' != '"
-                    + (string)expr2 + "'");
-    }
+    expect(expr.flatten().is_flat(),
+           "'is_flat()' is false after 'flatten()': '"s + (string)expr + "'");
+    expect(expr2.simplify().flatten().is_flat(),
+           "'is_flat()' is false after 'simplify().flatten()': '"s
+           + (string)expr2 + "'");
+    expect(expr == expr2,
+           "Flatten versions with and without 'simplify() differ: '"s
+           + (string)expr + "' != '"
+           + (string)expr2 + "'");
     cout << input << " -> " << (string)expr << endl;
     return move((string)expr);
 }
@@ -105,14 +101,12 @@ Arg expr_get_eval_res(const string& input, Params_eval<Arg, Param_values>& param
     Arg res2 = eval2(params._values);
     Arg res3 = Expr(input).eval<Arg>(params._values, params._keys);
 
-    if (res1 != res2) {
-        throw Error("Results of two consecutive 'Expr::get_eval's differ: "s
-                    + to_string(res1) + " != " + to_string(res2));
-    }
-    if (res2 != res3) {
-        throw Error("Results of 'Expr::get_eval' and direct 'Expr::eval' differ: "s
-                    + to_string(res2) + " != " + to_string(res3));
-    }
+    expect(res1 == res2,
+           "Results of two consecutive 'Expr::get_eval's differ: "s
+           + to_string(res1) + " != " + to_string(res2));
+    expect(res2 == res3,
+           "Results of 'Expr::get_eval' and direct 'Expr::eval' differ: "s
+           + to_string(res2) + " != " + to_string(res3));
 
     print_expr_eval_res(expr, eval1, params, res1);
     return res1;
@@ -195,8 +189,8 @@ int main(int, const char*[])
         {"(+ x (- (* (/ 3 t) y) 2))",                  {{"t", "x", "y"}, {10, 50, 20}, true},                                50+(3./10)*20-2,      },
     };
 
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
     test<Params_expr, string, string>(expr_data, expr_res, "building of expressions");
 

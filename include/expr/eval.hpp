@@ -92,10 +92,14 @@ namespace SOS {
         size_t size() const
             { return cparam_keys().size(); }
         Arg operator ()() const
-            { return _f((_arg_fs.first)(), (_arg_fs.second)()); }
+            // { return _f((_arg_fs.first)(), (_arg_fs.second)()); }
+            // { return _f(_arg_fs.first, _arg_fs.second); }
+            { return _f((_args_lazy.first)(), (_args_lazy.second)()); }
     protected:
-        using Arg_f = function<Arg()>;
-        using Arg_fs = pair<Arg_f, Arg_f>;
+        // using Arg_f = function<Arg()>;
+        // using Arg_fs = pair<Arg_f, Arg_f>;
+        using Arg_lazy = Lazy<Arg>;
+        using Args_lazy = pair<Arg_lazy, Arg_lazy>;
         using Oper_ptrs = pair<Oper_ptr, Oper_ptr>;
 
         Param_keys::iterator set_param_key(const Param_key& key_) const;
@@ -104,21 +108,31 @@ namespace SOS {
             { return std::find(std::begin(param_keys()),
                                std::end(param_keys()), key_); }
         template <int idx>
-        Arg_f get_arg_f(const Expr& expr_);
+        // Arg_f get_arg_f(const Expr& expr_);
+        Arg_lazy get_arg_lazy(const Expr& expr_);
         template <int idx>
-        void set_arg_f(const Expr& expr_)
-            { get<idx>(_arg_fs) = get_arg_f<idx>(expr_); }
-        void set_arg_fs(const Expr& expr_)
-            { set_arg_f<0>(expr_); set_arg_f<1>(expr_); }
-        Arg_f arg_f(Arg arg) const noexcept
+        // void set_arg_f(const Expr& expr_)
+            // { get<idx>(_arg_fs) = get_arg_lazy<idx>(expr_); }
+        void set_arg_lazy(const Expr& expr_)
+            { get<idx>(_args_lazy) = get_arg_lazy<idx>(expr_); }
+        // void set_arg_fs(const Expr& expr_)
+        //     { set_arg_f<0>(expr_); set_arg_f<1>(expr_); }
+        void set_args_lazy(const Expr& expr_)
+            { set_arg_lazy<0>(expr_); set_arg_lazy<1>(expr_); }
+        // Arg_f arg_f(Arg arg) const noexcept
+        Arg_lazy arg_lazy(Arg arg) const noexcept
             { return [arg](){ return arg; }; }
-        Arg_f param_f(const Param_key& key_) const;
-        Arg_f oper_f(const Oper_ptr& oper_ptr_) const;
+            // { return LAZY(Arg, arg); }
+        // Arg_f param_f(const Param_key& key_) const;
+        // Arg_f oper_f(const Oper_ptr& oper_ptr_) const;
+        Arg_lazy param_lazy(const Param_key& key_) const;
+        Arg_lazy oper_lazy(const Oper_ptr& oper_ptr_) const;
 
         Param_keys_link _param_keys_l;
         Param_values_link _param_values_l;
         Bin_f _f;
-        Arg_fs _arg_fs;
+        // Arg_fs _arg_fs;
+        Args_lazy _args_lazy;
         Oper_ptrs _oper_ptrs;
     };
 }

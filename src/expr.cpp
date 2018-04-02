@@ -17,7 +17,7 @@ namespace SOS {
         return *this;
     }
 
-    Expr::Expr(istringstream& iss, int depth)
+    Expr::Expr(istringstream& iss, unsigned depth)
         : Expr()
     {
         char c;
@@ -27,8 +27,7 @@ namespace SOS {
         iss >> std::noskipws;
         while (iss >> c) {
             if (!isprint(c)) {
-                if (!c) break;
-                throw Error("Unexpected non-printable character ("s + to_string((int)c) + ")");
+                expect(c == 0, "Unexpected non-printable character ("s + to_string((int)c) + ")");
             }
             if (isspace(c)) continue;
             if (c == '(') {
@@ -40,7 +39,9 @@ namespace SOS {
                     closed = true;
                     break;
                 }
-                throw Error("Unexpected closing brace in top level expression.");
+                expect(depth > 0, "Unexpected closing brace in top level expression.");
+                closed = true;
+                break;
             }
             oss << c;
             char c2 = iss.peek();
@@ -50,9 +51,8 @@ namespace SOS {
             }
         }
 
-        if (!closed && depth > 0) {
-            throw Error("Closing brace at level " + to_string(depth) + " not found.");
-        }
+        expect(closed || depth == 0,
+               "Closing brace at level "s + to_string(depth) + " not found.");
 
         if (!oss.str().empty()) {
             add_new_place(Expr_token(oss.str()));
@@ -109,12 +109,9 @@ namespace SOS {
     Expr& Expr::to_binary(const Token& neutral)
     {
         if (_is_binary) return *this;
-        if (size() <= 1) {
-            throw Error("Expression has not at least 2 arguments.");
-        }
-        if (!cfront()->is_token()) {
-            throw Error("First argument of each expression should be single token.");
-        }
+        expect(size() > 1, "Expression has not at least 2 arguments.");
+        expect(cfront()->is_token(),
+               "First argument of each expression should be single token.");
         _is_binary = true;
         if (size() == 2) {
             add_new_place(Expr_token(neutral));

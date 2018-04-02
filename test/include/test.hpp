@@ -32,11 +32,11 @@ namespace Test {
     using TestData = vector<TestCase<Params, Output, Input>>;
 
     template <typename Output = string>
-    void test_case(const Output& expect, const Output& res)
+    void test_case(const Output& expect_, const Output& res)
     {
-        if (res == expect) return;
+        if (res == expect_) return;
         ostringstream oss1, oss2;
-        oss1 << expect;
+        oss1 << expect_;
         oss2 << res;
         throw Error("Mismatch: expected: '"s + oss1.str()
                     + "', got: '" + oss2.str() + "'");
@@ -54,9 +54,9 @@ namespace Test {
         for (auto& t : tdata) try {
             const Input& input = get<0>(t);
             Params& params = get<1>(t);
-            const Output& expect = get<2>(t);
+            const Output& expect_ = get<2>(t);
             const Output& res = f(input, params);
-            test_case(expect, res);
+            test_case(expect_, res);
         }
         catch (const Error& e) {
             cerr << "!! At input '" + get<0>(t) << "':" << endl;

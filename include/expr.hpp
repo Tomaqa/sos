@@ -142,7 +142,7 @@ namespace SOS {
     protected:
         using Places = Elems<Expr_place_ptr>;
 
-        Expr(istringstream& iss, int depth = 0);
+        Expr(istringstream& iss, unsigned depth = 0);
         Expr(istringstream&& iss) : Expr(iss) { }
 
         template <typename T>

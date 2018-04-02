@@ -3,30 +3,30 @@
 namespace SOS {
     namespace ODE {
         Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_)
-            : _odes_spec(move(odes_spec_)),
-              _odes_eval(size())
+            : _odes_spec(move(odes_spec_))
         {
             size_t n_odes = size();
             size_t n_keyss = param_keyss_.size();
             bool unif_keys = n_keyss == 1;
-            if (!unif_keys && n_keyss != n_odes) {
-                throw Error("Size of ODEs and set of parameter keys mismatch: "s
-                            + to_string(n_odes) + " != "
-                            + to_string(n_keyss));
-            }
+            expect(unif_keys || n_keyss == n_odes,
+                   "Size of ODEs and set of parameter keys mismatch: "s
+                   + to_string(n_odes) + " != "
+                   + to_string(n_keyss));
+            odes_eval().reserve(size());
             if (unif_keys) param_keyss_.resize(n_odes, param_keyss_.front());
-            std::transform(std::begin(_odes_spec), std::end(_odes_spec),
+            std::transform(std::begin(odes_spec()), std::end(odes_spec()),
                            std::make_move_iterator(std::begin(param_keyss_)),
-                           std::begin(_odes_eval),
+                           std::back_inserter(odes_eval()),
                            bind(&Solver::create_ode_eval, this, _1, _2));
         }
 
         void Solver::add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_)
         {
-            _odes_spec.emplace_back(move(ode_spec_));
-            _odes_eval.emplace_back(move(create_ode_eval(_odes_spec.back(),
-                                                         move(param_keys_))
-                                        ));
+            odes_spec().emplace_back(move(ode_spec_));
+            odes_eval().emplace_back(move(create_ode_eval(odes_spec().back(),
+                                                          move(param_keys_))
+                                         ));
+            modified();
         }
 
         Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_,
@@ -38,6 +38,17 @@ namespace SOS {
                            bind(&Dt_spec::get_eval<Real>,
                                 _1, param_keys_));
             return move(ode_eval_);
+        }
+
+        void Solver::modified() {
+            _has_param_t = false;
+        }
+
+        bool Solver::has_param_t(Ode_id ode_id_) const
+        {
+            if (_has_param_t) return true;
+            if (ode_has_param_t(codes_eval()[ode_id_])) _has_param_t = true;
+            return _has_param_t;
         }
 
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
@@ -75,7 +86,7 @@ namespace SOS {
         void Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
                                    Real& dx, const State& x, Time t) const
         {
-            dx = has_param_t(ode_eval_)
+            dx = ode_has_param_t(ode_eval_)
                 ? eval_dt_step(ode_eval_[dt_id_], x, t)
                 : eval_dt_step(ode_eval_[dt_id_], x);
         }
@@ -90,10 +101,10 @@ namespace SOS {
 
         Solver::Context::Context(const string& input)
         {
-            const Error error("Invalid format of input context: " + input);
-            if (!regex_match(input, input_re)) throw error;
+            const string& err_msg("Invalid format of input context: "s + input);
+            expect(regex_match(input, input_re), err_msg);
             Expr expr(input);
-            if (expr.size() != input_expr_size) throw error;
+            expect(expr.size() == input_expr_size, err_msg);
 
             // ! redundantni, jen pro zacatek
             assert((!expr[0]->is_token() && expr.cto_expr(0).size() == 2));
@@ -113,11 +124,10 @@ namespace SOS {
 
         void Solver::Context::check_values() const
         {
-            if (_t_bounds.first > _t_bounds.second) {
-                throw Error("Invalid time interval: "s
-                            + to_string(_t_bounds.first) + ", "
-                            + to_string(_t_bounds.second));
-            }
+            expect(_t_bounds.first <= _t_bounds.second,
+                   "Invalid time interval: "s
+                   + to_string(_t_bounds.first) + ", "
+                   + to_string(_t_bounds.second));
         }
 
         ostream& operator <<(ostream& os, const Solver::Context& rhs)
@@ -134,5 +144,12 @@ namespace SOS {
             return lhs._t_bounds == rhs._t_bounds
                 && lhs._x_init == rhs._x_init;
         }
+
+        const regex Solver::Context::input_re{
+            "\\s*\\(?\\s*"s
+            + "\\((\\s*" + Expr::re_float + "\\s*){2}\\)\\s*"
+            + "\\((\\s*" + Expr::re_float + "\\s*)*\\)\\s*"
+            + "\\)?\\s*"
+        };
     }
 }

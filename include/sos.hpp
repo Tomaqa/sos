@@ -51,6 +51,34 @@ using std::bind;
 using namespace std::string_literals;
 
 namespace SOS {
+    // template <typename T, T def_value = T()>
+    // template <typename T>
+    // class Lazy {
+    // public:
+    //     using F = function<T()>;
+
+    //     // Lazy() : _f([](){ return move(def_value); }) { }
+    //     // Lazy() = delete;
+    //     Lazy() = default;
+    //     ~Lazy() = default;
+    //     // Lazy(const Lazy& rhs) = delete;
+    //     // Lazy& operator =(const Lazy& rhs) = delete;
+    //     Lazy(const Lazy& rhs) = default;
+    //     Lazy& operator =(const Lazy& rhs) = default;
+    //     Lazy(Lazy&& rhs) = default;
+    //     Lazy& operator =(Lazy&& rhs) = default;
+    //     Lazy(F&& f) : _f(move(f)) { }
+
+    //     operator T () const { return move(_f()); }
+    // private:
+    //     // const F _f;
+    //     F _f;
+    // };
+    // #define LAZY(T, arg) Lazy<T>([=](){ return T(arg); })
+    // #define LAZY(T, arg) Lazy<T>([&](){ return T(arg); })
+    template <typename T>
+    using Lazy = function<T()>;
+
     class Error {
     public:
         Error(const string& msg_ = "") : _msg(msg_) { }
@@ -60,6 +88,8 @@ namespace SOS {
     private:
         string _msg;
     };
+
+    #define expect(condition, msg) if (!(condition)) throw Error(msg);
 
     template <typename Key, typename Value>
     class Const_map {
