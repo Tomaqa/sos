@@ -7,6 +7,8 @@ namespace SOS {
     namespace ODE {
         class Euler : public Solver {
         public:
+            using Solver::Solver;
+
             virtual Real solve_ode(Dt_id dt_id_,
                                    Context context_,
                                    Ode_id ode_id_ = 0)

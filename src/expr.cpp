@@ -73,7 +73,7 @@ namespace SOS {
     {
         string str("( ");
         for (const auto& e : *this) {
-            str += (string)*e + " ";
+            str += to_string(*e) + " ";
         }
         return (str += ")");
     }

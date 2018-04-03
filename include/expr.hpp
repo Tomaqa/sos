@@ -3,8 +3,6 @@
 
 #include "sos.hpp"
 
-using namespace std::placeholders;
-
 namespace SOS {
     class Expr_place {
     public:
@@ -18,13 +16,12 @@ namespace SOS {
 
         virtual bool is_token() const noexcept = 0;
         virtual explicit operator string () const noexcept = 0;
-
         friend string to_string(const Expr_place& rhs)
             { return move((string)rhs); }
         friend ostream& operator <<(ostream& os, const Expr_place& rhs)
             { return (os << to_string(rhs)); }
         friend bool operator ==(const Expr_place& lhs, const Expr_place& rhs)
-            { return (string)lhs == (string)rhs; }
+            { return to_string(lhs) == to_string(rhs); }
         friend bool operator !=(const Expr_place& lhs, const Expr_place& rhs)
             { return !(lhs == rhs); }
     protected:

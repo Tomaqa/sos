@@ -22,7 +22,8 @@ namespace SOS {
             return x[0];
         }
 
-        State Odeint::solve_unif_odes(Dt_ids dt_ids_, Context context_) const
+        // State Odeint::solve_unif_odes(Dt_ids dt_ids_, Context context_) const
+        State Odeint::eval_unif_odes(Dt_ids&& dt_ids_, Context&& context_) const
         {
             State x = move(context_.cx_init());
             // taky plytvani pokud je pocet param. vetsi nez derivaci, ale mensi

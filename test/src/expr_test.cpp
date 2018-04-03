@@ -2,122 +2,115 @@
 #include "expr.hpp"
 #include "expr/eval.hpp"
 
-using namespace Test;
+namespace SOS {
+    namespace Test {
+        ///////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////////
+        using Params_expr = pair<bool, bool>;
+        string expr_res(const string& input, bool should_throw, Params_expr& params)
+        {
+            Expr expr(input);
+            if (params.first) expr.simplify();
+            if (params.second) expr.to_binary();
+            if (!should_throw) {
+                cout << input << " -> " << to_string(expr) << endl;
+            }
+            return move(to_string(expr));
+        }
 
-using Params_expr = pair<bool, bool>;
-string expr_res(const string& input, bool should_throw, Params_expr& params)
-{
-    Expr expr(input);
-    if (params.first) expr.simplify();
-    if (params.second) expr.to_binary();
-    if (!should_throw) {
-        cout << input << " -> " << (string)expr << endl;
+        /////////////////////////////////////////////////////////////////
+
+        bool is_flat_res(const string& input, bool, Dummy&)
+        {
+            return Expr(input).is_flat();
+        }
+
+        string flatten_res(const string& input, bool should_throw, Dummy&)
+        {
+            Expr expr(input);
+            Expr expr2(expr);
+            if (!should_throw) {
+                expect(expr.flatten().is_flat(),
+                       "'is_flat()' is false after 'flatten()': '"s + to_string(expr) + "'");
+                expect(expr2.simplify().flatten().is_flat(),
+                       "'is_flat()' is false after 'simplify().flatten()': '"s
+                       + to_string(expr2) + "'");
+                expect(expr == expr2,
+                       "Flatten versions with and without 'simplify() differ: '"s
+                       + to_string(expr) + "' != '"
+                       + to_string(expr2) + "'");
+                cout << input << " -> " << to_string(expr) << endl;
+            }
+            return move(to_string(expr));
+        }
+
+        /////////////////////////////////////////////////////////////////
+
+        template <typename Arg>
+        using Elems = Expr::Elems<Arg>;
+
+        template <typename Arg>
+        Elems<Arg> flat_trans_res(const string& input, bool, Dummy&)
+        {
+            return Expr(input).flatten().flat_transform<Arg>();
+        }
+
+        /////////////////////////////////////////////////////////////////
+
+        template <typename Arg>
+        using Eval_t = Expr::Eval<Arg>;
+        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        struct Params_eval {
+            typename Eval_t<Arg>::Param_keys _keys;
+            Param_values _values;
+            bool _quiet{false};
+        };
+
+        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        void print_expr_eval_res(const Expr& expr, const Eval_t<Arg>& eval,
+                                 Params_eval<Arg, Param_values>& params, Arg res)
+        {
+            if (params._quiet) return;
+            params._quiet = true;
+            cout << expr << eval << endl;
+            cout << "  =? " << res << endl;
+        }
+
+        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        Arg eval_res(const string& input, bool should_throw,
+                     Params_eval<Arg, Param_values>& params)
+        {
+            Expr expr(input);
+            Eval_t<Arg> eval(expr, params._keys);
+            Arg res = eval(params._values);
+            if (!should_throw) print_expr_eval_res(expr, eval, params, res);
+            return res;
+        }
+
+        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        Arg expr_get_eval_res(const string& input, bool should_throw,
+                              Params_eval<Arg, Param_values>& params)
+        {
+            Expr expr(input);
+            Eval_t<Arg> eval1 = expr.get_eval<Arg>(params._keys);
+            Eval_t<Arg> eval2 = expr.get_eval<Arg>(params._keys);
+            Arg res1 = eval1(params._values);
+            Arg res2 = eval2(params._values);
+            Arg res3 = Expr(input).eval<Arg>(params._values, params._keys);
+
+            if (!should_throw) {
+                expect(res1 == res2,
+                       "Results of two consecutive 'Expr::get_eval's differ: "s
+                       + to_string(res1) + " != " + to_string(res2));
+                expect(res2 == res3,
+                       "Results of 'Expr::get_eval' and direct 'Expr::eval' differ: "s
+                       + to_string(res2) + " != " + to_string(res3));
+
+                print_expr_eval_res(expr, eval1, params, res1);
+            }
+            return res1;
+        }
     }
-    return move((string)expr);
-}
-
-/////////////////////////////////////////////////////////////////
-
-bool is_flat_res(const string& input, bool, Dummy&)
-{
-    return Expr(input).is_flat();
-}
-
-string flatten_res(const string& input, bool should_throw, Dummy&)
-{
-    Expr expr(input);
-    Expr expr2(expr);
-    if (!should_throw) {
-        expect(expr.flatten().is_flat(),
-               "'is_flat()' is false after 'flatten()': '"s + (string)expr + "'");
-        expect(expr2.simplify().flatten().is_flat(),
-               "'is_flat()' is false after 'simplify().flatten()': '"s
-               + (string)expr2 + "'");
-        expect(expr == expr2,
-               "Flatten versions with and without 'simplify() differ: '"s
-               + (string)expr + "' != '"
-               + (string)expr2 + "'");
-        cout << input << " -> " << (string)expr << endl;
-    }
-    return move((string)expr);
-}
-
-/////////////////////////////////////////////////////////////////
-
-template <typename Arg>
-using Elems = Expr::Elems<Arg>;
-
-template <typename Arg>
-Elems<Arg> flat_trans_res(const string& input, bool, Dummy&)
-{
-    return Expr(input).flatten().flat_transform<Arg>();
-}
-
-/////////////////////////////////////////////////////////////////
-
-template <typename Arg>
-using Eval_t = Expr::Eval<Arg>;
-template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
-struct Params_eval {
-    typename Eval_t<Arg>::Param_keys _keys;
-    Param_values _values;
-    bool _quiet{false};
-};
-
-template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
-void print_expr_eval_res(const Expr& expr, const Eval_t<Arg>& eval,
-                         Params_eval<Arg, Param_values>& params, Arg res)
-{
-    if (params._quiet) return;
-    params._quiet = true;
-    cout << expr;
-    cout << "[ ";
-    for (const auto& k : eval.cparam_keys()) {
-        cout << k << " ";
-    }
-    cout << "] <-- [ ";
-    for (const auto& v : eval.cparam_values()) {
-        cout << v << " ";
-    }
-    cout << "]" << endl;
-    cout << "  =? " << res << endl;
-}
-
-template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
-Arg eval_res(const string& input, bool should_throw,
-             Params_eval<Arg, Param_values>& params)
-{
-    Expr expr(input);
-    Eval_t<Arg> eval(expr, params._keys);
-    Arg res = eval(params._values);
-    if (!should_throw) print_expr_eval_res(expr, eval, params, res);
-    return res;
-}
-
-template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
-Arg expr_get_eval_res(const string& input, bool should_throw,
-                      Params_eval<Arg, Param_values>& params)
-{
-    Expr expr(input);
-    Eval_t<Arg> eval1 = expr.get_eval<Arg>(params._keys);
-    Eval_t<Arg> eval2 = expr.get_eval<Arg>(params._keys);
-    Arg res1 = eval1(params._values);
-    Arg res2 = eval2(params._values);
-    Arg res3 = Expr(input).eval<Arg>(params._values, params._keys);
-
-    if (!should_throw) {
-        expect(res1 == res2,
-               "Results of two consecutive 'Expr::get_eval's differ: "s
-               + to_string(res1) + " != " + to_string(res2));
-        expect(res2 == res3,
-               "Results of 'Expr::get_eval' and direct 'Expr::eval' differ: "s
-               + to_string(res2) + " != " + to_string(res3));
-
-        print_expr_eval_res(expr, eval1, params, res1);
-    }
-    return res1;
 }
 
 /////////////////////////////////////////////////////////////////
@@ -125,6 +118,10 @@ Arg expr_get_eval_res(const string& input, bool should_throw,
 
 int main(int, const char*[])
 {
+    using namespace SOS;
+    using namespace SOS::Test;
+    using namespace std;
+
     Test_data<Params_expr> expr_data = {
         {"",                                        {true, false},      "( )",                                                                     },
         {"-",                                       {true, false},      "( - )",                                                                     },

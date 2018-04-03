@@ -1,20 +1,22 @@
 #include "test.hpp"
 #include "ode/solver.hpp"
+#include "ode/euler.hpp"
 
-using namespace Test;
-using namespace ODE;
+namespace SOS {
+    namespace Test {
+        using namespace ODE;
+        using Context = Solver::Context;
 
-using Context = Solver::Context;
+        /////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////////////////
+        Context context_res(const string& input, bool, Dummy&)
+        {
+            return Context(input);
+        }
 
-Context context_res(const string& input, bool, Dummy&)
-{
-    return Context(input);
+        /////////////////////////////////////////////////////////////////
+    }
 }
-
-/////////////////////////////////////////////////////////////////
-
 
 
 /////////////////////////////////////////////////////////////////
@@ -22,6 +24,10 @@ Context context_res(const string& input, bool, Dummy&)
 
 int main(int, const char*[])
 {
+    using namespace SOS;
+    using namespace SOS::Test;
+    using namespace std;
+
     Test_data<Dummy, Context> context_data = {
         {"( (0 10) (0))",                                            {},        {{0, 10}, {0}}                                               },
         {" ( (0 10) (0)) ",                                          {},        {{0, 10}, {0}}                                               },
@@ -56,12 +62,30 @@ int main(int, const char*[])
         {"(0 10)(1 2 (1))",                                          {},        {{0, 10}, {0}}                                               },
     };
 
+    // Test_data<Dummy, string, Odes_spec> odes_data = {
+    //     {{{"1"}},                                                    {},        {{0, 10}, {0}}                                               },
+    // }
+
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
 
     string context_msg = "building of context-s";
     test<Dummy, Context, string>(context_data, context_res, context_msg);
     test<Dummy, Context, string>(context_throw_data, context_res, context_msg, true);
+
+    try {
+        cout << Euler({{{"+ 1 2"}}}, {{{"x"}}}) << endl << endl;
+        cout << Euler({{{"+ 1 x"}}}, {{{"x"}}}) << endl << endl;
+        cout << Euler({{{"+ 1 2"}, {"- x 5"}}}, {{{"x"}}}) << endl << endl;
+        cout << Euler({{{"+ 1 2"}, {"- x 5"}}}, {{{"x"}, {"y"}}}) << endl << endl;
+        cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}}, {{"y"}}}) << endl << endl;
+        cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}, {"y"}}}) << endl << endl;
+        cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}, {"y"}}, {{"x"}, {"y"}}}) << endl << endl;
+    }
+    catch (const Error& e) {
+        cerr << e << endl;
+        throw;
+    }
 
     cout << endl << "Success." << endl;
     return 0;

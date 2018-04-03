@@ -37,28 +37,33 @@ namespace SOS {
             // nenapada me k cemu by bylo dobre a je to nebezpecne
 
             Solver() = default;
-            Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
-            Solver(Ode_spec ode_spec_, Param_keys param_keys_)
-                : Solver(Odes_spec{move(ode_spec_)},
-                         Param_keyss{move(param_keys_)}) { }
             virtual ~Solver() = default;
             Solver(const Solver& rhs) = delete;
             Solver& operator =(const Solver& rhs) = delete;
             Solver(Solver&& rhs) = default;
             Solver& operator =(Solver&& rhs) = default;
+            Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
+            Solver(const string& input); // not implemented yet
 
             size_t size() const noexcept { return codes_spec().size(); }
             Time step_size() const noexcept { return _step_size; }
             void set_step_size(Time step_size_) noexcept
                 { _step_size = step_size_; }
             void add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_);
+            bool is_unified() const;
+            void unify(); // not implemented yet
 
             virtual Real solve_ode(Dt_id dt_id_,
                                    Context context_,
                                    Ode_id ode_id_ = def_ode_id) const = 0;
             State solve_odes(Dt_ids dt_ids_, Contexts contexts_) const;
-            virtual State solve_unif_odes(Dt_ids dt_ids_,
-                                          Context context_) const;
+            State solve_unif_odes(Dt_ids dt_ids_, Context context_) const;
+
+            explicit operator string () const;
+            friend string to_string(const Solver& rhs)
+                { return move((string)rhs); }
+            friend ostream& operator <<(ostream& os, const Solver& rhs)
+                { return (os << to_string(rhs)); }
         protected:
             using Dt_eval = Expr::Eval<Real>;
             using Ode_eval = vector<Dt_eval>;
@@ -83,6 +88,11 @@ namespace SOS {
                          + to_string(param_keys_)); }
             static Ode_eval create_ode_eval(Ode_spec& ode_spec_,
                                      Param_keys param_keys_);
+
+            virtual State eval_odes(Dt_ids&& dt_ids_,
+                                    Contexts&& contexts_) const;
+            virtual State eval_unif_odes(Dt_ids&& dt_ids_,
+                                         Context&& context_) const;
             void eval_unif_odes_step(const Dt_ids& dt_ids_,
                                      State& dx, const State& x, Time t) const;
             State eval_unif_odes_step(const Dt_ids& dt_ids_,
@@ -103,6 +113,7 @@ namespace SOS {
             static bool ode_has_param_t(const Ode_eval& ode_eval_)
                 { return dt_has_param_t(ode_eval_.front()); }
             bool has_param_t(Ode_id ode_id_ = def_ode_id) const;
+
             Real eval_dt_step(const Dt_eval& dt_eval_,
                               const State& x, Time t) const;
             Real eval_dt_step(const Dt_eval& dt_eval_,
@@ -112,7 +123,8 @@ namespace SOS {
             Time _step_size{1.0};
             Odes_spec _odes_spec;
             Odes_eval _odes_eval;
-            mutable bool _has_param_t{false};
+            mutable Flag _is_unified;
+            mutable Flag _has_param_t;
         };
 
         class Solver::Context {

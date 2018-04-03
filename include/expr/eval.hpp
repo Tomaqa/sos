@@ -20,7 +20,7 @@ namespace SOS {
         Eval(Eval&& rhs) = default;
         Eval& operator =(Eval&& rhs) = default;
         Eval(const Expr& expr_, Param_keys param_keys_ = {})
-            : _param_keys{move(param_keys_)},
+            : _param_keys{check_keys(move(param_keys_))},
               _oper(&_param_keys, &_param_values, expr_) { }
         Eval(const string& str, Param_keys param_keys_ = {})
             : Eval(Expr(str), move(param_keys_)) { }
@@ -36,6 +36,12 @@ namespace SOS {
             { return call(move(list)); }
         Arg operator ()(Param_values param_values_) const
             { return call(move(param_values_)); }
+
+        explicit operator string () const;
+        friend string to_string(const Eval& rhs)
+            { return move((string)rhs); }
+        friend ostream& operator <<(ostream& os, const Eval& rhs)
+            { return (os << to_string(rhs)); }
     protected:
         class Oper;
         using Oper_ptr = unique_ptr<Oper>;
@@ -55,6 +61,7 @@ namespace SOS {
             { return _param_values; }
         const Oper& coper() const { return _oper; }
         Oper& oper() { return _oper; }
+        static Param_keys&& check_keys(Param_keys&& param_keys_);
 
         static Oper_ptr new_oper(Oper&& oper_)
             { return make_unique<Oper>(move(oper_)); }
@@ -67,6 +74,7 @@ namespace SOS {
         Param_keys _param_keys;
         mutable Param_values _param_values;
         Oper _oper;
+        mutable bool _valid_values{false};
     };
 
     template <typename Arg>

@@ -18,6 +18,17 @@ namespace SOS {
     };
 
     template <typename Arg>
+    typename Expr::Eval<Arg>::Param_keys&&
+        Expr::Eval<Arg>::check_keys(Param_keys&& param_keys_)
+    {
+        expect(all_of(param_keys_, [](const Param_key& key){
+                          return key.size() > 0;
+                      }),
+               "Parameter key tokens cannot be empty.");
+        return move(param_keys_);
+    }
+
+    template <typename Arg>
     template <typename Cont>
     Arg Expr::Eval<Arg>::call(Cont&& cont) const
     {
@@ -25,7 +36,16 @@ namespace SOS {
                "Count of parameters mismatch: expected "s + to_string(size())
                + ", got " + to_string(cont.size()));
         param_values() = forward<Cont>(cont);
+        _valid_values = true;
         return (coper())();
+    }
+
+    template <typename Arg>
+    Expr::Eval<Arg>::operator string () const
+    {
+        string str = "[ "s + to_string(cparam_keys()) + "]";
+        if (_valid_values) str += " <-- [ " + to_string(cparam_values()) + "]";
+        return move(str);
     }
 
     template <typename Arg>
