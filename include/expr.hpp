@@ -117,24 +117,13 @@ namespace SOS {
         Eval<Arg> get_eval(typename Eval<Arg>::Param_keys param_keys_ = {})
             { return {to_binary(), move(param_keys_)}; }
         template <typename Arg>
-        Eval<Arg> cget_eval(typename Eval<Arg>::Param_keys param_keys_ = {}) const
-            { return {*this, move(param_keys_)}; }
+        Eval<Arg> get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_)
+            { return {to_binary(), move(param_keys_ptr_)}; }
         template <typename Arg>
-        Arg eval(initializer_list<Arg> list,
-            typename Eval<Arg>::Param_keys param_keys_ = {})
-            { return get_eval<Arg>(move(param_keys_))(move(list)); }
-        template <typename Arg>
-        Arg eval(typename Eval<Arg>::Param_values param_values_,
-            typename Eval<Arg>::Param_keys param_keys_ = {})
-            { return get_eval<Arg>(move(param_keys_))(move(param_values_)); }
-        template <typename Arg>
-        Arg ceval(initializer_list<Arg> list,
-            typename Eval<Arg>::Param_keys param_keys_ = {}) const
-            { return cget_eval<Arg>(move(param_keys_))(move(list)); }
-        template <typename Arg>
-        Arg ceval(typename Eval<Arg>::Param_values param_values_,
-            typename Eval<Arg>::Param_keys param_keys_ = {}) const
-            { return cget_eval<Arg>(move(param_keys_))(move(param_values_)); }
+        Eval<Arg> get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_,
+                           typename Eval<Arg>::Param_values_ptr param_values_ptr_)
+            { return {to_binary(),
+                      move(param_keys_ptr_), move(param_values_ptr_)}; }
     protected:
         using Places = Elems<Expr_place_ptr>;
 

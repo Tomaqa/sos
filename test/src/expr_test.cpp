@@ -157,7 +157,7 @@ namespace SOS {
             Eval_t<Arg> eval2 = expr.get_eval<Arg>(params._keys);
             Arg res1 = eval1(params._values);
             Arg res2 = eval2(params._values);
-            Arg res3 = Expr(input).eval<Arg>(params._values, params._keys);
+            Arg res3 = Eval_t<Arg>(input, params._keys)(params._values);
 
             if (!should_throw) {
                 expect(res1 == res2,

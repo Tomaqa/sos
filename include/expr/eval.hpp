@@ -26,10 +26,8 @@ namespace SOS {
         Eval(const Expr& expr_,
              Param_keys_ptr param_keys_ptr_,
              Param_values_ptr param_values_ptr_ = new_param_values({}))
-            // : _param_keys_ptr(move(param_keys_ptr_)),
-            //   _param_values_ptr(move(param_values_ptr_)),
-            : _param_keys_ptr(param_keys_ptr_),
-              _param_values_ptr(param_values_ptr_),
+            : _param_keys_ptr(move(param_keys_ptr_)),
+              _param_values_ptr(move(param_values_ptr_)),
               _oper(param_keys_link(), param_values_link(), expr_) { }
         Eval(const Expr& expr_, Param_keys param_keys_ = {})
             : Eval(expr_, new_param_keys({check_keys(move(param_keys_))})) { }
@@ -73,13 +71,9 @@ namespace SOS {
             { return make_shared<Param_keys>(move(param_keys_)); }
         static Param_values_ptr new_param_values(Param_values&& param_values_)
             { return make_shared<Param_values>(move(param_values_)); }
-        // Param_keys* param_keys_link()
-            // { return _param_keys_ptr.get(); }
-        Param_keys_ptr param_keys_link()
+        Param_keys_ptr& param_keys_link()
             { return _param_keys_ptr; }
-        // Param_values* param_values_link()
-            // { return _param_values_ptr.get(); }
-        Param_values_ptr param_values_link()
+        Param_values_ptr& param_values_link()
             { return _param_values_ptr; }
         Param_keys& param_keys()
             { return *_param_keys_ptr; }

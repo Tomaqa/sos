@@ -44,7 +44,9 @@ namespace SOS {
             Ode_eval ode_eval_;
             ode_eval_.reserve(ode_spec_.size());
             transform(ode_spec_, std::back_inserter(ode_eval_),
-                      bind(&Dt_spec::get_eval<Real>, _1, param_keys_));
+                      [&param_keys_](Dt_spec& dspec){
+                          return dspec.get_eval<Real>(param_keys_);
+                      });
             return move(ode_eval_);
         }
 
