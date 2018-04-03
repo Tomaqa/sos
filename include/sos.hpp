@@ -62,6 +62,12 @@ namespace SOS {
             { return _msg; }
         friend ostream& operator <<(ostream& os, const Error& rhs)
             { return (os << (string)rhs); }
+        Error operator +(const string& rhs) const
+            { return Error(_msg + rhs); }
+        friend Error operator +(const string& lhs, const Error& rhs)
+            { return Error(lhs + rhs._msg); }
+        Error& operator +=(const string& rhs)
+            { _msg += rhs; return *this; }
     private:
         string _msg;
     };

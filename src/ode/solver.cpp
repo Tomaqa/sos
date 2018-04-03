@@ -116,54 +116,48 @@ namespace SOS {
         }
 
         Solver::Context::Context(const string& input)
-        {
-            const string& err_msg("Invalid format of input context: "s + input);
-            expect(regex_match(input, input_re), err_msg);
+        try {
             Expr expr(input);
-            expect(expr.size() == input_expr_size, err_msg);
-
-            // ! redundantni, jen pro zacatek
-            assert((!expr[0]->is_token() && expr.cto_expr(0).size() == 2));
-            assert((!expr[1]->is_token()));
-
+            expect(expr.size() == 2, "Two top subexpressions expected.");
+            expect(!expr[0]->is_token() && expr.cto_expr(0).size() == 2,
+                   "Two tokens of time bounds expected.");
             const Expr& t_subexpr = expr.cto_expr(0);
-            assert((t_subexpr.is_flat()));
-            _t_bounds = make_pair(t_subexpr.cto_token(0).get_value<Real>(),
-                                  t_subexpr.cto_token(1).get_value<Real>());
+            expect(t_subexpr.is_flat(), "No further subexpressions expected.");
+            expect(t_subexpr.cto_token(0).get_value_check<Real>(t_init())
+                   && t_subexpr.cto_token(1).get_value_check<Real>(t_end()),
+                   "Invalid values of time bounds.");
 
+            expect(!expr[1]->is_token(),
+                   "Initial values must be enclosed in subexpression.");
             const Expr& x_subexpr = expr.cto_expr(1);
-            assert((x_subexpr.is_flat()));
-            _x_init = move(x_subexpr.flat_transform<Real>());
+            expect(x_subexpr.is_flat(), "No further subexpressions expected.");
+            x_init() = move(x_subexpr.flat_transform<Real>());
 
             check_values();
+        }
+        catch (const Error& e) {
+            throw "Invalid format of input context '"s + input + "':\n" + e;
         }
 
         void Solver::Context::check_values() const
         {
-            expect(_t_bounds.first <= _t_bounds.second,
+            expect(ct_init() <= ct_end(),
                    "Invalid time interval: "s
-                   + to_string(_t_bounds.first) + ", "
-                   + to_string(_t_bounds.second));
+                   + to_string(ct_init()) + ", "
+                   + to_string(ct_end()));
         }
 
         Solver::Context::operator string () const
         {
-            return string("( "s + to_string(t_bounds().first)
-                          + to_string(t_bounds().second) + " ) ("
-                          + to_string(x_init()) + " )");
+            return string("( "s + to_string(ct_init())
+                          + to_string(ct_end()) + " ) ("
+                          + to_string(cx_init()) + " )");
         }
 
         bool operator ==(const Solver::Context& lhs, const Solver::Context& rhs)
         {
-            return lhs._t_bounds == rhs._t_bounds
-                && lhs._x_init == rhs._x_init;
+            return lhs.ct_bounds() == rhs.ct_bounds()
+                && lhs.cx_init() == rhs.cx_init();
         }
-
-        const regex Solver::Context::input_re{
-            "\\s*\\(?\\s*"s
-            + "\\((\\s*" + Expr::re_float + "\\s*){2}\\)\\s*"
-            + "\\((\\s*" + Expr::re_float + "\\s*)*\\)\\s*"
-            + "\\)?\\s*"
-        };
     }
 }

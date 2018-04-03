@@ -3,11 +3,6 @@
 
 #include "sos.hpp"
 
-#include <regex>
-
-using std::regex;
-using std::regex_match;
-
 using namespace std::placeholders;
 
 namespace SOS {
@@ -71,8 +66,6 @@ namespace SOS {
         template <typename Arg>
         using Elems = vector<Arg>;
 
-        static constexpr const char* re_float = "[+-]?\\d*\\.?\\d+";
-
         Expr() = default;
         virtual ~Expr() = default;
         virtual Expr_place_ptr clone() const override
@@ -115,6 +108,8 @@ namespace SOS {
         bool is_flat() const
             { return std::all_of(cbegin(), cend(),
                                  bind(&Expr_place::is_token, _1)); }
+        template <typename Arg>
+        bool has_values() const;
         Expr& flatten();
         template <typename Arg>
         Elems<Arg> flat_transform() const;

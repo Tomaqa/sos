@@ -205,8 +205,11 @@ int main(int, const char*[])
     Test_data<Dummy, Elems<double>> flat_trans_data = {
         {"",                                                  {},                      {},                                                         },
         {"1 2",                                               {},                      {1, 2},                                                     },
-        {"1 x",                                               {},                      {1, 0},                                                     },
         {"0 (1 2 3) (4 5 6) (7 8 9)",                         {},                      {0, 1, 2, 3, 4, 5, 6, 7, 8, 9},                             },
+    };
+
+    Test_data<Dummy, Elems<double>> flat_trans_throw_data = {
+        {"1 x",                                               {},                      {},                                                         },
     };
 
     Test_data<Params_eval<double>, double> eval_data_double = {
@@ -255,7 +258,9 @@ int main(int, const char*[])
     test<Dummy, bool, string>(is_flat_data, is_flat_res, "checking of flat state");
     test<Dummy, string, string>(flatten_data, flatten_res, "flattening the expressions");
 
-    test<Dummy, Elems<double>, string>(flat_trans_data, flat_trans_res<double>, "transforming expressions to arrays of values");
+    string flat_trans_msg = "transforming expressions to arrays of values";
+    test<Dummy, Elems<double>, string>(flat_trans_data, flat_trans_res<double>, flat_trans_msg);
+    test<Dummy, Elems<double>, string>(flat_trans_throw_data, flat_trans_res<double>, flat_trans_msg, true);
 
     string eval_msg = "evaluation of expressions via evaluation objects";
     test<Params_eval<double>,
@@ -275,8 +280,6 @@ int main(int, const char*[])
     test<Params_eval<double, initializer_list<double>>,
          double, string>
          (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
-
-    // ! netestuju FAIL pripady, kdy to ma hodit vyjimku
 
     cout << endl << "Success." << endl;
     return 0;

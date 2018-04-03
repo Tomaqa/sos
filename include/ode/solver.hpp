@@ -135,16 +135,16 @@ namespace SOS {
                 { return (os << to_string(rhs)); }
             friend bool operator ==(const Context& lhs, const Context& rhs);
 
-            const Interval<Time>& t_bounds() const { return _t_bounds; }
-            Time t_init() const { return t_bounds().first; }
-            Time t_end() const { return t_bounds().second; }
-            const State& x_init() const { return _x_init; }
+            const Interval<Time>& ct_bounds() const { return _t_bounds; }
+            Time ct_init() const { return ct_bounds().first; }
+            Time ct_end() const { return ct_bounds().second; }
+            const State& cx_init() const { return _x_init; }
         protected:
-            // ! ~ 7500 allocs ?!
-            static const regex input_re;
-            static constexpr size_t input_expr_size = 2;
-
             void check_values() const;
+            Interval<Time>& t_bounds() { return _t_bounds; }
+            Time& t_init() { return t_bounds().first; }
+            Time& t_end() { return t_bounds().second; }
+            State& x_init() { return _x_init; }
         private:
             Interval<Time> _t_bounds;
             State _x_init;
