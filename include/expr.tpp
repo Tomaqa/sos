@@ -2,6 +2,7 @@ namespace SOS {
     template <typename Arg>
     bool Expr::has_values() const
     {
+        // ! 'is_flat()' is assumed to be true
         return std::all_of(cbegin(), cend(),
                            bind(&Expr_token::is_value<Arg>,
                                 bind(&Expr::cptr_to_token, _1))

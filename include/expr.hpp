@@ -2,8 +2,11 @@
 #define ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430
 
 #include "sos.hpp"
+#include "util.hpp"
 
 namespace SOS {
+    using namespace Util;
+
     class Expr_place {
     public:
         using Token = string;
@@ -73,7 +76,6 @@ namespace SOS {
         Expr& operator =(Expr&& rhs) = default;
         Expr(const string& input) : Expr(istringstream(input)) { }
         Expr(initializer_list<Expr_place_ptr> list);
-        void swap(Expr& rhs) { std::swap(_places, rhs._places); }
 
         virtual bool is_token() const noexcept override
             { return false; }
@@ -162,6 +164,7 @@ namespace SOS {
         Expr& simplify_rec() noexcept;
 
         Places _places;
+        //! reimplement to 'Flag's ?
         bool _is_simplified{false};
         bool _is_binary{false};
         bool _is_flatten{false};

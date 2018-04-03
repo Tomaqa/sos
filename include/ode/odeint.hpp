@@ -13,9 +13,6 @@ namespace SOS {
                                    Context context_,
                                    Ode_id ode_id_ = 0)
                                    const override final;
-            // virtual State solve_unif_odes(Dt_ids dt_ids_,
-            //                               Context context_)
-            //                               const override final;
         protected:
             using Integrate_f = function<void(const State&, State&, Time)>;
 

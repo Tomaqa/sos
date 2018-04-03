@@ -4,6 +4,7 @@
 
 namespace SOS {
     namespace Test {
+
         ///////////////////////////////////////////////////////////////
 
         using Params_expr = pair<bool, bool>;
@@ -81,10 +82,25 @@ namespace SOS {
                      Params_eval<Arg, Param_values>& params)
         {
             Expr expr(input);
-            Eval_t<Arg> eval(expr, params._keys);
-            Arg res = eval(params._values);
-            if (!should_throw) print_expr_eval_res(expr, eval, params, res);
-            return res;
+            Eval_t<Arg> eval1(expr, params._keys);
+            Eval_t<Arg> eval2(eval1);
+            Arg res1 = eval1(params._values);
+            Arg res2 = eval2(params._values);
+            Arg res12 = eval1(params._values);
+            Arg res22 = eval2(params._values);
+            if (!should_throw) {
+                expect(res1 == res2,
+                       "Result of two copies differ: "s
+                       + to_string(res1) + " != " + to_string(res2));
+                expect(res1 == res12,
+                       "Results of two consecutive evaluations differ: "s
+                       + to_string(res1) + " != " + to_string(res12));
+                expect(res1 == res12,
+                       "Results of two consecutive evaluations of copy differ: "s
+                       + to_string(res2) + " != " + to_string(res22));
+                print_expr_eval_res(expr, eval1, params, res1);
+            }
+            return res1;
         }
 
         template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>

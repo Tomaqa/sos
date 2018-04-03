@@ -3,23 +3,19 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <cassert>
 
 #include <string>
 #include <vector>
-#include <map>
 #include <iostream>
 #include <sstream>
 #include <memory>
-#include <algorithm>
-#include <functional>
+#include <utility>
 
 namespace SOS {
     using std::move;
     using std::forward;
 
     using std::vector;
-    using std::map;
     using std::initializer_list;
 
     using std::pair;
@@ -43,41 +39,39 @@ namespace SOS {
     using std::shared_ptr;
     using std::make_shared;
 
-    using std::function;
-    using std::bind;
-
     using namespace std::string_literals;
-    using namespace std::placeholders;
-
-    template <typename T>
-    using Lazy = function<T()>;
 
     class Error;
 
-    template <typename Key, typename Value>
-    class Const_map;
-
-    class Flag;
-
     #define expect(condition, msg) if (!(condition)) throw Error(msg);
-
-    template <typename Cont, typename Un_f>
-    Un_f for_each(Cont& cont, Un_f f);
-    template <typename Cont, typename Un_f>
-    bool all_of(const Cont& cont, Un_f f);
-    template <typename Cont, typename Un_f>
-    bool any_of(const Cont& cont, Un_f f);
-    template <typename Cont, typename OutputIt, typename Un_f>
-    OutputIt transform(Cont& cont, OutputIt d_first, Un_f f);
-    template <typename Cont1, typename InputIt2,
-              typename OutputIt, typename Bin_f>
-    OutputIt transform(Cont1& cont1, InputIt2 first2,
-                       OutputIt d_first, Bin_f f);
 }
+
+class SOS::Error {
+public:
+    Error(const string& msg_ = "") : _msg(msg_) { }
+
+    explicit operator string () const
+        { return _msg; }
+    friend const string& to_string(const Error& rhs)
+        { return rhs._msg; }
+    friend ostream& operator <<(ostream& os, const Error& rhs)
+        { return (os << to_string(rhs)); }
+    Error operator +(const string& rhs) const
+        { return Error(_msg + rhs); }
+    friend Error operator +(const string& lhs, const Error& rhs)
+        { return Error(lhs + rhs._msg); }
+    Error& operator +=(const string& rhs)
+        { _msg += rhs; return *this; }
+private:
+    string _msg;
+};
 
 namespace std {
     template <typename T>
     string to_string(const vector<T>& rhs);
+
+    template <typename T1, typename T2>
+    string to_string(const pair<T1, T2>& rhs);
 
     inline const string& to_string(const string& rhs)
         { return rhs; }

@@ -13,7 +13,7 @@ namespace SOS {
                    "Size of ODEs and set of non-unified "s
                    + "parameter keys mismatch: "
                    + to_string(n_odes) + " != " + to_string(n_keyss));
-            for_each(param_keyss_, bind(&check_keys, _1));
+            for_each(param_keyss_, bind(&check_param_keys, _1));
             const size_t n_keys_front = param_keyss_.front().size();
             expect(!unified || (unified && n_keys_front >= n_odes),
                    "Size of unified parameter keys "s
@@ -30,7 +30,7 @@ namespace SOS {
 
         void Solver::add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_)
         {
-            check_keys(param_keys_);
+            check_param_keys(param_keys_);
             odes_spec().emplace_back(move(ode_spec_));
             odes_eval().emplace_back(move(create_ode_eval(odes_spec().back(),
                                                           move(param_keys_))
@@ -41,28 +41,29 @@ namespace SOS {
         Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_,
                                                  Param_keys param_keys_)
         {
-            Ode_eval ode_eval_(ode_spec_.size());
-            transform(ode_spec_, std::begin(ode_eval_),
+            Ode_eval ode_eval_;
+            ode_eval_.reserve(ode_spec_.size());
+            transform(ode_spec_, std::back_inserter(ode_eval_),
                       bind(&Dt_spec::get_eval<Real>, _1, param_keys_));
             return move(ode_eval_);
-        }
-
-        bool Solver::is_unified() const
-        {
-            if (_is_unified.is_valid()) return _is_unified.is_set();
-            const Param_keys& keys0 = codes_eval().front().front().cparam_keys();
-            const bool res = (all_of(codes_eval(),
-                                     [&keys0](const Ode_eval& oeval) {
-                                         return oeval.front().cparam_keys()
-                                                == keys0;
-                                     }));
-            _is_unified.set(res);
-            return res;
         }
 
         void Solver::modified() {
             _is_unified.invalidate();
             _has_param_t.invalidate();
+        }
+
+        bool Solver::is_unified(bool eval_if_unknown) const
+        {
+            if (_is_unified.is_valid()) return _is_unified.is_set();
+            if (!eval_if_unknown) return false;
+            const Param_keys& keys0 = cunif_param_keys_wo_check();
+            const bool res = (all_of(codes_eval(),
+                                     [&keys0](const Ode_eval& oeval) {
+                                         return code_param_keys(oeval) == keys0;
+                                     }));
+            _is_unified.set(res);
+            return res;
         }
 
         bool Solver::has_param_t(Ode_id ode_id_) const
@@ -73,12 +74,27 @@ namespace SOS {
             return res;
         }
 
+        Solver::Param_keyss Solver::cparam_keyss() const
+        {
+            Param_keyss param_keyss_;
+            param_keyss_.reserve(size());
+            transform(codes_eval(), std::back_inserter(param_keyss_),
+                      bind(&Solver::code_param_keys, _1));
+            return move(param_keyss_);
+        }
+
+        const Solver::Param_keys& Solver::cunif_param_keys() const
+        {
+            expect(is_unified(), "Parameter keys are not unified.");
+            return cunif_param_keys_wo_check();
+        }
+
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
         {
-            return move(is_unified()
-                          ? eval_unif_odes(move(dt_ids_),
-                                           move(contexts_.front()))
-                          : eval_odes(move(dt_ids_), move(contexts_))
+            const bool unified = is_unified() && equal(contexts_);
+            return move(unified ? eval_unif_odes(move(dt_ids_),
+                                                 move(contexts_.front()))
+                                : eval_odes(move(dt_ids_), move(contexts_))
                        );
         }
 
@@ -111,7 +127,7 @@ namespace SOS {
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
                                     State& dx, const State& x, Time t) const
         {
-            // ! neptat se v kazdem kroku
+            // ! do not construct in each step
             function<Real(const Ode_eval& ode_eval_, Dt_id dt_id_)> f;
             if (has_param_t()) {
                 f = [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
@@ -198,9 +214,8 @@ namespace SOS {
 
         Solver::Context::operator string () const
         {
-            return string("( "s + to_string(ct_init())
-                          + to_string(ct_end()) + " ) ("
-                          + to_string(cx_init()) + " )");
+            return "( "s + to_string(ct_bounds()) + " )"
+                          + " ( " + to_string(cx_init()) + ")";
         }
 
         bool operator ==(const Solver::Context& lhs, const Solver::Context& rhs)

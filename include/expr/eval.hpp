@@ -12,30 +12,42 @@ namespace SOS {
         using Param_key = Token;
         using Param_keys = vector<Param_key>;
         using Param_values = vector<Arg>;
+        template <typename T>
+        using Param_ptr_t = shared_ptr<T>;
+        using Param_keys_ptr = Param_ptr_t<Param_keys>;
+        using Param_values_ptr = Param_ptr_t<Param_values>;
 
         Eval() = default;
         ~Eval() = default;
-        Eval(const Eval& rhs) = delete;
-        Eval& operator =(const Eval& rhs) = delete;
+        Eval(const Eval& rhs) = default;
+        Eval& operator =(const Eval& rhs) = default;
         Eval(Eval&& rhs) = default;
         Eval& operator =(Eval&& rhs) = default;
+        Eval(const Expr& expr_,
+             Param_keys_ptr param_keys_ptr_,
+             Param_values_ptr param_values_ptr_ = new_param_values({}))
+            : _param_keys_ptr(move(param_keys_ptr_)),
+              _param_values_ptr(move(param_values_ptr_)),
+              _oper(param_keys_link(), param_values_link(), expr_) { }
         Eval(const Expr& expr_, Param_keys param_keys_ = {})
-            : _param_keys{check_keys(move(param_keys_))},
-              _oper(&_param_keys, &_param_values, expr_) { }
+            : Eval(expr_, new_param_keys({check_keys(move(param_keys_))})) { }
         Eval(const string& str, Param_keys param_keys_ = {})
             : Eval(Expr(str), move(param_keys_)) { }
 
         size_t size() const
             { return cparam_keys().size(); }
         const Param_keys& cparam_keys() const
-            { return _param_keys; }
-        const Param_values& cparam_values() const
-            { return _param_values; }
+            { return *_param_keys_ptr; }
+        Param_values& param_values() const
+            { return *_param_values_ptr; }
+        const Param_keys_ptr& cparam_keys_ptr() const
+            { return _param_keys_ptr; }
+        Param_values_ptr& param_values_ptr() const
+            { return _param_values_ptr; }
 
-        Arg operator ()(initializer_list<Arg> list) const
-            { return call(move(list)); }
-        Arg operator ()(Param_values param_values_) const
-            { return call(move(param_values_)); }
+        Arg operator ()(initializer_list<Arg> list) const;
+        Arg operator ()(Param_values param_values_) const;
+        Arg operator ()(Param_values_ptr param_values_ptr_) const;
 
         explicit operator string () const;
         friend string to_string(const Eval& rhs)
@@ -44,7 +56,7 @@ namespace SOS {
             { return (os << to_string(rhs)); }
     protected:
         class Oper;
-        using Oper_ptr = unique_ptr<Oper>;
+        using Oper_ptr = shared_ptr<Oper>;
 
         using Bin_f = function<Arg(Arg, Arg)>;
         using F_key = const string;
@@ -55,24 +67,32 @@ namespace SOS {
                                 typename F_pair<F>::second_type>;
         static const F_map<Bin_f> bin_fs;
 
+        static Param_keys_ptr new_param_keys(Param_keys&& param_keys_)
+            { return make_shared<Param_keys>(move(param_keys_)); }
+        static Param_values_ptr new_param_values(Param_values&& param_values_)
+            { return make_shared<Param_values>(move(param_values_)); }
+        Param_keys* param_keys_link()
+            { return _param_keys_ptr.get(); }
+        Param_values* param_values_link()
+            { return _param_values_ptr.get(); }
         Param_keys& param_keys()
-            { return _param_keys; }
-        Param_values& param_values() const
-            { return _param_values; }
+            { return *_param_keys_ptr; }
         const Oper& coper() const { return _oper; }
         Oper& oper() { return _oper; }
         static Param_keys&& check_keys(Param_keys&& param_keys_);
 
         static Oper_ptr new_oper(Oper&& oper_)
-            { return make_unique<Oper>(move(oper_)); }
+            { return make_shared<Oper>(move(oper_)); }
         static Oper* oper_link(const Oper_ptr& oper_ptr_)
             { return oper_ptr_.get(); }
     private:
         template <typename Cont>
-        Arg call(Cont&& cont) const;
+        void check_param_values(Cont&& cont) const;
+        Arg call() const
+            { return (coper())(); }
 
-        Param_keys _param_keys;
-        mutable Param_values _param_values;
+        Param_keys_ptr _param_keys_ptr;
+        mutable Param_values_ptr _param_values_ptr;
         Oper _oper;
         mutable bool _valid_values{false};
     };
@@ -83,11 +103,10 @@ namespace SOS {
         using Param_keys_link = Param_keys*;
         using Param_values_link = const Param_values*;
 
-        Oper() : _param_keys_l(nullptr), _param_values_l(nullptr),
-                 _oper_ptrs{nullptr, nullptr} { }
+        Oper() = default;
         ~Oper() = default;
-        Oper(const Oper& rhs) = delete;
-        Oper& operator =(const Oper& rhs) = delete;
+        Oper(const Oper& rhs) = default;
+        Oper& operator =(const Oper& rhs) = default;
         Oper(Oper&& rhs) = default;
         Oper& operator =(Oper&& rhs) = default;
         Oper(Param_keys_link param_keys_, Param_values_link param_values_,
@@ -98,7 +117,7 @@ namespace SOS {
         const Param_values& param_values() const
             { return *_param_values_l; }
         size_t size() const
-            { return cparam_keys().size(); }
+            { return param_keys().size(); }
         Arg operator ()() const
             { return _f((_args_lazy.first)(), (_args_lazy.second)()); }
     protected:

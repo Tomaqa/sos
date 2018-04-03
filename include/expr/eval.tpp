@@ -30,21 +30,43 @@ namespace SOS {
 
     template <typename Arg>
     template <typename Cont>
-    Arg Expr::Eval<Arg>::call(Cont&& cont) const
+    void Expr::Eval<Arg>::check_param_values(Cont&& cont) const
     {
         expect(cont.size() == size(),
                "Count of parameters mismatch: expected "s + to_string(size())
                + ", got " + to_string(cont.size()));
-        param_values() = forward<Cont>(cont);
         _valid_values = true;
-        return (coper())();
+    }
+
+    template <typename Arg>
+    Arg Expr::Eval<Arg>::operator ()(initializer_list<Arg> list) const
+    {
+        check_param_values(list);
+        param_values() = move(list);
+        return call();
+    }
+
+    template <typename Arg>
+    Arg Expr::Eval<Arg>::operator ()(Param_values param_values_) const
+    {
+        check_param_values(param_values_);
+        param_values() = move(param_values_);
+        return call();
+    }
+
+    template <typename Arg>
+    Arg Expr::Eval<Arg>::operator ()(Param_values_ptr param_values_ptr_) const
+    {
+        check_param_values(*param_values_ptr_);
+        param_values_ptr() = move(param_values_ptr_);
+        return call();
     }
 
     template <typename Arg>
     Expr::Eval<Arg>::operator string () const
     {
         string str = "[ "s + to_string(cparam_keys()) + "]";
-        if (_valid_values) str += " <-- [ " + to_string(cparam_values()) + "]";
+        if (_valid_values) str += " <-- [ " + to_string(param_values()) + "]";
         return move(str);
     }
 
@@ -98,9 +120,9 @@ namespace SOS {
     typename Expr::Eval<Arg>::Oper::Arg_lazy
         Expr::Eval<Arg>::Oper::param_lazy(const Param_key& key_) const
     {
-        const Param_values& param_values_ = param_values();
         auto it = set_param_key(key_);
-        int idx = distance(std::begin(param_keys()), it);
+        int idx = std::distance(std::begin(param_keys()), it);
+        const Param_values& param_values_ = param_values();
         return [&param_values_, idx](){ return param_values_[idx]; };
     }
 

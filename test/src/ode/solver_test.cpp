@@ -15,6 +15,19 @@ namespace SOS {
         }
 
         /////////////////////////////////////////////////////////////////
+
+        using Param_keys = Solver::Param_keys;
+        using Unified_output = pair<bool, Param_keys>;
+
+        Unified_output unified_res(const Euler& solver, bool, Dummy&)
+        {
+            Param_keys param_keys_;
+            bool unified = solver.is_unified();
+            if (unified) param_keys_ = solver.cunif_param_keys();
+            return Unified_output(unified, param_keys_);
+        }
+
+        /////////////////////////////////////////////////////////////////
     }
 }
 
@@ -62,9 +75,12 @@ int main(int, const char*[])
         {"(0 10)(1 2 (1))",                                          {},        {{0, 10}, {0}}                                               },
     };
 
-    // Test_data<Dummy, string, Odes_spec> odes_data = {
-    //     {{{"1"}},                                                    {},        {{0, 10}, {0}}                                               },
-    // }
+    Test_data<Dummy, Unified_output, Euler> unified_data = {
+        // {  {},                                                       {},           {true, {}}                   },
+        {  {{ {{"+ 1 2"}} }, { {{"x"}} }},                                                       {},           {true, {"x"}},                   },
+        {  {{ {{"+ 1 x"}} }, { {{"x"}} }},                                                       {},           {true, {"x"}},                   },
+        // {  {{ {{"+ 1 x"}, {"- x 5"}} }, { {{"x"}} }},                                            {},           true,                         },
+    };
 
 /////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////
@@ -73,19 +89,22 @@ int main(int, const char*[])
     test<Dummy, Context, string>(context_data, context_res, context_msg);
     test<Dummy, Context, string>(context_throw_data, context_res, context_msg, true);
 
-    try {
-        cout << Euler({{{"+ 1 2"}}}, {{{"x"}}}) << endl << endl;
-        cout << Euler({{{"+ 1 x"}}}, {{{"x"}}}) << endl << endl;
-        cout << Euler({{{"+ 1 2"}, {"- x 5"}}}, {{{"x"}}}) << endl << endl;
-        cout << Euler({{{"+ 1 2"}, {"- x 5"}}}, {{{"x"}, {"y"}}}) << endl << endl;
-        cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}}, {{"y"}}}) << endl << endl;
-        cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}, {"y"}}}) << endl << endl;
-        cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}, {"y"}}, {{"x"}, {"y"}}}) << endl << endl;
-    }
-    catch (const Error& e) {
-        cerr << e << endl;
-        throw;
-    }
+    string unified_msg = "building of solvers";
+    test<Dummy, Unified_output, Euler>(unified_data, unified_res, unified_msg);
+
+    // try {
+    //     cout << Euler({{{"+ 1 2"}}}, {{{"x"}}}) << endl << endl;
+    //     cout << Euler({{{"+ 1 x"}}}, {{{"x"}}}) << endl << endl;
+    //     cout << Euler({{{"+ 1 2"}, {"- x 5"}}}, {{{"x"}}}) << endl << endl;
+    //     cout << Euler({{{"+ 1 2"}, {"- x 5"}}}, {{{"x"}, {"y"}}}) << endl << endl;
+    //     cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}}, {{"y"}}}) << endl << endl;
+    //     cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}, {"y"}}}) << endl << endl;
+    //     cout << Euler({{{"+ 1 2"}, {"- x 5"}}, {{"- 1"}}}, {{{"x"}, {"y"}}, {{"x"}, {"y"}}}) << endl << endl;
+    // }
+    // catch (const Error& e) {
+    //     cerr << e << endl;
+    //     throw;
+    // }
 
     cout << endl << "Success." << endl;
     return 0;

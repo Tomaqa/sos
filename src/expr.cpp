@@ -2,18 +2,21 @@
 
 namespace SOS {
     Expr::Expr(const Expr& rhs)
-        : _is_binary(rhs._is_binary)
+        : _is_simplified(rhs._is_simplified),
+          _is_binary(rhs._is_binary),
+          _is_flatten(rhs._is_flatten)
     {
         _places.reserve(rhs.size());
         for (const auto& e : rhs) {
             add_place_ptr(e->clone());
+            // ? shared_ptr
         }
     }
 
     Expr& Expr::operator =(const Expr& rhs)
     {
         Expr tmp(rhs);
-        swap(tmp);
+        std::swap(*this, tmp);
         return *this;
     }
 

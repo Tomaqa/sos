@@ -28,18 +28,13 @@ namespace SOS {
             // (pokud je obsazen)
             // + parametr derivovane funkce MUSI byt obsazen:
             // a) unifikovane klice: pozice [ode_id]
-            // b) pozice [0]
+            // b) jinak: pozice [0]
             // nederivovane parametry musi byt az za temito; "t" je posledni
-            // klice jsou bud sdilene mezi vsemi ODE, nebo jsou ruzne,
-            // pak se lisi jestli je zadano voladni 'solve_unif_odes' nebo 'solve_odes'
-            // Unifikace je ale vec konvence a zodpovednost uzivatele, hlidat to by bylo zbytecne slozite
-            // Nevkladani klicu (vytvoreni z vyrazu) zatim nebudu vubec povolovat,
-            // nenapada me k cemu by bylo dobre a je to nebezpecne
 
             Solver() = default;
             virtual ~Solver() = default;
-            Solver(const Solver& rhs) = delete;
-            Solver& operator =(const Solver& rhs) = delete;
+            Solver(const Solver& rhs) = default;
+            Solver& operator =(const Solver& rhs) = default;
             Solver(Solver&& rhs) = default;
             Solver& operator =(Solver&& rhs) = default;
             Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
@@ -50,8 +45,10 @@ namespace SOS {
             void set_step_size(Time step_size_) noexcept
                 { _step_size = step_size_; }
             void add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_);
-            bool is_unified() const;
+            bool is_unified(bool eval_if_unknown = true) const;
             void unify(); // not implemented yet
+            Param_keyss cparam_keyss() const;
+            const Param_keys& cunif_param_keys() const;
 
             virtual Real solve_ode(Dt_id dt_id_,
                                    Context context_,
@@ -82,7 +79,7 @@ namespace SOS {
 
             static bool valid_keys(const Param_keys& param_keys_)
                 { return param_keys_.size() >= 1; }
-            static void check_keys(const Param_keys& param_keys_)
+            static void check_param_keys(const Param_keys& param_keys_)
                 { expect(valid_keys(param_keys_),
                          "Invalid parameter keys: "s
                          + to_string(param_keys_)); }
@@ -108,6 +105,10 @@ namespace SOS {
             using Dt_eval_params = Dt_eval::Param_values;
 
             void modified();
+            static const Param_keys& code_param_keys(const Ode_eval& ode_eval_)
+                { return ode_eval_.front().cparam_keys(); }
+            const Param_keys& cunif_param_keys_wo_check() const
+                { return code_param_keys(codes_eval().front()); }
             static bool dt_has_param_t(const Dt_eval& dt_eval_)
                 { return dt_eval_.cparam_keys().back() == "t"; }
             static bool ode_has_param_t(const Ode_eval& ode_eval_)

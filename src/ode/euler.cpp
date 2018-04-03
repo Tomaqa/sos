@@ -17,7 +17,6 @@ namespace SOS {
                  t < et; t += h) {
                 dx += h * f(x, t);
             }
-
             return dx;
         }
     }

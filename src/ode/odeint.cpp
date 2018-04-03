@@ -2,10 +2,10 @@
 
 #include <boost/numeric/odeint/integrate/integrate.hpp>     //< the integrate routines.
 
-namespace odeint = boost::numeric::odeint;
-
 namespace SOS {
     namespace ODE {
+        namespace odeint = boost::numeric::odeint;
+
         Real Odeint::solve_ode(Dt_id dt_id_,
                                Context context_, Ode_id ode_id_) const
         {
@@ -22,7 +22,6 @@ namespace SOS {
             return x[0];
         }
 
-        // State Odeint::solve_unif_odes(Dt_ids dt_ids_, Context context_) const
         State Odeint::eval_unif_odes(Dt_ids&& dt_ids_, Context&& context_) const
         {
             State x = move(context_.cx_init());

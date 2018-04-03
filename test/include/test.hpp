@@ -1,6 +1,9 @@
 #include "sos.hpp"
+#include "util.hpp"
 
 namespace SOS {
+    using namespace Util;
+
     namespace Test {
 
         struct Dummy{};
