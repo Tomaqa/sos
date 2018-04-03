@@ -58,7 +58,8 @@ namespace SOS {
     Arg Expr::Eval<Arg>::operator ()(Param_values_ptr param_values_ptr_) const
     {
         check_param_values(*param_values_ptr_);
-        param_values_ptr() = move(param_values_ptr_);
+        // param_values_ptr() = move(param_values_ptr_);
+        param_values_ptr() = param_values_ptr_;
         return call();
     }
 
@@ -122,15 +123,20 @@ namespace SOS {
     {
         auto it = set_param_key(key_);
         int idx = std::distance(std::begin(param_keys()), it);
-        const Param_values& param_values_ = param_values();
-        return [&param_values_, idx](){ return param_values_[idx]; };
+        // const Param_values& param_values_ = param_values();
+        // return [&param_values_, idx](){ return param_values_[idx]; };
+        // const Param_values *const param_values_link_ = &param_values();
+        // return [param_values_link_, idx](){ return (*param_values_link_)[idx]; };
+        const Param_values_ptr& param_values_ptr_ = cparam_values_ptr();
+        return [param_values_ptr_, idx](){ return (*param_values_ptr_)[idx]; };
     }
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Oper::Arg_lazy
         Expr::Eval<Arg>::Oper::oper_lazy(const Oper_ptr& oper_ptr_) const
     {
-        const Oper *const oper_link_ = oper_link(oper_ptr_);
-        return [oper_link_](){ return (*oper_link_)(); };
+        // const Oper *const oper_link_ = oper_link(oper_ptr_);
+        // return [oper_link_](){ return (*oper_link_)(); };
+        return [oper_ptr_](){ return (*oper_ptr_)(); };
     }
 }

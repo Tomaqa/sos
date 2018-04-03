@@ -11,9 +11,20 @@ namespace SOS {
         string expr_res(const string& input, bool should_throw, Params_expr& params)
         {
             Expr expr(input);
-            if (params.first) expr.simplify();
-            if (params.second) expr.to_binary();
+            Expr expr2(expr);
+            if (params.first) {
+                expr.simplify();
+                expr2.simplify();
+            }
+            if (params.second) {
+                expr.to_binary();
+                expr2.to_binary();
+            }
             if (!should_throw) {
+                expect(expr == expr2,
+                       "Result differ with copy of itself: "s
+                       + to_string(expr) + " != " + to_string(expr2));
+
                 cout << input << " -> " << to_string(expr) << endl;
             }
             return move(to_string(expr));
@@ -84,20 +95,54 @@ namespace SOS {
             Expr expr(input);
             Eval_t<Arg> eval1(expr, params._keys);
             Eval_t<Arg> eval2(eval1);
+            Eval_t<Arg> eval3(expr, eval1.cparam_keys_ptr());
+            Eval_t<Arg> eval4(expr, eval1.cparam_keys_ptr(),
+                              eval1.param_values_ptr());
             Arg res1 = eval1(params._values);
             Arg res2 = eval2(params._values);
+            Arg res3 = eval3(params._values);
+            Arg res4 = eval4(params._values);
             Arg res12 = eval1(params._values);
             Arg res22 = eval2(params._values);
+            Arg res32 = eval3(params._values);
+            Arg res42 = eval4(params._values);
+            Arg res23 = eval2(eval1.param_values_ptr());
+            Arg res33 = eval3(eval1.param_values_ptr());
+            Arg res43 = eval4(eval1.param_values_ptr());
             if (!should_throw) {
                 expect(res1 == res2,
-                       "Result of two copies differ: "s
+                       "Result differ with copy of itself: "s
                        + to_string(res1) + " != " + to_string(res2));
+                expect(res1 == res3,
+                       "Result differ with copy of keys pointer: "s
+                       + to_string(res1) + " != " + to_string(res3));
+                expect(res1 == res4,
+                       "Result differ with copy of both parameter pointers: "s
+                       + to_string(res1) + " != " + to_string(res4));
+
                 expect(res1 == res12,
                        "Results of two consecutive evaluations differ: "s
                        + to_string(res1) + " != " + to_string(res12));
-                expect(res1 == res12,
+                expect(res2 == res22,
                        "Results of two consecutive evaluations of copy differ: "s
                        + to_string(res2) + " != " + to_string(res22));
+                expect(res3 == res32,
+                       "Results of two consecutive evaluations of keys pointer copy differ: "s
+                       + to_string(res3) + " != " + to_string(res32));
+                expect(res4 == res42,
+                       "Results of two consecutive evaluations of both param. pointers copy differ: "s
+                       + to_string(res4) + " != " + to_string(res42));
+
+                expect(res1 == res23,
+                       "Result differ with calling parameters by pointer at copy of itself: "s
+                       + to_string(res1) + " != " + to_string(res23));
+                expect(res1 == res33,
+                       "Result differ with calling parameters by pointer at copy of keys pointer: "s
+                       + to_string(res1) + " != " + to_string(res33));
+                expect(res1 == res43,
+                       "Result differ with calling parameters by pointer at copy of both param. pointers: "s
+                       + to_string(res1) + " != " + to_string(res43));
+
                 print_expr_eval_res(expr, eval1, params, res1);
             }
             return res1;

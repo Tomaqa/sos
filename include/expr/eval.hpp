@@ -26,8 +26,10 @@ namespace SOS {
         Eval(const Expr& expr_,
              Param_keys_ptr param_keys_ptr_,
              Param_values_ptr param_values_ptr_ = new_param_values({}))
-            : _param_keys_ptr(move(param_keys_ptr_)),
-              _param_values_ptr(move(param_values_ptr_)),
+            // : _param_keys_ptr(move(param_keys_ptr_)),
+            //   _param_values_ptr(move(param_values_ptr_)),
+            : _param_keys_ptr(param_keys_ptr_),
+              _param_values_ptr(param_values_ptr_),
               _oper(param_keys_link(), param_values_link(), expr_) { }
         Eval(const Expr& expr_, Param_keys param_keys_ = {})
             : Eval(expr_, new_param_keys({check_keys(move(param_keys_))})) { }
@@ -71,10 +73,14 @@ namespace SOS {
             { return make_shared<Param_keys>(move(param_keys_)); }
         static Param_values_ptr new_param_values(Param_values&& param_values_)
             { return make_shared<Param_values>(move(param_values_)); }
-        Param_keys* param_keys_link()
-            { return _param_keys_ptr.get(); }
-        Param_values* param_values_link()
-            { return _param_values_ptr.get(); }
+        // Param_keys* param_keys_link()
+            // { return _param_keys_ptr.get(); }
+        Param_keys_ptr param_keys_link()
+            { return _param_keys_ptr; }
+        // Param_values* param_values_link()
+            // { return _param_values_ptr.get(); }
+        Param_values_ptr param_values_link()
+            { return _param_values_ptr; }
         Param_keys& param_keys()
             { return *_param_keys_ptr; }
         const Oper& coper() const { return _oper; }
@@ -100,8 +106,8 @@ namespace SOS {
     template <typename Arg>
     class Expr::Eval<Arg>::Oper {
     public:
-        using Param_keys_link = Param_keys*;
-        using Param_values_link = const Param_values*;
+        using Param_keys_link = Param_keys_ptr;
+        using Param_values_link = Param_values_ptr;
 
         Oper() = default;
         ~Oper() = default;
@@ -112,12 +118,16 @@ namespace SOS {
         Oper(Param_keys_link param_keys_, Param_values_link param_values_,
              const Expr& expr_);
 
+        size_t size() const
+            { return param_keys().size(); }
         Param_keys& param_keys() const
             { return *_param_keys_l; }
         const Param_values& param_values() const
             { return *_param_values_l; }
-        size_t size() const
-            { return param_keys().size(); }
+        const Param_keys_ptr& cparam_keys_ptr() const
+            { return _param_keys_l; }
+        const Param_values_ptr& cparam_values_ptr() const
+            { return _param_values_l; }
         Arg operator ()() const
             { return _f((_args_lazy.first)(), (_args_lazy.second)()); }
     protected:
