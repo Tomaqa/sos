@@ -38,6 +38,18 @@ namespace SOS {
             modified();
         }
 
+        bool Solver::valid_keys(const Param_keys& param_keys_)
+        {
+            return param_keys_.size() >= 1;
+        }
+
+        void Solver::check_param_keys(const Param_keys& param_keys_)
+        {
+            expect(valid_keys(param_keys_),
+                   "Invalid parameter keys: "s
+                   + to_string(param_keys_));
+        }
+
         Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_,
                                                  Param_keys param_keys_)
         {
@@ -60,10 +72,11 @@ namespace SOS {
             if (_is_unified.is_valid()) return _is_unified.is_set();
             if (!eval_if_unknown) return false;
             const Param_keys& keys0 = cunif_param_keys_wo_check();
-            const bool res = (all_of(codes_eval(),
-                                     [&keys0](const Ode_eval& oeval) {
-                                         return code_param_keys(oeval) == keys0;
-                                     }));
+            const bool res =
+                (all_of(codes_eval(),
+                        [&keys0](const Ode_eval& oeval){
+                            return code_param_keys(oeval) == keys0;
+                        }));
             _is_unified.set(res);
             return res;
         }
@@ -74,6 +87,16 @@ namespace SOS {
             const bool res = ode_has_param_t(codes_eval()[ode_id_]);
             _has_param_t.set(res);
             return res;
+        }
+
+        bool Solver::ode_has_param_t(const Ode_eval& ode_eval_)
+        {
+            return dt_has_param_t(ode_eval_.front());
+        }
+
+        bool Solver::dt_has_param_t(const Dt_eval& dt_eval_)
+        {
+            return dt_eval_.cparam_keys().back() == "t";
         }
 
         Solver::Param_keyss Solver::cparam_keyss() const
@@ -89,6 +112,17 @@ namespace SOS {
         {
             expect(is_unified(), "Parameter keys are not unified.");
             return cunif_param_keys_wo_check();
+        }
+
+        const Solver::Param_keys&
+            Solver::code_param_keys(const Ode_eval& ode_eval_)
+        {
+            return ode_eval_.front().cparam_keys();
+        }
+
+        const Solver::Param_keys& Solver::cunif_param_keys_wo_check() const
+        {
+            return code_param_keys(codes_eval().front());
         }
 
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
@@ -114,7 +148,9 @@ namespace SOS {
             int size_ = size();
             res.reserve(size_);
             for (int i = 0; i < size_; i++) {
-                res.emplace_back(solve_ode(dt_ids_[i], move(contexts_[i]), i));
+                res.emplace_back(solve_ode(dt_ids_[i],
+                                           move(contexts_[i]),
+                                           i));
             }
             return move(res);
         }
@@ -144,6 +180,20 @@ namespace SOS {
             transform(codes_eval(), std::begin(dt_ids_), std::begin(dx), f);
         }
 
+        State Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
+                                          const State& x, Time t) const
+        {
+            State dx;
+            eval_unif_odes_step(dt_ids_, dx, x, t);
+            return move(dx);
+        }
+
+        void Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
+                                   Real& dx, const State& x, Time t) const
+        {
+            dx = eval_ode_step(ode_eval_, dt_id_, x, t);
+        }
+
         Real Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
                                    const State& x, Time t) const
         {
@@ -160,6 +210,12 @@ namespace SOS {
             return eval_dt_step(dt_eval_, move(params));
         }
 
+        Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
+                                  Dt_eval_params params) const
+        {
+            return dt_eval_(move(params));
+        }
+
         Solver::operator string () const
         {
             string str("");
@@ -169,17 +225,36 @@ namespace SOS {
                 const Ode_spec& ospec = spec[oid];
                 const Ode_eval& oeval = eval[oid];
                 str += "ODE [" + to_string(oid) + "]\n";
-                for (Dt_id did = 0, osize = ospec.size(); did < osize; ++did) {
+                for (Dt_id did = 0, osize = ospec.size();
+                     did < osize; ++did) {
                     const Dt_spec& dspec = ospec[did];
                     const Dt_eval& deval = oeval[did];
                     const Param_keys& deval_keys = deval.cparam_keys();
-                    str += "  [" + to_string(did) + "]d" + deval_keys[0] + "/dt = "
+                    str += "  [" + to_string(did) + "]d"
+                        + deval_keys[0] + "/dt = "
                         + to_string(dspec) + to_string(deval)
                         + (is_unified() ? "*" : "") + "\n";
                 }
                 str += "\n";
             }
             return move(str);
+        }
+
+        string to_string(const Solver& rhs)
+        {
+            return move((string)rhs);
+        }
+
+        ostream& operator <<(ostream& os, const Solver& rhs)
+        {
+            return (os << to_string(rhs));
+        }
+
+        Solver::Context::Context(Interval<Time> t_bounds_, State x_init_)
+            : _t_bounds(move(t_bounds_)),
+              _x_init(move(x_init_))
+        {
+            check_values();
         }
 
         Solver::Context::Context(const string& input)
@@ -189,7 +264,8 @@ namespace SOS {
             expect(!expr[0]->is_token() && expr.cto_expr(0).size() == 2,
                    "Two tokens of time bounds expected.");
             const Expr& t_subexpr = expr.cto_expr(0);
-            expect(t_subexpr.is_flat(), "No further subexpressions expected.");
+            expect(t_subexpr.is_flat(),
+                   "No further subexpressions expected.");
             expect(t_subexpr.cto_token(0).get_value_check<Real>(t_init())
                    && t_subexpr.cto_token(1).get_value_check<Real>(t_end()),
                    "Invalid values of time bounds.");
@@ -197,7 +273,8 @@ namespace SOS {
             expect(!expr[1]->is_token(),
                    "Initial values must be enclosed in subexpression.");
             const Expr& x_subexpr = expr.cto_expr(1);
-            expect(x_subexpr.is_flat(), "No further subexpressions expected.");
+            expect(x_subexpr.is_flat(),
+                   "No further subexpressions expected.");
             x_init() = move(x_subexpr.flat_transform<Real>());
 
             check_values();
@@ -210,8 +287,8 @@ namespace SOS {
         {
             expect(ct_init() <= ct_end(),
                    "Invalid time interval: "s
-                   + to_string(ct_init()) + ", "
-                   + to_string(ct_end()));
+                   + std::to_string(ct_init()) + ", "
+                   + std::to_string(ct_end()));
         }
 
         Solver::Context::operator string () const
@@ -220,7 +297,18 @@ namespace SOS {
                           + " ( " + to_string(cx_init()) + ")";
         }
 
-        bool operator ==(const Solver::Context& lhs, const Solver::Context& rhs)
+        string to_string(const Solver::Context& rhs)
+        {
+            return move((string)rhs);
+        }
+
+        ostream& operator <<(ostream& os, const Solver::Context& rhs)
+        {
+            return (os << to_string(rhs));
+        }
+
+        bool operator ==(const Solver::Context& lhs,
+                         const Solver::Context& rhs)
         {
             return lhs.ct_bounds() == rhs.ct_bounds()
                 && lhs.cx_init() == rhs.cx_init();

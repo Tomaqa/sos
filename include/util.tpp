@@ -1,30 +1,16 @@
 namespace SOS {
     template <typename Key, typename Value>
-    class Util::Const_map {
-    public:
-        using Map = map<Key, Value>;
+    bool Util::Const_map<Key, Value>::includes(const Key& key_) const noexcept
+    {
+        return _map.count(key_) == 1;
+    }
 
-        Const_map(const Const_map& cmap) = default;
-        Const_map& operator =(const Const_map& cmap) = default;
-        Const_map(Const_map&& cmap) = default;
-        Const_map& operator =(Const_map&& cmap) = default;
-        Const_map(Map&& map_) : _map(map_) { }
-        Const_map(initializer_list<pair<const Key, Value>> list)
-            : _map{list} { }
-
-        bool includes(const Key& key_) const noexcept
-            { return _map.count(key_) == 1; }
-        const Value& operator [](const Key& key_) const
-            { return _map.at(key_); }
-        const auto cbegin() const { return std::cbegin(_map); }
-        const auto cend() const { return std::cend(_map); }
-        const auto begin() const { return std::begin(_map); }
-        const auto end() const { return std::end(_map); }
-        auto begin() { return std::begin(_map); }
-        auto end() { return std::end(_map); }
-    private:
-        Map _map;
-    };
+    template <typename Key, typename Value>
+    const Value& Util::Const_map<Key, Value>
+        ::operator [](const Key& key_) const
+    {
+        return _map.at(key_);
+    }
 
     template <typename Cont, typename Un_f>
     Un_f Util::for_each(Cont& cont, Un_f f)

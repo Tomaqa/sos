@@ -50,31 +50,23 @@ class SOS::Error {
 public:
     Error(const string& msg_ = "") : _msg(msg_) { }
 
-    explicit operator string () const
-        { return _msg; }
-    friend const string& to_string(const Error& rhs)
-        { return rhs._msg; }
-    friend ostream& operator <<(ostream& os, const Error& rhs)
-        { return (os << to_string(rhs)); }
-    Error operator +(const string& rhs) const
-        { return Error(_msg + rhs); }
-    friend Error operator +(const string& lhs, const Error& rhs)
-        { return Error(lhs + rhs._msg); }
-    Error& operator +=(const string& rhs)
-        { _msg += rhs; return *this; }
+    explicit operator string () const                         { return _msg; }
+    friend const string& to_string(const Error& rhs)      { return rhs._msg; }
+    friend ostream& operator <<(ostream& os, const Error& rhs);
+    Error operator +(const string& rhs) const;
+    friend Error operator +(const string& lhs, const Error& rhs);
+    Error& operator +=(const string& rhs);
 private:
     string _msg;
 };
 
 namespace std {
-    template <typename T>
-    string to_string(const vector<T>& rhs);
+    template <typename T> string to_string(const vector<T>& rhs);
 
     template <typename T1, typename T2>
-    string to_string(const pair<T1, T2>& rhs);
+        string to_string(const pair<T1, T2>& rhs);
 
-    inline const string& to_string(const string& rhs)
-        { return rhs; }
+    inline const string& to_string(const string& rhs)          { return rhs; }
 }
 
 #include "sos.tpp"

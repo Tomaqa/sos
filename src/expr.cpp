@@ -1,6 +1,36 @@
 #include "expr.hpp"
 
 namespace SOS {
+    string to_string(const Expr_place& rhs)
+    {
+        return move((string)rhs);
+    }
+
+    ostream& operator <<(ostream& os, const Expr_place& rhs)
+    {
+        return (os << to_string(rhs));
+    }
+
+    bool operator ==(const Expr_place& lhs, const Expr_place& rhs)
+    {
+        return to_string(lhs) == to_string(rhs);
+    }
+
+    bool operator !=(const Expr_place& lhs, const Expr_place& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    Expr_place::Expr_place_ptr Expr_token::clone() const
+    {
+        return new_place(Expr_token(*this));
+    }
+
+    Expr_place::Expr_place_ptr Expr::clone() const
+    {
+        return new_place(Expr(*this));
+    }
+
     Expr::Expr(const Expr& rhs)
         : _is_simplified(rhs._is_simplified),
           _is_binary(rhs._is_binary),
@@ -9,7 +39,6 @@ namespace SOS {
         _places.reserve(rhs.size());
         for (const auto& e : rhs) {
             add_place_ptr(e->clone());
-            // ? shared_ptr
         }
     }
 
@@ -30,7 +59,9 @@ namespace SOS {
         iss >> std::noskipws;
         while (iss >> c) {
             if (!isprint(c)) {
-                expect(c == 0, "Unexpected non-printable character ("s + to_string((int)c) + ")");
+                expect(c == 0,
+                       "Unexpected non-printable character ("s
+                       + to_string((int)c) + ")");
             }
             if (isspace(c)) continue;
             if (c == '(') {
@@ -42,7 +73,8 @@ namespace SOS {
                     closed = true;
                     break;
                 }
-                expect(depth > 0, "Unexpected closing brace in top level expression.");
+                expect(depth > 0,
+                       "Unexpected closing brace in top level expression.");
                 closed = true;
                 break;
             }
@@ -79,6 +111,76 @@ namespace SOS {
             str += to_string(*e) + " ";
         }
         return (str += ")");
+    }
+
+    const Expr_place::Expr_place_ptr& Expr::operator [](int idx) const
+    {
+        return _places[idx];
+    }
+
+    Expr_place::Expr_place_ptr& Expr::operator [](int idx)
+    {
+        return _places[idx];
+    }
+
+    const Expr_place::Expr_place_ptr& Expr::cfront() const
+    {
+        return _places.front();
+    }
+
+    const Expr_place::Expr_place_ptr& Expr::cback() const
+    {
+        return _places.back();
+    }
+
+    Expr_place::Expr_place_ptr& Expr::front()
+    {
+        return _places.front();
+    }
+
+    Expr_place::Expr_place_ptr& Expr::back()
+    {
+        return _places.back();
+    }
+
+    const Expr_token& Expr::cptr_to_token(const Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr_token&>(*place_ptr);
+    }
+
+    const Expr& Expr::cptr_to_expr(const Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr&>(*place_ptr);
+    }
+
+    Expr_token& Expr::ptr_to_token(Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr_token&>(*place_ptr);
+    }
+
+    Expr& Expr::ptr_to_expr(Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr&>(*place_ptr);
+    }
+
+    const Expr_token& Expr::cto_token(int idx) const
+    {
+        return cptr_to_token((*this)[idx]);
+    }
+
+    const Expr& Expr::cto_expr(int idx) const
+    {
+        return cptr_to_expr((*this)[idx]);
+    }
+
+    Expr_token& Expr::to_token(int idx)
+    {
+        return ptr_to_token((*this)[idx]);
+    }
+
+    Expr& Expr::to_expr(int idx)
+    {
+        return ptr_to_expr((*this)[idx]);
     }
 
     Expr& Expr::simplify() noexcept
@@ -133,6 +235,12 @@ namespace SOS {
             ptr_to_expr(e).to_binary();
         }
         return *this;
+    }
+
+    bool Expr::is_flat() const
+    {
+        return std::all_of(cbegin(), cend(),
+                           bind(&Expr_place::is_token, _1));
     }
 
     Expr& Expr::flatten()

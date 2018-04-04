@@ -1,4 +1,32 @@
 namespace SOS {
+    template <typename T>
+    Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)
+    {
+        return make_unique<T>(forward<T>(place_));
+    }
+
+    template <typename Arg>
+    bool Expr_token::get_value_check(Arg& arg) const
+    {
+        istringstream iss(_token);
+        return (bool)(iss >> arg);
+    }
+
+    template <typename Arg>
+    Arg Expr_token::get_value() const
+    {
+        Arg arg;
+        get_value_check(arg);
+        return arg;
+    }
+
+    template <typename Arg>
+    bool Expr_token::is_value() const
+    {
+        Arg v;
+        return get_value_check(v);
+    }
+
     template <typename Arg>
     bool Expr::has_values() const
     {
@@ -22,5 +50,40 @@ namespace SOS {
                             bind(&Expr::cptr_to_token, _1))
                        );
         return move(elems);
+    }
+
+    template <typename Arg>
+    Expr::Eval<Arg> Expr::get_eval(typename Eval<Arg>::Param_keys param_keys_)
+    {
+        return {to_binary(), move(param_keys_)};
+    }
+
+    template <typename Arg>
+    Expr::Eval<Arg>
+        Expr::get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_)
+    {
+        return {to_binary(), move(param_keys_ptr_)};
+
+    }
+
+    template <typename Arg>
+    Expr::Eval<Arg>
+        Expr::get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_,
+                       typename Eval<Arg>::Param_values_ptr
+                           param_values_ptr_)
+    {
+        return {to_binary(), move(param_keys_ptr_), move(param_values_ptr_)};
+    }
+
+    template <typename T>
+    void Expr::add_place_ptr(T&& place_ptr_)
+    {
+        _places.emplace_back(forward<T>(place_ptr_));
+    }
+
+    template <typename T>
+    void Expr::add_new_place(T&& place_)
+    {
+        add_place_ptr(new_place(forward<T>(place_)));
     }
 }

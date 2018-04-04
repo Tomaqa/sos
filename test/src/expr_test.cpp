@@ -8,7 +8,8 @@ namespace SOS {
         ///////////////////////////////////////////////////////////////
 
         using Params_expr = pair<bool, bool>;
-        string expr_res(const string& input, bool should_throw, Params_expr& params)
+        string expr_res(const string& input, bool should_throw,
+                        Params_expr& params)
         {
             Expr expr(input);
             Expr expr2(expr);
@@ -43,12 +44,13 @@ namespace SOS {
             Expr expr2(expr);
             if (!should_throw) {
                 expect(expr.flatten().is_flat(),
-                       "'is_flat()' is false after 'flatten()': '"s + to_string(expr) + "'");
+                       "'is_flat()' is false after 'flatten()': '"s
+                       + to_string(expr) + "'");
                 expect(expr2.simplify().flatten().is_flat(),
                        "'is_flat()' is false after 'simplify().flatten()': '"s
                        + to_string(expr2) + "'");
                 expect(expr == expr2,
-                       "Flatten versions with and without 'simplify() differ: '"s
+                       "Flatten versions with/without 'simplify() differ: '"s
                        + to_string(expr) + "' != '"
                        + to_string(expr2) + "'");
                 cout << input << " -> " << to_string(expr) << endl;
@@ -71,16 +73,19 @@ namespace SOS {
 
         template <typename Arg>
         using Eval_t = Expr::Eval<Arg>;
-        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        template <typename Arg,
+                  typename Param_values = typename Eval_t<Arg>::Param_values>
         struct Params_eval {
             typename Eval_t<Arg>::Param_keys _keys;
             Param_values _values;
             bool _quiet{false};
         };
 
-        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        template <typename Arg,
+                  typename Param_values = typename Eval_t<Arg>::Param_values>
         void print_expr_eval_res(const Expr& expr, const Eval_t<Arg>& eval,
-                                 Params_eval<Arg, Param_values>& params, Arg res)
+                                 Params_eval<Arg, Param_values>& params,
+                                 Arg res)
         {
             if (params._quiet) return;
             params._quiet = true;
@@ -88,7 +93,8 @@ namespace SOS {
             cout << "  =? " << res << endl;
         }
 
-        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        template <typename Arg,
+                  typename Param_values = typename Eval_t<Arg>::Param_values>
         Arg eval_res(const string& input, bool should_throw,
                      Params_eval<Arg, Param_values>& params)
         {
@@ -124,23 +130,29 @@ namespace SOS {
                        "Results of two consecutive evaluations differ: "s
                        + to_string(res1) + " != " + to_string(res12));
                 expect(res2 == res22,
-                       "Results of two consecutive evaluations of copy differ: "s
+                       "Results of two consecutive evaluations "s
+                       + "of copy differ: "
                        + to_string(res2) + " != " + to_string(res22));
                 expect(res3 == res32,
-                       "Results of two consecutive evaluations of keys pointer copy differ: "s
+                       "Results of two consecutive evaluations "s
+                       + "of keys pointer copy differ: "
                        + to_string(res3) + " != " + to_string(res32));
                 expect(res4 == res42,
-                       "Results of two consecutive evaluations of both param. pointers copy differ: "s
+                       "Results of two consecutive evaluations "s
+                       + " of both param. pointers copy differ: "
                        + to_string(res4) + " != " + to_string(res42));
 
                 expect(res1 == res23,
-                       "Result differ with calling parameters by pointer at copy of itself: "s
+                       "Result differ with calling parameters "s
+                       + "by pointer at copy of itself: "
                        + to_string(res1) + " != " + to_string(res23));
                 expect(res1 == res33,
-                       "Result differ with calling parameters by pointer at copy of keys pointer: "s
+                       "Result differ with calling parameters "s
+                       + "by pointer at copy of keys pointer: "
                        + to_string(res1) + " != " + to_string(res33));
                 expect(res1 == res43,
-                       "Result differ with calling parameters by pointer at copy of both param. pointers: "s
+                       "Result differ with calling parameters "s
+                       + "by pointer at copy of both param. pointers: "
                        + to_string(res1) + " != " + to_string(res43));
 
                 print_expr_eval_res(expr, eval1, params, res1);
@@ -148,7 +160,8 @@ namespace SOS {
             return res1;
         }
 
-        template <typename Arg, typename Param_values = typename Eval_t<Arg>::Param_values>
+        template <typename Arg,
+                  typename Param_values = typename Eval_t<Arg>::Param_values>
         Arg expr_get_eval_res(const string& input, bool should_throw,
                               Params_eval<Arg, Param_values>& params)
         {
@@ -161,10 +174,11 @@ namespace SOS {
 
             if (!should_throw) {
                 expect(res1 == res2,
-                       "Results of two consecutive 'Expr::get_eval's differ: "s
+                       "Results of two consecutive 'Expr::get_eval' differ: "s
                        + to_string(res1) + " != " + to_string(res2));
                 expect(res2 == res3,
-                       "Results of 'Expr::get_eval' and direct 'Expr::eval' differ: "s
+                       "Results of 'Expr::get_eval' "s
+                       + "and direct 'Expr::eval' differ: "
                        + to_string(res2) + " != " + to_string(res3));
 
                 print_expr_eval_res(expr, eval1, params, res1);

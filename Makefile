@@ -122,20 +122,23 @@ $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
 
 #####################################
 
-
+build/sos.o: src/sos.cpp include/sos.hpp include/sos.tpp
 build/expr/eval.o: src/expr/eval.cpp include/expr/eval.hpp \
- include/expr.hpp include/sos.hpp include/sos.tpp include/expr.tpp \
- include/expr/eval.tpp
+ include/expr.hpp include/sos.hpp include/sos.tpp include/util.hpp \
+ include/util.tpp include/expr.tpp include/expr/eval.tpp
+build/util.o: src/util.cpp include/util.hpp include/sos.hpp \
+ include/sos.tpp include/util.tpp
 build/ode/euler.o: src/ode/euler.cpp include/ode/euler.hpp \
  include/ode/solver.hpp include/ode.hpp include/sos.hpp include/sos.tpp \
- include/expr.hpp include/expr.tpp include/expr/eval.hpp \
- include/expr/eval.tpp
+ include/expr.hpp include/util.hpp include/util.tpp include/expr.tpp \
+ include/expr/eval.hpp include/expr/eval.tpp
 build/ode/solver.o: src/ode/solver.cpp include/ode/solver.hpp \
  include/ode.hpp include/sos.hpp include/sos.tpp include/expr.hpp \
- include/expr.tpp include/expr/eval.hpp include/expr/eval.tpp
+ include/util.hpp include/util.tpp include/expr.tpp include/expr/eval.hpp \
+ include/expr/eval.tpp
 build/ode/odeint.o: src/ode/odeint.cpp include/ode/odeint.hpp \
  include/ode/solver.hpp include/ode.hpp include/sos.hpp include/sos.tpp \
- include/expr.hpp include/expr.tpp include/expr/eval.hpp \
- include/expr/eval.tpp
+ include/expr.hpp include/util.hpp include/util.tpp include/expr.tpp \
+ include/expr/eval.hpp include/expr/eval.tpp
 build/expr.o: src/expr.cpp include/expr.hpp include/sos.hpp \
- include/sos.tpp include/expr.tpp
+ include/sos.tpp include/util.hpp include/util.tpp include/expr.tpp

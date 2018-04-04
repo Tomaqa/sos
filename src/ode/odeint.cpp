@@ -10,7 +10,8 @@ namespace SOS {
                                Context context_, Ode_id ode_id_) const
         {
             State x = move(context_.cx_init());
-            // predpokladam ze dx se automaticky alokuje na stejnou velikost jako x
+            // predpokladam ze dx se automaticky alokuje
+            // na stejnou velikost jako x
             // -> plytvani
             const Ode_eval& ode_eval_ = codes_eval()[ode_id_];
             auto f = [this, &ode_eval_, dt_id_]
@@ -22,13 +23,14 @@ namespace SOS {
             return x[0];
         }
 
-        State Odeint::eval_unif_odes(Dt_ids&& dt_ids_, Context&& context_) const
+        State Odeint::eval_unif_odes(Dt_ids&& dt_ids_,
+                                     Context&& context_) const
         {
             State x = move(context_.cx_init());
-            // taky plytvani pokud je pocet param. vetsi nez derivaci, ale mensi
+            // taky plytvani
+            // pokud je pocet param. vetsi nez derivaci, ale mensi
             auto f = [this, &dt_ids_](const State& x_, State& dx_, Time t_){
-                         eval_unif_odes_step(dt_ids_,
-                                             dx_, x_, t_);
+                         eval_unif_odes_step(dt_ids_, dx_, x_, t_);
                      };
             integrate(f, x, move(context_.ct_bounds()));
             return move(x);
@@ -41,7 +43,8 @@ namespace SOS {
                                                t_bounds_.first,
                                                t_bounds_.second,
                                                step_size()
-                                               /*, TObserver(states, times)*/);
+                                               /*, TObserver(states, times)*/
+                                               );
             return n_steps;
         }
     }
