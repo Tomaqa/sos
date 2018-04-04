@@ -12,6 +12,8 @@ namespace SOS {
         return _map.at(key_);
     }
 
+    ///////////////////////////////////////////////////////////////
+
     template <typename Cont, typename Un_f>
     Un_f Util::for_each(Cont& cont, Un_f f)
     {

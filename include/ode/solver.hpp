@@ -76,10 +76,19 @@ namespace SOS {
             Odes_spec& odes_spec()                      { return _odes_spec; }
             Odes_eval& odes_eval()                      { return _odes_eval; }
 
-            static bool valid_keys(const Param_keys& param_keys_);
+            bool check_param_keyss(const Param_keyss& param_keyss_);
             static void check_param_keys(const Param_keys& param_keys_);
+            static bool valid_keys(const Param_keys& param_keys_);
+
+            static Param_keys_ptr new_param_keys(Param_keys&& param_keys_);
+            void add_odes_eval(Param_keyss&& param_keyss_);
+            void add_unif_odes_eval(Param_keys&& param_keys_);
+            template <typename Keys> void
+                add_ode_eval(Ode_spec& ode_spec_, Keys&& keys_);
             static Ode_eval create_ode_eval(Ode_spec& ode_spec_,
                                             Param_keys param_keys_);
+            static Ode_eval create_ode_eval(Ode_spec& ode_spec_,
+                                            Param_keys_ptr param_keys_ptr_);
 
             virtual State eval_odes(Dt_ids&& dt_ids_,
                                     Contexts&& contexts_) const;

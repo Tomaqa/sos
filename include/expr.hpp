@@ -89,13 +89,13 @@ namespace SOS {
         Expr& flatten();
         template <typename Arg> Elems<Arg> flat_transform() const;
 
-        template <typename Arg> Eval<Arg> get_eval(
-            typename Eval<Arg>::Param_keys param_keys_ = {});
-        template <typename Arg> Eval<Arg> get_eval(
-            typename Eval<Arg>::Param_keys_ptr param_keys_ptr_);
-        template <typename Arg> Eval<Arg> get_eval(
-            typename Eval<Arg>::Param_keys_ptr param_keys_ptr_,
-            typename Eval<Arg>::Param_values_ptr param_values_ptr_);
+        template <typename Arg> Eval<Arg>
+            get_eval(typename Eval<Arg>::Param_keys param_keys_ = {});
+        template <typename Arg> Eval<Arg>
+            get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_);
+        template <typename Arg> Eval<Arg>
+            get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_,
+                     typename Eval<Arg>::Param_values_ptr param_values_ptr_);
     protected:
         using Places = Elems<Expr_place_ptr>;
 

@@ -1,6 +1,12 @@
 #include "expr.hpp"
 
 namespace SOS {
+    template <typename T>
+    Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)
+    {
+        return make_unique<T>(forward<T>(place_));
+    }
+
     string to_string(const Expr_place& rhs)
     {
         return move((string)rhs);
@@ -21,10 +27,14 @@ namespace SOS {
         return !(lhs == rhs);
     }
 
+    ///////////////////////////////////////////////////////////////
+
     Expr_place::Expr_place_ptr Expr_token::clone() const
     {
         return new_place(Expr_token(*this));
     }
+
+    ///////////////////////////////////////////////////////////////
 
     Expr_place::Expr_place_ptr Expr::clone() const
     {
@@ -141,6 +151,18 @@ namespace SOS {
     Expr_place::Expr_place_ptr& Expr::back()
     {
         return _places.back();
+    }
+
+    template <typename T>
+    void Expr::add_place_ptr(T&& place_ptr_)
+    {
+        _places.emplace_back(forward<T>(place_ptr_));
+    }
+
+    template <typename T>
+    void Expr::add_new_place(T&& place_)
+    {
+        add_place_ptr(new_place(forward<T>(place_)));
     }
 
     const Expr_token& Expr::cptr_to_token(const Expr_place_ptr& place_ptr)

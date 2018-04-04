@@ -31,6 +31,10 @@ namespace SOS {
 
         size_t size() const                   { return cparam_keys().size(); }
 
+        static Param_keys_ptr
+            new_param_keys(Param_keys&& param_keys_);
+        static Param_values_ptr
+            new_param_values(Param_values&& param_values_);
         const Param_keys_ptr& cparam_keys_ptr() const;
         Param_values_ptr& param_values_ptr() const;
         const Param_keys& cparam_keys() const;
@@ -60,10 +64,6 @@ namespace SOS {
                       typename F_pair<F>::second_type>;
         static const F_map<Bin_f> bin_fs;
 
-        static Param_keys_ptr
-            new_param_keys(Param_keys&& param_keys_);
-        static Param_values_ptr
-            new_param_values(Param_values&& param_values_);
         Param_keys_ptr& param_keys_ptr();
         Param_keys& param_keys();
         Param_keys_link& param_keys_link();

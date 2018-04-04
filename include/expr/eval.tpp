@@ -180,6 +180,8 @@ namespace SOS {
         return (os << to_string(rhs));
     }
 
+    ///////////////////////////////////////////////////////////////
+
     template <typename Arg>
     Expr::Eval<Arg>::Oper::Oper(Param_keys_link& param_keys_l_,
                                 Param_values_link& param_values_l_,

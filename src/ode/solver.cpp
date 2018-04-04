@@ -5,10 +5,20 @@ namespace SOS {
         Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_)
             : _odes_spec(move(odes_spec_))
         {
+            const bool unified = check_param_keyss(param_keyss_);
+            if (!unified) {
+                add_odes_eval(move(param_keyss_));
+            }
+            else {
+                add_unif_odes_eval(move(param_keyss_.front()));
+            }
+        }
+
+        bool Solver::check_param_keyss(const Param_keyss& param_keyss_)
+        {
             const size_t n_odes = size();
             const size_t n_keyss = param_keyss_.size();
             const bool unified = n_keyss == 1 && n_odes > 1;
-            if (unified) _is_unified.set();
             expect(unified || n_keyss == n_odes,
                    "Size of ODEs and set of non-unified "s
                    + "parameter keys mismatch: "
@@ -19,28 +29,7 @@ namespace SOS {
                    "Size of unified parameter keys "s
                    +"must be at least equal to size of ODEs: "
                    + to_string(n_keys_front) + " < " + to_string(n_odes));
-
-            odes_eval().reserve(size());
-            if (unified) param_keyss_.resize(n_odes, param_keyss_.front());
-            transform(odes_spec(),
-                      std::make_move_iterator(std::begin(param_keyss_)),
-                      std::back_inserter(odes_eval()),
-                      bind(&create_ode_eval, _1, _2));
-        }
-
-        void Solver::add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_)
-        {
-            check_param_keys(param_keys_);
-            odes_spec().emplace_back(move(ode_spec_));
-            odes_eval().emplace_back(move(create_ode_eval(odes_spec().back(),
-                                                          move(param_keys_))
-                                         ));
-            modified();
-        }
-
-        bool Solver::valid_keys(const Param_keys& param_keys_)
-        {
-            return param_keys_.size() >= 1;
+            return unified;
         }
 
         void Solver::check_param_keys(const Param_keys& param_keys_)
@@ -50,14 +39,75 @@ namespace SOS {
                    + to_string(param_keys_));
         }
 
-        Solver::Ode_eval Solver::create_ode_eval(Ode_spec& ode_spec_,
-                                                 Param_keys param_keys_)
+        bool Solver::valid_keys(const Param_keys& param_keys_)
+        {
+            return param_keys_.size() >= 1;
+        }
+
+        Solver::Param_keys_ptr
+            Solver::new_param_keys(Solver::Param_keys&& param_keys_)
+        {
+            return Dt_eval::new_param_keys(move(param_keys_));
+        }
+
+        void Solver::add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_)
+        {
+            check_param_keys(param_keys_);
+            odes_spec().emplace_back(move(ode_spec_));
+            add_ode_eval(odes_spec().back(), move(param_keys_));
+            modified();
+        }
+
+        void Solver::add_odes_eval(Param_keyss&& param_keyss_)
+        {
+            odes_eval().reserve(size());
+            transform(odes_spec(),
+                      std::make_move_iterator(std::begin(param_keyss_)),
+                      std::back_inserter(odes_eval()),
+                      [](Ode_spec& ospec, const Param_keys& keys_){
+                          return create_ode_eval(ospec, keys_);
+                      });
+        }
+
+        void Solver::add_unif_odes_eval(Param_keys&& param_keys_)
+        {
+            Param_keys_ptr param_keys_ptr_ =
+                new_param_keys(move(param_keys_));
+            odes_eval().reserve(size());
+            transform(odes_spec(),
+                      std::back_inserter(odes_eval()),
+                      [&param_keys_ptr_](Ode_spec& ospec){
+                          return create_ode_eval(ospec, param_keys_ptr_);
+                      });
+            _is_unified.set();
+        }
+
+        template <typename Keys>
+        void Solver::add_ode_eval(Ode_spec& ode_spec_, Keys&& keys_)
+        {
+            odes_eval().emplace_back(
+                move(create_ode_eval(ode_spec_, forward<Keys>(keys_)))
+            );
+        }
+
+        Solver::Ode_eval
+            Solver::create_ode_eval(Ode_spec& ode_spec_,
+                                    Param_keys param_keys_)
+        {
+            Param_keys_ptr param_keys_ptr_ =
+                new_param_keys(move(param_keys_));
+            return move(create_ode_eval(ode_spec_, move(param_keys_ptr_)));
+        }
+
+        Solver::Ode_eval
+            Solver::create_ode_eval(Ode_spec& ode_spec_,
+                                    Param_keys_ptr param_keys_ptr_)
         {
             Ode_eval ode_eval_;
             ode_eval_.reserve(ode_spec_.size());
             transform(ode_spec_, std::back_inserter(ode_eval_),
-                      [&param_keys_](Dt_spec& dspec){
-                          return dspec.get_eval<Real>(param_keys_);
+                      [&param_keys_ptr_](Dt_spec& dspec){
+                          return dspec.get_eval<Real>(param_keys_ptr_);
                       });
             return move(ode_eval_);
         }
@@ -249,6 +299,8 @@ namespace SOS {
         {
             return (os << to_string(rhs));
         }
+
+        ///////////////////////////////////////////////////////////////
 
         Solver::Context::Context(Interval<Time> t_bounds_, State x_init_)
             : _t_bounds(move(t_bounds_)),
