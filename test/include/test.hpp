@@ -9,7 +9,8 @@ namespace SOS {
         struct Dummy{};
         template <typename Params, typename Output, typename Input>
         using Test_case = tuple<const Input, Params, const Output>;
-        template <typename Params = Dummy, typename Output = string, typename Input = string>
+        template <typename Params = Dummy,
+                  typename Output = string, typename Input = string>
         using Test_data = vector<Test_case<Params, Output, Input>>;
         template <typename Params, typename Output, typename Input>
         using Res_f = function<Output(const Input&, bool, Params&)>;
@@ -26,7 +27,8 @@ namespace SOS {
                    + "', got: '" + to_string(res) + "'");
         }
 
-        template <typename Params = Dummy, typename Output = string, typename Input = string>
+        template <typename Params = Dummy,
+                  typename Output = string, typename Input = string>
         void test(Test_data<Params, Output, Input>& tdata,
                   Res_f<Params, Output, Input> f,
                   const string& msg = "",
@@ -36,9 +38,15 @@ namespace SOS {
         {
             Input input;
             try {
+                string head_msg, tail_msg, line;
                 if (!msg.empty()) {
-                    cout << "  " << string(msg.size()+16, '-') << "  " << endl;
-                    cout << "// Testing " << msg << " ...   \\\\" << endl;
+                    head_msg = "// Testing "s + msg
+                               + " with " + (should_throw ? "in" : "")
+                               + "valid inputs"
+                               + "...   \\\\";
+                    line = "  " + string(head_msg.size()-4, '-') + "  ";
+                    cout << line << endl
+                         << head_msg << endl;
                 }
                 for (auto& t : tdata) try {
                     input = get<0>(t);
@@ -58,13 +66,16 @@ namespace SOS {
                     throw Error("Expected thrown exception");
                 }
                 if (!msg.empty()) {
-                    cout << "\\\\ Testing " << msg << " done. //" << endl;
-                    cout << "  " << string(msg.size()+16, '-') << "  " << endl;
-                    cout << endl;
+                    tail_msg = "\\\\ Testing " + msg + " done.";
+                    tail_msg += string(head_msg.size() - tail_msg.size() - 3,
+                                       ' ')
+                             + " //";
+                    cout << tail_msg << endl
+                         << line << endl << endl;
                 }
             }
             catch (const Error& e) {
-                cerr << "!! At input '" << input << "':" << endl;
+                cerr << "!! At input '" << to_string(input) << "':" << endl;
                 cerr << "!! " << e << " !!" << endl;
                 throw;
             }

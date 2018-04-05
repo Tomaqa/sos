@@ -74,8 +74,8 @@ namespace SOS {
         Oper& oper()                                         { return _oper; }
         static Oper_link oper_link(const Oper_ptr& oper_ptr_);
     private:
-        static Param_keys&& check_param_keys(Param_keys&& param_keys_);
-        template <typename Cont> void check_param_values(Cont&& cont) const;
+        template <typename T> static T&& check_param_keys(T&& param_keys_);
+        template <typename Cont> Cont&& check_param_values(Cont&& cont) const;
         Arg call() const                               { return (coper())(); }
 
         Param_keys_ptr _param_keys_ptr;

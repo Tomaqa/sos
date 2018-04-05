@@ -34,6 +34,22 @@ namespace SOS {
         return new_place(Expr_token(*this));
     }
 
+    Expr_token::Expr_token(const Token& token)
+        : _token(token)
+    { }
+
+    const Expr_place::Token& Expr_token::check_token(const Token& token)
+    {
+        expect(valid_token(token),
+               "Invalid token: "s + to_string(token));
+        return token;
+    }
+
+    bool Expr_token::valid_token(const Token& token)
+    {
+        return !token.empty();
+    }
+
     ///////////////////////////////////////////////////////////////
 
     Expr_place::Expr_place_ptr Expr::clone() const

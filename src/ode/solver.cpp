@@ -5,6 +5,12 @@ namespace SOS {
         Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_)
             : _odes_spec(move(odes_spec_))
         {
+            if (empty()) {
+                expect(param_keyss_.empty(),
+                       "No ODE given and parameter keys are non-empty.");
+                return;
+            }
+            for_each(codes_spec(), bind(&Solver::check_ode_spec, _1));
             const bool unified = check_param_keyss(param_keyss_);
             if (!unified) {
                 add_odes_eval(move(param_keyss_));
@@ -12,6 +18,19 @@ namespace SOS {
             else {
                 add_unif_odes_eval(move(param_keyss_.front()));
             }
+            // ? pokud nema parametr t, zvazit (otestovat) jestli nebude
+            // efektivnejsi jej pridat presto ze se nebude vyhodnocovat
+        }
+
+        void Solver::check_ode_spec(const Ode_spec& ode_spec_)
+        {
+            expect(valid_ode_spec(ode_spec_),
+                   "Empty ODE specification detected.");
+        }
+
+        bool Solver::valid_ode_spec(const Ode_spec& ode_spec_)
+        {
+            return !ode_spec_.empty();
         }
 
         bool Solver::check_param_keyss(const Param_keyss& param_keyss_)
@@ -52,6 +71,7 @@ namespace SOS {
 
         void Solver::add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_)
         {
+            check_ode_spec(ode_spec_);
             check_param_keys(param_keys_);
             odes_spec().emplace_back(move(ode_spec_));
             add_ode_eval(odes_spec().back(), move(param_keys_));
@@ -117,11 +137,10 @@ namespace SOS {
             _has_param_t.invalidate();
         }
 
-        bool Solver::is_unified(bool eval_if_unknown) const
+        bool Solver::is_unified() const
         {
             if (empty()) return false;
             if (_is_unified.is_valid()) return _is_unified.is_set();
-            if (!eval_if_unknown) return false;
             const Param_keys& keys0 = cunif_param_keys_wo_check();
             const bool res =
                 (all_of(codes_eval(),
@@ -132,16 +151,16 @@ namespace SOS {
             return res;
         }
 
-        bool Solver::has_param_t() const
+        bool Solver::has_unif_param_t() const
         {
-            if (empty()) return false;
+            if (empty() || !is_unified()) return false;
             if (_has_param_t.is_valid()) return _has_param_t.is_set();
-            const bool res = has_param_t(def_ode_id);
+            const bool res = ode_has_param_t(def_ode_id);
             _has_param_t.set(res);
             return res;
         }
 
-        bool Solver::has_param_t(Ode_id ode_id_) const
+        bool Solver::ode_has_param_t(Ode_id ode_id_) const
         {
             return ode_has_param_t(code_eval(ode_id_));
         }
@@ -153,7 +172,7 @@ namespace SOS {
 
         bool Solver::dt_has_param_t(const Dt_eval& dt_eval_)
         {
-            return dt_eval_.cparam_keys().back() == "t";
+            return to_string(dt_eval_.cparam_keys().back()) == "t";
         }
 
         Solver::Param_keyss Solver::cparam_keyss() const
@@ -240,7 +259,7 @@ namespace SOS {
         {
             // ! do not construct in each step
             function<Real(const Ode_eval& ode_eval_, Dt_id dt_id_)> f;
-            if (has_param_t()) {
+            if (has_unif_param_t()) {
                 f = [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
                     return eval_dt_step(ode_eval_[dt_id_], x, t);
                 };
@@ -293,12 +312,12 @@ namespace SOS {
         {
             string str("");
             const bool unified = is_unified();
-            const bool has_t = has_param_t();
             const Odes_spec& spec = codes_spec();
             const Odes_eval& eval = codes_eval();
             for (Ode_id oid = 0, size_ = size(); oid < size_; ++oid) {
                 const Ode_spec& ospec = spec[oid];
                 const Ode_eval& oeval = eval[oid];
+                const bool has_t = ode_has_param_t(oid);
                 str += "ODE [" + to_string(oid) + "]\n";
                 for (Dt_id did = 0, osize = ospec.size();
                      did < osize; ++did) {
@@ -306,7 +325,7 @@ namespace SOS {
                     const Dt_eval& deval = oeval[did];
                     const Param_key& pkey = code_param_key(oid, unified);
                     str += "  [" + to_string(did) + "]d"
-                        + pkey + "/dt = "
+                        + to_string(pkey) + "/dt = "
                         + to_string(dspec) + to_string(deval)
                         + (unified ? "*" : "")
                         + (has_t ? "%" : "")

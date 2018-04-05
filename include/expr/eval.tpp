@@ -28,21 +28,23 @@ namespace SOS {
 
     template <typename Arg>
     Expr::Eval<Arg>::Eval(const Expr& expr_, Param_keys param_keys_)
-        : Eval(expr_,
-               new_param_keys({check_param_keys(move(param_keys_))}) )
+        : Eval(expr_, new_param_keys(move(param_keys_)) )
     { }
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Param_keys_ptr
         Expr::Eval<Arg>::new_param_keys(Param_keys&& param_keys_)
     {
-        return make_shared<Param_keys>(move(param_keys_));
+        return make_shared<Param_keys>(
+            move(check_param_keys(move(param_keys_)))
+        );
     }
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Param_values_ptr
         Expr::Eval<Arg>::new_param_values(Param_values&& param_values_)
     {
+        // kontrola probiha az pri volani
         return make_shared<Param_values>(move(param_values_));
     }
 
@@ -118,16 +120,14 @@ namespace SOS {
     template <typename Arg>
     Arg Expr::Eval<Arg>::operator ()(initializer_list<Arg> list) const
     {
-        check_param_values(list);
-        param_values() = move(list);
+        param_values() = move(check_param_values(move(list)));
         return call();
     }
 
     template <typename Arg>
     Arg Expr::Eval<Arg>::operator ()(Param_values param_values_) const
     {
-        check_param_values(param_values_);
-        param_values() = move(param_values_);
+        param_values() = move(check_param_values(move(param_values_)));
         return call();
     }
 
@@ -140,24 +140,22 @@ namespace SOS {
     }
 
     template <typename Arg>
-    typename Expr::Eval<Arg>::Param_keys&&
-        Expr::Eval<Arg>::check_param_keys(Param_keys&& param_keys_)
+    template <typename T>
+    T&& Expr::Eval<Arg>::check_param_keys(T&& param_keys_)
     {
-        expect(all_of(param_keys_, [](const Param_key& key){
-                          return key.size() > 0;
-                      }),
-               "Parameter key tokens cannot be empty.");
-        return move(param_keys_);
+        for_each(param_keys_, bind(&Expr_token::check_token, _1));
+        return forward<T>(param_keys_);
     }
 
     template <typename Arg>
     template <typename Cont>
-    void Expr::Eval<Arg>::check_param_values(Cont&& cont) const
+    Cont&& Expr::Eval<Arg>::check_param_values(Cont&& cont) const
     {
         expect(cont.size() == size(),
                "Count of parameters mismatch: expected "s + to_string(size())
                + ", got " + to_string(cont.size()));
         _valid_values = true;
+        return forward<Cont>(cont);
     }
 
     template <typename Arg>

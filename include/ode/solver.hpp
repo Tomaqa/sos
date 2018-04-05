@@ -51,9 +51,10 @@ namespace SOS {
                                                   { _step_size = step_size_; }
 
             void add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_);
-            bool is_unified(bool eval_if_unknown = true) const;
+            bool is_unified() const;
             void unify(); // not implemented yet
-            bool has_param_t() const;
+            bool ode_has_param_t(Ode_id ode_id_) const;
+            bool has_unif_param_t() const;
 
             Param_keyss cparam_keyss() const;
             const Param_keys& cunif_param_keys() const;
@@ -82,6 +83,8 @@ namespace SOS {
             const Ode_eval& code_eval(Ode_id ode_id_ = def_ode_id) const
                                              { return codes_eval()[ode_id_]; }
 
+            static void check_ode_spec(const Ode_spec& ode_spec_);
+            static bool valid_ode_spec(const Ode_spec& ode_spec_);
             bool check_param_keyss(const Param_keyss& param_keyss_);
             static void check_param_keys(const Param_keys& param_keys_);
             static bool valid_keys(const Param_keys& param_keys_);
@@ -112,7 +115,6 @@ namespace SOS {
             using Dt_eval_params = Dt_eval::Param_values;
 
             void modified();
-            bool has_param_t(Ode_id ode_id_) const;
             static bool ode_has_param_t(const Ode_eval& ode_eval_);
             static bool dt_has_param_t(const Dt_eval& dt_eval_);
 
@@ -130,7 +132,7 @@ namespace SOS {
             Real eval_dt_step(const Dt_eval& dt_eval_,
                               Dt_eval_params params) const;
 
-            Time _step_size{1.0};
+            Time _step_size{1e-2};
             Odes_spec _odes_spec;
             Odes_eval _odes_eval;
             mutable Flag _is_unified;

@@ -32,6 +32,12 @@ namespace SOS {
         return move(std::any_of(std::begin(cont), std::end(cont), move(f)));
     }
 
+    template <typename Cont, typename Un_f>
+    bool Util::none_of(const Cont& cont, Un_f f)
+    {
+        return move(std::none_of(std::begin(cont), std::end(cont), move(f)));
+    }
+
     template <typename Cont, typename OutputIt, typename Un_f>
     OutputIt Util::transform(Cont& cont, OutputIt d_first, Un_f f)
     {

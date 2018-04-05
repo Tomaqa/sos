@@ -28,6 +28,8 @@ namespace SOS {
             bool all_of(const Cont& cont, Un_f f);
         template <typename Cont, typename Un_f>
             bool any_of(const Cont& cont, Un_f f);
+        template <typename Cont, typename Un_f>
+            bool none_of(const Cont& cont, Un_f f);
         template <typename Cont, typename OutputIt, typename Un_f>
             OutputIt transform(Cont& cont, OutputIt d_first, Un_f f);
         template <typename Cont1, typename InputIt2,

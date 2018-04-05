@@ -29,11 +29,14 @@ namespace SOS {
 
     class Expr_token : public Expr_place {
     public:
+        Expr_token()                                                 = delete;
         virtual ~Expr_token()                                       = default;
         virtual Expr_place_ptr clone() const override final;
-        Expr_token(const string& input)                    : _token(input) { }
+        Expr_token(const Token& token);
 
         const Token& ctoken() const                         { return _token; }
+        static const Token& check_token(const Token& token);
+        static bool valid_token(const Token& token);
 
         template <typename Arg> bool get_value_check(Arg& arg) const;
         template <typename Arg> Arg get_value() const;
