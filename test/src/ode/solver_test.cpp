@@ -46,9 +46,29 @@ namespace SOS {
 
         /////////////////////////////////////////////////////////////////
 
-        using Solve_ode_output = Real;
         using Context = Solver::Context;
-        using Solve_ode_input = tuple<Param_keyss, Context>;
+        using Ode_spec = Solver::Ode_spec;
+        using Solve_ode_output = vector<Real>;
+        using Solve_ode_input = tuple<Ode_spec, Param_keys, Context>;
+        using Solve_ode_params = tuple<Time>;
+
+        Solve_ode_output solve_ode_res(const Solve_ode_input& input,
+                                       bool should_throw,
+                                       Solve_ode_params& params)
+        {
+            const Ode_spec& ospec = get<0>(input);
+            const Param_keys& keys = get<1>(input);
+            const Context& ctx = get<2>(input);
+            int size_ = ospec.size();
+            Euler solver(ospec, keys);
+            Time step_size = get<0>(params);
+            if (step_size > 0) solver.set_step_size(step_size);
+            Solve_ode_output res;
+            for (int i = 0; i < size_; i++) {
+                 res.push_back(solver.solve_ode(i, ctx));
+            }
+            return move(res);
+        }
 
         /////////////////////////////////////////////////////////////////
     }
@@ -131,8 +151,19 @@ try {
         {  {{ {{"- 1"}} }, { {""} }},                                                          {},                {}                                                                        },
     };
 
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
+    Test_data<Solve_ode_params, Solve_ode_output, Solve_ode_input> solve_ode_data = {
+        {  { { {"- 1"} }, {"x"}, {{0, 0}, {100}} },                                                                                             {-1},       {100}                           },
+        {  { { {"- 1"} }, {"x"}, {{0, 10}, {100}} },                                                                                            {-1},       {90}                            },
+        {  { { {"- 1"} }, {"x"}, {{0, 10}, {100}} },                                                                                            {1},        {90}                            },
+        {  { { {"- (* 2 x) 100"} }, {"x"}, {{0, 10}, {100}} },                                                                                  {1},        {2.9525e6}                      },
+        {  { { {"- (* 2 x) 100"} }, {"x"}, {{0, 10}, {100}} },                                                                                  {0.1},      {4.1409e9}                      },
+        {  { { {"- (* 2 x) 100"} }, {"x"}, {{0, 10}, {100}} },                                                                                  {0.01},     {1.991323e10}                   },
+        {  { { {"+ x ( - 10 y)"}, {"+ x y"} }, {"x", "y"}, {{0, 50}, {5, 20}} },                                                                {0.05},     {-7.73159e21, 3.8658e22}        },
+        {  { { {"- (/ x 2) (/ t 3)"}, {"- (/ t 3) x"} }, {"x", "t"}, {{0, 50}, {10}} },                                                         {0.02},     {5.5117124e11, 16.3333}         },
+    };
+
+    /////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////
 
     string context_msg = "building of context-s";
     test<Dummy, Context, string>(context_data, context_res, context_msg);
@@ -142,10 +173,16 @@ try {
     test<Keys_params, Keys_output, Keys_input>(keys_data, keys_res, keys_msg);
     test<Keys_params, Keys_output, Keys_input>(keys_throw_data, keys_res, keys_msg, true);
 
+    string solve_ode_msg = "solving single ODE";
+    test<Solve_ode_params, Solve_ode_output, Solve_ode_input>(solve_ode_data, solve_ode_res, solve_ode_msg,
+                                                              false, apx_equal_vec<Real>);
+
     Euler s1;
     expect(s1.size() == 0 && !s1.is_unified() && !s1.has_unif_param_t()
            && s1.cparam_keyss().empty(),
            "Default construction of 'Solver' failed.");
+
+    /////////////////////////////////////////////////////////////////
 
     auto& dcase = keys_data[5];
     auto& input = get<0>(dcase);

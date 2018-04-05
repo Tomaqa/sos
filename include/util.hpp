@@ -36,7 +36,13 @@ namespace SOS {
                   typename OutputIt, typename Bin_f>
             OutputIt transform(Cont1& cont1, InputIt2 first2,
                                OutputIt d_first, Bin_f f);
-        template <typename Cont> bool equal(const Cont& cont);
+        template <typename Cont,
+                  typename Bin_f = std::equal_to<typename Cont::value_type>>
+            bool equal(const Cont& cont, Bin_f f = Bin_f());
+        template <typename Cont1, typename Cont2,
+                  typename Bin_f = std::equal_to<typename Cont1::value_type>>
+            bool equal(const Cont1& cont1, const Cont2& cont2,
+                       Bin_f f = Bin_f());
     }
 
     class Util::Flag {

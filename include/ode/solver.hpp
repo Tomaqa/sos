@@ -5,9 +5,6 @@
 #include "expr.hpp"
 #include "expr/eval.hpp"
 
-// ? teoreticky by slo taky kroky pocitat misto pomocti 'Eval'
-// dynamickym vytvorenim C-funkce a jejim zkompilovanim ...
-
 namespace SOS {
     namespace ODE {
         class Solver {
@@ -28,13 +25,6 @@ namespace SOS {
 
             static constexpr Ode_id def_ode_id = 0;
 
-            /// KONVENCE: posledni parametr je cas, aby to slo rychle overit
-            // (pokud je obsazen)
-            // + parametr derivovane funkce MUSI byt obsazen:
-            // a) unifikovane klice: pozice [ode_id]
-            // b) jinak: pozice [def_ode_id]
-            // nederivovane parametry musi byt az za temito; "t" je posledni
-
             Solver()                                                = default;
             virtual ~Solver()                                       = default;
             Solver(const Solver& rhs)                               = default;
@@ -44,7 +34,7 @@ namespace SOS {
             Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
             Solver(Odes_spec odes_spec_, Param_keys param_keys_);
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
-            Solver(const string& input); // not implemented yet
+            Solver(const string& input); // ! not implemented yet
 
             size_t size() const noexcept       { return codes_spec().size(); }
             bool empty() const noexcept                { return size() == 0; }
@@ -54,7 +44,7 @@ namespace SOS {
 
             void add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_);
             bool is_unified() const;
-            void unify(); // not implemented yet
+            void unify(); // ! not implemented yet
             bool ode_has_param_t(Ode_id ode_id_) const;
             bool has_unif_param_t() const;
 
@@ -143,7 +133,7 @@ namespace SOS {
 
         class Solver::Context {
         public:
-            Context()                                                = delete;
+            Context()                                               = default;
             ~Context()                                              = default;
             Context(const Context& rhs)                             = default;
             Context& operator =(const Context& rhs)                 = default;

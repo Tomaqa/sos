@@ -17,6 +17,20 @@ namespace SOS {
         template <typename Output>
         using Pred_f = function<bool(const Output&, const Output&)>;
 
+        constexpr double eps = 4e-6;
+        bool apx_equal(double a, double b)
+        {
+            return fabs(a - b) <= (eps * (fabs(a) < fabs(b)
+                                        ? fabs(b) : fabs(a))
+                                  );
+        }
+
+        template <typename T>
+        bool apx_equal_vec(const vector<T>& a, const vector<T>& b)
+        {
+            return Util::equal(a, b, apx_equal);
+        }
+
         template <typename Output>
         void test_pred(const Output& expect_, const Output& res,
                        Pred_f<Output> pred, const string& pred_msg)
