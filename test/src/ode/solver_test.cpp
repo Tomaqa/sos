@@ -17,14 +17,28 @@ namespace SOS {
         /////////////////////////////////////////////////////////////////
 
         using Param_keys = Solver::Param_keys;
-        using Unified_output = pair<bool, Param_keys>;
+        using Param_keyss = Solver::Param_keyss;
+        using Keys_output = tuple<size_t, bool, bool, Param_keys, Param_keyss>;
+        using Keys_params = tuple<bool>;
 
-        Unified_output unified_res(const Euler& solver, bool, Dummy&)
+        Keys_output keys_res(const Euler& solver, bool should_throw,
+                             Keys_params& params)
         {
             Param_keys param_keys_;
+            size_t size = solver.size();
             bool unified = solver.is_unified();
+            bool has_t = solver.has_param_t();
             if (unified) param_keys_ = solver.cunif_param_keys();
-            return Unified_output(unified, param_keys_);
+            Param_keyss param_keyss_ = solver.cparam_keyss();
+            bool& quiet = get<0>(params);
+            if (!should_throw && !quiet) {
+                quiet = true;
+                cout << solver
+                     << " >> size: " << size
+                     << endl << endl;
+            }
+            return Keys_output(size, unified, has_t,
+                               move(param_keys_), move(param_keyss_));
         }
 
         /////////////////////////////////////////////////////////////////
@@ -36,7 +50,7 @@ namespace SOS {
 /////////////////////////////////////////////////////////////////
 
 int main(int, const char*[])
-{
+try {
     using namespace SOS;
     using namespace SOS::Test;
     using namespace std;
@@ -75,11 +89,19 @@ int main(int, const char*[])
         {"(0 10)(1 2 (1))",                                          {},        {{0, 10}, {0}}                                               },
     };
 
-    Test_data<Dummy, Unified_output, Euler> unified_data = {
-        // {  {},                                                       {},           {true, {}}                   },
-        {  {{ {{"+ 1 2"}} }, { {{"x"}} }},                                                       {},           {true, {"x"}},                   },
-        {  {{ {{"+ 1 x"}} }, { {{"x"}} }},                                                       {},           {true, {"x"}},                   },
-        // {  {{ {{"+ 1 x"}, {"- x 5"}} }, { {{"x"}} }},                                            {},           true,                         },
+    Test_data<Keys_params, Keys_output, Euler> keys_data = {
+        {  {},                                                                                 {false},           {0, false, false, {}, {} }                                                },
+        {  {{}, {}},                                                                           {true},            {0, false, false, {}, {} }                                                },
+        {  {{ {{"+ 1 2"}} }, { {"x"} }},                                                       {false},           {1, true, false, {"x"}, {{"x"}} },                                        },
+        {  {{ {{"+ 1 x"}} }, { {"x"} }},                                                       {false},           {1, true, false, {"x"}, {{"x"}} },                                        },
+        {  {{ {{"+ 1 x"}, {"- x 5"}} }, { {"x", "y"} }},                                       {false},           {1, true, false, {"x", "y"}, {{"x", "y"}} },                              },
+        {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- 1"}} }, { {"x", "y"} }},                            {false},           {2, true, false, {"x", "y"}, {{"x", "y"}, {"x", "y"}} },                  },
+        {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- 1"}} }, { {"x"}, {"y"} }},                          {false},           {2, false, false, {}, {{"x"}, {"y"}} },                                   },
+        {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- 1"}} }, { {"x", "y"}, {"x", "y"} }},                {true},           {2, true, false, {"x", "y"}, {{"x", "y"}, {"x", "y"}} },                  },
+        {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- 1"}} }, { {"x", "y"}, {"y", "x"} }},                {false},           {2, false, false, {}, {{"x", "y"}, {"y", "x"}} },                         },
+        {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- t"}, {"* y 2"}} }, { {"x", "y", "t"} }},            {false},           {2, true, true, {"x", "y", "t"}, {{"x", "y", "t"}, {"x", "y", "t"}} },    },
+        {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- t"}, {"* y 2"}} }, { {"x", "y"} }},                 {true},            {2, true, true, {"x", "y", "t"}, {{"x", "y", "t"}, {"x", "y", "t"}} },    },
+        {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- t"}, {"* y 2"}} }, { {"x", "t", "y"} }},            {false},           {2, true, false, {"x", "t", "y"}, {{"x", "t", "y"}, {"x", "t", "y"}} },    },
     };
 
 /////////////////////////////////////////////////////////////////
@@ -89,8 +111,8 @@ int main(int, const char*[])
     test<Dummy, Context, string>(context_data, context_res, context_msg);
     test<Dummy, Context, string>(context_throw_data, context_res, context_msg, true);
 
-    string unified_msg = "building of solvers";
-    test<Dummy, Unified_output, Euler>(unified_data, unified_res, unified_msg);
+    string keys_msg = "building of solvers";
+    test<Keys_params, Keys_output, Euler>(keys_data, keys_res, keys_msg);
 
     // try {
     //     cout << Euler({{{"+ 1 2"}}}, {{{"x"}}}) << endl << endl;
@@ -108,4 +130,8 @@ int main(int, const char*[])
 
     cout << endl << "Success." << endl;
     return 0;
+}
+catch (const SOS::Error& e) {
+    std::cout << e << std::endl;
+    throw;
 }

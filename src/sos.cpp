@@ -3,7 +3,11 @@
 namespace SOS {
     ostream& operator <<(ostream& os, const Error& rhs)
     {
-        return (os << to_string(rhs));
+        if (!rhs._printed) {
+            os << to_string(rhs);
+            rhs._printed = true;
+        }
+        return os;
     }
 
     Error Error::operator +(const string& rhs) const

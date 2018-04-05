@@ -19,6 +19,7 @@ namespace SOS {
             using Dt_id = int;
             using Ode_id = int;
             using Dt_ids = vector<Dt_id>;
+            using Param_key = Dt_eval::Param_key;
             using Param_keys = Dt_eval::Param_keys;
             using Param_keyss = vector<Param_keys>;
 
@@ -31,7 +32,7 @@ namespace SOS {
             // (pokud je obsazen)
             // + parametr derivovane funkce MUSI byt obsazen:
             // a) unifikovane klice: pozice [ode_id]
-            // b) jinak: pozice [0]
+            // b) jinak: pozice [def_ode_id]
             // nederivovane parametry musi byt az za temito; "t" je posledni
 
             Solver()                                                = default;
@@ -44,6 +45,7 @@ namespace SOS {
             Solver(const string& input); // not implemented yet
 
             size_t size() const noexcept       { return codes_spec().size(); }
+            bool empty() const noexcept                { return size() == 0; }
             Time step_size() const noexcept             { return _step_size; }
             void set_step_size(Time step_size_) noexcept
                                                   { _step_size = step_size_; }
@@ -51,7 +53,7 @@ namespace SOS {
             void add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_);
             bool is_unified(bool eval_if_unknown = true) const;
             void unify(); // not implemented yet
-            bool has_param_t(Ode_id ode_id_ = def_ode_id) const;
+            bool has_param_t() const;
 
             Param_keyss cparam_keyss() const;
             const Param_keys& cunif_param_keys() const;
@@ -68,13 +70,17 @@ namespace SOS {
         protected:
             using Ode_eval = vector<Dt_eval>;
             using Odes_eval = vector<Ode_eval>;
-            using Param_keys_ptr = Expr::Eval<Real>::Param_keys_ptr;
+            using Param_keys_ptr = Dt_eval::Param_keys_ptr;
             using Param_keys_ptrs = vector<Param_keys_ptr>;
 
             const Odes_spec& codes_spec() const         { return _odes_spec; }
             const Odes_eval& codes_eval() const         { return _odes_eval; }
             Odes_spec& odes_spec()                      { return _odes_spec; }
             Odes_eval& odes_eval()                      { return _odes_eval; }
+            const Ode_spec& code_spec(Ode_id ode_id_ = def_ode_id) const
+                                             { return codes_spec()[ode_id_]; }
+            const Ode_eval& code_eval(Ode_id ode_id_ = def_ode_id) const
+                                             { return codes_eval()[ode_id_]; }
 
             bool check_param_keyss(const Param_keyss& param_keyss_);
             static void check_param_keys(const Param_keys& param_keys_);
@@ -106,12 +112,18 @@ namespace SOS {
             using Dt_eval_params = Dt_eval::Param_values;
 
             void modified();
+            bool has_param_t(Ode_id ode_id_) const;
             static bool ode_has_param_t(const Ode_eval& ode_eval_);
             static bool dt_has_param_t(const Dt_eval& dt_eval_);
 
+            const Param_keys& code_param_keys(Ode_id ode_id_) const;
             static const Param_keys&
                 code_param_keys(const Ode_eval& ode_eval_);
             const Param_keys& cunif_param_keys_wo_check() const;
+            const Param_key& code_param_key(Ode_id ode_id_,
+                                            bool unified) const;
+            const Param_key& code_param_key(Ode_id ode_id_) const
+                             { return code_param_key(ode_id_, is_unified()); }
 
             Real eval_dt_step(const Dt_eval& dt_eval_,
                               const State& x, Time t) const;

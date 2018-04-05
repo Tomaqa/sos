@@ -2,6 +2,27 @@ namespace SOS {
 
 }
 
+namespace Aux {
+    using namespace std;
+
+    template<size_t...> struct Seq{};
+
+    template<size_t n, size_t... is>
+    struct Gen_seq : Gen_seq<n-1, n-1, is...>{};
+
+    template<size_t... is>
+    struct Gen_seq<0, is...> : Seq<is...>{};
+
+    template<typename Tuple, size_t... is>
+    static void tuple_to_string(string& str, const Tuple& t, Seq<is...>)
+    {
+        using A = int[];
+        A{0, (void(str += (is == 0? "" : " ")
+                       + to_string(get<is>(t))
+                  ), 0)...};
+    }
+}
+
 namespace std {
     template <typename T>
     string to_string(const vector<T>& rhs)
@@ -17,5 +38,13 @@ namespace std {
     string to_string(const pair<T1, T2>& rhs)
     {
         return to_string(rhs.first) + " " + to_string(rhs.second);
+    }
+
+    template<typename... Args>
+    string to_string(const tuple<Args...>& rhs)
+    {
+      string str("");
+      Aux::tuple_to_string(str, rhs, Aux::Gen_seq<sizeof...(Args)>());
+      return move(str);
     }
 }

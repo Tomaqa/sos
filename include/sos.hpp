@@ -58,6 +58,7 @@ public:
     Error& operator +=(const string& rhs);
 private:
     string _msg;
+    mutable bool _printed{false};
 };
 
 namespace std {
@@ -65,6 +66,9 @@ namespace std {
 
     template <typename T1, typename T2>
         string to_string(const pair<T1, T2>& rhs);
+
+    template <typename... Args>
+        string to_string(const tuple<Args...>& rhs);
 
     inline const string& to_string(const string& rhs)          { return rhs; }
 }

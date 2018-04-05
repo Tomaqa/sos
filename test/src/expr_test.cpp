@@ -192,7 +192,7 @@ namespace SOS {
 /////////////////////////////////////////////////////////////////
 
 int main(int, const char*[])
-{
+try {
     using namespace SOS;
     using namespace SOS::Test;
     using namespace std;
@@ -355,4 +355,8 @@ int main(int, const char*[])
 
     cout << endl << "Success." << endl;
     return 0;
+}
+catch (const SOS::Error& e) {
+    std::cout << e << std::endl;
+    throw;
 }
