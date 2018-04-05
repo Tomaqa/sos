@@ -1,6 +1,7 @@
 #include "test.hpp"
 #include "ode/solver.hpp"
 #include "ode/euler.hpp"
+#include "ode/odeint.hpp"
 
 namespace SOS {
     namespace Test {
@@ -52,6 +53,7 @@ namespace SOS {
         using Solve_ode_input = tuple<Ode_spec, Param_keys, Context>;
         using Solve_ode_params = tuple<Time>;
 
+        template <typename Solver>
         Solve_ode_output solve_ode_res(const Solve_ode_input& input,
                                        bool should_throw,
                                        Solve_ode_params& params)
@@ -60,7 +62,7 @@ namespace SOS {
             const Param_keys& keys = get<1>(input);
             const Context& ctx = get<2>(input);
             int size_ = ospec.size();
-            Euler solver(ospec, keys);
+            Solver solver(ospec, keys);
             Time step_size = get<0>(params);
             if (step_size > 0) solver.set_step_size(step_size);
             Solve_ode_output res;
@@ -151,7 +153,7 @@ try {
         {  {{ {{"- 1"}} }, { {""} }},                                                          {},                {}                                                                        },
     };
 
-    Test_data<Solve_ode_params, Solve_ode_output, Solve_ode_input> solve_ode_data = {
+    Test_data<Solve_ode_params, Solve_ode_output, Solve_ode_input> solve_ode_euler_data = {
         {  { { {"- 1"} }, {"x"}, {{0, 0}, {100}} },                                                                                             {-1},       {100}                           },
         {  { { {"- 1"} }, {"x"}, {{0, 10}, {100}} },                                                                                            {-1},       {90}                            },
         {  { { {"- 1"} }, {"x"}, {{0, 10}, {100}} },                                                                                            {1},        {90}                            },
@@ -160,6 +162,17 @@ try {
         {  { { {"- (* 2 x) 100"} }, {"x"}, {{0, 10}, {100}} },                                                                                  {0.01},     {1.991323e10}                   },
         {  { { {"+ x ( - 10 y)"}, {"+ x y"} }, {"x", "y"}, {{0, 50}, {5, 20}} },                                                                {0.05},     {-7.73159e21, 3.8658e22}        },
         {  { { {"- (/ x 2) (/ t 3)"}, {"- (/ t 3) x"} }, {"x", "t"}, {{0, 50}, {10}} },                                                         {0.02},     {5.5117124e11, 16.3333}         },
+    };
+
+    Test_data<Solve_ode_params, Solve_ode_output, Solve_ode_input> solve_ode_odeint_data = {
+        {  { { {"- 1"} }, {"x"}, {{0, 0}, {100}} },                                                                                             {-1},       {100}                           },
+        {  { { {"- 1"} }, {"x"}, {{0, 10}, {100}} },                                                                                            {-1},       {90}                            },
+        {  { { {"- 1"} }, {"x"}, {{0, 10}, {100}} },                                                                                            {1},        {90}                            },
+        {  { { {"- (* 2 x) 100"} }, {"x"}, {{0, 10}, {100}} },                                                                                  {1},        {2.42585e10}                    },
+        {  { { {"- (* 2 x) 100"} }, {"x"}, {{0, 10}, {100}} },                                                                                  {0.1},      {2.425e10}                      },
+        {  { { {"- (* 2 x) 100"} }, {"x"}, {{0, 10}, {100}} },                                                                                  {0.01},     {2.42583e10}                    },
+        {  { { {"+ x ( - 10 y)"}, {"+ x y"} }, {"x", "y"}, {{0, 50}, {5, 20}} },                                                                {0.05},     {-2.59242e22, 1.29621e23}       },
+        {  { { {"- (/ x 2) (/ t 3)"}, {"- (/ t 3) x"} }, {"x", "t"}, {{0, 50}, {10}} },                                                         {0.02},     {6.24e11, 16.3267}              },
     };
 
     /////////////////////////////////////////////////////////////////
@@ -174,7 +187,11 @@ try {
     test<Keys_params, Keys_output, Keys_input>(keys_throw_data, keys_res, keys_msg, true);
 
     string solve_ode_msg = "solving single ODE";
-    test<Solve_ode_params, Solve_ode_output, Solve_ode_input>(solve_ode_data, solve_ode_res, solve_ode_msg,
+    test<Solve_ode_params, Solve_ode_output, Solve_ode_input>(solve_ode_euler_data, solve_ode_res<Euler>,
+                                                              solve_ode_msg + " by 'Euler'",
+                                                              false, apx_equal_vec<Real>);
+    test<Solve_ode_params, Solve_ode_output, Solve_ode_input>(solve_ode_odeint_data, solve_ode_res<Odeint>,
+                                                              solve_ode_msg + " by 'Odeint'",
                                                               false, apx_equal_vec<Real>);
 
     Euler s1;

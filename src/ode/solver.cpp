@@ -260,7 +260,8 @@ namespace SOS {
         State Solver::eval_unif_odes(Dt_ids&& dt_ids_,
                                      Context&& context_) const
         {
-            return move(eval_odes(move(dt_ids_), Contexts(size(), context_)));
+            return move(eval_odes(move(dt_ids_),
+                        Contexts(size(), context_)));
         }
 
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,

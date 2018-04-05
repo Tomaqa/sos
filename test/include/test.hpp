@@ -17,7 +17,7 @@ namespace SOS {
         template <typename Output>
         using Pred_f = function<bool(const Output&, const Output&)>;
 
-        constexpr double eps = 4e-6;
+        constexpr double eps = 1e-3;
         bool apx_equal(double a, double b)
         {
             return fabs(a - b) <= (eps * (fabs(a) < fabs(b)
