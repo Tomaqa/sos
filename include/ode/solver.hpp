@@ -42,6 +42,8 @@ namespace SOS {
             Solver(Solver&& rhs)                                    = default;
             Solver& operator =(Solver&& rhs)                        = default;
             Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
+            Solver(Odes_spec odes_spec_, Param_keys param_keys_);
+            Solver(Ode_spec ode_spec_, Param_keys param_keys_);
             Solver(const string& input); // not implemented yet
 
             size_t size() const noexcept       { return codes_spec().size(); }

@@ -45,6 +45,12 @@ namespace SOS {
         }
 
         /////////////////////////////////////////////////////////////////
+
+        using Solve_ode_output = Real;
+        using Context = Solver::Context;
+        using Solve_ode_input = tuple<Param_keyss, Context>;
+
+        /////////////////////////////////////////////////////////////////
     }
 }
 
@@ -135,6 +141,50 @@ try {
     string keys_msg = "building of solvers";
     test<Keys_params, Keys_output, Keys_input>(keys_data, keys_res, keys_msg);
     test<Keys_params, Keys_output, Keys_input>(keys_throw_data, keys_res, keys_msg, true);
+
+    Euler s1;
+    expect(s1.size() == 0 && !s1.is_unified() && !s1.has_unif_param_t()
+           && s1.cparam_keyss().empty(),
+           "Default construction of 'Solver' failed.");
+
+    auto& dcase = keys_data[5];
+    auto& input = get<0>(dcase);
+    auto& output = get<2>(dcase);
+    Euler s2(input.first, input.second.front());
+    expect(s2.size() == get<0>(output)
+           && s2.is_unified() == true
+           && s2.has_unif_param_t() == get<2>(output)
+           && s2.cunif_param_keys() == get<3>(output),
+           "Construction of 'Solver' with single parameter keys failed.");
+
+    Euler s3(input.first.front(), input.second.front());
+    expect(s3.size() == get<0>(output)
+           && s3.is_unified() == true
+           && s3.has_unif_param_t() == get<2>(output)
+           && s3.cunif_param_keys() == get<3>(output),
+           "Construction of 'Solver' with single parameter keys "s
+           + "and single ODE specification failed.");
+
+    Param_keyss keyss{get<3>(output)};
+    Param_keys new_keys{"?"};
+    Euler s4 = move(s3);
+    s4.add_ode_spec({{"+ 1"}}, new_keys);
+    keyss.emplace_back(new_keys);
+    expect(s4.size() == get<0>(output)+1
+           && s4.is_unified() == false
+           && s4.has_unif_param_t() == false
+           && s4.cparam_keyss() == keyss,
+           "Move construction of 'Solver' "s
+           + "with adding ODE specification failed"s);
+
+    Euler s5 = s2;
+    s5.add_ode_spec({{"+ 1"}}, new_keys);
+    expect(s2.size() == get<0>(output) && s5.size() == get<0>(output)+1
+           && s2.is_unified() == true && s4.is_unified() == false
+           && s2.has_unif_param_t() == get<2>(output) && s4.has_unif_param_t() == false
+           && s2.cunif_param_keys() == get<3>(output) && s4.cparam_keyss() == keyss,
+           "Copy construction of 'Solver' "s
+           + "with adding ODE specification failed"s);
 
     cout << endl << "Success." << endl;
     return 0;

@@ -22,6 +22,15 @@ namespace SOS {
             // efektivnejsi jej pridat presto ze se nebude vyhodnocovat
         }
 
+        Solver::Solver(Odes_spec odes_spec_, Param_keys param_keys_)
+            : Solver(move(odes_spec_), Param_keyss{move(param_keys_)})
+        { }
+
+        Solver::Solver(Ode_spec ode_spec_, Param_keys param_keys_)
+            : Solver(Odes_spec{move(ode_spec_)},
+                     Param_keyss{move(param_keys_)})
+        { }
+
         void Solver::check_ode_spec(const Ode_spec& ode_spec_)
         {
             expect(valid_ode_spec(ode_spec_),
