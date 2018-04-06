@@ -65,6 +65,8 @@ namespace SOS {
             using Param_keys_ptr = Dt_eval::Param_keys_ptr;
             using Param_keys_ptrs = vector<Param_keys_ptr>;
 
+            static constexpr Dt_id def_dt_id = 0;
+
             const Odes_spec& codes_spec() const         { return _odes_spec; }
             const Odes_eval& codes_eval() const         { return _odes_eval; }
             Odes_spec& odes_spec()                      { return _odes_spec; }
@@ -97,10 +99,12 @@ namespace SOS {
             virtual State eval_odes(Dt_ids&& dt_ids_,
                                     Contexts&& contexts_) const;
             virtual State eval_unif_odes(Dt_ids&& dt_ids_,
-                                         Context&& context_) const;
+                                         Context&& context_) const        = 0;
 
-            void eval_unif_odes_step(const Dt_ids& dt_ids_,
-                                     State& dx, const State& x, Time t) const;
+            template <typename OutputIt>
+                void eval_unif_odes_step(const Dt_ids& dt_ids_,
+                                         OutputIt dx_it,
+                                         const State& x, Time t) const;
             State eval_unif_odes_step(const Dt_ids& dt_ids_,
                                       const State& x, Time t) const;
             void eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,

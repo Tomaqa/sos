@@ -18,7 +18,7 @@ namespace SOS {
                                          const override final;
 
             size_t integrate(Integrate_f f, State& x,
-                             Interval<Time> t_bounds_) const;
+                             Time t_init_, Time t_end_) const;
         };
     }
 }

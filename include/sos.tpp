@@ -1,29 +1,23 @@
 namespace SOS {
+    namespace Aux {
+        template<size_t...> struct Seq{};
 
-}
+        template<size_t n, size_t... is>
+        struct Gen_seq : Gen_seq<n-1, n-1, is...>{};
 
-namespace Aux {
-    using namespace std;
+        template<size_t... is>
+        struct Gen_seq<0, is...> : Seq<is...>{};
 
-    template<size_t...> struct Seq{};
-
-    template<size_t n, size_t... is>
-    struct Gen_seq : Gen_seq<n-1, n-1, is...>{};
-
-    template<size_t... is>
-    struct Gen_seq<0, is...> : Seq<is...>{};
-
-    template<typename Tuple, size_t... is>
-    static void tuple_to_string(string& str, const Tuple& t, Seq<is...>)
-    {
-        using A = int[];
-        A{0, (void(str += (is == 0? "" : " ")
-                       + to_string(get<is>(t))
-                  ), 0)...};
+        template<typename Tuple, size_t... is>
+        static void tuple_to_string(string& str, const Tuple& t, Seq<is...>)
+        {
+            using A = int[];
+            A{0, (void(str += (is == 0? "" : " ")
+                           + to_string(get<is>(t))
+                      ), 0)...};
+        }
     }
-}
 
-namespace std {
     template <typename T>
     string to_string(const vector<T>& rhs)
     {
@@ -46,5 +40,23 @@ namespace std {
       string str("");
       Aux::tuple_to_string(str, rhs, Aux::Gen_seq<sizeof...(Args)>());
       return move(str);
+    }
+
+    template <typename T>
+    ostream& operator <<(ostream& os, const vector<T>& rhs)
+    {
+        return (os << to_string(rhs));
+    }
+
+    template <typename T1, typename T2>
+    ostream& operator <<(ostream& os, const pair<T1, T2>& rhs)
+    {
+        return (os << to_string(rhs));
+    }
+
+    template <typename... Args>
+    ostream& operator <<(ostream& os, const tuple<Args...>& rhs)
+    {
+        return (os << to_string(rhs));
     }
 }

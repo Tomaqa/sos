@@ -61,15 +61,78 @@ namespace SOS {
             const Ode_spec& ospec = get<0>(input);
             const Param_keys& keys = get<1>(input);
             const Context& ctx = get<2>(input);
-            int size_ = ospec.size();
+            int dt_size_ = ospec.size();
             Solver solver(ospec, keys);
             Time step_size = get<0>(params);
             if (step_size > 0) solver.set_step_size(step_size);
-            Solve_ode_output res;
-            for (int i = 0; i < size_; i++) {
-                 res.push_back(solver.solve_ode(i, ctx));
+            Solve_ode_output res1;
+            Solve_ode_output res2;
+            for (int i = 0; i < dt_size_; i++) {
+                res1.push_back(solver.solve_ode(i, ctx));
+                res2.push_back(solver.solve_ode(i, ctx));
             }
-            return move(res);
+            if (!should_throw) {
+                expect(res1 == res2,
+                       "Two consecutive solutions differ: '"s\
+                       + to_string(res1) + "' != '" + to_string(res2) + "'");
+
+                cout << ospec
+                     << "[ " << keys << "]"
+                     << " (" << ctx << ")"
+                     << " {" << params << "}"
+                     << endl << "  -> " << "( " << res1 << ")"
+                     << endl;
+            }
+            return move(res1);
+        }
+
+        /////////////////////////////////////////////////////////////////
+
+        using Solve_unif_odes_output = vector<State>;
+        using Solve_unif_odes_input = tuple<Odes_spec, Param_keys, Context>;
+        using Solve_unif_odes_params = tuple<Time>;
+        using Dt_ids = Solver::Dt_ids;
+
+        template <typename Solver>
+        Solve_unif_odes_output
+            solve_unif_odes_res(const Solve_unif_odes_input& input,
+                                bool should_throw,
+                                Solve_unif_odes_params& params)
+        {
+            const Odes_spec& osspec = get<0>(input);
+            const Param_keys& keys = get<1>(input);
+            const Context& ctx = get<2>(input);
+            expect(all_equal(osspec, [](auto& ospec0, auto& ospec){
+                                         return ospec0.size() == ospec.size();
+                                     }),
+                   "Please provide all ODEs with equal size of dt variants "s
+                   + "within this test.");
+            int size_ = osspec.size();
+            int dt_size_ = osspec.front().size();
+            Dt_ids dt_ids_(size_);
+            Solver solver(osspec, keys);
+            Time step_size = get<0>(params);
+            if (step_size > 0) solver.set_step_size(step_size);
+            Solve_unif_odes_output res1;
+            Solve_unif_odes_output res2;
+            for (int i = 0; i < dt_size_; i++) {
+                std::fill_n(std::begin(dt_ids_), size_, i);
+                res1.push_back(solver.solve_unif_odes(dt_ids_, ctx));
+                res2.push_back(solver.solve_unif_odes(dt_ids_, ctx));
+            }
+            if (!should_throw) {
+                expect(res1 == res2,
+                       "Two consecutive solutions differ: '"s\
+                       + to_string(res1) + "' != '" + to_string(res2) + "'");
+
+                cout << osspec
+                     << "[ " << keys << "]"
+                     << " (" << ctx << ")"
+                     << " {" << params << "}"
+                     << endl << "  -> " << "( " << res1 << ")"
+                     << endl;
+            }
+            return move(res1);
         }
 
         /////////////////////////////////////////////////////////////////
@@ -175,6 +238,12 @@ try {
         {  { { {"- (/ x 2) (/ t 3)"}, {"- (/ t 3) x"} }, {"x", "t"}, {{0, 50}, {10}} },                                                         {0.02},     {6.24e11, 16.3267}              },
     };
 
+    Test_data<Solve_unif_odes_params, Solve_unif_odes_output, Solve_unif_odes_input> solve_unif_odes_euler_data = {
+        {  { { {{"- 1"}}, {{"- 1"}} }, {"x", "y"}, {{0, 10}, {100, 50}} },                                                                      {-1},       {{90, 40}}                      },
+        {  { { {{"+ x ( - 10 y)"}}, {{"+ 0"}} }, {"x", "y"}, {{0, 50}, {5, 20}} },                                                              {0.05},     {{-7.73159e21, 20}}             },
+        {  { { {{"- (/ tt 3) x"}}, {{"+ 1"}} }, {"x", "tt"}, {{0, 50}, {10, 0}} },                                                              {0.02},     {{16.3333, 50}}                 },
+    };
+
     /////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////
 
@@ -189,17 +258,22 @@ try {
     string solve_ode_msg = "solving single ODE";
     test<Solve_ode_params, Solve_ode_output, Solve_ode_input>(solve_ode_euler_data, solve_ode_res<Euler>,
                                                               solve_ode_msg + " by 'Euler'",
-                                                              false, apx_equal_vec<Real>);
+                                                              false, apx_equal<Solve_ode_output>);
     test<Solve_ode_params, Solve_ode_output, Solve_ode_input>(solve_ode_odeint_data, solve_ode_res<Odeint>,
                                                               solve_ode_msg + " by 'Odeint'",
-                                                              false, apx_equal_vec<Real>);
+                                                              false, apx_equal<Solve_ode_output>);
+
+    string solve_unif_odes_msg = "solving unified ODEs";
+    test<Solve_unif_odes_params, Solve_unif_odes_output, Solve_unif_odes_input>(solve_unif_odes_euler_data, solve_unif_odes_res<Euler>,
+                                                              solve_unif_odes_msg + " by 'Euler'",
+                                                              false, apx_equal<Solve_unif_odes_output>);
+
+    /////////////////////////////////////////////////////////////////
 
     Euler s1;
     expect(s1.size() == 0 && !s1.is_unified() && !s1.has_unif_param_t()
            && s1.cparam_keyss().empty(),
            "Default construction of 'Solver' failed.");
-
-    /////////////////////////////////////////////////////////////////
 
     auto& dcase = keys_data[5];
     auto& input = get<0>(dcase);

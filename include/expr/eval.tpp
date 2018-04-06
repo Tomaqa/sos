@@ -307,6 +307,8 @@ namespace SOS {
     typename Expr::Eval<Arg>::Oper::Arg_lazy
         Expr::Eval<Arg>::Oper::oper_lazy(const Oper_ptr& oper_ptr_) const
     {
-        return [op_l = oper_link(oper_ptr_)](){ return (*op_l)(); };
+        return [op_l = oper_link(oper_ptr_)](){
+            return (*op_l)();
+        };
     }
 }

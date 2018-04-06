@@ -17,18 +17,20 @@ namespace SOS {
         template <typename Output>
         using Pred_f = function<bool(const Output&, const Output&)>;
 
+        template <typename T>
+        bool apx_equal(const T& a, const T& b)
+        {
+            return Util::equal(a, std::begin(b),
+                               apx_equal<typename T::value_type>);
+        }
+
         constexpr double eps = 1e-3;
-        bool apx_equal(double a, double b)
+        template <>
+        bool apx_equal(const double& a, const double& b)
         {
             return fabs(a - b) <= (eps * (fabs(a) < fabs(b)
                                         ? fabs(b) : fabs(a))
                                   );
-        }
-
-        template <typename T>
-        bool apx_equal_vec(const vector<T>& a, const vector<T>& b)
-        {
-            return Util::equal(a, std::begin(b), apx_equal);
         }
 
         template <typename Output>
@@ -89,7 +91,7 @@ namespace SOS {
                 }
             }
             catch (const Error& e) {
-                cerr << "!! At input '" << to_string(input) << "':" << endl;
+                cerr << "!! At input '" << input << "':" << endl;
                 cerr << "!! " << e << " !!" << endl;
                 throw;
             }

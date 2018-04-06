@@ -18,10 +18,10 @@ namespace SOS {
             auto f = [this, &ode_eval_, dt_id_]
                          (const State& x_, State& dx_, Time t_){
                          eval_ode_step(ode_eval_, dt_id_,
-                                       dx_[0], x_, t_);
+                                       dx_[def_dt_id], x_, t_);
                      };
-            integrate(f, x, move(context_.ct_bounds()));
-            return x[0];
+            integrate(f, x, context_.ct_init(), context_.ct_end());
+            return x[def_dt_id];
         }
 
         State Odeint::eval_unif_odes(Dt_ids&& dt_ids_,
@@ -31,18 +31,18 @@ namespace SOS {
             // taky plytvani
             // pokud je pocet param. vetsi nez derivaci, ale mensi
             auto f = [this, &dt_ids_](const State& x_, State& dx_, Time t_){
-                         eval_unif_odes_step(dt_ids_, dx_, x_, t_);
+                         eval_unif_odes_step(dt_ids_, std::begin(dx_),
+                                             x_, t_);
                      };
-            integrate(f, x, move(context_.ct_bounds()));
+            integrate(f, x, context_.ct_init(), context_.ct_end());
             return move(x);
         }
 
         size_t Odeint::integrate(Integrate_f f, State& x,
-                                 Interval<Time> t_bounds_) const
+                                 Time t_init_, Time t_end_) const
         {
             size_t n_steps = odeint::integrate(f, x,
-                                               t_bounds_.first,
-                                               t_bounds_.second,
+                                               t_init_, t_end_,
                                                step_size()
                                                /*, TObserver(states, times)*/
                                                );

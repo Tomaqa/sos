@@ -68,10 +68,10 @@ namespace SOS {
     }
 
     template <typename Cont, typename Bin_f>
-    bool Util::equal(const Cont& cont, Bin_f f)
+    bool Util::all_equal(const Cont& cont, Bin_f f)
     {
         const auto& e0 = cont.front();
-        return all_of(cont, [&e0, &f](const auto& e){ return f(e, e0); });
+        return all_of(cont, [&e0, &f](const auto& e){ return f(e0, e); });
     }
 
     template <typename Cont1, typename InputIt2, typename Bin_f>
@@ -81,4 +81,40 @@ namespace SOS {
                           move(first2),
                           move(f));
     }
+
+    template <typename T>
+    vector<T>& Util::operator +=(vector<T>& lhs, vector<T> rhs)
+    {
+        transform(lhs, std::begin(move(rhs)),
+                  std::begin(lhs),
+                  std::plus<T>());
+        return lhs;
+    }
+
+    template <typename T>
+    vector<T> Util::operator +(vector<T> lhs, vector<T> rhs)
+    {
+        return move(lhs += move(rhs));
+    }
+
+    template <typename T>
+    vector<T>& Util::operator *=(vector<T>& lhs, T rhs)
+    {
+        transform(lhs, std::begin(lhs),
+                  bind(std::multiplies<T>(), _1, rhs));
+        return lhs;
+    }
+
+    template <typename T>
+    vector<T> Util::operator *(vector<T> lhs, T rhs)
+    {
+        return move(lhs *= rhs);
+    }
+
+    template <typename T>
+    vector<T> Util::operator *(T lhs, vector<T> rhs)
+    {
+        return move(rhs *= lhs);
+    }
 }
+

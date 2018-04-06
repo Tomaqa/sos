@@ -26,7 +26,7 @@ namespace SOS {
                        "Result differ with copy of itself: "s
                        + to_string(expr) + " != " + to_string(expr2));
 
-                cout << input << " -> " << to_string(expr) << endl;
+                cout << input << " -> " << expr << endl;
             }
             return move(to_string(expr));
         }
@@ -53,7 +53,7 @@ namespace SOS {
                        "Flatten versions with/without 'simplify() differ: '"s
                        + to_string(expr) + "' != '"
                        + to_string(expr2) + "'");
-                cout << input << " -> " << to_string(expr) << endl;
+                cout << input << " -> " << expr << endl;
             }
             return move(to_string(expr));
         }

@@ -235,7 +235,7 @@ namespace SOS {
         {
             const bool unified = is_unified()
                                  && (contexts_.size() == 1
-                                     || equal(contexts_));
+                                     || all_equal(contexts_));
             if (unified) {
                 return move(
                     solve_unif_odes_wo_check(move(dt_ids_),
@@ -298,29 +298,29 @@ namespace SOS {
             return move(res);
         }
 
-        // ! inefficient!!
-        State Solver::eval_unif_odes(Dt_ids&& dt_ids_,
-                                     Context&& context_) const
-        {
-            return move(eval_odes(move(dt_ids_),
-                        Contexts(size(), context_)));
-        }
-
+        template <typename OutputIt>
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
-                                    State& dx, const State& x, Time t) const
+                                         OutputIt dx_it,
+                                         const State& x, Time t) const
         {
             transform(codes_eval(), std::begin(dt_ids_),
-                      std::begin(dx),
+                      move(dx_it),
                       [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
                           return eval_dt_step(ode_eval_[dt_id_], x, t);
                       });
         }
 
+        template
+        void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
+                                         State::iterator dx_it,
+                                         const State& x, Time t) const;
+
         State Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
                                           const State& x, Time t) const
         {
             State dx;
-            eval_unif_odes_step(dt_ids_, dx, x, t);
+            dx.reserve(x.size());
+            eval_unif_odes_step(dt_ids_, std::back_inserter(dx), x, t);
             return move(dx);
         }
 
@@ -424,8 +424,8 @@ namespace SOS {
 
         Solver::Context::operator string () const
         {
-            return "( "s + to_string(ct_bounds()) + " )"
-                          + " ( " + to_string(cx_init()) + ")";
+            return "( "s + SOS::to_string(ct_bounds()) + " )"
+                   + " ( " + SOS::to_string(cx_init()) + ")";
         }
 
         string to_string(const Solver::Context& rhs)
