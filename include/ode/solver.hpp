@@ -108,9 +108,7 @@ namespace SOS {
             Real eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
                                const State& x, Time t) const;
         private:
-            using Dt_eval_params = Dt_eval::Param_values;
-            // using State_f = function<const State&(const State&, Time)>;
-            using State_f = function<State(const State&, Time)>;
+            using State_f = function<const State&(const State&, Time)>;
 
             void modified();
             static bool ode_has_param_t(const Ode_eval& ode_eval_);
@@ -125,10 +123,10 @@ namespace SOS {
             const Param_key& code_param_key(Ode_id ode_id_) const
                              { return code_param_key(ode_id_, is_unified()); }
 
-            void reserve_param_t(bool has_t, Context& context_) const;
+            State_f get_state_f(bool has_t, Context& context_) const;
+            void set_state_f(bool has_t, Context& context_) const;
             State_f& state_f() const                      { return _state_f; }
-            // const State& state(const State& x, Time t) const
-            State state(const State& x, Time t) const
+            const State& state(const State& x, Time t) const
                                                    { return state_f()(x, t); }
             Real eval_dt_step(const Dt_eval& dt_eval_,
                               const State& x, Time t) const;

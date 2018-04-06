@@ -227,7 +227,7 @@ namespace SOS {
         Real Solver::solve_ode(Dt_id dt_id_, Context context_,
                                Ode_id ode_id_) const
         {
-            reserve_param_t(ode_has_param_t(ode_id_), context_);
+            set_state_f(ode_has_param_t(ode_id_), context_);
             return eval_ode(dt_id_, move(context_), ode_id_);
         }
 
@@ -244,7 +244,7 @@ namespace SOS {
             }
             for_each(contexts_, std::begin(codes_eval()),
                     [this](Context& ctx, const Ode_eval& oeval){
-                        reserve_param_t(ode_has_param_t(oeval), ctx);
+                        set_state_f(ode_has_param_t(oeval), ctx);
                     });
             return move(eval_odes(move(dt_ids_), move(contexts_)));
         }
@@ -261,24 +261,27 @@ namespace SOS {
         State Solver::solve_unif_odes_wo_check(Dt_ids dt_ids_,
                                                Context context_) const
         {
-            reserve_param_t(has_unif_param_t(), context_);
+            set_state_f(has_unif_param_t(), context_);
             return move(eval_unif_odes(move(dt_ids_), move(context_)));
         }
 
-        void Solver::reserve_param_t(bool has_t, Context& context_) const
+        void Solver::set_state_f(bool has_t, Context& context_) const
+        {
+            state_f() = get_state_f(has_t, context_);
+        }
+
+        Solver::State_f Solver::get_state_f(bool has_t,
+                                            Context& context_) const
         {
             if (!has_t) {
-                state_f() = [](const State& x, Time){ return x; };
-                return;
+                return [](const State& x, Time) -> const State& {
+                    return x;
+                };
             }
             context_.add_param_t();
-            state_f() = [](const State& x, Time t){
-                // x.back() = t;
-                // !!!
-                // return x;
-                State x2(x);
-                x2.back() = t;
-                return move(x2);
+            return [](const State& x, Time t) -> const State& {
+                const_cast<Real&>(x.back()) = t;
+                return x;
             };
         }
 
@@ -336,8 +339,7 @@ namespace SOS {
         Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
                                   const State& x, Time t) const
         {
-            // return dt_eval_(state(x, t));
-            return dt_eval_(move(state(x, t)));
+            return dt_eval_(state(x, t));
         }
 
         Solver::operator string () const
