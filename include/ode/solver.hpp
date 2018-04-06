@@ -51,9 +51,8 @@ namespace SOS {
             Param_keyss cparam_keyss() const;
             const Param_keys& cunif_param_keys() const;
 
-            virtual Real solve_ode(Dt_id dt_id_,
-                                   Context context_,
-                                   Ode_id ode_id_ = def_ode_id) const     = 0;
+            Real solve_ode(Dt_id dt_id_, Context context_,
+                           Ode_id ode_id_ = def_ode_id) const;
             State solve_odes(Dt_ids dt_ids_, Contexts contexts_) const;
             State solve_unif_odes(Dt_ids dt_ids_, Context context_) const;
 
@@ -91,10 +90,15 @@ namespace SOS {
             static Ode_eval create_ode_eval(Ode_spec& ode_spec_,
                                             Param_keys_ptr param_keys_ptr_);
 
+            State solve_unif_odes_wo_check(Dt_ids dt_ids_,
+                                           Context context_) const;
+            virtual Real eval_ode(Dt_id dt_id_, Context&& context_,
+                                  Ode_id ode_id_) const                   = 0;
             virtual State eval_odes(Dt_ids&& dt_ids_,
                                     Contexts&& contexts_) const;
             virtual State eval_unif_odes(Dt_ids&& dt_ids_,
                                          Context&& context_) const;
+
             void eval_unif_odes_step(const Dt_ids& dt_ids_,
                                      State& dx, const State& x, Time t) const;
             State eval_unif_odes_step(const Dt_ids& dt_ids_,
@@ -105,6 +109,8 @@ namespace SOS {
                                const State& x, Time t) const;
         private:
             using Dt_eval_params = Dt_eval::Param_values;
+            // using State_f = function<const State&(const State&, Time)>;
+            using State_f = function<State(const State&, Time)>;
 
             void modified();
             static bool ode_has_param_t(const Ode_eval& ode_eval_);
@@ -119,16 +125,20 @@ namespace SOS {
             const Param_key& code_param_key(Ode_id ode_id_) const
                              { return code_param_key(ode_id_, is_unified()); }
 
+            void reserve_param_t(bool has_t, Context& context_) const;
+            State_f& state_f() const                      { return _state_f; }
+            // const State& state(const State& x, Time t) const
+            State state(const State& x, Time t) const
+                                                   { return state_f()(x, t); }
             Real eval_dt_step(const Dt_eval& dt_eval_,
                               const State& x, Time t) const;
-            Real eval_dt_step(const Dt_eval& dt_eval_,
-                              Dt_eval_params params) const;
 
             Time _step_size{1e-2};
             Odes_spec _odes_spec;
             Odes_eval _odes_eval;
             mutable Flag _is_unified;
             mutable Flag _has_param_t;
+            mutable State_f _state_f;
         };
 
         class Solver::Context {
@@ -152,6 +162,8 @@ namespace SOS {
             Time ct_init() const                 { return ct_bounds().first; }
             Time ct_end() const                 { return ct_bounds().second; }
             const State& cx_init() const                   { return _x_init; }
+
+            void add_param_t();
         protected:
             void check_values() const;
 

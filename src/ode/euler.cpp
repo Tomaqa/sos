@@ -2,10 +2,10 @@
 
 namespace SOS {
     namespace ODE {
-        Real Euler::solve_ode(Dt_id dt_id_,
-                              Context context_, Ode_id ode_id_) const
+        Real Euler::eval_ode(Dt_id dt_id_, Context&& context_,
+                             Ode_id ode_id_) const
         {
-            const Ode_eval& ode_eval_ = codes_eval()[ode_id_];
+            const Ode_eval& ode_eval_ = code_eval(ode_id_);
             State x = move(context_.cx_init());
             Real& dx = x[0];
 

@@ -18,8 +18,6 @@ namespace SOS {
             else {
                 add_unif_odes_eval(move(param_keyss_.front()));
             }
-            // ? pokud nema parametr t, zvazit (otestovat) jestli nebude
-            // efektivnejsi jej pridat presto ze se nebude vyhodnocovat
         }
 
         Solver::Solver(Odes_spec odes_spec_, Param_keys param_keys_)
@@ -226,13 +224,29 @@ namespace SOS {
                                                     : def_ode_id];
         }
 
+        Real Solver::solve_ode(Dt_id dt_id_, Context context_,
+                               Ode_id ode_id_) const
+        {
+            reserve_param_t(ode_has_param_t(ode_id_), context_);
+            return eval_ode(dt_id_, move(context_), ode_id_);
+        }
+
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
         {
-            const bool unified = is_unified() && equal(contexts_);
-            return move(unified ? eval_unif_odes(move(dt_ids_),
-                                                 move(contexts_.front()))
-                                : eval_odes(move(dt_ids_), move(contexts_))
-                       );
+            const bool unified = is_unified()
+                                 && (contexts_.size() == 1
+                                     || equal(contexts_));
+            if (unified) {
+                return move(
+                    solve_unif_odes_wo_check(move(dt_ids_),
+                                             move(contexts_.front()))
+                );
+            }
+            for_each(contexts_, std::begin(codes_eval()),
+                    [this](Context& ctx, const Ode_eval& oeval){
+                        reserve_param_t(ode_has_param_t(oeval), ctx);
+                    });
+            return move(eval_odes(move(dt_ids_), move(contexts_)));
         }
 
         State Solver::solve_unif_odes(Dt_ids dt_ids_,
@@ -240,7 +254,32 @@ namespace SOS {
         {
             expect(is_unified(), "Attempt to solve unified ODEs,"s
                                  + " but parameter keys are not unified.");
+            return move(solve_unif_odes_wo_check(move(dt_ids_),
+                                                 move(context_)));
+        }
+
+        State Solver::solve_unif_odes_wo_check(Dt_ids dt_ids_,
+                                               Context context_) const
+        {
+            reserve_param_t(has_unif_param_t(), context_);
             return move(eval_unif_odes(move(dt_ids_), move(context_)));
+        }
+
+        void Solver::reserve_param_t(bool has_t, Context& context_) const
+        {
+            if (!has_t) {
+                state_f() = [](const State& x, Time){ return x; };
+                return;
+            }
+            context_.add_param_t();
+            state_f() = [](const State& x, Time t){
+                // x.back() = t;
+                // !!!
+                // return x;
+                State x2(x);
+                x2.back() = t;
+                return move(x2);
+            };
         }
 
         State Solver::eval_odes(Dt_ids&& dt_ids_, Contexts&& contexts_) const
@@ -249,9 +288,9 @@ namespace SOS {
             int size_ = size();
             res.reserve(size_);
             for (int i = 0; i < size_; i++) {
-                res.emplace_back(solve_ode(dt_ids_[i],
-                                           move(contexts_[i]),
-                                           i));
+                res.emplace_back(eval_ode(dt_ids_[i],
+                                          move(contexts_[i]),
+                                          i));
             }
             return move(res);
         }
@@ -267,19 +306,11 @@ namespace SOS {
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
                                     State& dx, const State& x, Time t) const
         {
-            // ! do not construct in each step
-            function<Real(const Ode_eval& ode_eval_, Dt_id dt_id_)> f;
-            if (has_unif_param_t()) {
-                f = [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
-                    return eval_dt_step(ode_eval_[dt_id_], x, t);
-                };
-            }
-            else {
-                f = [this, &x](const Ode_eval& ode_eval_, Dt_id dt_id_){
-                    return eval_dt_step(ode_eval_[dt_id_], x);
-                };
-            }
-            transform(codes_eval(), std::begin(dt_ids_), std::begin(dx), f);
+            transform(codes_eval(), std::begin(dt_ids_),
+                      std::begin(dx),
+                      [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
+                          return eval_dt_step(ode_eval_[dt_id_], x, t);
+                      });
         }
 
         State Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
@@ -299,23 +330,14 @@ namespace SOS {
         Real Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
                                    const State& x, Time t) const
         {
-            return ode_has_param_t(ode_eval_)
-                   ? eval_dt_step(ode_eval_[dt_id_], x, t)
-                   : eval_dt_step(ode_eval_[dt_id_], x);
+            return eval_dt_step(ode_eval_[dt_id_], x, t);
         }
 
         Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
                                   const State& x, Time t) const
         {
-            Dt_eval_params params(x);
-            params.emplace_back(t);
-            return eval_dt_step(dt_eval_, move(params));
-        }
-
-        Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
-                                  Dt_eval_params params) const
-        {
-            return dt_eval_(move(params));
+            // return dt_eval_(state(x, t));
+            return dt_eval_(move(state(x, t)));
         }
 
         Solver::operator string () const
@@ -419,6 +441,11 @@ namespace SOS {
         {
             return lhs.ct_bounds() == rhs.ct_bounds()
                 && lhs.cx_init() == rhs.cx_init();
+        }
+
+        void Solver::Context::add_param_t()
+        {
+            x_init().emplace_back(ct_init());
         }
     }
 }

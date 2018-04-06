@@ -28,7 +28,7 @@ namespace SOS {
         template <typename T>
         bool apx_equal_vec(const vector<T>& a, const vector<T>& b)
         {
-            return Util::equal(a, b, apx_equal);
+            return Util::equal(a, std::begin(b), apx_equal);
         }
 
         template <typename Output>

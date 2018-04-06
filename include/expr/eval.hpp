@@ -120,6 +120,10 @@ namespace SOS {
         Arg_lazy param_lazy(const Param_key& key_) const;
         Arg_lazy oper_lazy(const Oper_ptr& oper_ptr_) const;
 
+        // ! potentionally inefficient
+        //   - operations are not stored in continual memory blocks
+        //   - binary operations -> maximal depth
+        //   - if both arguments are known, whole operation can be simplified
         Param_keys_link _param_keys_l;
         Param_values_link _param_values_l;
         Bin_f _f;

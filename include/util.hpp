@@ -24,6 +24,8 @@ namespace SOS {
 
         template <typename Cont, typename Un_f>
             Un_f for_each(Cont& cont, Un_f f);
+        template <typename Cont1, typename InputIt2, typename Bin_f>
+            Bin_f for_each(Cont1& cont1, InputIt2 first2, Bin_f f);
         template <typename Cont, typename Un_f>
             bool all_of(const Cont& cont, Un_f f);
         template <typename Cont, typename Un_f>
@@ -39,9 +41,9 @@ namespace SOS {
         template <typename Cont,
                   typename Bin_f = std::equal_to<typename Cont::value_type>>
             bool equal(const Cont& cont, Bin_f f = Bin_f());
-        template <typename Cont1, typename Cont2,
+        template <typename Cont1, typename InputIt2,
                   typename Bin_f = std::equal_to<typename Cont1::value_type>>
-            bool equal(const Cont1& cont1, const Cont2& cont2,
+            bool equal(const Cont1& cont1, InputIt2 first2,
                        Bin_f f = Bin_f());
     }
 
