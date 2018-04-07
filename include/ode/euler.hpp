@@ -1,5 +1,4 @@
-#ifndef ___SOS_EULER_H_OUD4893G789HJ3490G834HG34G3FG430
-#define ___SOS_EULER_H_OUD4893G789HJ3490G834HG34G3FG430
+#pragma once
 
 #include "ode/solver.hpp"
 
@@ -20,6 +19,4 @@ namespace SOS {
         };
     }
 }
-
-#endif // ___SOS_EULER_H_OUD4893G789HJ3490G834HG34G3FG430
 

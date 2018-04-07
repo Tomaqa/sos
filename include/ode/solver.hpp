@@ -1,5 +1,4 @@
-#ifndef ___SOS_SOLVER_H_OUDH9GH34798GH949T938HJ3409FG430
-#define ___SOS_SOLVER_H_OUDH9GH34798GH949T938HJ3409FG430
+#pragma once
 
 #include "ode.hpp"
 #include "expr.hpp"
@@ -34,7 +33,7 @@ namespace SOS {
             Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
             Solver(Odes_spec odes_spec_, Param_keys param_keys_);
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
-            Solver(const string& input); // ! not implemented yet
+            Solver(const string& input);
 
             size_t size() const noexcept       { return codes_spec().size(); }
             bool empty() const noexcept                { return size() == 0; }
@@ -44,7 +43,6 @@ namespace SOS {
 
             void add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_);
             bool is_unified() const;
-            void unify(); // ! not implemented yet
             bool ode_has_param_t(Ode_id ode_id_) const;
             bool has_unif_param_t() const;
 
@@ -65,6 +63,8 @@ namespace SOS {
             using Param_keys_ptr = Dt_eval::Param_keys_ptr;
             using Param_keys_ptrs = vector<Param_keys_ptr>;
 
+            class Eval;
+
             static constexpr Dt_id def_dt_id = 0;
             static constexpr Time def_step_size = 1e-2;
 
@@ -80,8 +80,8 @@ namespace SOS {
                                         { return &ode_spec_ - &code_spec(0); }
             Ode_id code_eval_id(const Ode_eval& ode_eval_) const
                                         { return &ode_eval_ - &code_eval(0); }
-            const Dt_eval& cdt_eval(const Ode_eval& ode_eval_,
-                                    Dt_id dt_id_ = def_dt_id) const
+            static const Dt_eval& cdt_eval(const Ode_eval& ode_eval_,
+                                           Dt_id dt_id_ = def_dt_id)
                                                  { return ode_eval_[dt_id_]; }
             const Dt_eval& cdt_eval(Ode_id ode_id_ = def_ode_id,
                                     Dt_id dt_id_ = def_dt_id) const
@@ -130,6 +130,11 @@ namespace SOS {
             using State_f = function<const State&(const State&, Time)>;
             using State_fs = vector<State_f>;
 
+            void set_odes_eval(Param_keyss&& param_keyss_);
+            void parse_odes_spec(const Expr& expr);
+            static Param_keyss parse_param_keyss(const Expr& expr);
+            static Param_keys parse_param_keys(const Expr& expr);
+
             void modified();
             static bool ode_has_param_t(const Ode_eval& ode_eval_);
             static bool dt_has_param_t(const Dt_eval& dt_eval_);
@@ -163,42 +168,7 @@ namespace SOS {
             mutable Flag _has_param_t;
             mutable State_fs _state_fs;
         };
-
-        class Solver::Context {
-        public:
-            Context()                                               = default;
-            ~Context()                                              = default;
-            Context(const Context& rhs)                             = default;
-            Context& operator =(const Context& rhs)                 = default;
-            Context(Context&& rhs)                                  = default;
-            Context& operator =(Context&& rhs)                      = default;
-            Context(Interval<Time> t_bounds_, State x_init_);
-            Context(const string& input);
-
-            explicit operator string () const;
-            friend string to_string(const Context& rhs);
-            friend ostream& operator <<(ostream& os, const Context& rhs);
-
-            friend bool operator ==(const Context& lhs, const Context& rhs);
-
-            const Interval<Time>& ct_bounds() const      { return _t_bounds; }
-            Time ct_init() const                 { return ct_bounds().first; }
-            Time ct_end() const                 { return ct_bounds().second; }
-            const State& cx_init() const                   { return _x_init; }
-
-            void add_param_t();
-        protected:
-            void check_values() const;
-
-            Interval<Time>& t_bounds()                   { return _t_bounds; }
-            Time& t_init()                        { return t_bounds().first; }
-            Time& t_end()                        { return t_bounds().second; }
-            State& x_init()                                { return _x_init; }
-        private:
-            Interval<Time> _t_bounds;
-            State _x_init;
-        };
     }
 }
 
-#endif // ___SOS_SOLVER_H_OUDH9GH34798GH949T938HJ3409FG430
+#include "ode/solver/context.hpp"

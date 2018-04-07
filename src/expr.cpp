@@ -281,6 +281,12 @@ namespace SOS {
                            bind(&Expr_place::is_token, _1));
     }
 
+    bool Expr::is_deep() const
+    {
+        return std::none_of(cbegin(), cend(),
+                            bind(&Expr_place::is_token, _1));
+    }
+
     Expr& Expr::flatten()
     {
         if (_is_flatten) return *this;

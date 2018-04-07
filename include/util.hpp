@@ -1,5 +1,4 @@
-#ifndef ___UTIL_H_G73H38OD9843HG3048GH34JN0JNFG430
-#define ___UTIL_H_G73H38OD9843HG3048GH34JN0JNFG430
+#pragma once
 
 #include "sos.hpp"
 
@@ -102,5 +101,3 @@ namespace SOS {
 }
 
 #include "util.tpp"
-
-#endif // ___UTIL_H_G73H38OD9843HG3048GH34JN0JNFG430

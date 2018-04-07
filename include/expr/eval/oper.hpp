@@ -1,0 +1,54 @@
+#pragma once
+
+// ! <numeric> accumulate
+
+namespace SOS {
+    template <typename Arg>
+    class Expr::Eval<Arg>::Oper {
+    public:
+        Oper()                                                      = default;
+        ~Oper()                                                     = default;
+        Oper(const Oper& rhs)                                       = default;
+        Oper& operator =(const Oper& rhs)                           = default;
+        Oper(Oper&& rhs)                                            = default;
+        Oper& operator =(Oper&& rhs)                                = default;
+        Oper(Param_keys_link& param_keys_,
+             Param_values_link& param_values_,
+             const Expr& expr_);
+
+        size_t size() const                    { return param_keys().size(); }
+        const Param_keys_link& cparam_keys_link() const;
+        const Param_values_link& cparam_values_link() const;
+        Param_keys& param_keys() const;
+        const Param_values& cparam_values() const;
+
+        Arg operator ()() const;
+    protected:
+        using Arg_lazy = Lazy<Arg>;
+        using Args_lazy = pair<Arg_lazy, Arg_lazy>;
+        using Oper_ptrs = pair<Oper_ptr, Oper_ptr>;
+
+        Param_keys::iterator find_param_key(const Param_key& key_) const;
+        Param_keys::iterator set_param_key(const Param_key& key_) const;
+    private:
+        void set_lazy_args(const Expr& expr_);
+        template <int idx> void set_lazy_arg(const Expr& expr_);
+        template <int idx> Arg_lazy get_arg_lazy(const Expr& expr_);
+
+        Arg_lazy arg_lazy(Arg arg) const noexcept;
+        Arg_lazy param_lazy(const Param_key& key_) const;
+        Arg_lazy oper_lazy(const Oper_ptr& oper_ptr_) const;
+
+        // ! potentionally inefficient
+        //   - operations are not stored in continual memory blocks
+        //   - binary operations -> maximal depth
+        //   - if both arguments are known, whole operation can be simplified
+        Param_keys_link _param_keys_l;
+        Param_values_link _param_values_l;
+        Bin_f _f;
+        Args_lazy _args_lazy;
+        Oper_ptrs _oper_ptrs;
+    };
+}
+
+#include "expr/eval/oper.tpp"

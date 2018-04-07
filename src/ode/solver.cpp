@@ -12,14 +12,7 @@ namespace SOS {
                 return;
             }
             for_each(codes_spec(), bind(&Solver::check_ode_spec, _1));
-            const bool unified = check_param_keyss(param_keyss_);
-            odes_eval().reserve(size());
-            if (!unified) {
-                add_odes_eval(move(param_keyss_));
-            }
-            else {
-                add_unif_odes_eval(move(param_keyss_.front()));
-            }
+            set_odes_eval(move(param_keyss_));
         }
 
         Solver::Solver(Odes_spec odes_spec_, Param_keys param_keys_)
@@ -30,6 +23,87 @@ namespace SOS {
             : Solver(Odes_spec{move(ode_spec_)},
                      Param_keyss{move(param_keys_)})
         { }
+
+        Solver::Solver(const string& input)
+        try {
+            Expr expr(input);
+            expect(expr.is_deep() && expr.size() == 2,
+                   "Expected two expressions of ODEs specifications "s
+                   + "and set of parameter keys "
+                   + "at the top level.");
+            parse_odes_spec(expr.cto_expr(0));
+            set_odes_eval(move(parse_param_keyss(expr.cto_expr(1))));
+            _state_fs.resize(size());
+        }
+        catch (const Error& e) {
+            throw "Invalid format of input ODEs specification\n'"s
+                  + input + "'\n: " + e;
+        }
+
+        void Solver::set_odes_eval(Param_keyss&& param_keyss_)
+        {
+            const bool unified = check_param_keyss(param_keyss_);
+            odes_eval().reserve(size());
+            if (!unified) {
+                add_odes_eval(move(param_keyss_));
+            }
+            else {
+                add_unif_odes_eval(move(param_keyss_.front()));
+            }
+        }
+
+        void Solver::parse_odes_spec(const Expr& expr)
+        {
+            expect(!expr.empty() && expr.is_deep(),
+                   "Expected expressions "s
+                   + "with ODE specifications.");
+            _odes_spec.reserve(expr.size());
+            for (auto& eptr : expr) {
+                const Expr& espec = Expr::cptr_to_expr(eptr);
+                expect(espec.is_deep(),
+                       "Expected expressions "s
+                       + "with specifications of dt variants, "
+                       + "not tokens.");
+                Ode_spec ode_spec_;
+                ode_spec_.reserve(espec.size());
+                transform(espec,
+                          std::back_inserter(ode_spec_),
+                          bind(&Expr::cptr_to_expr, _1));
+                check_ode_spec(ode_spec_);
+                _odes_spec.emplace_back(move(ode_spec_));
+            }
+        }
+
+        Solver::Param_keyss Solver::parse_param_keyss(const Expr& expr)
+        {
+            if (!expr.is_deep()) {
+                return Param_keyss{move(parse_param_keys(expr))};
+            }
+            expect(!expr.empty(),
+                   "Expected expressions with parameter keys.");
+            Param_keyss param_keyss_;
+            param_keyss_.reserve(expr.size());
+            transform(expr,
+                      std::back_inserter(param_keyss_),
+                      bind(&Solver::parse_param_keys,
+                           bind(&Expr::cptr_to_expr, _1))
+                      );
+            return move(param_keyss_);
+        }
+
+        Solver::Param_keys Solver::parse_param_keys(const Expr& expr)
+        {
+            expect(!expr.empty() && expr.is_flat(),
+                   "Expected tokens of parameter keys.");
+            Param_keys param_keys_;
+            param_keys_.reserve(expr.size());
+            transform(expr,
+                      std::back_inserter(param_keys_),
+                      bind(&Expr_token::ctoken,
+                           bind(&Expr::cptr_to_token, _1))
+                      );
+            return move(param_keys_);
+        }
 
         void Solver::check_ode_spec(const Ode_spec& ode_spec_)
         {
@@ -422,77 +496,6 @@ namespace SOS {
         ostream& operator <<(ostream& os, const Solver& rhs)
         {
             return (os << to_string(rhs));
-        }
-
-        ///////////////////////////////////////////////////////////////
-
-        Solver::Context::Context(Interval<Time> t_bounds_, State x_init_)
-            : _t_bounds(move(t_bounds_)),
-              _x_init(move(x_init_))
-        {
-            check_values();
-        }
-
-        Solver::Context::Context(const string& input)
-        try {
-            Expr expr(input);
-            expect(expr.size() == 2, "Two top subexpressions expected.");
-            expect(!expr[0]->is_token() && expr.cto_expr(0).size() == 2,
-                   "Two tokens of time bounds expected.");
-            const Expr& t_subexpr = expr.cto_expr(0);
-            expect(t_subexpr.is_flat(),
-                   "No further subexpressions expected.");
-            expect(t_subexpr.cto_token(0).get_value_check<Real>(t_init())
-                   && t_subexpr.cto_token(1).get_value_check<Real>(t_end()),
-                   "Invalid values of time bounds.");
-
-            expect(!expr[1]->is_token(),
-                   "Initial values must be enclosed in subexpression.");
-            const Expr& x_subexpr = expr.cto_expr(1);
-            expect(x_subexpr.is_flat(),
-                   "No further subexpressions expected.");
-            x_init() = move(x_subexpr.flat_transform<Real>());
-
-            check_values();
-        }
-        catch (const Error& e) {
-            throw "Invalid format of input context '"s + input + "':\n" + e;
-        }
-
-        void Solver::Context::check_values() const
-        {
-            expect(ct_init() <= ct_end(),
-                   "Invalid time interval: "s
-                   + std::to_string(ct_init()) + ", "
-                   + std::to_string(ct_end()));
-        }
-
-        Solver::Context::operator string () const
-        {
-            return "( "s + SOS::to_string(ct_bounds()) + " )"
-                   + " ( " + SOS::to_string(cx_init()) + ")";
-        }
-
-        string to_string(const Solver::Context& rhs)
-        {
-            return move((string)rhs);
-        }
-
-        ostream& operator <<(ostream& os, const Solver::Context& rhs)
-        {
-            return (os << to_string(rhs));
-        }
-
-        bool operator ==(const Solver::Context& lhs,
-                         const Solver::Context& rhs)
-        {
-            return lhs.ct_bounds() == rhs.ct_bounds()
-                && lhs.cx_init() == rhs.cx_init();
-        }
-
-        void Solver::Context::add_param_t()
-        {
-            x_init().emplace_back(ct_init());
         }
     }
 }

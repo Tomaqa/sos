@@ -1,5 +1,4 @@
-#ifndef ___SOS_H_G73H38ODIHG5GH54GT95H8J549JFG430
-#define ___SOS_H_G73H38ODIHG5GH54GT95H8J549JFG430
+#pragma once
 
 #include <cstdlib>
 #include <cstring>
@@ -79,5 +78,3 @@ namespace SOS {
 }
 
 #include "sos.tpp"
-
-#endif // ___SOS_H_G73H38ODIHG5GH54GT95H8J549JFG430

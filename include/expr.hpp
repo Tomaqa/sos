@@ -1,5 +1,4 @@
-#ifndef ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430
-#define ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430
+#pragma once
 
 #include "sos.hpp"
 #include "util.hpp"
@@ -78,6 +77,10 @@ namespace SOS {
         Expr_place_ptr& back();
         const Expr_token& cto_token(int idx) const;
         const Expr& cto_expr(int idx) const;
+        static const Expr_token&
+            cptr_to_token(const Expr_place_ptr& place_ptr);
+        static const Expr&
+            cptr_to_expr(const Expr_place_ptr& place_ptr);
         const auto cbegin() const             { return std::cbegin(_places); }
         const auto cend() const                 { return std::cend(_places); }
         const auto begin() const               { return std::begin(_places); }
@@ -88,6 +91,7 @@ namespace SOS {
         Expr& simplify() noexcept;
         Expr& to_binary(const Token& neutral = "0");
         bool is_flat() const;
+        bool is_deep() const;
         template <typename Arg> bool has_values() const;
         Expr& flatten();
         template <typename Arg> Elems<Arg> flat_transform() const;
@@ -108,10 +112,6 @@ namespace SOS {
         template <typename T> void add_place_ptr(T&& place_ptr_);
         template <typename T> void add_new_place(T&& place_);
 
-        static const Expr_token&
-            cptr_to_token(const Expr_place_ptr& place_ptr);
-        static const Expr&
-            cptr_to_expr(const Expr_place_ptr& place_ptr);
         static Expr_token& ptr_to_token(Expr_place_ptr& place_ptr);
         static Expr& ptr_to_expr(Expr_place_ptr& place_ptr);
         Expr_token& to_token(int idx);
@@ -129,5 +129,3 @@ namespace SOS {
 }
 
 #include "expr.tpp"
-
-#endif // ___SOS_EXPR_H_OUDH983489GH43G3454H8J540H45T938HJ3409FG430

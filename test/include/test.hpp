@@ -1,3 +1,5 @@
+#pragma once
+
 #include "sos.hpp"
 #include "util.hpp"
 
