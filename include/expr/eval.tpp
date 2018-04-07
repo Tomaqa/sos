@@ -143,6 +143,7 @@ namespace SOS {
     template <typename T>
     T&& Expr::Eval<Arg>::check_param_keys(T&& param_keys_)
     {
+        // ! unieqness is not checked
         for_each(param_keys_, bind(&Expr_token::check_token, _1));
         return forward<T>(param_keys_);
     }

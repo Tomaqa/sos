@@ -14,10 +14,12 @@ namespace SOS {
             // predpokladam ze dx se automaticky alokuje
             // na stejnou velikost jako x
             // -> plytvani
-            const Ode_eval& ode_eval_ = code_eval(ode_id_);
-            auto f = [this, &ode_eval_, dt_id_]
+            // const Ode_eval& ode_eval_ = code_eval(ode_id_);
+            // auto f = [this, &ode_eval_, dt_id_]
+            auto f = [this, ode_id_, dt_id_]
                          (const State& x_, State& dx_, Time t_){
-                         eval_ode_step(ode_eval_, dt_id_,
+                         // eval_ode_step(ode_eval_, dt_id_,
+                         eval_ode_step(ode_id_, dt_id_,
                                        dx_[def_dt_id], x_, t_);
                      };
             integrate(f, x, context_.ct_init(), context_.ct_end());

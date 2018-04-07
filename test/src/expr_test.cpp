@@ -353,6 +353,8 @@ try {
          double, string>
          (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
 
+    // 3386 allocs
+
     cout << endl << "Success." << endl;
     return 0;
 }
