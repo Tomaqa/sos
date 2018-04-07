@@ -234,12 +234,8 @@ namespace SOS {
         Real Solver::solve_ode(Dt_id dt_id_, Context context_,
                                Ode_id ode_id_) const
         {
-            // set_state_f(ode_has_param_t(ode_id_), context_);
-            const bool has_t = ode_has_param_t(ode_id_);
-            // set_state_f(has_t);
-            set_state_f(has_t, ode_id_);
-            context_add_param_t(has_t, context_);
-            return eval_ode(dt_id_, move(context_), ode_id_);
+            add_param_t(ode_has_param_t(ode_id_), context_, ode_id_);
+            return eval_ode(ode_id_, dt_id_, move(context_));
         }
 
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
@@ -253,22 +249,10 @@ namespace SOS {
                                              move(contexts_.front()))
                 );
             }
-            // for_each(contexts_, std::begin(codes_eval()),
-            //         [this](Context& ctx, const Ode_eval& oeval){
-            //             set_state_f(ode_has_param_t(oeval), ctx);
-            //         });
-            // const bool has_t = any_of(codes_eval(),
-            //                           [](const Ode_eval& oeval){
-            //                               return ode_has_param_t(oeval);
-            //                           });
-            // set_state_f(has_t);
-            // for_each(contexts_,
-            //          bind(&Solver::context_add_param_t, has_t, _1));
             for_each(contexts_, std::begin(codes_eval()),
                     [this](Context& ctx, const Ode_eval& oeval){
                         const bool has_t = ode_has_param_t(oeval);
-                        set_state_f(has_t, code_eval_id(oeval));
-                        context_add_param_t(has_t, ctx);
+                        add_param_t(has_t, ctx, code_eval_id(oeval));
                     });
             return move(eval_odes(move(dt_ids_), move(contexts_)));
         }
@@ -285,10 +269,7 @@ namespace SOS {
         State Solver::solve_unif_odes_wo_check(Dt_ids dt_ids_,
                                                Context context_) const
         {
-            // set_state_f(has_unif_param_t(), context_);
-            const bool has_t = has_unif_param_t();
-            set_state_f(has_t);
-            context_add_param_t(has_t, context_);
+            add_param_t(has_unif_param_t(), context_);
             return move(eval_unif_odes(move(dt_ids_), move(context_)));
         }
 
@@ -297,32 +278,20 @@ namespace SOS {
             return state_fs()[ode_id_];
         }
 
-        // void Solver::set_state_f(bool has_t, Context& context_) const
-        // {
-        //     state_f() = get_state_f(has_t, context_);
-        // }
-        // void Solver::set_state_f(bool has_t) const
         void Solver::set_state_f(bool has_t, Ode_id ode_id_) const
         {
-            // state_f() = get_state_f(has_t);
             state_f(ode_id_) = get_state_f(has_t);
         }
 
-        // Solver::State_f Solver::get_state_f(bool has_t,
-        //                                     Context& context_) const
-        Solver::State_f Solver::get_state_f(bool has_t) const
+        Solver::State_f Solver::get_state_f(bool has_t)
         {
             if (!has_t) {
                 return [](const State& x, Time) -> const State& {
-                    cout << x << endl;
                     return x;
                 };
             }
-            // context_.add_param_t();
             return [](const State& x, Time t) -> const State& {
-                cout << x << " | " << t << endl;
                 const_cast<Real&>(x.back()) = t;
-                cout << "-> " << x << endl;
                 return x;
             };
         }
@@ -338,15 +307,21 @@ namespace SOS {
             if (has_t) context_.add_param_t();
         }
 
+        void Solver::add_param_t(bool has_t, Context& context_,
+                                 Ode_id ode_id_) const
+        {
+            set_state_f(has_t, ode_id_);
+            context_add_param_t(has_t, context_);
+        }
+
         State Solver::eval_odes(Dt_ids&& dt_ids_, Contexts&& contexts_) const
         {
             State res;
             const int size_ = size();
             res.reserve(size_);
             for (int i = 0; i < size_; i++) {
-                res.emplace_back(eval_ode(dt_ids_[i],
-                                          move(contexts_[i]),
-                                          i));
+                res.emplace_back(eval_ode(i, dt_ids_[i],
+                                          move(contexts_[i])));
             }
             return move(res);
         }
@@ -358,10 +333,6 @@ namespace SOS {
         {
             transform(codes_eval(), std::begin(dt_ids_),
                       move(dx_it),
-                      // [this, &x, t](const Ode_eval& ode_eval_, Dt_id dt_id_){
-                          // return eval_dt_step(ode_eval_[dt_id_], x, t);
-                          // return eval_ode_step(ode_eval_, dt_id_, x, t);
-                          // return eval_unif_ode_step(ode_eval_, dt_id_, x, t);
                       [this, &x, t](const Ode_eval& oeval, Dt_id dt_id_){
                           return eval_unif_ode_step(code_eval_id(oeval),
                                                     dt_id_, x, t);
@@ -385,38 +356,17 @@ namespace SOS {
             return move(dx);
         }
 
-        // void Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
-        //                            Real& dx, const State& x, Time t) const
-        // {
-        //     dx = eval_ode_step(ode_eval_, dt_id_, x, t);
-        // }
         void Solver::eval_ode_step(Ode_id ode_id_, Dt_id dt_id_,
                                    Real& dx, const State& x, Time t) const
         {
             dx = eval_ode_step(ode_id_, dt_id_, x, t);
         }
 
-        // Real Solver::eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
-        //                            const State& x, Time t) const
         Real Solver::eval_ode_step(Ode_id ode_id_, Dt_id dt_id_,
                                    const State& x, Time t) const
         {
-            // return eval_dt_step(ode_eval_[dt_id_], x, t);
-            // return eval_dt_step(ode_id_, dt_id_, x, t);
-            const Ode_eval& ode_eval_ = code_eval(ode_id_);
-            const Dt_eval& dt_eval_ = ode_eval_[dt_id_];
-            // return dt_eval_(state(x, t, ode_id_));
-            return eval_dt_step(dt_eval_, ode_id_, x, t);
+            return eval_dt_step(cdt_eval(ode_id_, dt_id_), ode_id_, x, t);
         }
-
-        // Real Solver::eval_dt_step(const Dt_eval& dt_eval_,
-        //                           const State& x, Time t) const
-        // Real Solver::eval_dt_step(Ode_id_ ode_id_, Dt_id_ dt_id_,
-        //                           const State& x, Time t) const
-        // {
-        //     // return dt_eval_(state(x, t));
-        //     return dt_eval_(state(x, t, ode_id_));
-        // }
 
         void Solver::eval_unif_ode_step(Ode_id ode_id_, Dt_id dt_id_,
                                         Real& dx, const State& x, Time t)
@@ -428,9 +378,7 @@ namespace SOS {
         Real Solver::eval_unif_ode_step(Ode_id ode_id_, Dt_id dt_id_,
                                         const State& x, Time t) const
         {
-            const Ode_eval& ode_eval_ = code_eval(ode_id_);
-            const Dt_eval& dt_eval_ = ode_eval_[dt_id_];
-            return eval_dt_step(dt_eval_, def_ode_id, x, t);
+            return eval_dt_step(cdt_eval(ode_id_, dt_id_), def_ode_id, x, t);
         }
 
         Real Solver::eval_dt_step(const Dt_eval& dt_eval_, Ode_id state_id,

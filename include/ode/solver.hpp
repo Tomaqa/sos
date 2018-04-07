@@ -66,6 +66,7 @@ namespace SOS {
             using Param_keys_ptrs = vector<Param_keys_ptr>;
 
             static constexpr Dt_id def_dt_id = 0;
+            static constexpr Time def_step_size = 1e-2;
 
             const Odes_spec& codes_spec() const         { return _odes_spec; }
             const Odes_eval& codes_eval() const         { return _odes_eval; }
@@ -76,9 +77,15 @@ namespace SOS {
             const Ode_eval& code_eval(Ode_id ode_id_ = def_ode_id) const
                                              { return codes_eval()[ode_id_]; }
             Ode_id code_spec_id(const Ode_spec& ode_spec_) const
-                                       { return &ode_spec_ - &code_spec(0); }
+                                        { return &ode_spec_ - &code_spec(0); }
             Ode_id code_eval_id(const Ode_eval& ode_eval_) const
-                                       { return &ode_eval_ - &code_eval(0); }
+                                        { return &ode_eval_ - &code_eval(0); }
+            const Dt_eval& cdt_eval(const Ode_eval& ode_eval_,
+                                    Dt_id dt_id_ = def_dt_id) const
+                                                 { return ode_eval_[dt_id_]; }
+            const Dt_eval& cdt_eval(Ode_id ode_id_ = def_ode_id,
+                                    Dt_id dt_id_ = def_dt_id) const
+                              { return cdt_eval(code_eval(ode_id_), dt_id_); }
 
             static void check_ode_spec(const Ode_spec& ode_spec_);
             static bool valid_ode_spec(const Ode_spec& ode_spec_);
@@ -98,8 +105,8 @@ namespace SOS {
 
             State solve_unif_odes_wo_check(Dt_ids dt_ids_,
                                            Context context_) const;
-            virtual Real eval_ode(Dt_id dt_id_, Context&& context_,
-                                  Ode_id ode_id_) const                   = 0;
+            virtual Real eval_ode(Ode_id ode_id_, Dt_id dt_id_,
+                                  Context&& context_) const               = 0;
             virtual State eval_odes(Dt_ids&& dt_ids_,
                                     Contexts&& contexts_) const;
             virtual State eval_unif_odes(Dt_ids&& dt_ids_,
@@ -111,10 +118,6 @@ namespace SOS {
                                          const State& x, Time t) const;
             State eval_unif_odes_step(const Dt_ids& dt_ids_,
                                       const State& x, Time t) const;
-            // void eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
-            //                    Real& dx, const State& x, Time t) const;
-            // Real eval_ode_step(const Ode_eval& ode_eval_, Dt_id dt_id_,
-            //                    const State& x, Time t) const;
             void eval_ode_step(Ode_id ode_id_, Dt_id dt_id_,
                                Real& dx, const State& x, Time t) const;
             Real eval_ode_step(Ode_id ode_id_, Dt_id dt_id_,
@@ -140,32 +143,24 @@ namespace SOS {
             const Param_key& code_param_key(Ode_id ode_id_) const
                              { return code_param_key(ode_id_, is_unified()); }
 
-            // State_f get_state_f(bool has_t, Context& context_) const;
-            // void set_state_f(bool has_t, Context& context_) const;
-            // State_f get_state_f(bool has_t) const;
-            // void set_state_f(bool has_t) const;
-            // State_f& state_f() const                      { return _state_f; }
-            // static void context_add_param_t(bool has_t, Context& context_);
-            // const State& state(const State& x, Time t) const
-                                                   // { return state_f()(x, t); }
             State_fs& state_fs() const                   { return _state_fs; }
             State_f& state_f(Ode_id ode_id_ = def_ode_id) const;
             void set_state_f(bool has_t, Ode_id ode_id_ = def_ode_id) const;
-            State_f get_state_f(bool has_t) const;
+            static State_f get_state_f(bool has_t);
             const State& state(const State& x, Time t,
                                Ode_id ode_id_ = def_ode_id) const;
             static void context_add_param_t(bool has_t, Context& context_);
-            // Real eval_dt_step(const Dt_eval& dt_eval_,
-                              // const State& x, Time t) const;
+            void add_param_t(bool has_t, Context& context_,
+                             Ode_id ode_id_ = def_ode_id) const;
+
             Real eval_dt_step(const Dt_eval& dt_eval_, Ode_id state_id,
                               const State& x, Time t) const;
 
-            Time _step_size{1e-2};
+            Time _step_size{def_step_size};
             Odes_spec _odes_spec;
             Odes_eval _odes_eval;
             mutable Flag _is_unified;
             mutable Flag _has_param_t;
-            // mutable State_f _state_f;
             mutable State_fs _state_fs;
         };
 

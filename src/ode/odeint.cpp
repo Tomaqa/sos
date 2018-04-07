@@ -7,18 +7,15 @@ namespace SOS {
     namespace ODE {
         namespace odeint = boost::numeric::odeint;
 
-        Real Odeint::eval_ode(Dt_id dt_id_, Context&& context_,
-                              Ode_id ode_id_) const
+        Real Odeint::eval_ode(Ode_id ode_id_, Dt_id dt_id_,
+                              Context&& context_) const
         {
             State x = move(context_.cx_init());
             // predpokladam ze dx se automaticky alokuje
             // na stejnou velikost jako x
             // -> plytvani
-            // const Ode_eval& ode_eval_ = code_eval(ode_id_);
-            // auto f = [this, &ode_eval_, dt_id_]
             auto f = [this, ode_id_, dt_id_]
                          (const State& x_, State& dx_, Time t_){
-                         // eval_ode_step(ode_eval_, dt_id_,
                          eval_ode_step(ode_id_, dt_id_,
                                        dx_[def_dt_id], x_, t_);
                      };
