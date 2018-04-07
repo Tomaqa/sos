@@ -7,8 +7,8 @@
 
 ;;; Constants
 
-(define-fun t0 () Real 0.0)
-(define-fun x0 () Real 60.0)
+(define-fun t0 () Real 0)
+(define-fun x0 () Real 60)
 (define-fun on0 () Bool false)
 
 (define-fun T () Real 0.25)
@@ -48,15 +48,16 @@
 (declare-fun on_8 () Bool)
 (declare-fun on_9 () Bool)
 
-(declare-fun dx_0 () Real)
-(declare-fun dx_1 () Real)
-(declare-fun dx_2 () Real)
-(declare-fun dx_3 () Real)
-(declare-fun dx_4 () Real)
-(declare-fun dx_5 () Real)
-(declare-fun dx_6 () Real)
-(declare-fun dx_7 () Real)
-(declare-fun dx_8 () Real)
+(define-sort Dt () Real)
+(declare-fun dx_0 () Dt)
+(declare-fun dx_1 () Dt)
+(declare-fun dx_2 () Dt)
+(declare-fun dx_3 () Dt)
+(declare-fun dx_4 () Dt)
+(declare-fun dx_5 () Dt)
+(declare-fun dx_6 () Dt)
+(declare-fun dx_7 () Dt)
+(declare-fun dx_8 () Dt)
 
 ;;; Initializations
 
@@ -75,45 +76,74 @@
              (= t_9 (+ t_8 T))
 ))
 
-;;; Derivatives definition
+;;; Derivatives declaration and definition
 
-;(define-dt dx_on  x (- 100.0 x))
-;(define-dt dx_off x (-  50.0 x))
-(define-fun dx_on  () Real 1.0)
-(define-fun dx_off () Real 0.0)
+;(declare-ode x (dx_on dx_off) ())
+;(define-dt dx_on  () (- 100 x))
+;(define-dt dx_off () (-  50 x))
+(define-fun dx_on  () Dt 0)
+(define-fun dx_off () Dt 1)
+
+;;; Integration
+
+;(assert (and (= x_1 (int-ode x dx_0 (x_0 t_0 t_1) ()))
+;             (= x_2 (int-ode x dx_1 (x_1 t_1 t_2) ()))
+;             (= x_3 (int-ode x dx_1 (x_1 t_1 t_3) ()))
+;             (= x_4 (int-ode x dx_3 (x_3 t_3 t_4) ()))
+;             (= x_5 (int-ode x dx_4 (x_4 t_4 t_5) ()))
+;             (= x_6 (int-ode x dx_5 (x_5 t_5 t_6) ()))
+;             (= x_7 (int-ode x dx_6 (x_6 t_6 t_7) ()))
+;             (= x_8 (int-ode x dx_7 (x_7 t_7 t_8) ()))
+;             (= x_9 (int-ode x dx_8 (x_8 t_8 t_9) ()))
+;))
+
+(declare-fun _dx_0_int () Real)
+(declare-fun _dx_1_int () Real)
+(declare-fun _dx_2_int () Real)
+(declare-fun _dx_3_int () Real)
+(declare-fun _dx_4_int () Real)
+(declare-fun _dx_5_int () Real)
+(declare-fun _dx_6_int () Real)
+(declare-fun _dx_7_int () Real)
+(declare-fun _dx_8_int () Real)
+
+(assert (and (= x_1 _dx_0_int)
+             (= x_2 _dx_1_int)
+             (= x_3 _dx_2_int)
+             (= x_4 _dx_3_int)
+             (= x_5 _dx_4_int)
+             (= x_6 _dx_5_int)
+             (= x_7 _dx_6_int)
+             (= x_8 _dx_7_int)
+             (= x_9 _dx_8_int)
+))
 
 ;;; Derivatives connection
 
-(declare-fun dt-int (Real Real Real Real) Real)
+(define-fun connect ((dx Dt) (on Bool)) Bool
+    (and (=>      on  (= dx dx_on ))
+         (=> (not on) (= dx dx_off))
+))
 
-(define-fun connect ((on1 Bool) (dx1 Real)
-                     (t1 Real)  (t2 Real)
-                     (x1 Real)  (x2 Real)) Bool
-    (and (or (and      on1  (= dx1 dx_on ))
-             (and (not on1) (= dx1 dx_off)) )
-         (= x2 (dt-int dx1 t1 t2 x1))
-    )
-)
-
-(assert (and (connect on_0 dx_0 t_0 t_1 x_0 x_1)
-             (connect on_1 dx_1 t_1 t_2 x_1 x_2)
-             (connect on_2 dx_2 t_2 t_3 x_2 x_3)
-             (connect on_3 dx_3 t_3 t_4 x_3 x_4)
-             (connect on_4 dx_4 t_4 t_5 x_4 x_5)
-             (connect on_5 dx_5 t_5 t_6 x_5 x_6)
-             (connect on_6 dx_6 t_6 t_7 x_6 x_7)
-             (connect on_7 dx_7 t_7 t_8 x_7 x_8)
-             (connect on_8 dx_8 t_8 t_9 x_8 x_9)
+(assert (and (connect dx_0 on_0)
+             (connect dx_1 on_1)
+             (connect dx_2 on_2)
+             (connect dx_3 on_3)
+             (connect dx_4 on_4)
+             (connect dx_5 on_5)
+             (connect dx_6 on_6)
+             (connect dx_7 on_7)
+             (connect dx_8 on_8)
 ))
 
 ;;; Jump conditions
 
 (define-fun jump ((on1 Bool) (on2 Bool) (x2 Real)) Bool
-    (or (and      on1       on2  (<  x2 77.0))
-        (and      on1  (not on2) (>= x2 77.0))
-        (and (not on1) (not on2) (>  x2 73.0))
-        (and (not on1)      on2  (<= x2 73.0)) )
-)
+    (and (=> (and      on1  (<  x2 77) )      on2  )
+         (=> (and      on1  (>= x2 77) ) (not on2) )
+         (=> (and (not on1) (>  x2 73) ) (not on2) )
+         (=> (and (not on1) (<= x2 73) )      on2  )
+))
 
 (assert (and (jump on_0 on_1 x_1)
              (jump on_1 on_2 x_2)
