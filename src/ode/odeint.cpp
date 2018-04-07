@@ -42,7 +42,7 @@ namespace SOS {
         {
             size_t n_steps = odeint::integrate(f, x,
                                                t_init_, t_end_,
-                                               step_size()
+                                               cstep_size()
                                                /*, TObserver(states, times)*/
                                                );
             return n_steps;

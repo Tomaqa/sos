@@ -38,7 +38,7 @@ namespace SOS {
 
             size_t size() const noexcept       { return codes_spec().size(); }
             bool empty() const noexcept                { return size() == 0; }
-            Time step_size() const noexcept             { return _step_size; }
+            Time cstep_size() const noexcept            { return _step_size; }
             void set_step_size(Time step_size_) noexcept
                                                   { _step_size = step_size_; }
 

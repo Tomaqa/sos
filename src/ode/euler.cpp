@@ -30,7 +30,7 @@ namespace SOS {
         void Euler::integrate(F f, Ref& dx, const State& x,
                               Time t_init_, Time t_end_) const
         {
-            const Time h = step_size();
+            const Time h = cstep_size();
             t_end_ -= h/2;
 
             for (Time t = t_init_; t < t_end_; t += h) {
