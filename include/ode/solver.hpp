@@ -18,6 +18,7 @@ namespace SOS {
             using Param_key = Dt_eval::Param_key;
             using Param_keys = Dt_eval::Param_keys;
             using Param_keyss = vector<Param_keys>;
+            using Spec = pair<Odes_spec, Param_keyss>;
 
             class Context;
             using Contexts = vector<Context>;
@@ -33,6 +34,7 @@ namespace SOS {
             Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
             Solver(Odes_spec odes_spec_, Param_keys param_keys_);
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
+            Solver(Spec spec);
             Solver(const string& input);
 
             size_t size() const noexcept       { return codes_spec().size(); }
@@ -87,6 +89,7 @@ namespace SOS {
                                     Dt_id dt_id_ = def_dt_id) const
                               { return cdt_eval(code_eval(ode_id_), dt_id_); }
 
+            void check_empty(const Param_keyss& param_keyss_);
             static void check_ode_spec(const Ode_spec& ode_spec_);
             static bool valid_ode_spec(const Ode_spec& ode_spec_);
             bool check_param_keyss(const Param_keyss& param_keyss_);

@@ -27,7 +27,7 @@ namespace SOS {
             const Expr& x_subexpr = expr.cto_expr(1);
             expect(x_subexpr.is_flat(),
                    "No further subexpressions expected.");
-            x_init() = move(x_subexpr.flat_transform<Real>());
+            x_init() = move(x_subexpr.transform_to_args<Real>());
 
             check_values();
         }

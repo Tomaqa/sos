@@ -6,11 +6,7 @@ namespace SOS {
             : _odes_spec(move(odes_spec_)),
               _state_fs(size())
         {
-            if (empty()) {
-                expect(param_keyss_.empty(),
-                       "No ODE given and parameter keys are non-empty.");
-                return;
-            }
+            check_empty(param_keyss_);
             for_each(codes_spec(), bind(&Solver::check_ode_spec, _1));
             set_odes_eval(move(param_keyss_));
         }
@@ -24,6 +20,10 @@ namespace SOS {
                      Param_keyss{move(param_keys_)})
         { }
 
+        Solver::Solver(Spec spec)
+            : Solver(move(spec.first), move(spec.second))
+        { }
+
         Solver::Solver(const string& input)
         try {
             Expr expr(input);
@@ -32,7 +32,11 @@ namespace SOS {
                    + "and set of parameter keys "
                    + "at the top level.");
             parse_odes_spec(expr.cto_expr(0));
-            set_odes_eval(move(parse_param_keyss(expr.cto_expr(1))));
+            Param_keyss param_keyss_(move(
+                parse_param_keyss(expr.cto_expr(1))
+            ));
+            check_empty(param_keyss_);
+            set_odes_eval(move(param_keyss_));
             _state_fs.resize(size());
         }
         catch (const Error& e) {
@@ -54,7 +58,7 @@ namespace SOS {
 
         void Solver::parse_odes_spec(const Expr& expr)
         {
-            expect(!expr.empty() && expr.is_deep(),
+            expect(expr.is_deep(),
                    "Expected expressions "s
                    + "with ODE specifications.");
             _odes_spec.reserve(expr.size());
@@ -64,13 +68,9 @@ namespace SOS {
                        "Expected expressions "s
                        + "with specifications of dt variants, "
                        + "not tokens.");
-                Ode_spec ode_spec_;
-                ode_spec_.reserve(espec.size());
-                transform(espec,
-                          std::back_inserter(ode_spec_),
-                          bind(&Expr::cptr_to_expr, _1));
-                check_ode_spec(ode_spec_);
-                _odes_spec.emplace_back(move(ode_spec_));
+                Ode_spec ospec(move(espec.transform_to_exprs()));
+                check_ode_spec(ospec);
+                _odes_spec.emplace_back(move(ospec));
             }
         }
 
@@ -79,30 +79,27 @@ namespace SOS {
             if (!expr.is_deep()) {
                 return Param_keyss{move(parse_param_keys(expr))};
             }
-            expect(!expr.empty(),
-                   "Expected expressions with parameter keys.");
             Param_keyss param_keyss_;
             param_keyss_.reserve(expr.size());
-            transform(expr,
+            transform(expr.transform_to_exprs(),
                       std::back_inserter(param_keyss_),
-                      bind(&Solver::parse_param_keys,
-                           bind(&Expr::cptr_to_expr, _1))
-                      );
+                      bind(&Solver::parse_param_keys, _1));
             return move(param_keyss_);
         }
 
         Solver::Param_keys Solver::parse_param_keys(const Expr& expr)
         {
-            expect(!expr.empty() && expr.is_flat(),
+            expect(expr.is_flat(),
                    "Expected tokens of parameter keys.");
-            Param_keys param_keys_;
-            param_keys_.reserve(expr.size());
-            transform(expr,
-                      std::back_inserter(param_keys_),
-                      bind(&Expr_token::ctoken,
-                           bind(&Expr::cptr_to_token, _1))
-                      );
-            return move(param_keys_);
+            return move(expr.transform_to_tokens());
+        }
+
+        void Solver::check_empty(const Param_keyss& param_keyss_)
+        {
+            if (empty()) {
+                expect(param_keyss_.empty(),
+                       "No ODE given and parameter keys are non-empty.");
+            }
         }
 
         void Solver::check_ode_spec(const Ode_spec& ode_spec_)

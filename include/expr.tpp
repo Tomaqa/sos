@@ -37,7 +37,7 @@ namespace SOS {
     }
 
     template <typename Arg>
-    Expr::Elems<Arg> Expr::flat_transform() const
+    Expr::Elems<Arg> Expr::transform_to_args() const
     {
         // ! 'is_flat()' is assumed to be true
         expect(has_values<Arg>(), "Elements are not of demanded type.");

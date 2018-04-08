@@ -304,4 +304,29 @@ namespace SOS {
         _places = move(places);
         return *this;
     }
+
+    Expr::Tokens Expr::transform_to_tokens() const
+    {
+        // ! is_flat is expected to be true
+        Tokens tokens;
+        tokens.reserve(size());
+        std::transform(cbegin(), cend(),
+                       std::back_inserter(tokens),
+                       bind(&Expr_token::ctoken,
+                            bind(&Expr::cptr_to_token, _1))
+                       );
+        return move(tokens);
+    }
+
+    Expr::Exprs Expr::transform_to_exprs() const
+    {
+        // ! is_deep is expected to be true
+        Exprs exprs;
+        exprs.reserve(size());
+        std::transform(cbegin(), cend(),
+                       std::back_inserter(exprs),
+                       bind(&Expr::cptr_to_expr, _1));
+        return move(exprs);
+    }
+
 }

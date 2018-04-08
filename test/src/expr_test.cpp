@@ -66,7 +66,7 @@ namespace SOS {
         template <typename Arg>
         Elems<Arg> flat_trans_res(const string& input, bool, Dummy&)
         {
-            return Expr(input).flatten().flat_transform<Arg>();
+            return Expr(input).flatten().transform_to_args<Arg>();
         }
 
         /////////////////////////////////////////////////////////////////

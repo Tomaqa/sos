@@ -24,10 +24,11 @@ namespace SOS {
         using Keys_output = tuple<size_t, bool, bool, Param_keys, Param_keyss>;
         using Keys_params = tuple<bool>;
 
-        Keys_output keys_res(const Keys_input& input, bool should_throw,
+        template <typename KeysInput>
+        Keys_output keys_res(const KeysInput& input, bool should_throw,
                              Keys_params& params)
         {
-            Euler solver(input.first, input.second);
+            Euler solver(input);
             Param_keys param_keys_;
             size_t size = solver.size();
             bool unified = solver.is_unified();
@@ -261,9 +262,49 @@ try {
         {  {{ {{"- 1"}}, {{"+ 2"}}, {{"* 1"}} }, { {"x"}, {"y"} }},                            {},                {}                                                                        },
         {  {{ {{"-"}} }, { {"x"} }},                                                           {},                {}                                                                        },
         {  {{ {{""}} }, { {"x"} }},                                                            {},                {}                                                                        },
+        {  {{ {{}} }, { {"x"} }},                                                            {},                {}                                                                        },
         {  {{ {{"- 1"}} }, { {""} }},                                                          {},                {}                                                                        },
         {  {{ {{"- 1"}} }, { {"t"} }},                                                         {},                {}                                                                        },
         {  {{ {{"+ 1 x"}, {"- x 5"}}, {{"- t"}, {"* y 2"}} }, { {"x", "t", "y"} }},            {},                {},                                                                       },
+    };
+
+    Test_data<Keys_params, Keys_output> keys_string_data = {
+        {  "() ()",                                                                            {true},            {0, false, false, {}, {} }                                                },
+        {  "( ((+ 1 2)) ) ( (x) )",                                                            {true},            {1, true, false, {"x"}, {{"x"}} },                                        },
+        {  "( ((+ 1 2)) ) (  x  )",                                                            {true},            {1, true, false, {"x"}, {{"x"}} },                                        },
+        {  "( (( + 1 2 )) )  (   (x    y)   )",                                                {true},            {1, true, false, {"x", "y"}, {{"x", "y"}} },                              },
+        {  "( (( + 1 2 )) )  (    x    y    )",                                                {true},            {1, true, false, {"x", "y"}, {{"x", "y"}} },                              },
+        {  "( ((+ 1 x)) ) ( x )",                                                              {true},            {1, true, false, {"x"}, {{"x"}} },                                        },
+        {  "( ((+ 1 x) (- x 5)) ) ( (x y) )",                                                  {true},            {1, true, false, {"x", "y"}, {{"x", "y"}} },                              },
+        {  "( ((+ 1 x) (- x 5)) ) (  x y  )",                                                  {true},            {1, true, false, {"x", "y"}, {{"x", "y"}} },                              },
+        {  "( ((+ 1 x) (- x 5)) ((- 1)) ) ( (x y) )",                                          {true},            {2, true, false, {"x", "y"}, {{"x", "y"}, {"x", "y"}} },                  },
+        {  "( ((+ 1 x) (- x 5)) ((- 1)) ) (  x y  )",                                          {true},            {2, true, false, {"x", "y"}, {{"x", "y"}, {"x", "y"}} },                  },
+        {  "( ((+ 1 x) (- x 5)) ((- 1)) ) ( (x) (y) )",                                        {true},            {2, false, false, {}, {{"x"}, {"y"}} },                                   },
+        {  "( ((+ 1 x) (- x 5)) ((- 1)) ) ( (x y) (x y) )",                                    {true},            {2, true, false, {"x", "y"}, {{"x", "y"}, {"x", "y"}} },                  },
+        {  "( ((+ 1 x) (- x 5)) ((- 1)) ) ( (x y) (y x) )",                                    {true},            {2, false, false, {}, {{"x", "y"}, {"y", "x"}} },                         },
+        {  "( ((+ 1 x) (- x 5)) ((- t) (* y 2)) ) ( (x y t) )",                                {true},            {2, true, true, {"x", "y", "t"}, {{"x", "y", "t"}, {"x", "y", "t"}} },    },
+        {  "( ((+ 1 x) (- x 5)) ((- t) (* y 2)) ) (  x y t  )",                                {true},            {2, true, true, {"x", "y", "t"}, {{"x", "y", "t"}, {"x", "y", "t"}} },    },
+        {  "( ((+ 1 x) (- x 5)) ((- t) (* y 2)) ) ( (x y) )",                                  {true},            {2, true, true, {"x", "y", "t"}, {{"x", "y", "t"}, {"x", "y", "t"}} },    },
+        {  "( ((+ 1 x) (- x 5)) ((- t) (* y 2)) ) (  x y  )",                                  {true},            {2, true, true, {"x", "y", "t"}, {{"x", "y", "t"}, {"x", "y", "t"}} },    },
+        {  "( ((+ 1 x) (- x 5)) ((- t) (* y 2)) ) ( (x) (y) )",                                {true},            {2, false, false, {}, {{"x"}, {"y", "t"}} },                              },
+    };
+
+    Test_data<Keys_params, Keys_output> keys_throw_string_data = {
+        {  "() ( () )",                                                                       {},                {}                                                                        },
+        {  "() ( (x) )",                                                                      {},                {}                                                                        },
+        {  "( () ) ()",                                                                       {},                {}                                                                        },
+        {  "( () ) ( () )",                                                                   {},                {}                                                                        },
+        {  "( () ) ( (x) )",                                                                  {},                {}                                                                        },
+        {  "( ((- 1)) ) ()",                                                                  {},                {}                                                                        },
+        {  "( ((- 1)) ) ( () )",                                                              {},                {}                                                                        },
+        {  "( ((- 1)) ) ( (x) (y) )",                                                         {},                {}                                                                        },
+        {  "( ((- 1)) ((+ 2)) ) ( (x) (y) (z) )",                                             {},                {}                                                                        },
+        {  "( ((- 1)) ((+ 2)) ((* 1)) ) ( (x) (y) )",                                         {},                {}                                                                        },
+        {  "( ((-)) ) ( (x) )",                                                               {},                {}                                                                        },
+        {  "( (()) ) ( (x) )",                                                                {},                {}                                                                        },
+        {  "( ((- 1)) ) ( () )",                                                              {},                {}                                                                        },
+        {  "( ((- 1)) ) ( (t) )",                                                             {},                {}                                                                        },
+        {  "( ((+ 1 x) (- x 5)) ((- t) (* y 2)) ) ( (x t y) )",                               {},                {},                                                                       },
     };
 
     Test_data<Solve_ode_params, Solve_ode_output, Solve_ode_input> solve_ode_euler_data = {
@@ -325,8 +366,12 @@ try {
     test<Dummy, Context, string>(context_throw_data, context_res, context_msg, true);
 
     string keys_msg = "building of solvers";
-    test<Keys_params, Keys_output, Keys_input>(keys_data, keys_res, keys_msg);
-    test<Keys_params, Keys_output, Keys_input>(keys_throw_data, keys_res, keys_msg, true);
+    test<Keys_params, Keys_output, Keys_input>(keys_data, keys_res<Keys_input>, keys_msg);
+    test<Keys_params, Keys_output, Keys_input>(keys_throw_data, keys_res<Keys_input>, keys_msg, true);
+
+    string keys_string_msg = keys_msg + " from string";
+    test<Keys_params, Keys_output, string>(keys_string_data, keys_res<string>, keys_string_msg);
+    test<Keys_params, Keys_output, string>(keys_throw_string_data, keys_res<string>, keys_string_msg, true);
 
     string solve_ode_msg = "solving single ODE";
     test<Solve_ode_params, Solve_ode_output, Solve_ode_input>(solve_ode_euler_data, solve_ode_res<Euler>,

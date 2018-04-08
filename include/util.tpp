@@ -15,15 +15,18 @@ namespace SOS {
     ///////////////////////////////////////////////////////////////
 
     template <typename Cont, typename Un_f>
-    Un_f Util::for_each(Cont& cont, Un_f f)
+    Un_f Util::for_each(Cont&& cont, Un_f f)
     {
-        return move(std::for_each(std::begin(cont), std::end(cont), move(f)));
+        return move(std::for_each(std::begin(forward<Cont>(cont)),
+                                  std::end(forward<Cont>(cont)),
+                                  move(f)));
     }
 
     template <typename Cont1, typename InputIt2, typename Bin_f>
-    Bin_f Util::for_each(Cont1& cont1, InputIt2 first2, Bin_f f)
+    Bin_f Util::for_each(Cont1&& cont1, InputIt2 first2, Bin_f f)
     {
-        for (auto&& first1 = std::begin(cont1), last1 = std::end(cont1);
+        for (auto&& first1 = std::begin(forward<Cont1>(cont1)),
+             last1 = std::end(forward<Cont1>(cont1));
              first1 != last1; ++first1, ++first2) {
             f(*first1, *first2);
         }
@@ -49,19 +52,21 @@ namespace SOS {
     }
 
     template <typename Cont, typename OutputIt, typename Un_f>
-    OutputIt Util::transform(Cont& cont, OutputIt d_first, Un_f f)
+    OutputIt Util::transform(Cont&& cont, OutputIt d_first, Un_f f)
     {
-        return move(std::transform(std::begin(cont), std::end(cont),
+        return move(std::transform(std::begin(forward<Cont>(cont)),
+                                   std::end(forward<Cont>(cont)),
                                    move(d_first),
                                    move(f)));
     }
 
     template <typename Cont1, typename InputIt2,
               typename OutputIt, typename Bin_f>
-    OutputIt Util::transform(Cont1& cont1, InputIt2 first2,
+    OutputIt Util::transform(Cont1&& cont1, InputIt2 first2,
                        OutputIt d_first, Bin_f f)
     {
-        return move(std::transform(std::begin(cont1), std::end(cont1),
+        return move(std::transform(std::begin(forward<Cont1>(cont1)),
+                                   std::end(forward<Cont1>(cont1)),
                                    move(first2),
                                    move(d_first),
                                    move(f)));

@@ -52,6 +52,8 @@ namespace SOS {
     public:
         template <typename Arg> class Eval;
         template <typename Arg> using Elems = vector<Arg>;
+        using Tokens = Elems<Token>;
+        using Exprs = Elems<Expr>;
 
         Expr()                                                      = default;
         virtual ~Expr()                                             = default;
@@ -94,7 +96,9 @@ namespace SOS {
         bool is_deep() const;
         template <typename Arg> bool has_values() const;
         Expr& flatten();
-        template <typename Arg> Elems<Arg> flat_transform() const;
+        Tokens transform_to_tokens() const;
+        Exprs transform_to_exprs() const;
+        template <typename Arg> Elems<Arg> transform_to_args() const;
 
         template <typename Arg> Eval<Arg>
             get_eval(typename Eval<Arg>::Param_keys param_keys_ = {});
