@@ -12,6 +12,7 @@ namespace SOS {
             Context& operator =(Context&& rhs)                      = default;
             Context(Interval<Time> t_bounds_, State x_init_);
             Context(const string& input);
+            Context(const Expr& expr);
 
             explicit operator string () const;
             friend string to_string(const Context& rhs);

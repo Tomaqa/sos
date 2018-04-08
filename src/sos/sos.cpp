@@ -25,4 +25,19 @@ namespace SOS {
         _msg += rhs;
         return *this;
     }
+
+    string to_string(istream& rhs)
+    {
+        string str;
+
+        rhs.seekg(0, std::ios::end);
+        int size_ = rhs.tellg();
+        if (size_ <= 0) size_ = 32;
+        str.reserve(size_);
+        rhs.seekg(0, std::ios::beg);
+
+        str.assign(std::istreambuf_iterator<char>(rhs),
+                   std::istreambuf_iterator<char>());
+        return move(str);
+    }
 }

@@ -1,21 +1,24 @@
 C := gcc
 CPP := g++
 
+PROJ_NAME := sos
+
 ROOT_DIR  := ./
-INCL_DIR_SUFFIX  := include
-SRC_DIR_SUFFIX   := src
-BUILD_DIR_SUFFIX := build
-BIN_DIR_SUFFIX   := bin
+INCL_NAME  := include
+SRC_NAME   := src
+BUILD_NAME := build
+BIN_NAME   := bin
+TEST_NAME  := test
 
-INCL_DIR  := $(ROOT_DIR)/$(INCL_DIR_SUFFIX)
-SRC_DIR   := $(ROOT_DIR)/$(SRC_DIR_SUFFIX)
-BUILD_DIR := $(ROOT_DIR)/$(BUILD_DIR_SUFFIX)
-BIN_DIR   := $(ROOT_DIR)/$(BIN_DIR_SUFFIX)
+INCL_DIR  := $(ROOT_DIR)/$(INCL_NAME)/$(PROJ_NAME)
+SRC_DIR   := $(ROOT_DIR)/$(SRC_NAME)/$(PROJ_NAME)
+BUILD_DIR := $(ROOT_DIR)/$(BUILD_NAME)/$(PROJ_NAME)
+BIN_DIR   := $(ROOT_DIR)/$(BIN_NAME)
+SRC_MAIN_DIR := $(ROOT_DIR)/$(SRC_NAME)/main
 
-TEST_DIR   := $(ROOT_DIR)/test
-TEST_INCL_DIR := $(TEST_DIR)/$(INCL_DIR_SUFFIX)
-TEST_SRC_DIR := $(TEST_DIR)/$(SRC_DIR_SUFFIX)
-TEST_BIN_DIR := $(TEST_DIR)/$(BIN_DIR_SUFFIX)
+TEST_INCL_DIR := $(ROOT_DIR)/$(INCL_NAME)/$(TEST_NAME)
+TEST_SRC_DIR := $(ROOT_DIR)/$(SRC_NAME)/$(TEST_NAME)
+TEST_BIN_DIR := $(ROOT_DIR)/$(TEST_NAME)
 
 TOOLS_DIR := $(ROOT_DIR)/tools
 DOC_DIR   := $(ROOT_DIR)/doc
@@ -61,6 +64,8 @@ CPP_SOURCES := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.cpp)
 C_SOURCES   := $(shell find $(SRC_DIR)  $(FIND_FLAGS) *.c)
 SOURCES := $(CPP_SOURCES) $(C_SOURCES)
 
+MAIN_SOURCES := $(shell find $(SRC_MAIN_DIR)  $(FIND_FLAGS) *.cpp)
+
 TEST_HEADERS := $(shell find $(TEST_INCL_DIR) $(FIND_FLAGS) *.hpp)
 TEST_SOURCES := $(shell find $(TEST_SRC_DIR)  $(FIND_FLAGS) *.cpp)
 
@@ -69,7 +74,8 @@ C_OBJECTS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(C_SOURCES:.c=.o))
 OBJECTS := $(CPP_OBJECTS) $(C_OBJECTS)
 
 TEST_CMDS := $(patsubst $(TEST_SRC_DIR)/%, $(TEST_BIN_DIR)/%, $(TEST_SOURCES:.cpp=))
-CMDS := $(TEST_CMDS)
+CMDS := $(patsubst $(SRC_MAIN_DIR)/%, $(BIN_DIR)/%, $(MAIN_SOURCES:.cpp=))
+CMDS += $(TEST_CMDS)
 
 ###################################################
 
@@ -106,10 +112,10 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	${CPP} -c $< ${CPPFLAGS} -o $@
 
 ## Particular executable files
-$(BIN_DIR)/%: ${C_OBJECTS} $(SRC_DIR)/%.c
+$(BIN_DIR)/%: ${C_OBJECTS} $(SRC_MAIN_DIR)/%.c
 	${C} ${LDFLAGS} ${CFLAGS} ${LIBS} -o $@ $^
 
-$(BIN_DIR)/%: ${OBJECTS} $(SRC_DIR)/%.cpp
+$(BIN_DIR)/%: ${OBJECTS} $(SRC_MAIN_DIR)/%.cpp
 	${CPP} ${LDFLAGS} ${CPPFLAGS} ${LIBS} -o $@ $^
 
 $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
@@ -130,6 +136,16 @@ build/expr/eval.o: src/expr/eval.cpp include/expr/eval.hpp \
 build/util.o: src/util.cpp include/util.hpp include/sos.hpp \
  include/sos.tpp include/util.tpp
 build/ode/solver/context.o: src/ode/solver/context.cpp \
+ include/ode/solver.hpp include/ode.hpp include/sos.hpp include/sos.tpp \
+ include/expr.hpp include/util.hpp include/util.tpp include/expr.tpp \
+ include/expr/eval.hpp include/expr/eval/oper.hpp \
+ include/expr/eval/oper.tpp include/expr/eval.tpp \
+ include/ode/solver/context.hpp
+build/ode/solver/run.o: src/ode/solver/run.cpp include/ode/solver/run.hpp \
+ include/ode/solver.hpp include/ode.hpp include/sos.hpp include/sos.tpp \
+ include/expr.hpp include/util.hpp include/util.tpp include/expr.tpp \
+ include/expr/eval.hpp include/expr/eval/oper.hpp \
+ include/expr/eval/oper.tpp include/expr/eval.tpp \
  include/ode/solver/context.hpp
 build/ode/euler.o: src/ode/euler.cpp include/ode/euler.hpp \
  include/ode/solver.hpp include/ode.hpp include/sos.hpp include/sos.tpp \

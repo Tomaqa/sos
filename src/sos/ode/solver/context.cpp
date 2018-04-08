@@ -10,8 +10,16 @@ namespace SOS {
         }
 
         Solver::Context::Context(const string& input)
+        try
+            : Context(Expr(input))
+        { }
+        catch (const Error& err) {
+            throw "Invalid format of input context '"s
+                  + input + "':\n" + err;
+        }
+
+        Solver::Context::Context(const Expr& expr)
         try {
-            Expr expr(input);
             expect(expr.size() == 2, "Two top subexpressions expected.");
             expect(!expr[0]->is_token() && expr.cto_expr(0).size() == 2,
                    "Two tokens of time bounds expected.");
@@ -31,8 +39,9 @@ namespace SOS {
 
             check_values();
         }
-        catch (const Error& e) {
-            throw "Invalid format of input context '"s + input + "':\n" + e;
+        catch (const Error& err) {
+            throw "Invalid format of input context '"s
+                  + to_string(expr) + "':\n" + err;
         }
 
         void Solver::Context::check_values() const

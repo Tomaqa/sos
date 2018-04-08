@@ -25,9 +25,17 @@ namespace SOS {
         { }
 
         Solver::Solver(const string& input)
+        try
+            : Solver(Expr(input))
+        { }
+        catch (const Error& err) {
+            throw "Invalid format of input ODEs specification\n'"s
+                  + input + "'\n: " + err;
+        }
+
+        Solver::Solver(const Expr& expr)
         try {
-            Expr expr(input);
-            expect(expr.is_deep() && expr.size() == 2,
+            expect(expr.size() == 2 && expr.is_deep(),
                    "Expected two expressions of ODEs specifications "s
                    + "and set of parameter keys "
                    + "at the top level.");
@@ -39,9 +47,9 @@ namespace SOS {
             set_odes_eval(move(param_keyss_));
             _state_fs.resize(size());
         }
-        catch (const Error& e) {
+        catch (const Error& err) {
             throw "Invalid format of input ODEs specification\n'"s
-                  + input + "'\n: " + e;
+                  + to_string(expr) + "'\n: " + err;
         }
 
         void Solver::set_odes_eval(Param_keyss&& param_keyss_)
@@ -94,7 +102,7 @@ namespace SOS {
             return move(expr.transform_to_tokens());
         }
 
-        void Solver::check_empty(const Param_keyss& param_keyss_)
+        void Solver::check_empty(const Param_keyss& param_keyss_) const
         {
             if (empty()) {
                 expect(param_keyss_.empty(),
@@ -113,7 +121,7 @@ namespace SOS {
             return !ode_spec_.empty();
         }
 
-        bool Solver::check_param_keyss(const Param_keyss& param_keyss_)
+        bool Solver::check_param_keyss(const Param_keyss& param_keyss_) const
         {
             const size_t n_odes = size();
             const size_t n_keyss = param_keyss_.size();
@@ -148,6 +156,14 @@ namespace SOS {
                 --size_;
             }
             return size_ > 0;
+        }
+
+        void Solver::check_dt_ids(const Dt_ids& dt_ids_) const
+        {
+            expect(dt_ids_.size() == size(),
+                   "Expected dt index for every ODEs ("s
+                   + to_string(size()) + "), got: "
+                   + to_string(dt_ids_.size()));
         }
 
         Solver::Param_keys_ptr
@@ -311,6 +327,7 @@ namespace SOS {
 
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
         {
+            check_dt_ids(dt_ids_);
             const bool unified = is_unified()
                                  && (contexts_.size() == 1
                                      || all_equal(contexts_));
@@ -333,6 +350,7 @@ namespace SOS {
         {
             expect(is_unified(), "Attempt to solve unified ODEs,"s
                                  + " but parameter keys are not unified.");
+            check_dt_ids(dt_ids_);
             return move(solve_unif_odes_wo_check(move(dt_ids_),
                                                  move(context_)));
         }
@@ -342,6 +360,38 @@ namespace SOS {
         {
             add_param_t(has_unif_param_t(), context_);
             return move(eval_unif_odes(move(dt_ids_), move(context_)));
+        }
+
+        State Solver::solve(const string& input) const
+        {
+            return move(solve(Expr(input)));
+        }
+
+        State Solver::solve(const Expr& expr) const
+        {
+            expect(expr.size() == 2 && expr.is_deep(),
+                   "Expected two expressions of chosen dt variants "s
+                   + "and context(s) for ODEs.");
+
+            Expr ids_expr(expr.cto_expr(0));
+            expect(ids_expr.is_flat(),
+                   "Expected tokens with chosen dt indexes.");
+            Dt_ids dt_ids_(ids_expr.transform_to_args<Dt_id>());
+
+            Expr ctx_expr(expr.cto_expr(1));
+            expect(ctx_expr.is_deep(),
+                   "Expected subexpressions with context(s) for ODEs.");
+            if (ctx_expr.size() == 1) {
+                return move(solve_unif_odes(move(dt_ids_),
+                                            Context(ctx_expr.cto_expr(0))
+                           ));
+            }
+            Contexts contexts_;
+            contexts_.reserve(ctx_expr.size());
+            transform(ctx_expr.transform_to_exprs(),
+                      std::back_inserter(contexts_),
+                      [](const Expr& e){ return Context(e); });
+            return solve_odes(move(dt_ids_), move(contexts_));
         }
 
         Solver::State_f& Solver::state_f(Ode_id ode_id_) const

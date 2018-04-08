@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <memory>
 #include <utility>
@@ -26,11 +27,15 @@ namespace SOS {
 
     using std::cout;
     using std::cerr;
+    using std::cin;
     using std::endl;
 
     using std::string;
     using std::to_string;
     using std::ostream;
+    using std::istream;
+    using std::ofstream;
+    using std::ifstream;
     using std::ostringstream;
     using std::istringstream;
 
@@ -51,6 +56,7 @@ namespace SOS {
     template <typename... Args>
         string to_string(const tuple<Args...>& rhs);
     inline const string& to_string(const string& rhs)          { return rhs; }
+    string to_string(istream& rhs);
 
     template <typename T>
         ostream& operator <<(ostream& os, const vector<T>& rhs);

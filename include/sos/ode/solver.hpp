@@ -23,6 +23,8 @@ namespace SOS {
             class Context;
             using Contexts = vector<Context>;
 
+            template <typename S> class Run;
+
             static constexpr Ode_id def_ode_id = 0;
 
             Solver()                                                = default;
@@ -36,6 +38,7 @@ namespace SOS {
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
             Solver(Spec spec);
             Solver(const string& input);
+            Solver(const Expr& expr);
 
             size_t size() const noexcept       { return codes_spec().size(); }
             bool empty() const noexcept                { return size() == 0; }
@@ -55,6 +58,8 @@ namespace SOS {
                            Ode_id ode_id_ = def_ode_id) const;
             State solve_odes(Dt_ids dt_ids_, Contexts contexts_) const;
             State solve_unif_odes(Dt_ids dt_ids_, Context context_) const;
+            State solve(const string& input) const;
+            State solve(const Expr& expr) const;
 
             explicit operator string () const;
             friend string to_string(const Solver& rhs);
@@ -89,12 +94,13 @@ namespace SOS {
                                     Dt_id dt_id_ = def_dt_id) const
                               { return cdt_eval(code_eval(ode_id_), dt_id_); }
 
-            void check_empty(const Param_keyss& param_keyss_);
+            void check_empty(const Param_keyss& param_keyss_) const;
             static void check_ode_spec(const Ode_spec& ode_spec_);
             static bool valid_ode_spec(const Ode_spec& ode_spec_);
-            bool check_param_keyss(const Param_keyss& param_keyss_);
+            bool check_param_keyss(const Param_keyss& param_keyss_) const;
             static void check_param_keys(const Param_keys& param_keys_);
             static bool valid_keys(const Param_keys& param_keys_);
+            void check_dt_ids(const Dt_ids& dt_ids_) const;
 
             static Param_keys_ptr new_param_keys(Param_keys&& param_keys_);
             void add_odes_eval(Param_keyss&& param_keyss_);
