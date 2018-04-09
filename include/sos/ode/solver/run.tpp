@@ -1,4 +1,13 @@
+#include <iostream>
+#include <fstream>
+
 namespace SOS {
+    using std::cin;
+    using std::cout;
+    using std::cerr;
+    using std::endl;
+    using std::ifstream;
+
     namespace ODE {
         template <typename S>
         typename Solver::Run<S>::Solver_ptr
@@ -12,10 +21,8 @@ namespace SOS {
         try {
             ifstream ifs;
             istream* is_ptr;
-            bool stdin = false;
             if (argc == 1) {
                 is_ptr = &cin;
-                stdin = true;
             }
             else {
                 expect(argc == 2, "Additional arguments, "s
@@ -32,7 +39,6 @@ namespace SOS {
             while (getline(*is_ptr, line)) {
                 if (line.empty()) continue;
                 State res = _solver_ptr->solve(line);
-                if (stdin) cout << endl << " = ";
                 cout << res << endl;
             }
 

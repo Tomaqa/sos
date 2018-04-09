@@ -1,5 +1,6 @@
-namespace SOS {
+#include <sstream>
 
+namespace SOS {
     ///////////////////////////////////////////////////////////////
 
     template <typename Arg>

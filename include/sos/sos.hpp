@@ -1,50 +1,30 @@
 #pragma once
 
-#include <cstdlib>
-#include <cstring>
-#include <cmath>
-
+#include <iosfwd>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <memory>
 #include <utility>
 
 namespace SOS {
     using std::move;
     using std::forward;
 
+    using std::ostream;
+    using std::istream;
+    using std::istringstream;
+    using std::ostringstream;
+
+    using std::string;
+    using std::to_string;
+    using namespace std::string_literals;
+
     using std::vector;
     using std::initializer_list;
 
     using std::pair;
-    using std::make_pair;
     using std::tuple;
     using std::get;
-    using std::tie;
-
-    using std::cout;
-    using std::cerr;
-    using std::cin;
-    using std::endl;
-
-    using std::string;
-    using std::to_string;
-    using std::ostream;
-    using std::istream;
-    using std::ofstream;
-    using std::ifstream;
-    using std::ostringstream;
-    using std::istringstream;
-
-    using std::unique_ptr;
-    using std::make_unique;
-    using std::shared_ptr;
-    using std::make_shared;
-
-    using namespace std::string_literals;
+    using std::make_pair;
 
     class Error;
 

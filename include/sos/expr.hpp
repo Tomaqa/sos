@@ -3,8 +3,15 @@
 #include "sos.hpp"
 #include "util.hpp"
 
+#include <memory>
+
 namespace SOS {
     using namespace Util;
+
+    using std::unique_ptr;
+    using std::shared_ptr;
+    using std::make_unique;
+    using std::make_shared;
 
     class Expr_place {
     public:
@@ -62,7 +69,7 @@ namespace SOS {
         Expr& operator =(const Expr& rhs);
         Expr(Expr&& rhs)                                            = default;
         Expr& operator =(Expr&& rhs)                                = default;
-        Expr(const string& input)             : Expr(istringstream(input)) { }
+        Expr(const string& input);
         Expr(initializer_list<Expr_place_ptr> list);
 
         virtual bool is_token() const noexcept override      { return false; }

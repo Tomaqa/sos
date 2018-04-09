@@ -1,5 +1,6 @@
 #include "test.hpp"
 #include "ode/solver.hpp"
+#include "ode/solver/context.hpp"
 #include "ode/euler.hpp"
 #include "ode/odeint.hpp"
 

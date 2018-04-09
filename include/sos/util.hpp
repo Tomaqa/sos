@@ -3,15 +3,12 @@
 #include "sos.hpp"
 
 #include <map>
-#include <algorithm>
 #include <functional>
 
 namespace SOS {
     using std::map;
 
     using std::function;
-    using std::bind;
-
     using namespace std::placeholders;
 
     namespace Util {

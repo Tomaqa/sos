@@ -1,4 +1,8 @@
+#include <algorithm>
+
 namespace SOS {
+    using namespace std::placeholders;
+
     template <typename Key, typename Value>
     bool Util::Const_map<Key, Value>::includes(const Key& key_) const noexcept
     {

@@ -1,3 +1,5 @@
+#include "expr/eval/oper.hpp"
+
 namespace SOS {
     template <typename Arg>
     const typename Expr::Eval<Arg>::template
@@ -136,6 +138,12 @@ namespace SOS {
     {
         check_param_values(*param_values_ptr_);
         param_values_ptr() = move(param_values_ptr_);
+        return call();
+    }
+
+    template <typename Arg>
+    Arg Expr::Eval<Arg>::operator ()() const
+    {
         return call();
     }
 

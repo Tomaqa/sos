@@ -1,5 +1,7 @@
 #include "sos.hpp"
 
+#include <iostream>
+
 namespace SOS {
     ostream& operator <<(ostream& os, const Error& rhs)
     {

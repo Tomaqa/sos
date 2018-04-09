@@ -75,6 +75,10 @@ namespace SOS {
         return *this;
     }
 
+    Expr::Expr(const string& input)
+        : Expr(istringstream(input))
+    { }
+
     Expr::Expr(istringstream& iss, unsigned depth)
         : Expr()
     {

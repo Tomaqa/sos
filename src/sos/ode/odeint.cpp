@@ -1,4 +1,5 @@
 #include "ode/odeint.hpp"
+#include "ode/solver/context.hpp"
 
 /// Integrate routines
 #include <boost/numeric/odeint/integrate/integrate.hpp>

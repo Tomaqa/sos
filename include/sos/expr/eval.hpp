@@ -15,6 +15,8 @@ namespace SOS {
         using Param_keys_ptr = Param_ptr_t<Param_keys>;
         using Param_values_ptr = Param_ptr_t<Param_values>;
 
+        class Run;
+
         Eval()                                                      = default;
         ~Eval()                                                     = default;
         Eval(const Eval& rhs)                                       = default;
@@ -42,6 +44,7 @@ namespace SOS {
         Arg operator ()(initializer_list<Arg> list) const;
         Arg operator ()(Param_values param_values_) const;
         Arg operator ()(Param_values_ptr param_values_ptr_) const;
+        Arg operator ()() const;
 
         explicit operator string () const;
         template <typename T> friend string to_string(const Eval<T>& rhs);
@@ -83,7 +86,5 @@ namespace SOS {
         mutable bool _valid_values{false};
     };
 }
-
-#include "expr/eval/oper.hpp"
 
 #include "expr/eval.tpp"

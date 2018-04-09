@@ -179,5 +179,3 @@ namespace SOS {
         };
     }
 }
-
-#include "ode/solver/context.hpp"

@@ -1,4 +1,5 @@
 #include "ode/solver.hpp"
+#include "ode/solver/context.hpp"
 
 namespace SOS {
     namespace ODE {

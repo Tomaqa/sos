@@ -3,8 +3,15 @@
 #include "sos.hpp"
 #include "util.hpp"
 
+#include <cmath>
+#include <iostream>
+
 namespace SOS {
     using namespace Util;
+
+    using std::cout;
+    using std::cerr;
+    using std::endl;
 
     namespace Test {
 
