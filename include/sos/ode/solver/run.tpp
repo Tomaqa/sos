@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 namespace SOS {
     using std::cin;
@@ -36,6 +37,7 @@ namespace SOS {
             getline(*is_ptr, line);
             _solver_ptr = new_solver(S(move(to_string(line))));
 
+            cout << std::setprecision(8);
             while (getline(*is_ptr, line)) {
                 if (line.empty()) continue;
                 State res = _solver_ptr->solve(line);

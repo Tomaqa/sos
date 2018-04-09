@@ -1,5 +1,6 @@
 ;; Thermostat SMT without ODE
 (set-option :print-success false)
+(set-option :produce-models true)
 
 (set-logic QF_UFLRA)
 (define-sort Int () Real)
@@ -60,5 +61,7 @@
 ))
 
 (check-sat)
+
+(get-value (x_1 x_2))
 
 (exit)
