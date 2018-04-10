@@ -1,8 +1,7 @@
 #pragma once
 
+#include "sos.hpp"
 #include "expr.hpp"
-
-// ! <numeric> accumulate
 
 namespace SOS {
     template <typename Arg>

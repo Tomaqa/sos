@@ -88,12 +88,12 @@ namespace SOS {
         bool closed = false;
         iss >> std::noskipws;
         while (iss >> c) {
+            if (isspace(c)) continue;
             if (!isprint(c)) {
                 expect(c == 0,
                        "Unexpected non-printable character ("s
                        + to_string((int)c) + ")");
             }
-            if (isspace(c)) continue;
             if (c == '(') {
                 add_new_place(Expr(iss, depth+1));
                 continue;

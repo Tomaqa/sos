@@ -28,6 +28,16 @@ namespace SOS {
         return move(str);
     }
 
+    template <typename Key, typename Value>
+    string to_string(const map<Key, Value>& rhs)
+    {
+        string str("");
+        for (const auto& e : rhs) {
+            str += to_string(e) + ", ";
+        }
+        return move(str);
+    }
+
     template <typename T1, typename T2>
     string to_string(const pair<T1, T2>& rhs)
     {
@@ -44,6 +54,12 @@ namespace SOS {
 
     template <typename T>
     ostream& operator <<(ostream& os, const vector<T>& rhs)
+    {
+        return (os << to_string(rhs));
+    }
+
+    template <typename Key, typename Value>
+    ostream& operator <<(ostream& os, const map<Key, Value>& rhs)
     {
         return (os << to_string(rhs));
     }

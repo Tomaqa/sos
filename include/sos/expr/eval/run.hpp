@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sos.hpp"
 #include "expr/eval.hpp"
 
 namespace SOS {

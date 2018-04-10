@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <iomanip>
 
 namespace SOS {
@@ -7,25 +6,11 @@ namespace SOS {
     using std::cout;
     using std::cerr;
     using std::endl;
-    using std::ifstream;
 
     template <typename Arg>
     int Expr::Eval<Arg>::Run::run(int argc, const char* argv[])
     try {
-        ifstream ifs;
-        istream* is_ptr;
-        bool stdin = false;
-        if (argc == 1) {
-            is_ptr = &cin;
-            stdin = true;
-        }
-        else {
-            expect(argc == 2, "Additional arguments, "s
-                              + "input file name expected.");
-            ifs = ifstream(argv[1]);
-            is_ptr = &ifs;
-        }
-        expect(is_ptr->good(), "Input stream error.");
+        Stream_ptr<istream> is_ptr(run_get_istream(argc, argv));
 
         string line;
         while (getline(*is_ptr, line)) {

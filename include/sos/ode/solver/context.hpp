@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sos.hpp"
+
 namespace SOS {
     namespace ODE {
         class Solver::Context {

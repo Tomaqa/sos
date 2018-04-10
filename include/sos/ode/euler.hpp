@@ -1,5 +1,6 @@
 #pragma once
 
+#include "sos.hpp"
 #include "ode/solver.hpp"
 
 namespace SOS {

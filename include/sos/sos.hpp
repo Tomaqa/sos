@@ -3,6 +3,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <map>
 #include <utility>
 
 namespace SOS {
@@ -11,6 +12,8 @@ namespace SOS {
 
     using std::ostream;
     using std::istream;
+    using std::ofstream;
+    using std::ifstream;
     using std::istringstream;
     using std::ostringstream;
 
@@ -21,6 +24,8 @@ namespace SOS {
     using std::vector;
     using std::initializer_list;
 
+    using std::map;
+
     using std::pair;
     using std::tuple;
     using std::get;
@@ -30,7 +35,10 @@ namespace SOS {
 
     #define expect(condition, msg) if (!(condition)) throw Error(msg);
 
-    template <typename T> string to_string(const vector<T>& rhs);
+    template <typename T>
+        string to_string(const vector<T>& rhs);
+    template <typename Key, typename Value>
+        string to_string(const map<Key, Value>& rhs);
     template <typename T1, typename T2>
         string to_string(const pair<T1, T2>& rhs);
     template <typename... Args>
@@ -40,6 +48,8 @@ namespace SOS {
 
     template <typename T>
         ostream& operator <<(ostream& os, const vector<T>& rhs);
+    template <typename Key, typename Value>
+        ostream& operator <<(ostream& os, const map<Key, Value>& rhs);
     template <typename T1, typename T2>
         ostream& operator <<(ostream& os, const pair<T1, T2>& rhs);
     template <typename... Args>

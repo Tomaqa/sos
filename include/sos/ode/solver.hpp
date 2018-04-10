@@ -1,11 +1,15 @@
 #pragma once
 
+#include "sos.hpp"
+#include "util.hpp"
 #include "ode.hpp"
 #include "expr.hpp"
 #include "expr/eval.hpp"
 
 namespace SOS {
     namespace ODE {
+        using namespace Util;
+
         class Solver {
         public:
             using Dt_spec = Expr;

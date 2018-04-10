@@ -1,5 +1,7 @@
 #pragma once
 
+#include "sos.hpp"
+
 // ! <numeric> accumulate
 
 namespace SOS {

@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <iomanip>
 
 namespace SOS {
@@ -7,7 +6,6 @@ namespace SOS {
     using std::cout;
     using std::cerr;
     using std::endl;
-    using std::ifstream;
 
     namespace ODE {
         template <typename S>
@@ -20,18 +18,7 @@ namespace SOS {
         template <typename S>
         int Solver::Run<S>::run(int argc, const char* argv[])
         try {
-            ifstream ifs;
-            istream* is_ptr;
-            if (argc == 1) {
-                is_ptr = &cin;
-            }
-            else {
-                expect(argc == 2, "Additional arguments, "s
-                                  + "input file name expected.");
-                ifs = ifstream(argv[1]);
-                is_ptr = &ifs;
-            }
-            expect(is_ptr->good(), "Input stream error.");
+            Stream_ptr<istream> is_ptr(run_get_istream(argc, argv));
 
             string line;
             getline(*is_ptr, line);
