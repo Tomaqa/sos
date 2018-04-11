@@ -1,0 +1,242 @@
+;;;; Car steering model in SMT+ODE format
+;; `(p, gam, c)' is continuous state
+;; `p' denotes horizontal position of car
+;; `gam' denotes heading angle
+;; `c' denotes internal timer
+;; `(correct, left, ahead, canal)' is discrete state
+
+
+;;; Constants
+
+(define-fun pi   () Real 3.1415)
+
+(define-fun r  () Real 5)
+(define-fun om () Real 2)
+
+(define-fun p_lo  () Real (- 1))
+(define-fun p_hi  () Real    1 )
+(define-fun p_min () Real (- 1.5 ))
+
+(define-fun t0   () Real 0)
+
+(define-fun p0   () Real 0)
+(define-fun gam0 () Real 0)
+(define-fun c0   () Real 0)
+
+(define-fun correct0 () Bool false)
+(define-fun left0    () Bool false)
+(define-fun ahead0   () Bool true)
+(define-fun canal0   () Bool false)
+
+(define-fun T () Real 0.35)
+
+;;; Invariants
+
+(assert (and (<= pmin p_lo)
+             (>= p0   p_lo)
+             (<= p0   p_hi)
+             (>= gam0 (- (/ pi 4)))
+             (<= gam0    (/ pi 4) )
+))
+
+;;; Declarations
+
+(declare-fun t_0 () Real)
+(declare-fun t_1 () Real)
+(declare-fun t_2 () Real)
+(declare-fun t_3 () Real)
+(declare-fun t_4 () Real)
+(declare-fun t_5 () Real)
+
+(declare-fun p_0 () Real)
+(declare-fun p_1 () Real)
+(declare-fun p_2 () Real)
+(declare-fun p_3 () Real)
+(declare-fun p_4 () Real)
+(declare-fun p_5 () Real)
+
+(declare-fun gam_0 () Real)
+(declare-fun gam_1 () Real)
+(declare-fun gam_2 () Real)
+(declare-fun gam_3 () Real)
+(declare-fun gam_4 () Real)
+(declare-fun gam_5 () Real)
+
+(declare-fun c_0 () Real)
+(declare-fun c_1 () Real)
+(declare-fun c_2 () Real)
+(declare-fun c_3 () Real)
+(declare-fun c_4 () Real)
+(declare-fun c_5 () Real)
+
+(declare-fun correct_0 () Bool)
+(declare-fun correct_1 () Bool)
+(declare-fun correct_2 () Bool)
+(declare-fun correct_3 () Bool)
+(declare-fun correct_4 () Bool)
+(declare-fun correct_5 () Bool)
+
+(declare-fun left_0 () Bool)
+(declare-fun left_1 () Bool)
+(declare-fun left_2 () Bool)
+(declare-fun left_3 () Bool)
+(declare-fun left_4 () Bool)
+(declare-fun left_5 () Bool)
+
+(declare-fun ahead_0 () Bool)
+(declare-fun ahead_1 () Bool)
+(declare-fun ahead_2 () Bool)
+(declare-fun ahead_3 () Bool)
+(declare-fun ahead_4 () Bool)
+(declare-fun ahead_5 () Bool)
+
+(declare-fun canal_0 () Bool)
+(declare-fun canal_1 () Bool)
+(declare-fun canal_2 () Bool)
+(declare-fun canal_3 () Bool)
+(declare-fun canal_4 () Bool)
+(declare-fun canal_5 () Bool)
+
+(declare-fun dp_0 () Dt)
+(declare-fun dp_1 () Dt)
+(declare-fun dp_2 () Dt)
+(declare-fun dp_3 () Dt)
+(declare-fun dp_4 () Dt)
+(declare-fun dp_5 () Dt)
+
+(declare-fun dgam_0 () Dt)
+(declare-fun dgam_1 () Dt)
+(declare-fun dgam_2 () Dt)
+(declare-fun dgam_3 () Dt)
+(declare-fun dgam_4 () Dt)
+(declare-fun dgam_5 () Dt)
+
+(declare-fun dc_0 () Dt)
+(declare-fun dc_1 () Dt)
+(declare-fun dc_2 () Dt)
+(declare-fun dc_3 () Dt)
+(declare-fun dc_4 () Dt)
+(declare-fun dc_5 () Dt)
+
+;;; Initializations
+
+(assert (and (= t_0 t0)
+             (= p_0 p0) (= gam_0 gam0) (= c_0 c0)
+             (= correct_0 correct0) (= left_0 left0)
+             (= ahead_0 ahead0) (= canal_0 canal0)
+))
+
+;;; Steps definition
+
+(assert (and (= t_1  (+ t_0  T))
+             (= t_2  (+ t_1  T))
+             (= t_3  (+ t_2  T))
+             (= t_4  (+ t_3  T))
+             (= t_5  (+ t_4  T))
+))
+
+;;; Derivatives declaration and definition
+
+(declare-ode p (dp_move dp_fail) (gam r))
+(define-dt dp_move (gam r) (* (- r) (sin gam)))
+(define-dt dp_fail (gam r) 0)
+
+(declare-ode gam (dgam_left dgam_right dgam_ahead) (om))
+(define-dt dgam_left  (om) (- om))
+(define-dt dgam_right (om)    om )
+(define-dt dgam_ahead (om) 0)
+
+(declare-ode c (dc_inc dc_dec dc_idle) ())
+(define-dt dc_inc  ()    1 )
+(define-dt dc_dec  () (- 2))
+(define-dt dc_idle ()    0 )
+
+;;; Integration
+
+(assert (and (= p_1 (int-ode p dp_0 (p_0 t_0 t_1) (gam_0 r)))
+        (and (= p_2 (int-ode p dp_1 (p_1 t_1 t_2) (gam_1 r)))
+        (and (= p_3 (int-ode p dp_2 (p_2 t_2 t_3) (gam_2 r)))
+        (and (= p_4 (int-ode p dp_3 (p_3 t_3 t_4) (gam_3 r)))
+        (and (= p_5 (int-ode p dp_4 (p_4 t_4 t_5) (gam_4 r)))
+
+))
+
+(assert (and (= gam_1 (int-ode gam dgam_0 (gam_0 t_0 t_1) (om)))
+        (and (= gam_2 (int-ode gam dgam_1 (gam_1 t_1 t_2) (om)))
+        (and (= gam_3 (int-ode gam dgam_2 (gam_2 t_2 t_3) (om)))
+        (and (= gam_4 (int-ode gam dgam_3 (gam_3 t_3 t_4) (om)))
+        (and (= gam_5 (int-ode gam dgam_4 (gam_4 t_4 t_5) (om)))
+
+))
+
+(assert (and (= c_1 (int-ode c dc_0 (c_0 t_0 t_1) ()))
+        (and (= c_2 (int-ode c dc_1 (c_1 t_1 t_2) ()))
+        (and (= c_3 (int-ode c dc_2 (c_2 t_2 t_3) ()))
+        (and (= c_4 (int-ode c dc_3 (c_3 t_3 t_4) ()))
+        (and (= c_5 (int-ode c dc_4 (c_4 t_4 t_5) ()))
+
+))
+
+;;; Derivatives connection
+
+(define-fun connect ( (dp Dt) (dgam Dt) (dc Dt)
+                      (correct Bool) (left Bool)
+                      (ahead Bool) (canal Bool) ) Bool
+    (and (=>      canal           (and (= dp dp_fail     )
+                                       (= dgam dgam_ahead)
+                                       (= dc dc_idle     ) ))
+         (=> (not canal)               (= dp dp_move     )  )
+         (=>      ahead           (and (= dgam dgam_ahead)
+                                       (= dc dc_idle     ) ))
+         (=>       left                (= dgam dgam_left )  )
+         (=>  (not left)               (= dgam dgam_right)  )
+         (=> (and (not ahead) correct) (= dc dc_dec      )  )
+         (=> (and (not ahead) (not correct)) (= dc dc_inc)  )
+))
+
+(assert (and (connect dp_0 dgam_0 dc_0 correct_0 left_0 ahead_0 canal_0)
+             (connect dp_1 dgam_1 dc_1 correct_1 left_1 ahead_1 canal_1)
+             (connect dp_2 dgam_2 dc_2 correct_2 left_2 ahead_2 canal_2)
+             (connect dp_3 dgam_3 dc_3 correct_3 left_3 ahead_3 canal_3)
+             (connect dp_4 dgam_4 dc_4 correct_4 left_4 ahead_4 canal_4)
+             (connect dp_5 dgam_5 dc_5 correct_5 left_5 ahead_5 canal_5)
+))
+
+;;; Jump conditions
+
+!!!!!!!!!!
+
+(define-fun jump ((on1 Bool)   (on2 Bool)
+                  (pump1 Bool) (pump2 Bool)
+                  (y2 Real)
+                  (tau2_1 Real)(tau2_2 Real)) Bool
+    (or (and      on1       pump1       on2       pump2  (<  y2 ymax     ) (= tau2_2 tau2_1))
+        (and      on1       pump1  (not on2) (not pump2) (>= y2 ymax     ) (= tau2_2 0))
+        (and (not on1) (not pump1) (not on2) (not pump2) (<  tau2_1 delta) (= tau2_2 tau2_1))
+        (and (not on1) (not pump1) (not on2)      pump2  (>= tau2_1 delta) (= tau2_2 tau2_1))
+        (and (not on1)      pump1  (not on2)      pump2  (>  y2 ymin     ) (= tau2_2 tau2_1))
+        (and (not on1)      pump1       on2  (not pump2) (<= y2 ymin     ) (= tau2_2 0))
+        (and      on1  (not pump1)      on2  (not pump2) (<  tau2_1 delta) (= tau2_2 tau2_1))
+        (and      on1  (not pump1)      on2       pump2  (>= tau2_1 delta) (= tau2_2 tau2_1))
+))
+
+(assert (and (jump on_0  on_1  pump_0  pump_1  y_1  tau_1_1  tau_1_2)
+             (jump on_1  on_2  pump_1  pump_2  y_2  tau_2_1  tau_2_2)
+             (jump on_2  on_3  pump_2  pump_3  y_3  tau_3_1  tau_3_2)
+             (jump on_3  on_4  pump_3  pump_4  y_4  tau_4_1  tau_4_2)
+             (jump on_4  on_5  pump_4  pump_5  y_5  tau_5_1  tau_5_2)
+             (jump on_5  on_6  pump_5  pump_6  y_6  tau_6_1  tau_6_2)
+             (jump on_6  on_7  pump_6  pump_7  y_7  tau_7_1  tau_7_2)
+             (jump on_7  on_8  pump_7  pump_8  y_8  tau_8_1  tau_8_2)
+             (jump on_8  on_9  pump_8  pump_9  y_9  tau_9_1  tau_9_2)
+             (jump on_9  on_10 pump_9  pump_10 y_10 tau_10_1 tau_10_2)
+             (jump on_10 on_11 pump_10 pump_11 y_11 tau_11_1 tau_11_2)
+             (jump on_11 on_12 pump_11 pump_12 y_12 tau_12_1 tau_12_2)
+             (jump on_12 on_13 pump_12 pump_13 y_13 tau_13_1 tau_13_2)
+             (jump on_13 on_14 pump_13 pump_14 y_14 tau_14_1 tau_14_2)
+             (jump on_14 on_15 pump_14 pump_15 y_15 tau_15_1 tau_15_2)
+             (jump on_15 on_16 pump_15 pump_16 y_16 tau_16_1 tau_16_2)
+             (jump on_16 on_17 pump_16 pump_17 y_17 tau_17_1 tau_17_2)
+             (jump on_17 on_18 pump_17 pump_18 y_18 tau_18_1 tau_18_2)
+             (jump on_18 on_19 pump_18 pump_19 y_19 tau_19_1 tau_19_2)
+))

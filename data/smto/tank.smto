@@ -29,6 +29,8 @@
 
 (define-fun T () Real 0.35)
 
+;;; Invariants
+
 (assert (> inflow outflow))
 
 ;;; Declarations
