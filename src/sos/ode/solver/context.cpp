@@ -21,25 +21,19 @@ namespace SOS {
 
         Solver::Context::Context(const Expr& expr)
         try {
-            expect(expr.size() == 2, "Two top subexpressions expected.");
-            // expect(!expr[0]->is_token() && expr.cto_expr(0).size() == 2,
-            expect(!expr[0]->is_etoken() && expr.cto_expr(0).size() == 2,
-                   "Two tokens of time bounds expected.");
+            expect(expr.size() == 2 && expr.is_deep(),
+                   "Two top subexpressions expected.");
+
             const Expr& t_subexpr = expr.cto_expr(0);
-            expect(t_subexpr.is_flat(),
-                   "No further subexpressions expected.");
-            // expect(t_subexpr.cto_token(0).get_value_check<Real>(t_init())
-            //        && t_subexpr.cto_token(1).get_value_check<Real>(t_end()),
+            expect(t_subexpr.size() == 2 && t_subexpr.is_flat(),
+                   "Two tokens of time bounds expected.");
             expect(t_subexpr.cto_etoken(0).get_value_check<Real>(t_init())
                    && t_subexpr.cto_etoken(1).get_value_check<Real>(t_end()),
                    "Invalid values of time bounds.");
 
-            // expect(!expr[1]->is_token(),
-            expect(!expr[1]->is_etoken(),
-                   "Initial values must be enclosed in subexpression.");
             const Expr& x_subexpr = expr.cto_expr(1);
             expect(x_subexpr.is_flat(),
-                   "No further subexpressions expected.");
+                   "Tokens with initial values expected.");
             x_init() = move(x_subexpr.transform_to_args<Real>());
 
             check_values();

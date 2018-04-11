@@ -19,7 +19,6 @@ namespace SOS {
             const Ode_key& ode_key_ = odes_p.first;
             const Dts_spec_map& ode_spec_ = get<0>(odes_p.second);
             const Param_keys& param_keys_ = get<1>(odes_p.second);
-            // const int steps_ = get<2>(odes_p.second);
             const Const_ids& const_ids_ = get<2>(odes_p.second);
             const int steps_ = const_ids_.size();
             cerr << ode_key_ << endl;

@@ -173,6 +173,148 @@ namespace SOS {
         return places().back();
     }
 
+    const Expr_token& Expr::cptr_to_etoken(const Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr_token&>(*place_ptr);
+    }
+
+    const Expr::Token& Expr::cptr_to_token(const Expr_place_ptr& place_ptr)
+    {
+        return cptr_to_etoken(place_ptr).ctoken();
+    }
+
+    const Expr& Expr::cptr_to_expr(const Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr&>(*place_ptr);
+    }
+
+    Expr_token& Expr::ptr_to_etoken(Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr_token&>(*place_ptr);
+    }
+
+    Expr::Token& Expr::ptr_to_token(Expr_place_ptr& place_ptr)
+    {
+        return ptr_to_etoken(place_ptr).token();
+    }
+
+    Expr& Expr::ptr_to_expr(Expr_place_ptr& place_ptr)
+    {
+        return static_cast<Expr&>(*place_ptr);
+    }
+
+    const Expr_token& Expr::cto_etoken(int idx) const
+    {
+        return cptr_to_etoken((*this)[idx]);
+    }
+
+    const Expr::Token& Expr::cto_token(int idx) const
+    {
+        return cptr_to_token((*this)[idx]);
+    }
+
+    const Expr& Expr::cto_expr(int idx) const
+    {
+        return cptr_to_expr((*this)[idx]);
+    }
+
+    Expr_token& Expr::to_etoken(int idx)
+    {
+        return ptr_to_etoken((*this)[idx]);
+    }
+
+    Expr::Token& Expr::to_token(int idx)
+    {
+        return ptr_to_token((*this)[idx]);
+    }
+
+    Expr& Expr::to_expr(int idx)
+    {
+        return ptr_to_expr((*this)[idx]);
+    }
+
+    void Expr::check_is_etoken(const Expr_place_ptr& place_ptr)
+    {
+        expect(place_ptr->is_etoken(),
+               "Expected token, got: "s
+               + to_string(*place_ptr));
+    }
+
+    void Expr::check_is_expr(const Expr_place_ptr& place_ptr)
+    {
+        expect(!place_ptr->is_etoken(),
+               "Expected expression, got: "s
+               + to_string(*place_ptr));
+    }
+
+    const Expr_token&
+        Expr::cptr_to_etoken_check(const Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return cptr_to_etoken(place_ptr);
+    }
+
+    const Expr::Token&
+        Expr::cptr_to_token_check(const Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return cptr_to_token(place_ptr);
+    }
+
+    const Expr& Expr::cptr_to_expr_check(const Expr_place_ptr& place_ptr)
+    {
+        check_is_expr(place_ptr);
+        return cptr_to_expr(place_ptr);
+    }
+
+    Expr_token& Expr::ptr_to_etoken_check(Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return ptr_to_etoken(place_ptr);
+    }
+
+    Expr::Token& Expr::ptr_to_token_check(Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return ptr_to_token(place_ptr);
+    }
+
+    Expr& Expr::ptr_to_expr_check(Expr_place_ptr& place_ptr)
+    {
+        check_is_expr(place_ptr);
+        return ptr_to_expr(place_ptr);
+    }
+
+    const Expr_token& Expr::cto_etoken_check(int idx) const
+    {
+        return cptr_to_etoken_check((*this)[idx]);
+    }
+
+    const Expr::Token& Expr::cto_token_check(int idx) const
+    {
+        return cptr_to_token_check((*this)[idx]);
+    }
+
+    const Expr& Expr::cto_expr_check(int idx) const
+    {
+        return cptr_to_expr_check((*this)[idx]);
+    }
+
+    Expr_token& Expr::to_etoken_check(int idx)
+    {
+        return ptr_to_etoken_check((*this)[idx]);
+    }
+
+    Expr::Token& Expr::to_token_check(int idx)
+    {
+        return ptr_to_token_check((*this)[idx]);
+    }
+
+    Expr& Expr::to_expr_check(int idx)
+    {
+        return ptr_to_expr_check((*this)[idx]);
+    }
+
     template <typename T>
     void Expr::add_place_ptr(T&& place_ptr_)
     {
@@ -185,50 +327,17 @@ namespace SOS {
         add_place_ptr(new_place(forward<T>(place_)));
     }
 
-    // const Expr_token& Expr::cptr_to_token(const Expr_place_ptr& place_ptr)
-    const Expr_token& Expr::cptr_to_etoken(const Expr_place_ptr& place_ptr)
+    void Expr::erase_place(int idx_)
     {
-        return static_cast<Expr_token&>(*place_ptr);
+        erase_places(idx_, 1);
     }
 
-    const Expr& Expr::cptr_to_expr(const Expr_place_ptr& place_ptr)
+    void Expr::erase_places(int idx_, int count_)
     {
-        return static_cast<Expr&>(*place_ptr);
-    }
-
-    // Expr_token& Expr::ptr_to_token(Expr_place_ptr& place_ptr)
-    Expr_token& Expr::ptr_to_etoken(Expr_place_ptr& place_ptr)
-    {
-        return static_cast<Expr_token&>(*place_ptr);
-    }
-
-    Expr& Expr::ptr_to_expr(Expr_place_ptr& place_ptr)
-    {
-        return static_cast<Expr&>(*place_ptr);
-    }
-
-    // const Expr_token& Expr::cto_token(int idx) const
-    const Expr_token& Expr::cto_etoken(int idx) const
-    {
-        // return cptr_to_token((*this)[idx]);
-        return cptr_to_etoken((*this)[idx]);
-    }
-
-    const Expr& Expr::cto_expr(int idx) const
-    {
-        return cptr_to_expr((*this)[idx]);
-    }
-
-    // Expr_token& Expr::to_token(int idx)
-    Expr_token& Expr::to_etoken(int idx)
-    {
-        // return ptr_to_token((*this)[idx]);
-        return ptr_to_etoken((*this)[idx]);
-    }
-
-    Expr& Expr::to_expr(int idx)
-    {
-        return ptr_to_expr((*this)[idx]);
+        if (count_ <= 0) {
+            count_ = size() - idx_;
+        }
+        places().erase(begin()+idx_, begin()+idx_+count_);
     }
 
     Expr& Expr::simplify() noexcept
@@ -240,7 +349,6 @@ namespace SOS {
 
     Expr& Expr::simplify_top() noexcept
     {
-        // if (size() == 1 && !cfront()->is_token()) {
         if (size() == 1 && !cfront()->is_etoken()) {
             places() = move(to_expr(0).places());
         }
@@ -251,7 +359,6 @@ namespace SOS {
     {
         if (empty()) return *this;
         for (auto& e : *this) {
-            // if (e->is_token()) continue;
             if (e->is_etoken()) continue;
             auto& e_cast = ptr_to_expr(e);
             if (e_cast.simplify_rec().size() == 1) {
@@ -265,7 +372,6 @@ namespace SOS {
     {
         if (_is_binary) return *this;
         expect(size() > 1, "Expression has not at least 2 arguments.");
-        // expect(cfront()->is_token(),
         expect(cfront()->is_etoken(),
                "First argument of each expression should be single token.");
         _is_binary = true;
@@ -281,25 +387,19 @@ namespace SOS {
             places().erase(begin()+3, end());
             places()[2] = new_place(move(subexpr.to_binary()));
         }
-        for (auto& e : *this) {
-            // if (e->is_token()) continue;
-            if (e->is_etoken()) continue;
-            ptr_to_expr(e).to_binary();
-        }
+        for_each_expr([](Expr& e){ e.to_binary(); });
         return *this;
     }
 
     bool Expr::is_flat() const
     {
         return std::all_of(cbegin(), cend(),
-                           // bind(&Expr_place::is_token, _1));
                            bind(&Expr_place::is_etoken, _1));
     }
 
     bool Expr::is_deep() const
     {
         return std::none_of(cbegin(), cend(),
-                            // bind(&Expr_place::is_token, _1));
                             bind(&Expr_place::is_etoken, _1));
     }
 
@@ -310,7 +410,6 @@ namespace SOS {
         Places places_;
         places_.reserve(size()*2);
         for (auto& e : places()) {
-            // if (e->is_token()) {
             if (e->is_etoken()) {
                 places_.emplace_back(move(e));
                 continue;
@@ -329,10 +428,7 @@ namespace SOS {
         tokens.reserve(size());
         std::transform(cbegin(), cend(),
                        std::back_inserter(tokens),
-                       bind(&Expr_token::ctoken,
-                            // bind(&Expr::cptr_to_token, _1))
-                            bind(&Expr::cptr_to_etoken, _1))
-                       );
+                       bind(&Expr::cptr_to_token, _1));
         return move(tokens);
     }
 

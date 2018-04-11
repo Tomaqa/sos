@@ -6,11 +6,7 @@ namespace SOS {
         : _param_keys_l(param_keys_l_), _param_values_l(param_values_l_)
     {
         expect(expr_.size() == 3, "Expression is not binary.");
-        // expect(expr_.cfront()->is_token(),
-        expect(expr_.cfront()->is_etoken(),
-               "First argument of expression must be token.");
-        // const F_key key_ = expr_.cto_token(0).ctoken();
-        const F_key key_ = expr_.cto_etoken(0).ctoken();
+        const F_key& key_ = expr_.cto_token_check(0);
         expect(bin_fs.includes(key_),
                "First argument of expression is not operation token: "s
                + key_);
@@ -38,7 +34,6 @@ namespace SOS {
         Expr::Eval<Arg>::Oper::get_arg_lazy(const Expr& expr_)
     {
         const auto& place_ = expr_[idx+1];
-        // if (!place_->is_token()) {
         if (!place_->is_etoken()) {
             const auto& subexpr = cptr_to_expr(place_);
             Oper_ptr& oper_ptr_ = get<idx>(_oper_ptrs);
@@ -46,7 +41,6 @@ namespace SOS {
                                       subexpr));
             return oper_lazy(oper_ptr_);
         }
-        // const auto& token_ = cptr_to_token(place_);
         const auto& token_ = cptr_to_etoken(place_);
         Arg arg;
         if (token_.get_value_check(arg)) {

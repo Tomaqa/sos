@@ -23,7 +23,6 @@ namespace SOS {
                "Non-expression occured at top level.");
         smt_exprs().reserve(expr.size());
         for (auto&& e : expr.transform_to_exprs()) {
-            // expect(e.cfront()->is_token(),
             expect(e.cfront()->is_etoken(),
                    "Expected command expression, got: "s
                    + to_string(e.cto_expr(0)));
@@ -50,8 +49,7 @@ namespace SOS {
 
     void Parser::process_expr(Expr expr)
     {
-        // const string& cmd = expr.cto_token(0).ctoken();
-        const string& cmd = expr.cto_etoken(0).ctoken();
+        const string& cmd = expr.cto_token(0);
         expect(cmd != "int-ode",
                "Unexpected command '"s + cmd + "' "
                + "at top level.");
@@ -75,23 +73,18 @@ namespace SOS {
 
     void Parser::process_declare_ode(Expr&& expr)
     {
-        expect(expr.size() == 4
-               // && expr[1]->is_token() && !expr[2]->is_token()
-               // && !expr[3]->is_token(),
-               && expr[1]->is_etoken() && !expr[2]->is_etoken()
-               && !expr[3]->is_etoken(),
+        expect(expr.size() == 4,
                "Expected ODE function name, "s
                + "expression with dt variants "
                + "and expression with parameter keys, got: "
                + to_string(expr));
 
-        // const Ode_key& ode_key_ = expr.cto_token(1).ctoken();
-        const Ode_key& ode_key_ = expr.cto_etoken(1).ctoken();
+        const Ode_key& ode_key_ = expr.cto_token_check(1);
         expect(!has_ode_key(ode_key_),
                "ODE function name '"s + ode_key_ + "' "
                + "has already been declared.");
 
-        const Expr& dt_expr = expr.cto_expr(2);
+        const Expr& dt_expr = expr.cto_expr_check(2);
         expect(dt_expr.is_flat(),
                "Expected expression with dt variant name identifiers, got: "s
                + to_string(dt_expr));
@@ -99,7 +92,7 @@ namespace SOS {
             add_dt_key(ode_key_, move(dkey));
         }
 
-        const Expr& keys_expr = expr.cto_expr(3);
+        const Expr& keys_expr = expr.cto_expr_check(3);
         expect(keys_expr.is_flat(),
                "Expected expression with parameter keys identifiers, got: "s
                + to_string(keys_expr));
@@ -117,26 +110,19 @@ namespace SOS {
 
     void Parser::process_define_dt(Expr&& expr)
     {
-        // expect(expr.size() == 4 && expr[1]->is_token()
-        //        && !expr[2]->is_token(),
-        expect(expr.size() == 4 && expr[1]->is_etoken()
-               && !expr[2]->is_etoken(),
+        expect(expr.size() == 4,
                "Expected dt variant name, "s
                + "expression with parameter keys "
                + "and expression with dt specification, got: "
                + to_string(expr));
 
-        // const Dt_key& dt_key_ = expr.cto_token(1).ctoken();
-        const Dt_key& dt_key_ = expr.cto_etoken(1).ctoken();
+        const Dt_key& dt_key_ = expr.cto_token_check(1);
         check_has_dt_key(dt_key_);
 
         // !? check keys
 
-        // Dt_spec dt_spec_ = expr[3]->is_token()
-        //                  ? Dt_spec("+ 0 "s + expr.cto_token(3).ctoken())
-        //                  : move(expr.cto_expr(3)) ;
         Dt_spec dt_spec_ = expr[3]->is_etoken()
-                         ? Dt_spec("+ 0 "s + expr.cto_etoken(3).ctoken())
+                         ? Dt_spec("+ 0 "s + expr.cto_token(3))
                          : move(expr.cto_expr(3)) ;
         set_dt_spec(dt_key_, move(dt_spec_));
 
@@ -148,13 +134,11 @@ namespace SOS {
 
     void Parser::process_define_ode_step(Expr&& expr)
     {
-        // expect(expr.size() == 2 && expr[1]->is_token(),
-        expect(expr.size() == 2 && expr[1]->is_etoken(),
+        expect(expr.size() == 2,
                "Expected initial ODE step size, got: "s
                + to_string(expr));
         expect(!_ode_step_set, "ODE step size has already been set.");
-        // expect(expr.cto_token(1).get_value_check<Time>(_ode_step),
-        expect(expr.cto_etoken(1).get_value_check<Time>(_ode_step),
+        expect(expr.cto_etoken_check(1).get_value_check<Time>(_ode_step),
                "ODE step size is invalid: "s
                + to_string(*expr[1]));
         _ode_step_set = true;
@@ -162,54 +146,39 @@ namespace SOS {
 
     void Parser::process_assert(Expr& expr)
     {
-        for (auto& eptr : expr) {
-            // if (eptr->is_token()) continue;
-            if (eptr->is_etoken()) continue;
-            Expr& subexpr = Expr::ptr_to_expr(eptr);
-            // if (subexpr.cfront()->is_token()
-                // && subexpr.cto_token(0).ctoken() == "int-ode") {
-            if (subexpr.cfront()->is_etoken()
-                && subexpr.cto_etoken(0).ctoken() == "int-ode") {
-                process_int_ode(subexpr);
-                continue;
+        expr.for_each_expr([this](Expr& e){
+            if (e.cfront()->is_etoken()
+                && e.cto_token(0) == "int-ode") {
+                process_int_ode(e);
+                return;
             }
-            process_assert(subexpr);
-        }
+            process_assert(e);
+        });
     }
 
     void Parser::process_int_ode(Expr& expr)
     {
-        expect(expr.size() == 5
-               // && expr[1]->is_token() && expr[2]->is_token()
-               // && !expr[3]->is_token() && !expr[4]->is_token(),
-               && expr[1]->is_etoken() && expr[2]->is_etoken()
-               && !expr[3]->is_etoken() && !expr[4]->is_etoken(),
+        expect(expr.size() == 5,
                "Expected ODE function name, "s
                + "dt variant identifier of constant, "
                + "expression with initial values of ODE "
                + "and parameter values, got: "
                + to_string(expr));
 
-        // Ode_key ode_key_ = expr.cto_token(1).ctoken();
-        Ode_key ode_key_ = expr.cto_etoken(1).ctoken();
+        Ode_key ode_key_ = expr.cto_token_check(1);
         check_has_ode_key(ode_key_);
 
-        // Const_id dt_const = expr.cto_token(2).ctoken();
-        Const_id dt_const = expr.cto_etoken(2).ctoken();
-        // steps(ode_key_)++;
+        Const_id dt_const = expr.cto_token_check(2);
 
-        Expr init_expr = expr.cto_expr(3);
+        Expr init_expr = expr.cto_expr_check(3);
         expect(init_expr.size() == 3 && init_expr.is_flat(),
                "Expected initial values of ODE, got: "s
                + to_string(init_expr));
-        // Const_id init_const = move(init_expr.cto_token(0).ctoken());
-        // auto init_t_consts = make_pair(init_expr.cto_token(1).ctoken(),
-        //                                init_expr.cto_token(2).ctoken());
-        Const_id init_const = move(init_expr.cto_etoken(0).ctoken());
-        auto init_t_consts = make_pair(init_expr.cto_etoken(1).ctoken(),
-                                       init_expr.cto_etoken(2).ctoken());
+        Const_id init_const = move(init_expr.cto_token(0));
+        auto init_t_consts = make_pair(init_expr.cto_token(1),
+                                       init_expr.cto_token(2));
 
-        Expr param_expr = expr.cto_expr(4);
+        Expr param_expr = expr.cto_expr_check(4);
         expect(param_expr.is_flat(),
                "Expected parameter constants, got: "s
                + to_string(param_expr));
@@ -219,9 +188,8 @@ namespace SOS {
         add_const_ids_row(move(dt_const), move(init_const),
                           move(init_t_consts), {});
 
-        expr.places().erase(expr.begin()+1, expr.end());
-        // expr.to_token(0).token() += "_" + ode_key_;
-        expr.to_etoken(0).token() += "_" + ode_key_;
+        expr.erase_places(1);
+        expr.to_token(0) += "_" + ode_key_;
         const int steps_ = csteps(ode_key_);
         expr.add_new_place(Expr_token(to_string(steps_-1)));
     }
@@ -314,7 +282,6 @@ namespace SOS {
 
     int Parser::csteps(const Ode_key& ode_key_) const
     {
-        // return get<2>(codes_map().at(ode_key_));
         return get<2>(codes_map().at(ode_key_)).size();
     }
 

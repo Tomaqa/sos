@@ -27,13 +27,22 @@ namespace SOS {
 
     ///////////////////////////////////////////////////////////////
 
+    template <typename Un_f>
+    void Expr::for_each_expr(Un_f f)
+    {
+        for (auto& eptr : *this) {
+            if (eptr->is_etoken()) continue;
+            Expr& subexpr = ptr_to_expr(eptr);
+            f(subexpr);
+        }
+    }
+
     template <typename Arg>
     bool Expr::has_values() const
     {
         // ! 'is_flat()' is assumed to be true
         return std::all_of(cbegin(), cend(),
                            bind(&Expr_token::is_value<Arg>,
-                                // bind(&Expr::cptr_to_token, _1))
                                 bind(&Expr::cptr_to_etoken, _1))
                            );
     }
@@ -48,7 +57,6 @@ namespace SOS {
         std::transform(cbegin(), cend(),
                        std::back_inserter(elems),
                        bind(&Expr_token::get_value<Arg>,
-                            // bind(&Expr::cptr_to_token, _1))
                             bind(&Expr::cptr_to_etoken, _1))
                        );
         return move(elems);
