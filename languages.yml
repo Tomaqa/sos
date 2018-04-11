@@ -1,0 +1,5 @@
+SMT:
+  extensions:
+  - ".smt2"
+  - ".smt"
+  - ".smto"
