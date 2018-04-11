@@ -14,7 +14,29 @@ namespace SOS {
 
         _parser = Parser(*is_ptr);
 
-        cout << _parser.smt_input() << endl;
+        const Parser::Odes_map& odes_map_ = _parser.codes_map();
+        for (auto& odes_p : odes_map_) {
+            const Ode_key& ode_key_ = odes_p.first;
+            const Dts_spec_map& ode_spec_ = get<0>(odes_p.second);
+            const Param_keys& param_keys_ = get<1>(odes_p.second);
+            // const int steps_ = get<2>(odes_p.second);
+            const Const_ids& const_ids_ = get<2>(odes_p.second);
+            const int steps_ = const_ids_.size();
+            cerr << ode_key_ << endl;
+            for (auto& ode_p : ode_spec_) {
+                cerr << ode_p.first << " ";
+            }
+            cerr << endl;
+            for (auto& ode_p : ode_spec_) {
+                cerr << ode_p.second << " ";
+            }
+            cerr << endl;
+            cerr << param_keys_ << endl;
+            cerr << steps_ << endl;
+            cerr << endl;
+        }
+
+        cout << _parser.csmt_input() << endl;
 
         return 0;
     }

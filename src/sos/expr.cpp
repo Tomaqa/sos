@@ -185,7 +185,8 @@ namespace SOS {
         add_place_ptr(new_place(forward<T>(place_)));
     }
 
-    const Expr_token& Expr::cptr_to_token(const Expr_place_ptr& place_ptr)
+    // const Expr_token& Expr::cptr_to_token(const Expr_place_ptr& place_ptr)
+    const Expr_token& Expr::cptr_to_etoken(const Expr_place_ptr& place_ptr)
     {
         return static_cast<Expr_token&>(*place_ptr);
     }
@@ -195,7 +196,8 @@ namespace SOS {
         return static_cast<Expr&>(*place_ptr);
     }
 
-    Expr_token& Expr::ptr_to_token(Expr_place_ptr& place_ptr)
+    // Expr_token& Expr::ptr_to_token(Expr_place_ptr& place_ptr)
+    Expr_token& Expr::ptr_to_etoken(Expr_place_ptr& place_ptr)
     {
         return static_cast<Expr_token&>(*place_ptr);
     }
@@ -205,9 +207,11 @@ namespace SOS {
         return static_cast<Expr&>(*place_ptr);
     }
 
-    const Expr_token& Expr::cto_token(int idx) const
+    // const Expr_token& Expr::cto_token(int idx) const
+    const Expr_token& Expr::cto_etoken(int idx) const
     {
-        return cptr_to_token((*this)[idx]);
+        // return cptr_to_token((*this)[idx]);
+        return cptr_to_etoken((*this)[idx]);
     }
 
     const Expr& Expr::cto_expr(int idx) const
@@ -215,9 +219,11 @@ namespace SOS {
         return cptr_to_expr((*this)[idx]);
     }
 
-    Expr_token& Expr::to_token(int idx)
+    // Expr_token& Expr::to_token(int idx)
+    Expr_token& Expr::to_etoken(int idx)
     {
-        return ptr_to_token((*this)[idx]);
+        // return ptr_to_token((*this)[idx]);
+        return ptr_to_etoken((*this)[idx]);
     }
 
     Expr& Expr::to_expr(int idx)
@@ -234,7 +240,8 @@ namespace SOS {
 
     Expr& Expr::simplify_top() noexcept
     {
-        if (size() == 1 && !cfront()->is_token()) {
+        // if (size() == 1 && !cfront()->is_token()) {
+        if (size() == 1 && !cfront()->is_etoken()) {
             places() = move(to_expr(0).places());
         }
         return *this;
@@ -244,7 +251,8 @@ namespace SOS {
     {
         if (empty()) return *this;
         for (auto& e : *this) {
-            if (e->is_token()) continue;
+            // if (e->is_token()) continue;
+            if (e->is_etoken()) continue;
             auto& e_cast = ptr_to_expr(e);
             if (e_cast.simplify_rec().size() == 1) {
                 e = move(e_cast.front());
@@ -257,7 +265,8 @@ namespace SOS {
     {
         if (_is_binary) return *this;
         expect(size() > 1, "Expression has not at least 2 arguments.");
-        expect(cfront()->is_token(),
+        // expect(cfront()->is_token(),
+        expect(cfront()->is_etoken(),
                "First argument of each expression should be single token.");
         _is_binary = true;
         if (size() == 2) {
@@ -273,7 +282,8 @@ namespace SOS {
             places()[2] = new_place(move(subexpr.to_binary()));
         }
         for (auto& e : *this) {
-            if (e->is_token()) continue;
+            // if (e->is_token()) continue;
+            if (e->is_etoken()) continue;
             ptr_to_expr(e).to_binary();
         }
         return *this;
@@ -282,13 +292,15 @@ namespace SOS {
     bool Expr::is_flat() const
     {
         return std::all_of(cbegin(), cend(),
-                           bind(&Expr_place::is_token, _1));
+                           // bind(&Expr_place::is_token, _1));
+                           bind(&Expr_place::is_etoken, _1));
     }
 
     bool Expr::is_deep() const
     {
         return std::none_of(cbegin(), cend(),
-                            bind(&Expr_place::is_token, _1));
+                            // bind(&Expr_place::is_token, _1));
+                            bind(&Expr_place::is_etoken, _1));
     }
 
     Expr& Expr::flatten()
@@ -298,7 +310,8 @@ namespace SOS {
         Places places_;
         places_.reserve(size()*2);
         for (auto& e : places()) {
-            if (e->is_token()) {
+            // if (e->is_token()) {
+            if (e->is_etoken()) {
                 places_.emplace_back(move(e));
                 continue;
             }
@@ -317,7 +330,8 @@ namespace SOS {
         std::transform(cbegin(), cend(),
                        std::back_inserter(tokens),
                        bind(&Expr_token::ctoken,
-                            bind(&Expr::cptr_to_token, _1))
+                            // bind(&Expr::cptr_to_token, _1))
+                            bind(&Expr::cptr_to_etoken, _1))
                        );
         return move(tokens);
     }

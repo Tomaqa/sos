@@ -11,12 +11,14 @@ PARSER_CMD=(bin/parser_app)
 
 INPUT_F="$1"
 
-MIN_STEP=
+MIN_STEP=0
 MAX_STEP=
 
+T_ID=t
 F_IDS=()
+ODE_SPECS=()
+ODE_KEYS=()
 DT_IDS=()
-T_ID=
 
 declare -A VALUES
 ODE_VALUE=()
@@ -53,21 +55,49 @@ function failure {
 ##############################
 
 function parse_input {
+    local tmp_f=`mktemp`
     if [[ -z $INPUT_F ]]; then
         "${PARSER_CMD[@]}"
     else
         "${PARSER_CMD[@]}" "$INPUT_F"
-    fi | append_smt
+    fi 2>"$tmp_f" | append_smt
 
-    MIN_STEP=0
-    MAX_STEP=9
+    while read fid; do
+        F_IDS+=($fid)
+        read ospec
+        ODE_SPECS+=("($ospec)")
+        read keys
+        ODE_KEYS+=("($keys)")
+        read MAX_STEP
+    done
 
-    F_IDS+=(x)
-    DT_IDS+=(dx)
-    T_ID=t
+    local str="( "
+    for ospec in "${ODE_SPECS[@]}"; do
+        str+="$ospec"
+    done
+    str+=" )( "
+    for keys in "${ODE_KEYS[@]}"; do
+        str+="$keys"
+    done
+    str+=" )"
+    append_ode "$str"
 
-    # append_ode "( ((- 100 x) (-  50 x)) ) (x)"
-    append_ode "( ((-  50 x) (- 100 x)) ) (x)"
+    # MIN_STEP=0
+    # MAX_STEP=9
+
+    # F_IDS+=(x)
+    # DT_IDS+=(dx)
+
+    # append_ode "( ((-  50 x) (- 100 x)) ) (x)"
+
+    # MIN_STEP=0
+    # MAX_STEP=19
+
+    # # F_IDS+=(y tau)
+    # F_IDS+=(y tau_1)
+    # DT_IDS+=(dy dtau)
+
+    # append_ode "( ((- 40 20) (- 20)) ((+ 1) (+ 0)) ) ((y) (tau))"
 }
 
 function append_smt {
@@ -81,6 +111,10 @@ function append_smt {
 }
 
 function append_ode {
+    [[ -z $1 ]] && {
+        cat >&5
+        return
+    }
     for i; do
         printf -- "%s\n" "$i" >&5
     done
@@ -151,15 +185,9 @@ function add_asserts {
                  (= ${F_IDS[$i]}_${1} ${VALUES[${F_IDS[$i]}_${1}]})
                  (= ${T_ID}_${1} ${VALUES[${T_ID}_${1}]})
                  (= ${T_ID}_$(($1+1)) ${VALUES[${T_ID}_$(($1+1))]})
-            ) (= (int-ode_x ${1}) ${ODE_VALUES[$i]})
+            ) (= (int-ode_${F_IDS[$i]} ${1}) ${ODE_VALUES[$i]})
 ))
 KONEC
-# (assert (=> (and (= ${DT_IDS[$i]}_${1} ${VALUES[${DT_IDS[$i]}_${1}]})
-#                  (= ${T_ID}_${1} ${VALUES[${T_ID}_${1}]})
-#                  (= ${T_ID}_$(($1+1)) ${VALUES[${T_ID}_$(($1+1))]})
-#                  (= ${F_IDS[$i]}_${1} ${VALUES[${F_IDS[$i]}_${1}]})
-#             ) (= _dx_${1}_int ${ODE_VALUES[$i]})
-# ))
     done
 }
 
@@ -196,8 +224,6 @@ PIDS=()
 mkfifo -m 600 "$SMT_IFIFO"
 mkfifo -m 600 "$SMT_OFIFO"
 
-echo "${SMT_SOLVER[@]}"
-
 # "${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
 "${SMT_SOLVER[@]}" <"$SMT_IFIFO" >"$SMT_OFIFO" 2>/dev/null &
 # exec 3>"$SMT_IFIFO"
@@ -224,10 +250,11 @@ read <&4
 
 echo
 for var in F_IDS DT_IDS; do
-    for (( s=$MIN_STEP; $s < $MAX_STEP; s++ )); do
-        for i in ${!F_IDS[@]}; do
-            declare -n var_l=$var
-            id=${var_l[$i]}_${s}
+    declare -n var_l=$var
+    for i in ${!F_IDS[@]}; do
+        fid=${var_l[$i]}
+        for (( s=$MIN_STEP; $s < $MAX_STEP; s++ )); do
+            id=${fid}_${s}
             get_smt_value ${id}
             printf -- "%s = %.3f\n" ${id} ${VALUES[${id}]}
         done
@@ -243,6 +270,7 @@ for fid in ${F_IDS[@]}; do
 done
 
 append_smt "(exit)"
+# append_smt "(get-model)" "(exit)"
 cat <&4
 
 exit 0

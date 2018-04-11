@@ -3,5 +3,7 @@ lib/
 bin/
 test/
 
-data/smt2/benchmarks/
 .backup/
+*log
+data/smt2/benchmarks/
+doc/odeint

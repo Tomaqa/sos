@@ -11,6 +11,20 @@ namespace SOS {
 
     class Parser {
     public:
+        using Param_key = Expr::Token;
+        using Param_keys = vector<Param_key>;
+        using Dt_spec = Expr;
+        using Dt_key = Param_key;
+        using Dts_spec_map = map<Dt_key, Dt_spec>;
+        using Const_id = Param_key;
+        using Const_ids_row = tuple<Const_id, Const_id,
+                                    pair<Const_id, Const_id>,
+                                    vector<Const_id>>;
+        using Const_ids = vector<Const_ids_row>;
+        using Ode = tuple<Dts_spec_map, Param_keys, Const_ids>;
+        using Ode_key = Dt_key;
+        using Odes_map = map<Ode_key, Ode>;
+
         class Run;
 
         Parser()                                                    = default;
@@ -23,13 +37,9 @@ namespace SOS {
         Parser(const string& input);
         Parser(const Expr& expr);
 
-        string smt_input() const;
+        const Odes_map& codes_map() const                { return _odes_map; }
+        string csmt_input() const;
     protected:
-        using Param_key = Expr::Token;
-        using Dt_key = Param_key;
-        using Dt_spec = Expr;
-        using Ode_key = Dt_key;
-
         static constexpr const char* smt_init_cmds
             = "(set-option :print-success false)\n"
               "(set-option :produce-models true)\n"
@@ -48,23 +58,16 @@ namespace SOS {
 
         static Expr::Token int_ode_identifier(const Ode_key& ode_key_);
     private:
-        using Param_keys = vector<Param_key>;
-        using Ode_spec = map<Dt_key, Dt_spec>;
-        // using Ode = pair<Ode_spec, Param_keys>;
-        using Ode = tuple<Ode_spec, Param_keys, int>;
-        using Odes_spec = map<Ode_key, Ode>;
-
         using Dt_keys_map = map<Dt_key, Ode_key>;
 
         using Smt_exprs = Expr::Exprs;
 
-        const Odes_spec& codes_spec() const             { return _odes_spec; }
-        Odes_spec& odes_spec()                          { return _odes_spec; }
+        Odes_map& odes_map()                             { return _odes_map; }
         bool has_ode_key(const Ode_key& ode_key_) const;
         void check_has_ode_key(const Ode_key& ode_key_) const;
         int ode_key_idx(const Ode_key& ode_key_) const;
-        const Ode_spec& code_spec(const Ode_key& ode_key_) const;
-        Ode_spec& ode_spec(const Ode_key& ode_key_);
+        const Dts_spec_map& cdts_spec_map(const Ode_key& ode_key_) const;
+        Dts_spec_map& dts_spec_map(const Ode_key& ode_key_);
 
         const Dt_keys_map& cdt_keys_map() const       { return _dt_keys_map; }
         Dt_keys_map& dt_keys_map()                    { return _dt_keys_map; }
@@ -83,13 +86,17 @@ namespace SOS {
         Smt_exprs& smt_exprs()                          { return _smt_exprs; }
         void add_smt_expr(Expr&& expr);
 
+        const Const_ids& const_ids(const Ode_key& ode_key_) const;
+        Const_ids& const_ids(const Ode_key& ode_key_);
         int csteps(const Ode_key& ode_key_) const;
-        int& steps(const Ode_key& ode_key_);
 
-        Odes_spec _odes_spec;
+        void add_const_ids_row(Const_id&& dt_const, Const_id&& init_const,
+                               pair<Const_id, Const_id>&& init_t_consts,
+                               vector<Const_id>&& param_consts);
+
+        Odes_map _odes_map;
         Dt_keys_map _dt_keys_map;
         Smt_exprs _smt_exprs;
-        int _steps{0};
         Time _ode_step;
         bool _ode_step_set{false};
     };
