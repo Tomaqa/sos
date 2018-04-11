@@ -21,7 +21,7 @@ namespace SOS {
     {
         expect(expr.is_deep(),
                "Non-expression occured at top level.");
-        _smt_exprs.reserve(expr.size());
+        smt_exprs().reserve(expr.size());
         for (auto&& e : expr.transform_to_exprs()) {
             expect(e.cfront()->is_token(),
                    "Expected command expression, got: "s
@@ -62,15 +62,11 @@ namespace SOS {
             process_define_ode_step(move(expr));
             return;
         }
-        // if (cmd == "int-ode") {
-        //     process_int_ode(move(expr));
-        //     return;
-        // }
         if (cmd == "assert") {
             process_assert(move(expr));
             return;
         }
-        _smt_exprs.emplace_back(move(expr));
+        add_smt_expr(move(expr));
     }
 
     void Parser::process_declare_ode(Expr&& expr)
@@ -125,12 +121,17 @@ namespace SOS {
                "dt variant name '"s + dt_key_ + "' "
                + "has not been declared.");
 
-        // ! keys
+        // !? check keys
 
         Dt_spec dt_spec_ = expr[3]->is_token()
                          ? Dt_spec("+ 0 "s + expr.cto_token(3).ctoken())
                          : move(expr.cto_expr(3)) ;
         set_dt_spec(dt_key_, move(dt_spec_));
+
+        int dkey_idx = dt_key_idx(dt_key_);
+        add_smt_expr({"(define-fun "s + dt_key_
+                      + "  () Dt "
+                      + to_string(dkey_idx) +")"});
     }
 
     void Parser::process_define_ode_step(Expr&& expr)
@@ -148,7 +149,7 @@ namespace SOS {
     void Parser::process_assert(Expr&& expr)
     {
         // !!!
-        _smt_exprs.emplace_back(move(expr));
+        add_smt_expr(move(expr));
     }
 
     void Parser::process_int_ode(Expr&& expr)
@@ -163,11 +164,21 @@ namespace SOS {
         // staci substituovat primo
         //   - zatim je receno ze to musi byt v prikazu assert
         //   -> nemuze to byt v nejake funkci s parametry
+        // odsud by mel jit poznat pocet kroku
+        // zatim asi jen spolecne casove okamziky pro vsechny ODE
+        //   - a navic to zatim ani nebudu kontrolovat
     }
 
     bool Parser::has_ode_key(const Ode_key& ode_key_) const
     {
         return codes_spec().count(ode_key_) == 1;
+    }
+
+    int Parser::ode_key_idx(const Ode_key& ode_key_) const
+    {
+        const Odes_spec& odes_spec_ = codes_spec();
+        const auto& it = odes_spec_.find(ode_key_);
+        return std::distance(std::begin(odes_spec_), it);
     }
 
     const Parser::Ode_spec& Parser::code_spec(const Ode_key& ode_key_) const
@@ -185,10 +196,26 @@ namespace SOS {
         return cdt_keys_map().count(dt_key_) == 1;
     }
 
-    const Parser::Ode_key& Parser::code_key(const Dt_key& dt_key_)
+    int Parser::dt_key_idx(const Dt_key& dt_key_) const
+    {
+        const Ode_key& ode_key_ = code_key(dt_key_);
+        const Ode_spec& ode_spec_ = code_spec(ode_key_);
+        // const auto& it = code_spec_it(dt_key_);
+        const auto& it = ode_spec_.find(dt_key_);
+        return std::distance(std::begin(ode_spec_), it);
+    }
+
+    const Parser::Ode_key& Parser::code_key(const Dt_key& dt_key_) const
     {
         return cdt_keys_map().at(dt_key_);
+        // return cdt_keys_map().at(dt_key_).first;
     }
+
+    // const Parser::Ode_spec::iterator&
+    //     Parser::code_spec_it(const Dt_key& dt_key_) const
+    // {
+    //     return cdt_keys_map().at(dt_key_).second;
+    // }
 
     const Parser::Param_keys&
         Parser::cparam_keys(const Ode_key& ode_key_) const
@@ -204,7 +231,11 @@ namespace SOS {
     void Parser::add_dt_key(const Ode_key& ode_key_, Dt_key dt_key_)
     {
         ode_spec(ode_key_).emplace(dt_key_, Dt_spec());
+        // Ode_spec::iterator it;
+        // std::tie(it, std::ignore) =
+            // ode_spec(ode_key_).emplace(dt_key_, Dt_spec());
         dt_keys_map().emplace(move(dt_key_), ode_key_);
+        // dt_keys_map().emplace(move(dt_key_), make_pair(ode_key_, it));
     }
 
     void Parser::set_dt_spec(const Dt_key& dt_key_, Dt_spec dt_spec_)
@@ -212,11 +243,16 @@ namespace SOS {
         ode_spec(code_key(dt_key_))[dt_key_] = move(dt_spec_);
     }
 
+    void Parser::add_smt_expr(Expr&& expr)
+    {
+        smt_exprs().emplace_back(move(expr));
+    }
+
     string Parser::smt_input() const
     {
         cerr << to_string(_odes_spec) << endl;
         string str(smt_init_cmds);
-        for (const Expr& expr : _smt_exprs) {
+        for (const Expr& expr : csmt_exprs()) {
             str += to_string(expr) + "\n";
         }
         return move(str);

@@ -47,29 +47,37 @@ namespace SOS {
         using Ode_key = Dt_key;
         using Ode_spec = map<Dt_key, Dt_spec>;
         using Ode = pair<Ode_spec, Param_keys>;
-        // using Odes_spec = map<Ode_key, Ode_spec>;
         using Odes_spec = map<Ode_key, Ode>;
 
         using Dt_keys_map = map<Dt_key, Ode_key>;
+        // using Dt_key_value = pair<Ode_key, Ode_spec::iterator>;
+        // using Dt_keys_map = map<Dt_key, Dt_key_value>;
 
         using Smt_exprs = Expr::Exprs;
 
         const Odes_spec& codes_spec() const             { return _odes_spec; }
         Odes_spec& odes_spec()                          { return _odes_spec; }
         bool has_ode_key(const Ode_key& ode_key_) const;
+        int ode_key_idx(const Ode_key& ode_key_) const;
         const Ode_spec& code_spec(const Ode_key& ode_key_) const;
         Ode_spec& ode_spec(const Ode_key& ode_key_);
 
         const Dt_keys_map& cdt_keys_map() const       { return _dt_keys_map; }
         Dt_keys_map& dt_keys_map()                    { return _dt_keys_map; }
         bool has_dt_key(const Dt_key& dt_key_) const;
-        const Ode_key& code_key(const Dt_key& dt_key_);
+        int dt_key_idx(const Dt_key& dt_key_) const;
+        const Ode_key& code_key(const Dt_key& dt_key_) const;
+        // const Ode_spec::iterator& code_spec_it(const Dt_key& dt_key_) const;
 
         const Param_keys& cparam_keys(const Ode_key& ode_key_) const;
         Param_keys& param_keys(const Ode_key& ode_key_);
 
         void add_dt_key(const Ode_key& ode_key_, Dt_key dt_key_);
         void set_dt_spec(const Dt_key& dt_key_, Dt_spec dt_spec_);
+
+        const Smt_exprs& csmt_exprs() const             { return _smt_exprs; }
+        Smt_exprs& smt_exprs()                          { return _smt_exprs; }
+        void add_smt_expr(Expr&& expr);
 
         Odes_spec _odes_spec;
         Dt_keys_map _dt_keys_map;
