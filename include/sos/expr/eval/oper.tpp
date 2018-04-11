@@ -5,12 +5,25 @@ namespace SOS {
                                 const Expr& expr_)
         : _param_keys_l(param_keys_l_), _param_values_l(param_values_l_)
     {
-        expect(expr_.size() == 3, "Expression is not binary.");
+        const int size_ = expr_.size();
+        expect(size_ == 2 || size_ == 3,
+               "Expression is not unary nor binary.");
         const F_key& key_ = expr_.cto_token_check(0);
-        expect(bin_fs.includes(key_),
-               "First argument of expression is not operation token: "s
-               + key_);
-        _f = bin_fs[key_];
+        _is_binary = (size_ == 3);
+        if (is_binary()) {
+            expect(bin_fs.includes(key_),
+                   "First argument of binary expression "s
+                   + "is not binary operation token: "s
+                   + key_);
+            _bin_f = bin_fs[key_];
+        }
+        else {
+            expect(un_fs.includes(key_),
+                   "First argument of unary expression "s
+                   + "is not unary operation token: "s
+                   + key_);
+            _un_f = un_fs[key_];
+        }
         set_lazy_args(expr_);
     }
 
@@ -18,7 +31,7 @@ namespace SOS {
     void Expr::Eval<Arg>::Oper::set_lazy_args(const Expr& expr_)
     {
         set_lazy_arg<0>(expr_);
-        set_lazy_arg<1>(expr_);
+        if (is_binary()) set_lazy_arg<1>(expr_);
     }
 
     template <typename Arg>
@@ -81,8 +94,9 @@ namespace SOS {
     template <typename Arg>
     Arg Expr::Eval<Arg>::Oper::operator ()() const
     {
-        return _f((_args_lazy.first)(),
-                  (_args_lazy.second)());
+        if (is_binary()) return _bin_f((_args_lazy.first)(),
+                                       (_args_lazy.second)());
+        return _un_f((_args_lazy.first)());
     }
 
     template <typename Arg>

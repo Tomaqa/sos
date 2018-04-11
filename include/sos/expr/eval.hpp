@@ -57,12 +57,14 @@ namespace SOS {
         using Oper_ptr = shared_ptr<Oper>;
         using Oper_link = Oper*;
 
+        using Un_f = function<Arg(Arg)>;
         using Bin_f = function<Arg(Arg, Arg)>;
         using F_key = const string;
         template <typename F> using F_pair = pair<F_key, F>;
         template <typename F> using F_map =
             Const_map<typename F_pair<F>::first_type,
                       typename F_pair<F>::second_type>;
+        static const F_map<Un_f> un_fs;
         static const F_map<Bin_f> bin_fs;
 
         Param_keys_ptr& param_keys_ptr();

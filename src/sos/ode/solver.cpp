@@ -73,10 +73,6 @@ namespace SOS {
             _odes_spec.reserve(expr.size());
             for (auto& eptr : expr) {
                 const Expr& espec = Expr::cptr_to_expr(eptr);
-                expect(espec.is_deep(),
-                       "Expected expressions "s
-                       + "with specifications of dt variants, "
-                       + "not tokens.");
                 Ode_spec ospec(move(espec.transform_to_exprs()));
                 check_ode_spec(ospec);
                 _odes_spec.emplace_back(move(ospec));
@@ -98,8 +94,6 @@ namespace SOS {
 
         Solver::Param_keys Solver::parse_param_keys(const Expr& expr)
         {
-            expect(expr.is_flat(),
-                   "Expected tokens of parameter keys.");
             return move(expr.transform_to_tokens());
         }
 
@@ -374,10 +368,7 @@ namespace SOS {
                    "Expected two expressions of chosen dt variants "s
                    + "and context(s) for ODEs.");
 
-            Expr ids_expr(expr.cto_expr(0));
-            expect(ids_expr.is_flat(),
-                   "Expected tokens with chosen dt indexes.");
-            Dt_ids dt_ids_(ids_expr.transform_to_args<Dt_id>());
+            Dt_ids dt_ids_(expr.cto_expr(0).transform_to_args<Dt_id>());
 
             Expr ctx_expr(expr.cto_expr(1));
             expect(ctx_expr.is_deep(),

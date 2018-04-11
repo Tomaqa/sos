@@ -40,7 +40,7 @@ namespace SOS {
     template <typename Arg>
     bool Expr::has_values() const
     {
-        // ! 'is_flat()' is assumed to be true
+        if (!is_flat()) return false;
         return std::all_of(cbegin(), cend(),
                            bind(&Expr_token::is_value<Arg>,
                                 bind(&Expr::cptr_to_etoken, _1))
@@ -50,7 +50,6 @@ namespace SOS {
     template <typename Arg>
     Expr::Elems<Arg> Expr::transform_to_args() const
     {
-        // ! 'is_flat()' is assumed to be true
         expect(has_values<Arg>(), "Elements are not of demanded type.");
         Elems<Arg> elems;
         elems.reserve(size());

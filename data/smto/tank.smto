@@ -7,7 +7,6 @@
 ;; `on' stands for inflow mode
 ;; Additional invariants are reasonable:
 ;; `y >= 0 & y <= tank_volume'
-;; `inflow > outflow' ?
 
 
 ;;; Constants
@@ -28,7 +27,9 @@
 
 (define-fun delta () Real 1.0)
 
-(define-fun T () Real 1.0)
+(define-fun T () Real 0.35)
+
+(assert (> inflow outflow))
 
 ;;; Declarations
 

@@ -136,7 +136,7 @@ namespace SOS {
         template <typename Un_f> void for_each_expr(Un_f f);
 
         Expr& simplify() noexcept;
-        Expr& to_binary(const Token& neutral = "0");
+        Expr& to_binary();
         bool is_flat() const;
         bool is_deep() const;
         template <typename Arg> bool has_values() const;
@@ -164,7 +164,6 @@ namespace SOS {
         Expr& simplify_rec() noexcept;
 
         Places _places;
-        // ? reimplement to 'Flag's ?
         bool _is_simplified{false};
         bool _is_binary{false};
         bool _is_flatten{false};

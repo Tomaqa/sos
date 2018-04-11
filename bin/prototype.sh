@@ -1,7 +1,8 @@
 #!/bin/bash
 
-SMT_SOLVER=(cvc4 -L smt2 --incremental)
-# SMT_SOLVER=(z3 -smt2 -in)
+# SMT_SOLVER=(cvc4 -L smt2 -i)
+SMT_SOLVER=(z3 -smt2 -in)
+# SMT_SOLVER=(~"/Data/Software/opensmt2/opensmt")
 
 ODE_SOLVER=(bin/euler_app)
 
@@ -235,7 +236,8 @@ function do_step {
                         return $?
                     else
                         printf -- "Not satisfiable!\n"
-                        append_smt "(get-proof)" "(exit)"
+                        # append_smt "(get-proof)" "(exit)"
+                        append_smt "(exit)"
                         cat <&4
                         return 2
                     fi;;
@@ -255,8 +257,8 @@ PIDS=()
 mkfifo -m 600 "$SMT_IFIFO"
 mkfifo -m 600 "$SMT_OFIFO"
 
-# "${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
-"${SMT_SOLVER[@]}" <"$SMT_IFIFO" >"$SMT_OFIFO" 2>/dev/null &
+"${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
+# "${SMT_SOLVER[@]}" <"$SMT_IFIFO" >"$SMT_OFIFO" 2>/dev/null &
 # exec 3>"$SMT_IFIFO"
 exec 3> >(tee smt_log >"$SMT_IFIFO")
 exec 4<"$SMT_OFIFO"

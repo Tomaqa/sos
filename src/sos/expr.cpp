@@ -368,18 +368,14 @@ namespace SOS {
         return simplify_top();
     }
 
-    Expr& Expr::to_binary(const Token& neutral)
+    Expr& Expr::to_binary()
     {
         if (_is_binary) return *this;
         expect(size() > 1, "Expression has not at least 2 arguments.");
         expect(cfront()->is_etoken(),
                "First argument of each expression should be single token.");
         _is_binary = true;
-        if (size() == 2) {
-            add_new_place(Expr_token(neutral));
-            std::swap(places()[1], places()[2]);
-        }
-        else if (size() > 3) {
+        if (size() > 3) {
             Expr subexpr{cfront()->clone()};
             for (auto&& it = begin()+2, eit = end(); it != eit; ++it) {
                 subexpr.add_place_ptr(move(*it));
@@ -423,7 +419,7 @@ namespace SOS {
 
     Expr::Tokens Expr::transform_to_tokens() const
     {
-        // ! is_flat is expected to be true
+        expect(is_flat(), "Expression dous not contain only tokens.");
         Tokens tokens;
         tokens.reserve(size());
         std::transform(cbegin(), cend(),
@@ -434,7 +430,7 @@ namespace SOS {
 
     Expr::Exprs Expr::transform_to_exprs() const
     {
-        // ! is_deep is expected to be true
+        expect(is_deep(), "Expression dous not contain only subexpressions.");
         Exprs exprs;
         exprs.reserve(size());
         std::transform(cbegin(), cend(),

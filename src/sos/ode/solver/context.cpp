@@ -31,10 +31,7 @@ namespace SOS {
                    && t_subexpr.cto_etoken(1).get_value_check<Real>(t_end()),
                    "Invalid values of time bounds.");
 
-            const Expr& x_subexpr = expr.cto_expr(1);
-            expect(x_subexpr.is_flat(),
-                   "Tokens with initial values expected.");
-            x_init() = move(x_subexpr.transform_to_args<Real>());
+            x_init() = move(expr.cto_expr(1).transform_to_args<Real>());
 
             check_values();
         }

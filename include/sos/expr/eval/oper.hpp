@@ -33,6 +33,8 @@ namespace SOS {
         Param_keys::iterator find_param_key(const Param_key& key_) const;
         Param_keys::iterator set_param_key(const Param_key& key_) const;
     private:
+        bool is_binary() const                          { return _is_binary; }
+
         void set_lazy_args(const Expr& expr_);
         template <int idx> void set_lazy_arg(const Expr& expr_);
         template <int idx> Arg_lazy get_arg_lazy(const Expr& expr_);
@@ -47,7 +49,9 @@ namespace SOS {
         //   - if both arguments are known, whole operation can be simplified
         Param_keys_link _param_keys_l;
         Param_values_link _param_values_l;
-        Bin_f _f;
+        Un_f _un_f;
+        Bin_f _bin_f;
+        bool _is_binary;
         Args_lazy _args_lazy;
         Oper_ptrs _oper_ptrs;
     };
