@@ -25,9 +25,15 @@ namespace SOS {
 
         string smt_input() const;
     protected:
+        using Param_key = Expr::Token;
+        using Dt_key = Param_key;
+        using Dt_spec = Expr;
+        using Ode_key = Dt_key;
+
         static constexpr const char* smt_init_cmds
             = "(set-option :print-success false)\n"
               "(set-option :produce-models true)\n"
+              // "(set-option :produce-proofs true)\n"
               "(set-logic QF_UFNRA)\n"
               "(define-sort Dt () Real)\n";
 
@@ -37,27 +43,25 @@ namespace SOS {
         void process_declare_ode(Expr&& expr);
         void process_define_dt(Expr&& expr);
         void process_define_ode_step(Expr&& expr);
-        void process_assert(Expr&& expr);
-        void process_int_ode(Expr&& expr);
+        void process_assert(Expr& expr);
+        void process_int_ode(Expr& expr);
+
+        static Expr::Token int_ode_identifier(const Ode_key& ode_key_);
     private:
-        using Param_key = Expr::Token;
         using Param_keys = vector<Param_key>;
-        using Dt_key = Param_key;
-        using Dt_spec = Expr;
-        using Ode_key = Dt_key;
         using Ode_spec = map<Dt_key, Dt_spec>;
-        using Ode = pair<Ode_spec, Param_keys>;
+        // using Ode = pair<Ode_spec, Param_keys>;
+        using Ode = tuple<Ode_spec, Param_keys, int>;
         using Odes_spec = map<Ode_key, Ode>;
 
         using Dt_keys_map = map<Dt_key, Ode_key>;
-        // using Dt_key_value = pair<Ode_key, Ode_spec::iterator>;
-        // using Dt_keys_map = map<Dt_key, Dt_key_value>;
 
         using Smt_exprs = Expr::Exprs;
 
         const Odes_spec& codes_spec() const             { return _odes_spec; }
         Odes_spec& odes_spec()                          { return _odes_spec; }
         bool has_ode_key(const Ode_key& ode_key_) const;
+        void check_has_ode_key(const Ode_key& ode_key_) const;
         int ode_key_idx(const Ode_key& ode_key_) const;
         const Ode_spec& code_spec(const Ode_key& ode_key_) const;
         Ode_spec& ode_spec(const Ode_key& ode_key_);
@@ -65,9 +69,9 @@ namespace SOS {
         const Dt_keys_map& cdt_keys_map() const       { return _dt_keys_map; }
         Dt_keys_map& dt_keys_map()                    { return _dt_keys_map; }
         bool has_dt_key(const Dt_key& dt_key_) const;
+        void check_has_dt_key(const Dt_key& dt_key_) const;
         int dt_key_idx(const Dt_key& dt_key_) const;
         const Ode_key& code_key(const Dt_key& dt_key_) const;
-        // const Ode_spec::iterator& code_spec_it(const Dt_key& dt_key_) const;
 
         const Param_keys& cparam_keys(const Ode_key& ode_key_) const;
         Param_keys& param_keys(const Ode_key& ode_key_);
@@ -79,9 +83,13 @@ namespace SOS {
         Smt_exprs& smt_exprs()                          { return _smt_exprs; }
         void add_smt_expr(Expr&& expr);
 
+        int csteps(const Ode_key& ode_key_) const;
+        int& steps(const Ode_key& ode_key_);
+
         Odes_spec _odes_spec;
         Dt_keys_map _dt_keys_map;
         Smt_exprs _smt_exprs;
+        int _steps{0};
         Time _ode_step;
         bool _ode_step_set{false};
     };

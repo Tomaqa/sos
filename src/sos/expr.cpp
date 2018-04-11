@@ -62,7 +62,7 @@ namespace SOS {
           _is_binary(rhs._is_binary),
           _is_flatten(rhs._is_flatten)
     {
-        _places.reserve(rhs.size());
+        places().reserve(rhs.size());
         for (const auto& e : rhs) {
             add_place_ptr(e->clone());
         }
@@ -145,38 +145,38 @@ namespace SOS {
 
     const Expr_place::Expr_place_ptr& Expr::operator [](int idx) const
     {
-        return _places[idx];
+        return cplaces()[idx];
     }
 
     Expr_place::Expr_place_ptr& Expr::operator [](int idx)
     {
-        return _places[idx];
+        return places()[idx];
     }
 
     const Expr_place::Expr_place_ptr& Expr::cfront() const
     {
-        return _places.front();
+        return cplaces().front();
     }
 
     const Expr_place::Expr_place_ptr& Expr::cback() const
     {
-        return _places.back();
+        return cplaces().back();
     }
 
     Expr_place::Expr_place_ptr& Expr::front()
     {
-        return _places.front();
+        return places().front();
     }
 
     Expr_place::Expr_place_ptr& Expr::back()
     {
-        return _places.back();
+        return places().back();
     }
 
     template <typename T>
     void Expr::add_place_ptr(T&& place_ptr_)
     {
-        _places.emplace_back(forward<T>(place_ptr_));
+        places().emplace_back(forward<T>(place_ptr_));
     }
 
     template <typename T>
@@ -235,7 +235,7 @@ namespace SOS {
     Expr& Expr::simplify_top() noexcept
     {
         if (size() == 1 && !cfront()->is_token()) {
-            _places = move(to_expr(0)._places);
+            places() = move(to_expr(0).places());
         }
         return *this;
     }
@@ -262,15 +262,15 @@ namespace SOS {
         _is_binary = true;
         if (size() == 2) {
             add_new_place(Expr_token(neutral));
-            std::swap(_places[1], _places[2]);
+            std::swap(places()[1], places()[2]);
         }
         else if (size() > 3) {
             Expr subexpr{cfront()->clone()};
             for (auto&& it = begin()+2, eit = end(); it != eit; ++it) {
                 subexpr.add_place_ptr(move(*it));
             }
-            _places.erase(begin()+3, end());
-            _places[2] = new_place(move(subexpr.to_binary()));
+            places().erase(begin()+3, end());
+            places()[2] = new_place(move(subexpr.to_binary()));
         }
         for (auto& e : *this) {
             if (e->is_token()) continue;
@@ -295,17 +295,17 @@ namespace SOS {
     {
         if (_is_flatten) return *this;
         _is_flatten = true;
-        Places places;
-        places.reserve(size()*2);
-        for (auto& e : _places) {
+        Places places_;
+        places_.reserve(size()*2);
+        for (auto& e : places()) {
             if (e->is_token()) {
-                places.emplace_back(move(e));
+                places_.emplace_back(move(e));
                 continue;
             }
             auto& subexpr = ptr_to_expr(e).flatten();
-            move(subexpr.begin(), subexpr.end(), std::back_inserter(places));
+            move(subexpr.begin(), subexpr.end(), std::back_inserter(places_));
         }
-        _places = move(places);
+        places() = move(places_);
         return *this;
     }
 

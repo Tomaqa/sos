@@ -41,6 +41,7 @@ namespace SOS {
         Expr_token(const Token& token);
 
         const Token& ctoken() const                         { return _token; }
+        Token& token()                                      { return _token; }
         static const Token& check_token(const Token& token);
         static bool valid_token(const Token& token);
 
@@ -61,6 +62,7 @@ namespace SOS {
         template <typename Arg> using Elems = vector<Arg>;
         using Tokens = Elems<Token>;
         using Exprs = Elems<Expr>;
+        using Places = Elems<Expr_place_ptr>;
 
         Expr()                                                      = default;
         virtual ~Expr()                                             = default;
@@ -75,7 +77,10 @@ namespace SOS {
         virtual bool is_token() const noexcept override      { return false; }
         virtual explicit operator string () const noexcept override;
 
-        size_t size() const noexcept                { return _places.size(); }
+        const Places& cplaces() const                      { return _places; }
+        // !
+        Places& places()                                   { return _places; }
+        size_t size() const noexcept              { return cplaces().size(); }
         bool empty() const noexcept                    { return size() == 0; }
 
         const Expr_place_ptr& operator [](int idx) const;
@@ -84,18 +89,24 @@ namespace SOS {
         const Expr_place_ptr& cback() const;
         Expr_place_ptr& front();
         Expr_place_ptr& back();
-        const Expr_token& cto_token(int idx) const;
-        const Expr& cto_expr(int idx) const;
         static const Expr_token&
             cptr_to_token(const Expr_place_ptr& place_ptr);
         static const Expr&
             cptr_to_expr(const Expr_place_ptr& place_ptr);
-        const auto cbegin() const             { return std::cbegin(_places); }
-        const auto cend() const                 { return std::cend(_places); }
-        const auto begin() const               { return std::begin(_places); }
-        const auto end() const                   { return std::end(_places); }
-        auto begin()                           { return std::begin(_places); }
-        auto end()                               { return std::end(_places); }
+        static Expr_token& ptr_to_token(Expr_place_ptr& place_ptr);
+        static Expr& ptr_to_expr(Expr_place_ptr& place_ptr);
+        const Expr_token& cto_token(int idx) const;
+        const Expr& cto_expr(int idx) const;
+        Expr_token& to_token(int idx);
+        Expr& to_expr(int idx);
+        const auto cbegin() const           { return std::cbegin(cplaces()); }
+        const auto cend() const               { return std::cend(cplaces()); }
+        const auto begin() const             { return std::begin(cplaces()); }
+        const auto end() const                 { return std::end(cplaces()); }
+        auto begin()                          { return std::begin(places()); }
+        auto end()                              { return std::end(places()); }
+
+        template <typename T> void add_new_place(T&& place_);
 
         Expr& simplify() noexcept;
         Expr& to_binary(const Token& neutral = "0");
@@ -115,18 +126,10 @@ namespace SOS {
             get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_,
                      typename Eval<Arg>::Param_values_ptr param_values_ptr_);
     protected:
-        using Places = Elems<Expr_place_ptr>;
-
         Expr(istringstream& iss, unsigned depth = 0);
         Expr(istringstream&& iss)                              : Expr(iss) { }
 
         template <typename T> void add_place_ptr(T&& place_ptr_);
-        template <typename T> void add_new_place(T&& place_);
-
-        static Expr_token& ptr_to_token(Expr_place_ptr& place_ptr);
-        static Expr& ptr_to_expr(Expr_place_ptr& place_ptr);
-        Expr_token& to_token(int idx);
-        Expr& to_expr(int idx);
     private:
         Expr& simplify_top() noexcept;
         Expr& simplify_rec() noexcept;

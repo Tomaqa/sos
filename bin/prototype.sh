@@ -3,15 +3,13 @@
 SMT_SOLVER=(cvc4 -L smt2 --incremental)
 # SMT_SOLVER=(z3 -smt2 -in)
 
-EVAL_CMD=(bin/eval_app)
-
 ODE_SOLVER=(bin/euler_app)
 
-if [[ -z $1 ]]; then
-    INPUT=`cat`
-else
-    INPUT=`<"$1"`
-fi
+EVAL_CMD=(bin/eval_app)
+
+PARSER_CMD=(bin/parser_app)
+
+INPUT_F="$1"
 
 MIN_STEP=
 MAX_STEP=
@@ -55,7 +53,11 @@ function failure {
 ##############################
 
 function parse_input {
-    append_smt "$INPUT"
+    if [[ -z $INPUT_F ]]; then
+        "${PARSER_CMD[@]}"
+    else
+        "${PARSER_CMD[@]}" "$INPUT_F"
+    fi | append_smt
 
     MIN_STEP=0
     MAX_STEP=9
@@ -64,7 +66,8 @@ function parse_input {
     DT_IDS+=(dx)
     T_ID=t
 
-    append_ode "( ((- 100 x) (-  50 x)) ) (x)"
+    # append_ode "( ((- 100 x) (-  50 x)) ) (x)"
+    append_ode "( ((-  50 x) (- 100 x)) ) (x)"
 }
 
 function append_smt {
@@ -145,12 +148,18 @@ function add_asserts {
     for i in ${!F_IDS[@]}; do
         append_smt <<KONEC
 (assert (=> (and (= ${DT_IDS[$i]}_${1} ${VALUES[${DT_IDS[$i]}_${1}]})
+                 (= ${F_IDS[$i]}_${1} ${VALUES[${F_IDS[$i]}_${1}]})
                  (= ${T_ID}_${1} ${VALUES[${T_ID}_${1}]})
                  (= ${T_ID}_$(($1+1)) ${VALUES[${T_ID}_$(($1+1))]})
-                 (= ${F_IDS[$i]}_${1} ${VALUES[${F_IDS[$i]}_${1}]})
-            ) (= _dx_${1}_int ${ODE_VALUES[$i]})
+            ) (= (int-ode_x ${1}) ${ODE_VALUES[$i]})
 ))
 KONEC
+# (assert (=> (and (= ${DT_IDS[$i]}_${1} ${VALUES[${DT_IDS[$i]}_${1}]})
+#                  (= ${T_ID}_${1} ${VALUES[${T_ID}_${1}]})
+#                  (= ${T_ID}_$(($1+1)) ${VALUES[${T_ID}_$(($1+1))]})
+#                  (= ${F_IDS[$i]}_${1} ${VALUES[${F_IDS[$i]}_${1}]})
+#             ) (= _dx_${1}_int ${ODE_VALUES[$i]})
+# ))
     done
 }
 
@@ -186,6 +195,8 @@ PIDS=()
 
 mkfifo -m 600 "$SMT_IFIFO"
 mkfifo -m 600 "$SMT_OFIFO"
+
+echo "${SMT_SOLVER[@]}"
 
 # "${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
 "${SMT_SOLVER[@]}" <"$SMT_IFIFO" >"$SMT_OFIFO" 2>/dev/null &
