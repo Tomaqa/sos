@@ -16,13 +16,9 @@ MAX_STEP=
 
 T_ID=t
 F_IDS=()
-# ODE_SPECS=()
-# ODE_KEYS=()
-# DT_IDS=()
 
 declare -A VALUES
 ODE_VALUES=()
-# declare -A ODE_VALUES
 
 SMT_IFIFO=`mktemp -u`
 SMT_OFIFO=`mktemp -u`
@@ -63,6 +59,7 @@ function set_links {
     declare -gn lINIT_IDS=INIT_IDS_${1}
     declare -gn lT_INIT_IDS=T_INIT_IDS_${1}
     declare -gn lT_END_IDS=T_END_IDS_${1}
+    declare -gn lPARAM_IDS=PARAM_IDS_${1}
 }
 
 function parse_input {
@@ -74,13 +71,7 @@ function parse_input {
     fi) 2>"$tmp_f" | append_smt
 
     while read fid; do
-        [[ -z $fid ]] && break;
-        # F_IDS+=($fid)
-        # read ospec
-        # ODE_SPECS+=("($ospec)")
-        # read keys
-        # ODE_KEYS+=("($keys)")
-        # read MAX_STEP
+        [[ -z $fid ]] && continue;
 
         F_IDS+=($fid)
         set_links $fid
@@ -99,21 +90,15 @@ function parse_input {
             lINIT_IDS+=(${const_ids[1]})
             lT_INIT_IDS+=(${const_ids[2]})
             lT_END_IDS+=(${const_ids[3]})
+            lPARAM_IDS+=("${const_ids[*]:4}")
         done
     done <"$tmp_f"
     rm -f "$tmp_f"
 
-    # local str="( "
-    # for ospec in "${ODE_SPECS[@]}"; do
-    #     str+="$ospec"
-    # done
-    # str+=" )( "
-    # for keys in "${ODE_KEYS[@]}"; do
-    #     str+="$keys"
-    # done
-    # str+=" )"
-    # append_ode "$str"
+    init_ode
+}
 
+function init_ode {
     local str="( "
     for fid in ${F_IDS[@]}; do
         set_links $fid
@@ -130,23 +115,6 @@ function parse_input {
     done
     str+=" )"
     append_ode "$str"
-
-    # MIN_STEP=0
-    # MAX_STEP=9
-
-    # F_IDS+=(x)
-    # DT_IDS+=(dx)
-
-    # append_ode "( ((-  50 x) (- 100 x)) ) (x)"
-
-    # MIN_STEP=0
-    # MAX_STEP=19
-
-    # # F_IDS+=(y tau)
-    # F_IDS+=(y tau_1)
-    # DT_IDS+=(dy dtau)
-
-    # append_ode "( ((- 40 20) (- 20)) ((+ 1) (+ 0)) ) ((y) (tau))"
 }
 
 function append_smt {
@@ -200,15 +168,11 @@ function get_smt_values {
         return 1
     fi
 
-    # local args=(${T_ID}_${1} ${T_ID}_$(($1+1)) \
-    #             ${F_IDS[@]/%/_$1} ${DT_IDS[@]/%/_$1})
-    # for var in ${args[@]}; do
-    #     get_smt_value $var
-    # done
     for fid in ${F_IDS[@]}; do
         set_links $fid
         local args=(${lDT_IDS[$1]} ${lINIT_IDS[$1]} \
                     ${lT_INIT_IDS[$1]} ${lT_END_IDS[$1]})
+        args+=(${lPARAM_IDS[$1]})
         for var in ${args[@]}; do
             get_smt_value $var
         done
@@ -217,21 +181,6 @@ function get_smt_values {
 
 # 1 - step
 function compute_odes {
-    # local str_out="("
-    # for dt_id in ${DT_IDS[@]}; do
-    #     str_out+="${VALUES[${dt_id}_${1}]} "
-    # done
-    # str_out+=")  ("
-    # for i in ${!F_IDS[@]}; do
-    #     str_out+=" ( "
-    #     str_out+="(${VALUES[${T_ID}_${1}]} ${VALUES[${T_ID}_$(($1+1))]})"
-    #     str_out+="(${VALUES[${F_IDS[$i]}_${1}]})"
-    #     str_out+=" ) "
-    # done
-    # str_out+=")"
-    # append_ode "${str_out}"
-    # read values <&6
-    # ODE_VALUES=($values)
     local str_out="("
     for fid in ${F_IDS[@]}; do
         set_links $fid
@@ -243,8 +192,12 @@ function compute_odes {
         str_out+=" ( "
         str_out+="(${VALUES[${lT_INIT_IDS[$1]}]}"
         str_out+=" ${VALUES[${lT_END_IDS[$1]}]})"
-        str_out+="(${VALUES[${lINIT_IDS[$1]}]})"
-        str_out+=" ) "
+        str_out+="(${VALUES[${lINIT_IDS[$1]}]}"
+        local params=(${lPARAM_IDS[$1]})
+        for p in ${params[@]}; do
+            str_out+=" ${VALUES[$p]}"
+        done
+        str_out+=") ) "
     done
     str_out+=")"
     append_ode "${str_out}"
@@ -254,16 +207,6 @@ function compute_odes {
 
 # 1 - step
 function add_asserts {
-#     for i in ${!F_IDS[@]}; do
-#         append_smt <<KONEC
-# (assert (=> (and (= ${DT_IDS[$i]}_${1} ${VALUES[${DT_IDS[$i]}_${1}]})
-#                  (= ${F_IDS[$i]}_${1} ${VALUES[${F_IDS[$i]}_${1}]})
-#                  (= ${T_ID}_${1} ${VALUES[${T_ID}_${1}]})
-#                  (= ${T_ID}_$(($1+1)) ${VALUES[${T_ID}_$(($1+1))]})
-#             ) (= (int-ode_${F_IDS[$i]} ${1}) ${ODE_VALUES[$i]})
-# ))
-# KONEC
-#     done
     for i in ${!F_IDS[@]}; do
         fid=${F_IDS[$i]}
         set_links $fid
@@ -275,6 +218,7 @@ function add_asserts {
             ) (= (int-ode_${fid} ${1}) ${ODE_VALUES[$i]})
 ))
 KONEC
+                ## !!?
     done
 }
 
@@ -335,27 +279,6 @@ done
 append_smt "(check-sat)"
 read <&4
 
-# echo
-# for var in F_IDS DT_IDS; do
-#     declare -n var_l=$var
-#     for i in ${!F_IDS[@]}; do
-#         fid=${var_l[$i]}
-#         for (( s=$MIN_STEP; $s < $MAX_STEP; s++ )); do
-#             id=${fid}_${s}
-#             get_smt_value ${id}
-#             printf -- "%s = %.3f\n" ${id} ${VALUES[${id}]}
-#         done
-#     done
-#     echo
-# done
-
-# echo
-# for fid in ${F_IDS[@]}; do
-#     id=${fid}_${s}
-#     get_smt_value ${id}
-#     printf -- "%s = %.3f\n" ${id} ${VALUES[${id}]}
-# done
-
 echo
 for fid in ${F_IDS[@]}; do
     set_links $fid
@@ -370,8 +293,13 @@ for fid in ${F_IDS[@]}; do
     done
 done
 
+echo
+for i in ${!F_IDS[@]}; do
+    fid=${F_IDS[$i]}
+    printf -- "%s = %.3f\n" $fid ${ODE_VALUES[$i]}
+done
+
 append_smt "(exit)"
-# append_smt "(get-model)" "(exit)"
 cat <&4
 
 exit 0

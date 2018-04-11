@@ -36,7 +36,6 @@ namespace SOS {
                 cerr << t << endl;
             }
             cerr << endl;
-            cerr << endl;
         }
 
         cout << _parser.csmt_input() << endl;
