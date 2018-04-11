@@ -80,7 +80,7 @@
 
 (assert (and (= x_1 (int-ode x dx_0 (x_0 t_0 t_1) ()))
              (= x_2 (int-ode x dx_1 (x_1 t_1 t_2) ()))
-             (= x_3 (int-ode x dx_1 (x_1 t_1 t_3) ()))
+             (= x_3 (int-ode x dx_2 (x_2 t_2 t_3) ()))
              (= x_4 (int-ode x dx_3 (x_3 t_3 t_4) ()))
              (= x_5 (int-ode x dx_4 (x_4 t_4 t_5) ()))
              (= x_6 (int-ode x dx_5 (x_5 t_5 t_6) ()))

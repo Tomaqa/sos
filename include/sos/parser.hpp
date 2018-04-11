@@ -75,24 +75,23 @@ namespace SOS {
         void check_has_dt_key(const Dt_key& dt_key_) const;
         int dt_key_idx(const Dt_key& dt_key_) const;
         const Ode_key& code_key(const Dt_key& dt_key_) const;
+        void add_dt_key(const Ode_key& ode_key_, Dt_key dt_key_);
+        void set_dt_spec(const Dt_key& dt_key_, Dt_spec dt_spec_);
 
         const Param_keys& cparam_keys(const Ode_key& ode_key_) const;
         Param_keys& param_keys(const Ode_key& ode_key_);
 
-        void add_dt_key(const Ode_key& ode_key_, Dt_key dt_key_);
-        void set_dt_spec(const Dt_key& dt_key_, Dt_spec dt_spec_);
+        const Const_ids& cconst_ids(const Ode_key& ode_key_) const;
+        Const_ids& const_ids(const Ode_key& ode_key_);
+        int csteps(const Ode_key& ode_key_) const;
+        void add_const_ids_row(const Ode_key& ode_key_,
+                               Const_id&& dt_const, Const_id&& init_const,
+                               pair<Const_id, Const_id>&& init_t_consts,
+                               vector<Const_id>&& param_consts);
 
         const Smt_exprs& csmt_exprs() const             { return _smt_exprs; }
         Smt_exprs& smt_exprs()                          { return _smt_exprs; }
         void add_smt_expr(Expr&& expr);
-
-        const Const_ids& const_ids(const Ode_key& ode_key_) const;
-        Const_ids& const_ids(const Ode_key& ode_key_);
-        int csteps(const Ode_key& ode_key_) const;
-
-        void add_const_ids_row(Const_id&& dt_const, Const_id&& init_const,
-                               pair<Const_id, Const_id>&& init_t_consts,
-                               vector<Const_id>&& param_consts);
 
         Odes_map _odes_map;
         Dt_keys_map _dt_keys_map;

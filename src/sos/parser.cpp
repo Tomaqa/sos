@@ -184,9 +184,9 @@ namespace SOS {
                + to_string(param_expr));
         Param_keys param_consts = move(param_expr.transform_to_tokens());
 
-        // !
-        add_const_ids_row(move(dt_const), move(init_const),
-                          move(init_t_consts), {});
+        add_const_ids_row(ode_key_,
+                          move(dt_const), move(init_const),
+                          move(init_t_consts), move(param_consts));
 
         expr.erase_places(1);
         expr.to_token(0) += "_" + ode_key_;
@@ -280,16 +280,30 @@ namespace SOS {
         smt_exprs().emplace_back(move(expr));
     }
 
-    int Parser::csteps(const Ode_key& ode_key_) const
+    const Parser::Const_ids& Parser::cconst_ids(const Ode_key& ode_key_) const
     {
-        return get<2>(codes_map().at(ode_key_)).size();
+        return get<2>(codes_map().at(ode_key_));
     }
 
-    void Parser::add_const_ids_row(Const_id&& dt_const, Const_id&& init_const,
+    Parser::Const_ids& Parser::const_ids(const Ode_key& ode_key_)
+    {
+        return get<2>(odes_map()[ode_key_]);
+    }
+
+    int Parser::csteps(const Ode_key& ode_key_) const
+    {
+        return cconst_ids(ode_key_).size();
+    }
+
+    void Parser::add_const_ids_row(const Ode_key& ode_key_,
+                                   Const_id&& dt_const, Const_id&& init_const,
                                    pair<Const_id, Const_id>&& init_t_consts,
                                    vector<Const_id>&& param_consts)
     {
-        // !
+        const_ids(ode_key_).emplace_back(make_tuple(move(dt_const),
+                                            move(init_const),
+                                            move(init_t_consts),
+                                            move(param_consts) ));
     }
 
     string Parser::csmt_input() const

@@ -20,7 +20,7 @@ namespace SOS {
             const Dts_spec_map& ode_spec_ = get<0>(odes_p.second);
             const Param_keys& param_keys_ = get<1>(odes_p.second);
             const Const_ids& const_ids_ = get<2>(odes_p.second);
-            const int steps_ = const_ids_.size();
+            const int consts_size = const_ids_.size();
             cerr << ode_key_ << endl;
             for (auto& ode_p : ode_spec_) {
                 cerr << ode_p.first << " ";
@@ -31,7 +31,11 @@ namespace SOS {
             }
             cerr << endl;
             cerr << param_keys_ << endl;
-            cerr << steps_ << endl;
+            cerr << consts_size << endl;
+            for (auto& t : const_ids_) {
+                cerr << t << endl;
+            }
+            cerr << endl;
             cerr << endl;
         }
 
