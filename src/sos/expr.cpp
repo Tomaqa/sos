@@ -1,5 +1,7 @@
 #include "expr.hpp"
 
+#include <iostream>
+
 namespace SOS {
     template <typename T>
     Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)
@@ -75,19 +77,60 @@ namespace SOS {
         return *this;
     }
 
+    Expr::Expr(initializer_list<Expr_place_ptr> list)
+        : Expr()
+    {
+        for (const auto& e : list) {
+            add_place_ptr(e->clone());
+        }
+    }
+
     Expr::Expr(const string& input)
         : Expr(istringstream(input))
     { }
 
-    Expr::Expr(istringstream& iss, unsigned depth)
+    Expr::Expr(istream& is)
         : Expr()
+    {
+        streampos last_pos = is.tellg();
+        try {
+            parse(is, last_pos, 0);
+        }
+        catch (const Error& err) {
+            is.clear();
+            auto size_ = is.tellg() - last_pos;
+            if (size_ <= 0) throw;
+            is.seekg(last_pos);
+            string str;
+            str.reserve(size_);
+            for (decltype(size_) i = 0; i < size_; i++) {
+                str += (char)is.get();
+            }
+            throw "At '("s + str
+                  + "':\n" + err;
+        }
+        simplify_top();
+    }
+
+    Expr::Expr(istream&& is)
+        : Expr(is)
+    { }
+
+    Expr::Expr(istream& is, streampos& last_pos, unsigned depth)
+        : Expr()
+    {
+        parse(is, last_pos, depth);
+    }
+
+    void Expr::parse(istream& is, streampos& last_pos, unsigned depth)
     {
         char c;
         string str;
-        ostringstream oss;
+        ostringstream oss_buf;
+
         bool closed = false;
-        iss >> std::noskipws;
-        while (iss >> c) {
+        is >> std::noskipws;
+        while (is >> c) {
             if (isspace(c)) continue;
             if (!isprint(c)) {
                 expect(c == 0,
@@ -95,42 +138,31 @@ namespace SOS {
                        + to_string((int)c) + ")");
             }
             if (c == '(') {
-                add_new_place(Expr(iss, depth+1));
+                last_pos = is.tellg();
+                add_new_place(Expr(is, last_pos, depth+1));
                 continue;
             }
             if (c == ')') {
-                if (depth > 0) {
-                    closed = true;
-                    break;
-                }
                 expect(depth > 0,
-                       "Unexpected closing brace in top level expression.");
+                       "Unexpected closing brace "s
+                       + "in top level expression.");
                 closed = true;
                 break;
             }
-            oss << c;
-            char c2 = iss.peek();
+            oss_buf << c;
+            char c2 = is.peek();
             if (isspace(c2) || c2 == '(') {
-                add_new_place(Expr_token(oss.str()));
-                oss.str("");
+                add_new_place(Expr_token(oss_buf.str()));
+                oss_buf.str("");
             }
         }
 
         expect(closed || depth == 0,
-               "Closing brace at level "s + to_string(depth) + " not found.");
+               "Closing brace at level "s
+               + to_string(depth) + " not found.");
 
-        if (!oss.str().empty()) {
-            add_new_place(Expr_token(oss.str()));
-        }
-
-        if (depth == 0) simplify_top();
-    }
-
-    Expr::Expr(initializer_list<Expr_place_ptr> list)
-        : Expr()
-    {
-        for (const auto& e : list) {
-            add_place_ptr(e->clone());
+        if (!oss_buf.str().empty()) {
+            add_new_place(Expr_token(oss_buf.str()));
         }
     }
 

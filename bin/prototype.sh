@@ -64,12 +64,20 @@ function set_links {
 }
 
 function parse_input {
-    local tmp_f=`mktemp`
-    (if [[ -z $INPUT_F ]]; then
-        "${PARSER_CMD[@]}"
+    local tmp_1_f=`mktemp`
+    local tmp_2_f=`mktemp`
+    if [[ -z $INPUT_F ]]; then
+        "${PARSER_CMD[@]}" >"$tmp_1_f" 2>"$tmp_2_f"
     else
-        "${PARSER_CMD[@]}" "$INPUT_F"
-    fi) 2>"$tmp_f" | append_smt
+        "${PARSER_CMD[@]}" "$INPUT_F" >"$tmp_1_f" 2>"$tmp_2_f"
+    fi
+    (( $? )) && {
+        cat "$tmp_1_f"
+        cat "$tmp_2_f"
+        rm -f "$tmp_1_f" "$tmp_2_f"
+        exit 1
+    }
+    append_smt <"$tmp_1_f"
 
     while read fid; do
         [[ -z $fid ]] && continue;
@@ -93,8 +101,9 @@ function parse_input {
             lT_END_IDS+=(${const_ids[3]})
             lPARAM_IDS+=("${const_ids[*]:4}")
         done
-    done <"$tmp_f"
-    rm -f "$tmp_f"
+    done <"$tmp_2_f"
+
+    rm -f "$tmp_1_f" "$tmp_2_f"
 
     init_ode
 }
@@ -152,6 +161,21 @@ function get_smt_value {
     value="${value%))}"
     value=`get_value <<<"$value"`
     VALUES[$1]=$value
+}
+
+# 1 - step
+function add_smt_conflict {
+    local str=
+    for fid in ${F_IDS[@]}; do
+        set_links $fid
+        str+="
+(= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]})
+(= ${lINIT_IDS[$1]} ${VALUES[${lINIT_IDS[$1]}]})
+(= ${lT_INIT_IDS[$1]} ${VALUES[${lT_INIT_IDS[$1]}]})
+(= ${lT_END_IDS[$1]} ${VALUES[${lT_END_IDS[$1]}]})"
+    done
+    append_smt "(assert (not (and ${str}
+)))"
 }
 
 # 1 - step
@@ -219,7 +243,6 @@ function add_asserts {
             ) (= (int-ode_${fid} ${1}) ${ODE_VALUES[$i]})
 ))
 KONEC
-                ## !!?
     done
 }
 
@@ -232,15 +255,17 @@ function do_step {
     case $ret in
         1) return 1;;
         100)  if (( $s > 0 )); then
-                        do_step $(($s-1))
-                        return $?
-                    else
-                        printf -- "Not satisfiable!\n"
-                        # append_smt "(get-proof)" "(exit)"
-                        append_smt "(exit)"
-                        cat <&4
-                        return 2
-                    fi;;
+                  (( s-- ))
+                  add_smt_conflict $s
+                  do_step $s
+                  return $?
+              else
+                  printf -- "Not satisfiable!\n"
+                  # append_smt "(get-proof)" "(exit)"
+                  append_smt "(exit)"
+                  cat <&4
+                  return 2
+              fi;;
     esac
     compute_odes $s
     add_asserts $s

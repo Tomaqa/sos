@@ -48,7 +48,7 @@ namespace SOS {
     }
 
     void Parser::process_expr(Expr expr)
-    {
+    try {
         const string& cmd = expr.cto_token(0);
         expect(cmd != "int-ode",
                "Unexpected command '"s + cmd + "' "
@@ -69,6 +69,9 @@ namespace SOS {
             process_assert(expr);
         }
         add_smt_expr(move(expr));
+    }
+    catch (const Error& err) {
+        throw "At expression\n"s + to_string(expr) + "\n" + err;
     }
 
     void Parser::process_declare_ode(Expr&& expr)
@@ -122,7 +125,7 @@ namespace SOS {
         // !? check keys
 
         Dt_spec dt_spec_ = expr[3]->is_etoken()
-                         ? Dt_spec("+ 0 "s + expr.cto_token(3))
+                         ? Dt_spec("+ "s + move(expr.cto_token(3)))
                          : move(expr.cto_expr(3)) ;
         set_dt_spec(dt_key_, move(dt_spec_));
 

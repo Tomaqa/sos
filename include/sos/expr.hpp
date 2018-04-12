@@ -72,8 +72,10 @@ namespace SOS {
         Expr& operator =(const Expr& rhs);
         Expr(Expr&& rhs)                                            = default;
         Expr& operator =(Expr&& rhs)                                = default;
-        Expr(const string& input);
         Expr(initializer_list<Expr_place_ptr> list);
+        Expr(const string& input);
+        Expr(istream& is);
+        Expr(istream&& is);
 
         virtual bool is_etoken() const noexcept override     { return false; }
         virtual explicit operator string () const noexcept override;
@@ -153,8 +155,8 @@ namespace SOS {
             get_eval(typename Eval<Arg>::Param_keys_ptr param_keys_ptr_,
                      typename Eval<Arg>::Param_values_ptr param_values_ptr_);
     protected:
-        Expr(istringstream& iss, unsigned depth = 0);
-        Expr(istringstream&& iss)                              : Expr(iss) { }
+        Expr(istream& is, streampos& last_pos, unsigned depth);
+        void parse(istream& is, streampos& last_pos, unsigned depth);
 
         Places& places()                                   { return _places; }
 
