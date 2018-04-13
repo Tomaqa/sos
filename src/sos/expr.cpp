@@ -1,7 +1,5 @@
 #include "expr.hpp"
 
-#include <iostream>
-
 namespace SOS {
     template <typename T>
     Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)

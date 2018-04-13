@@ -1,6 +1,6 @@
 #include "sos.hpp"
 
-#include <iostream>
+#include <istream>
 
 namespace SOS {
     ostream& operator <<(ostream& os, const Error& rhs)

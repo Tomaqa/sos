@@ -2,12 +2,6 @@
 
 #include <sstream>
 
-#include <iostream>
-
-using std::cerr;
-using std::cout;
-using std::endl;
-
 namespace SOS {
     Parser::Parser(istream& is)
         : Parser(Expr(preprocess_input(is)))

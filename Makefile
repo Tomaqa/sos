@@ -148,6 +148,13 @@ build/main/euler_app.o: src/main/euler_app.cpp \
  include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
  include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
  include/sos/ode/solver/run.tpp include/sos/ode/euler.hpp
+build/main/odeint_app.o: src/main/odeint_app.cpp \
+ include/sos/ode/solver/run.hpp include/sos/sos.hpp include/sos/sos.tpp \
+ include/sos/ode/solver.hpp include/sos/util.hpp include/sos/util.tpp \
+ include/sos/ode.hpp include/sos/expr.hpp include/sos/expr.tpp \
+ include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
+ include/sos/ode/solver/run.tpp include/sos/ode/odeint.hpp
 build/main/eval_app.o: src/main/eval_app.cpp \
  include/sos/expr/eval/run.hpp include/sos/sos.hpp include/sos/sos.tpp \
  include/sos/expr/eval.hpp include/sos/expr.hpp include/sos/util.hpp \
@@ -156,8 +163,8 @@ build/main/eval_app.o: src/main/eval_app.cpp \
  include/sos/expr/eval/run.tpp
 build/main/parser_app.o: src/main/parser_app.cpp \
  include/sos/parser/run.hpp include/sos/sos.hpp include/sos/sos.tpp \
- include/sos/parser.hpp include/sos/expr.hpp include/sos/util.hpp \
- include/sos/util.tpp include/sos/expr.tpp
+ include/sos/parser.hpp include/sos/util.hpp include/sos/util.tpp \
+ include/sos/ode.hpp include/sos/expr.hpp include/sos/expr.tpp
 build/sos/sos.o: src/sos/sos.cpp include/sos/sos.hpp include/sos/sos.tpp
 build/sos/expr/eval.o: src/sos/expr/eval.cpp include/sos/expr/eval.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/expr.hpp \
@@ -198,12 +205,13 @@ build/sos/ode/odeint.o: src/sos/ode/odeint.cpp include/sos/ode/odeint.hpp \
  include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
  include/sos/expr/eval/oper.tpp include/sos/ode/solver/context.hpp
 build/sos/parser.o: src/sos/parser.cpp include/sos/parser.hpp \
- include/sos/sos.hpp include/sos/sos.tpp include/sos/expr.hpp \
- include/sos/util.hpp include/sos/util.tpp include/sos/expr.tpp
+ include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
+ include/sos/util.tpp include/sos/ode.hpp include/sos/expr.hpp \
+ include/sos/expr.tpp
 build/sos/parser/run.o: src/sos/parser/run.cpp include/sos/parser/run.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/parser.hpp \
- include/sos/expr.hpp include/sos/util.hpp include/sos/util.tpp \
- include/sos/expr.tpp
+ include/sos/util.hpp include/sos/util.tpp include/sos/ode.hpp \
+ include/sos/expr.hpp include/sos/expr.tpp
 build/sos/expr.o: src/sos/expr.cpp include/sos/expr.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp include/sos/expr.tpp

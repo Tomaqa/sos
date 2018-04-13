@@ -54,6 +54,14 @@ namespace SOS {
         return move(std::none_of(std::begin(cont), std::end(cont), move(f)));
     }
 
+    template <typename Cont, typename OutputIt>
+    OutputIt Util::copy(Cont&& cont, OutputIt d_first)
+    {
+        return move(std::copy(std::begin(forward<Cont>(cont)),
+                              std::end(forward<Cont>(cont)),
+                              move(d_first)));
+    }
+
     template <typename Cont, typename OutputIt, typename Un_f>
     OutputIt Util::transform(Cont&& cont, OutputIt d_first, Un_f f)
     {

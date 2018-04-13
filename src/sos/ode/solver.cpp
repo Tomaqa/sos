@@ -26,13 +26,19 @@ namespace SOS {
         { }
 
         Solver::Solver(const string& input)
-        try
-            : Solver(Expr(input))
+            : Solver(istringstream(input))
+        { }
+
+        Solver::Solver(istream& is)
+        try : Solver(Expr(is))
         { }
         catch (const Error& err) {
-            throw "Invalid format of input ODEs specification\n'"s
-                  + input + "'\n: " + err;
+            throw "Invalid format of input ODEs specification:\n" + err;
         }
+
+        Solver::Solver(istream&& is)
+            : Solver(is)
+        { }
 
         Solver::Solver(const Expr& expr)
         try {
@@ -337,7 +343,8 @@ namespace SOS {
                         const bool has_t = ode_has_param_t(oeval);
                         add_param_t(has_t, ctx, code_eval_id(oeval));
                     });
-            return move(eval_odes(move(dt_ids_), move(contexts_)));
+            return move(crop_result(eval_odes(move(dt_ids_),
+                                              move(contexts_)) ));
         }
 
         State Solver::solve_unif_odes(Dt_ids dt_ids_,
@@ -350,16 +357,33 @@ namespace SOS {
                                                  move(context_)));
         }
 
+        State&& Solver::crop_result(State&& result) const
+        {
+            result.resize(size());
+            return move(result);
+        }
+
         State Solver::solve_unif_odes_wo_check(Dt_ids dt_ids_,
                                                Context context_) const
         {
             add_param_t(has_unif_param_t(), context_);
-            return move(eval_unif_odes(move(dt_ids_), move(context_)));
+            return move(crop_result(eval_unif_odes(move(dt_ids_),
+                                                   move(context_)) ));
         }
 
         State Solver::solve(const string& input) const
         {
             return move(solve(Expr(input)));
+        }
+
+        State Solver::solve(istream& is) const
+        {
+            return move(solve(Expr(is)));
+        }
+
+        State Solver::solve(istream&& is) const
+        {
+            return move(solve(is));
         }
 
         State Solver::solve(const Expr& expr) const
@@ -368,21 +392,22 @@ namespace SOS {
                    "Expected two expressions of chosen dt variants "s
                    + "and context(s) for ODEs.");
 
-            Dt_ids dt_ids_(expr.cto_expr(0).transform_to_args<Dt_id>());
+            Dt_ids dt_ids_(move(expr.cto_expr(0).transform_to_args<Dt_id>()));
 
-            Expr ctx_expr(expr.cto_expr(1));
+            Expr ctx_expr(move(expr.cto_expr(1)));
             expect(ctx_expr.is_deep(),
                    "Expected subexpressions with context(s) for ODEs.");
-            if (ctx_expr.size() == 1) {
-                return move(solve_unif_odes(move(dt_ids_),
-                                            Context(ctx_expr.cto_expr(0))
-                           ));
+            if (is_unified() && ctx_expr.size() == 1) {
+                return move(
+                    solve_unif_odes(move(dt_ids_),
+                                    Context(move(ctx_expr.cto_expr(0)))
+                ));
             }
             Contexts contexts_;
             contexts_.reserve(ctx_expr.size());
             transform(ctx_expr.transform_to_exprs(),
                       std::back_inserter(contexts_),
-                      [](const Expr& e){ return Context(e); });
+                      [](Expr e){ return Context(move(e)); });
             return solve_odes(move(dt_ids_), move(contexts_));
         }
 
@@ -452,21 +477,11 @@ namespace SOS {
                       });
         }
 
-        template
         void Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
-                                         State::iterator dx_it,
-                                         const State& x, Time t) const;
-
-        // ! inefficient!
-        State Solver::eval_unif_odes_step(const Dt_ids& dt_ids_,
-                                          const State& x, Time t) const
+                                         State& dx,
+                                         const State& x, Time t) const
         {
-            State dx;
-            const size_t state_size = x.size();
-            dx.reserve(state_size);
-            eval_unif_odes_step(dt_ids_, std::back_inserter(dx), x, t);
-            if (state_size > size()) dx.emplace_back(Real());
-            return move(dx);
+            eval_unif_odes_step(dt_ids_, std::begin(dx), x, t);
         }
 
         void Solver::eval_ode_step(Ode_id ode_id_, Dt_id dt_id_,

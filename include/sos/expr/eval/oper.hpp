@@ -2,8 +2,6 @@
 
 #include "sos.hpp"
 
-// ! <numeric> accumulate
-
 namespace SOS {
     template <typename Arg>
     class Expr::Eval<Arg>::Oper {

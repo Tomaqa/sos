@@ -42,6 +42,8 @@ namespace SOS {
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
             Solver(Spec spec);
             Solver(const string& input);
+            Solver(istream& is);
+            Solver(istream&& is);
             Solver(const Expr& expr);
 
             size_t size() const noexcept       { return codes_spec().size(); }
@@ -63,6 +65,8 @@ namespace SOS {
             State solve_odes(Dt_ids dt_ids_, Contexts contexts_) const;
             State solve_unif_odes(Dt_ids dt_ids_, Context context_) const;
             State solve(const string& input) const;
+            State solve(istream& is) const;
+            State solve(istream&& is) const;
             State solve(const Expr& expr) const;
 
             explicit operator string () const;
@@ -116,6 +120,7 @@ namespace SOS {
             static Ode_eval create_ode_eval(Ode_spec& ode_spec_,
                                             Param_keys_ptr param_keys_ptr_);
 
+            State&& crop_result(State&& result) const;
             State solve_unif_odes_wo_check(Dt_ids dt_ids_,
                                            Context context_) const;
             virtual Real eval_ode(Ode_id ode_id_, Dt_id dt_id_,
@@ -129,8 +134,9 @@ namespace SOS {
                 void eval_unif_odes_step(const Dt_ids& dt_ids_,
                                          OutputIt dx_it,
                                          const State& x, Time t) const;
-            State eval_unif_odes_step(const Dt_ids& dt_ids_,
-                                      const State& x, Time t) const;
+            void eval_unif_odes_step(const Dt_ids& dt_ids_,
+                                     State& dx,
+                                     const State& x, Time t) const;
             void eval_ode_step(Ode_id ode_id_, Dt_id dt_id_,
                                Real& dx, const State& x, Time t) const;
             Real eval_ode_step(Ode_id ode_id_, Dt_id dt_id_,

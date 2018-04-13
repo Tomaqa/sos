@@ -29,6 +29,7 @@ namespace SOS {
         template <typename T>
         bool apx_equal(const T& a, const T& b)
         {
+            if (a.size() != b.size()) return false;
             return Util::equal(a, std::begin(b),
                                apx_equal<typename T::value_type>);
         }

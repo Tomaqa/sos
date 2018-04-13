@@ -11,32 +11,50 @@ namespace SOS {
                      };
             State x = move(context_.cx_init());
             Real& dx = x[def_dt_id];
-            integrate(f, dx, x, context_.ct_init(), context_.ct_end());
+
+            const Time h = cstep_size();
+            const Time t_init_ = context_.ct_init();
+            const Time t_end_ = t_end(context_.ct_end());
+
+            for (Time t = t_init_; t < t_end_; t += h) {
+                dx += h * f(x, t);
+            }
+
             return dx;
         }
 
         State Euler::eval_unif_odes(Dt_ids&& dt_ids_,
                                     Context&& context_) const
         {
-            auto f = [this, &dt_ids_](const State& x_, Time t_){
-                         return eval_unif_odes_step(dt_ids_, x_, t_);
+            auto f = [this, &dt_ids_](const State& x_, State& dx_, Time t_){
+                         eval_unif_odes_step(dt_ids_, dx_, x_, t_);
+                         // return dx_;
                      };
             State x = move(context_.cx_init());
-            State& dx = x;
-            integrate(f, dx, x, context_.ct_init(), context_.ct_end());
+            // State dx(std::begin(x), std::begin(x)+size());
+            State dx(size());
+
+            const Time h = cstep_size();
+            const Time t_init_ = context_.ct_init();
+            const Time t_end_ = t_end(context_.ct_end());
+
+            for (Time t = t_init_; t < t_end_; t += h) {
+                // dx += h * f(x, t);
+                // dx += h * f(x, dx, t);
+                // dx = dx + h * f(x, t);
+                f(x, dx, t);
+                // dx += h * dx;
+                dx *= h;
+                dx += x;
+                copy(dx, std::begin(x));
+            }
+
             return move(dx);
         }
 
-        template <typename F, typename Ref>
-        void Euler::integrate(F f, Ref& dx, const State& x,
-                              Time t_init_, Time t_end_) const
+        Time Euler::t_end(const Time t_end_) const
         {
-            const Time h = cstep_size();
-            t_end_ -= h/2;
-
-            for (Time t = t_init_; t < t_end_; t += h) {
-                dx += h * f(x, t);
-            }
+            return t_end_ - cstep_size()/2;
         }
     }
 }
