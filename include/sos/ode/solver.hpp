@@ -37,14 +37,15 @@ namespace SOS {
             Solver& operator =(const Solver& rhs)                   = default;
             Solver(Solver&& rhs)                                    = default;
             Solver& operator =(Solver&& rhs)                        = default;
-            Solver(Odes_spec odes_spec_, Param_keyss param_keyss_);
+            Solver(Odes_spec odes_spec_, Param_keyss param_keyss_,
+                   bool unify = false);
             Solver(Odes_spec odes_spec_, Param_keys param_keys_);
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
-            Solver(Spec spec);
-            Solver(const string& input);
-            Solver(istream& is);
-            Solver(istream&& is);
-            Solver(const Expr& expr);
+            Solver(Spec spec, bool unify = false);
+            Solver(const string& input, bool unify = false);
+            Solver(istream& is, bool unify = false);
+            Solver(istream&& is, bool unify = false);
+            Solver(const Expr& expr, bool unify = false);
 
             size_t size() const noexcept       { return codes_spec().size(); }
             bool empty() const noexcept                { return size() == 0; }
@@ -149,7 +150,7 @@ namespace SOS {
             using State_f = function<const State&(const State&, Time)>;
             using State_fs = vector<State_f>;
 
-            void set_odes_eval(Param_keyss&& param_keyss_);
+            void set_odes_eval(Param_keyss&& param_keyss_, bool unify);
             void parse_odes_spec(const Expr& expr);
             static Param_keyss parse_param_keyss(const Expr& expr);
             static Param_keys parse_param_keys(const Expr& expr);
@@ -166,6 +167,7 @@ namespace SOS {
                                             bool unified) const;
             const Param_key& code_param_key(Ode_id ode_id_) const
                              { return code_param_key(ode_id_, is_unified()); }
+            static Param_keys unify_param_keys(Param_keyss&& param_keyss_);
 
             State_fs& state_fs() const                   { return _state_fs; }
             State_f& state_f(Ode_id ode_id_ = def_ode_id) const;

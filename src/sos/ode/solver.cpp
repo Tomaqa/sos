@@ -1,15 +1,20 @@
 #include "ode/solver.hpp"
 #include "ode/solver/context.hpp"
 
+#include <set>
+
 namespace SOS {
+    using std::set;
+
     namespace ODE {
-        Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_)
+        Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_,
+                       bool unify)
             : _odes_spec(move(odes_spec_)),
               _state_fs(size())
         {
             check_empty(param_keyss_);
             for_each(codes_spec(), bind(&Solver::check_ode_spec, _1));
-            set_odes_eval(move(param_keyss_));
+            set_odes_eval(move(param_keyss_), unify);
         }
 
         Solver::Solver(Odes_spec odes_spec_, Param_keys param_keys_)
@@ -21,37 +26,46 @@ namespace SOS {
                      Param_keyss{move(param_keys_)})
         { }
 
-        Solver::Solver(Spec spec)
-            : Solver(move(spec.first), move(spec.second))
+        Solver::Solver(Spec spec, bool unify)
+            : Solver(move(spec.first), move(spec.second), unify)
         { }
 
-        Solver::Solver(const string& input)
-            : Solver(istringstream(input))
+        Solver::Solver(const string& input, bool unify)
+            : Solver(istringstream(input), unify)
         { }
 
-        Solver::Solver(istream& is)
-        try : Solver(Expr(is))
+        Solver::Solver(istream& is, bool unify)
+        try : Solver(Expr(is), unify)
         { }
         catch (const Error& err) {
             throw "Invalid format of input ODEs specification:\n" + err;
         }
 
-        Solver::Solver(istream&& is)
-            : Solver(is)
+        Solver::Solver(istream&& is, bool unify)
+            : Solver(is, unify)
         { }
 
-        Solver::Solver(const Expr& expr)
+        Solver::Solver(const Expr& expr, bool unify)
         try {
-            expect(expr.size() == 2 && expr.is_deep(),
+            bool parse_unify = (
+                 expr.size() == 3
+                 && !expr[0]->is_etoken() && !expr[2]->is_etoken()
+                 && expr[1]->is_etoken() && expr.cto_token(1) == "*"
+            );
+            unify |= parse_unify;
+            expect(parse_unify || (expr.size() == 2 && expr.is_deep()),
                    "Expected two expressions of ODEs specifications "s
                    + "and set of parameter keys "
-                   + "at the top level.");
+                   + "at top level "
+                   + "with optional '*' token in between "
+                   + "(to unify parameter keys).");
             parse_odes_spec(expr.cto_expr(0));
+            const int pkeys_idx = parse_unify ? 2 : 1 ;
             Param_keyss param_keyss_(move(
-                parse_param_keyss(expr.cto_expr(1))
+                parse_param_keyss(expr.cto_expr(pkeys_idx))
             ));
             check_empty(param_keyss_);
-            set_odes_eval(move(param_keyss_));
+            set_odes_eval(move(param_keyss_), unify);
             _state_fs.resize(size());
         }
         catch (const Error& err) {
@@ -59,9 +73,14 @@ namespace SOS {
                   + to_string(expr) + "'\n: " + err;
         }
 
-        void Solver::set_odes_eval(Param_keyss&& param_keyss_)
+        void Solver::set_odes_eval(Param_keyss&& param_keyss_, bool unify)
         {
-            const bool unified = check_param_keyss(param_keyss_);
+            bool unified = check_param_keyss(param_keyss_);
+            if (!unified && unify) {
+                param_keyss_ =
+                    Param_keyss{move(unify_param_keys(move(param_keyss_)))};
+                unified = true;
+            }
             odes_eval().reserve(size());
             if (!unified) {
                 add_odes_eval(move(param_keyss_));
@@ -317,6 +336,45 @@ namespace SOS {
         {
             return code_param_keys(ode_id_)[unified ? ode_id_
                                                     : def_ode_id];
+        }
+
+        Solver::Param_keys
+            Solver::unify_param_keys(Param_keyss&& param_keyss_)
+        {
+            const int pkeys_size = param_keyss_.size();
+            if (pkeys_size == 1 || all_equal(param_keyss_)) {
+                return {move(param_keyss_.front())};
+            }
+
+            Param_keys param_keys_;
+            param_keys_.reserve(pkeys_size*2);
+            set<Param_key> pkeys_set;
+            transform(param_keyss_, std::back_inserter(param_keys_),
+                      [&pkeys_set](auto&& pkeys){
+                          auto&& pdt_key = move(pkeys.front());
+                          expect(!pkeys_set.count(pdt_key),
+                                 "First parameter key must be unique: "s
+                                 + pdt_key);
+                          pkeys_set.insert(pdt_key);
+                          return move(pdt_key);
+                      });
+            bool has_t = false;
+            for (auto&& pkeys : move(param_keyss_)) {
+                std::for_each(std::begin(pkeys)+1, std::end(pkeys),
+                              [&param_keys_, &pkeys_set, &has_t]
+                              (auto&& pkey){
+                                  if (pkey == "t") {
+                                      has_t = true;
+                                      return;
+                                  }
+                                  if (pkeys_set.emplace(pkey).second) {
+                                      param_keys_.emplace_back(move(pkey));
+                                  }
+                              });
+            }
+            if (has_t) param_keys_.emplace_back("t");
+
+            return move(param_keys_);
         }
 
         Real Solver::solve_ode(Dt_id dt_id_, Context context_,

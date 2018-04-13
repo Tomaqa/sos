@@ -15,9 +15,11 @@ SRC_DIR   := $(ROOT_DIR)/$(SRC_NAME)/$(PROJ_NAME)
 BUILD_DIR := $(ROOT_DIR)/$(BUILD_NAME)/$(PROJ_NAME)
 BIN_DIR   := $(ROOT_DIR)/$(BIN_NAME)
 SRC_MAIN_DIR := $(ROOT_DIR)/$(SRC_NAME)/main
+BUILD_MAIN_DIR := $(ROOT_DIR)/$(BUILD_NAME)/main
 
 TEST_INCL_DIR := $(ROOT_DIR)/$(INCL_NAME)/$(TEST_NAME)
 TEST_SRC_DIR := $(ROOT_DIR)/$(SRC_NAME)/$(TEST_NAME)
+TEST_BUILD_DIR := $(ROOT_DIR)/$(BUILD_NAME)/$(TEST_NAME)
 TEST_BIN_DIR := $(ROOT_DIR)/$(TEST_NAME)
 
 TOOLS_DIR := $(ROOT_DIR)/tools
@@ -27,7 +29,6 @@ DATA_DIR  := $(ROOT_DIR)/data
 LIBS := -lm
 INCL := -I $(INCL_DIR)
 LDFLAGS := -Wl,--no-undefined
-# FLAGS := $(INCL) -Wall -pedantic -fopenmp -O3 -Wfatal-errors -Wshadow
 # FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
 FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow -Wfatal-errors
 CPPFLAGS := $(FLAGS) -std=c++14
@@ -42,22 +43,6 @@ MKDIR_DIRS := "$(BUILD_DIR)" "$(BIN_DIR)" "$(DOC_DIR)"
 FIND_FLAGS := -not -path '*/\.*' -type f -name
 
 ###################################################
-
-## Get list of source files, make a list of executables from them (exclude core file and header files)
-# ALL_SOURCES := $(wildcard $(SRC_DIR)/*)
-# HEADERS := $(wildcard $(SRC_DIR)/*.h)
-# CPP_SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
-# C_SOURCES := $(wildcard $(SRC_DIR)/*.c)
-# SOURCES := $(CPP_SOURCES) $(C_SOURCES)
-# potOBJECT_SOURCES := $(patsubst %.h,%.c,$(HEADERS)) $(patsubst %.h,%.cpp,$(HEADERS))
-# cOBJECT_SOURCES := $(filter-out $(SOURCES), $(potOBJECT_SOURCES) )
-# OBJECT_SOURCES := $(filter-out $(cOBJECT_SOURCES), $(potOBJECT_SOURCES))
-# OBJECT_CPP_SOURCES := $(filter-out $(C_SOURCES), $(OBJECT_SOURCES))
-# OBJECT_C_SOURCES := $(filter-out $(CPP_SOURCES), $(OBJECT_SOURCES))
-# CPP_OBJECTS := $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(OBJECT_CPP_SOURCES))
-# C_OBJECTS := $(patsubst $(SRC_DIR)/%.c,$(OBJ_DIR)/%.o,$(OBJECT_C_SOURCES))
-# OBJECTS := $(CPP_OBJECTS) $(C_OBJECTS)
-# CMDS := $(basename $(patsubst $(SRC_DIR)/%,$(BIN_DIR)/%, $(filter-out $(HEADERS) $(OBJECT_SOURCES), $(ALL_SOURCES)) ) )
 
 HEADERS     := $(shell find $(INCL_DIR) $(FIND_FLAGS) *.hpp)
 
@@ -74,6 +59,10 @@ CPP_OBJECTS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(CPP_SOURCES:.cpp=.o))
 C_OBJECTS := $(patsubst $(SRC_DIR)/%, $(BUILD_DIR)/%, $(C_SOURCES:.c=.o))
 OBJECTS := $(CPP_OBJECTS) $(C_OBJECTS)
 
+MAIN_OBJECTS := $(patsubst $(SRC_MAIN_DIR)/%, $(BUILD_MAIN_DIR)/%, $(MAIN_SOURCES:.cpp=.o))
+
+TEST_OBJECTS := $(patsubst $(TEST_SRC_DIR)/%, $(TEST_BUILD_DIR)/%, $(TEST_SOURCES:.cpp=.o))
+
 TEST_CMDS := $(patsubst $(TEST_SRC_DIR)/%, $(TEST_BIN_DIR)/%, $(TEST_SOURCES:.cpp=))
 CMDS := $(patsubst $(SRC_MAIN_DIR)/%, $(BIN_DIR)/%, $(MAIN_SOURCES:.cpp=))
 CMDS += $(TEST_CMDS)
@@ -83,7 +72,7 @@ CMDS += $(TEST_CMDS)
 .PHONY: init
 
 ## Compiles and links all algorithms' source files
-all: init ${OBJECTS} ${CMDS}
+all: init ${OBJECTS} ${MAIN_OBJECTS} ${TEST_OBJECTS} ${CMDS}
 
 ## Debug this makefile
 debug:
@@ -112,14 +101,17 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	${CPP} -c $< ${CPPFLAGS} -o $@
 
-## Particular executable files
-$(BIN_DIR)/%: ${C_OBJECTS} $(SRC_MAIN_DIR)/%.c
-	${C} ${LDFLAGS} ${CFLAGS} ${LIBS} -o $@ $^
+$(BUILD_MAIN_DIR)/%.o: $(SRC_MAIN_DIR)/%.cpp
+	${CPP} -c $< ${CPPFLAGS} -o $@
 
-$(BIN_DIR)/%: ${OBJECTS} $(SRC_MAIN_DIR)/%.cpp
+$(TEST_BUILD_DIR)/%.o: $(TEST_SRC_DIR)/%.cpp
+	${CPP} -c $< ${CPPFLAGS} ${TEST_FLAGS} -o $@
+
+## Particular executable files
+$(BIN_DIR)/%: ${OBJECTS} $(BUILD_MAIN_DIR)/%.o
 	${CPP} ${LDFLAGS} ${CPPFLAGS} ${LIBS} -o $@ $^
 
-$(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
+$(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_BUILD_DIR)/%.o
 	${CPP} ${LDFLAGS} ${CPPFLAGS} ${TEST_FLAGS} ${LIBS} -o $@ $^
 
 
@@ -128,6 +120,7 @@ $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_SRC_DIR)/%.cpp
 # rm -fr $(BUILD_DIR)/* $(BIN_DIR)/*
 
 #####################################
+
 
 build/test/expr_test.o: src/test/expr_test.cpp include/test/test.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \

@@ -28,10 +28,8 @@ namespace SOS {
         {
             auto f = [this, &dt_ids_](const State& x_, State& dx_, Time t_){
                          eval_unif_odes_step(dt_ids_, dx_, x_, t_);
-                         // return dx_;
                      };
             State x = move(context_.cx_init());
-            // State dx(std::begin(x), std::begin(x)+size());
             State dx(size());
 
             const Time h = cstep_size();
@@ -39,11 +37,7 @@ namespace SOS {
             const Time t_end_ = t_end(context_.ct_end());
 
             for (Time t = t_init_; t < t_end_; t += h) {
-                // dx += h * f(x, t);
-                // dx += h * f(x, dx, t);
-                // dx = dx + h * f(x, t);
                 f(x, dx, t);
-                // dx += h * dx;
                 dx *= h;
                 dx += x;
                 copy(dx, std::begin(x));
