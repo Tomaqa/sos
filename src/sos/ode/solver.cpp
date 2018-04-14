@@ -82,11 +82,11 @@ namespace SOS {
                 unified = true;
             }
             odes_eval().reserve(size());
-            if (!unified) {
-                add_odes_eval(move(param_keyss_));
+            if (unified) {
+                add_unif_odes_eval(move(param_keyss_.front()));
             }
             else {
-                add_unif_odes_eval(move(param_keyss_.front()));
+                add_odes_eval(move(param_keyss_));
             }
         }
 

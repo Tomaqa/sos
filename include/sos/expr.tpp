@@ -1,7 +1,19 @@
 #include <sstream>
 
 namespace SOS {
+    template <typename T>
+    Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)
+    {
+        return make_unique<T>(forward<T>(place_));
+    }
+
     ///////////////////////////////////////////////////////////////
+
+    template <typename... Args>
+    Expr_place::Expr_ptr_t<Expr_token> Expr_token::new_etoken(Args&&... args)
+    {
+        return new_place(Expr_token(forward<Args>(args)...));
+    }
 
     template <typename Arg>
     bool Expr_token::get_value_check(Arg& arg) const
@@ -26,6 +38,30 @@ namespace SOS {
     }
 
     ///////////////////////////////////////////////////////////////
+
+    template <typename... Args>
+    Expr_place::Expr_ptr_t<Expr> Expr::new_expr(Args&&... args)
+    {
+        return new_place(Expr(forward<Args>(args)...));
+    }
+
+    template <typename T>
+    void Expr::add_place_ptr(T&& place_ptr_)
+    {
+        places().emplace_back(forward<T>(place_ptr_));
+    }
+
+    template <typename... Args>
+    void Expr::add_new_etoken(Args&&... args)
+    {
+        add_place_ptr(Expr_token::new_etoken(forward<Args>(args)...));
+    }
+
+    template <typename... Args>
+    void Expr::add_new_expr(Args&&... args)
+    {
+        add_place_ptr(new_expr(forward<Args>(args)...));
+    }
 
     template <typename Un_f>
     void Expr::for_each_expr(Un_f f)

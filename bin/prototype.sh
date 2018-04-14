@@ -125,6 +125,8 @@ function init_ode {
     done
     str+=" )"
     append_ode "$str"
+    # !! param keys
+    read <&6
 }
 
 function append_smt {

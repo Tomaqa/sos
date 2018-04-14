@@ -29,8 +29,8 @@ DATA_DIR  := $(ROOT_DIR)/data
 LIBS := -lm
 INCL := -I $(INCL_DIR)
 LDFLAGS := -Wl,--no-undefined
-# FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
-FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow -Wfatal-errors
+FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
+# FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow -Wfatal-errors
 CPPFLAGS := $(FLAGS) -std=c++14
 CFLAGS   := $(FLAGS) -std=gnu99
 TEST_FLAGS := -I $(TEST_INCL_DIR)

@@ -40,6 +40,9 @@ namespace SOS {
         virtual Expr_place_ptr clone() const override final;
         Expr_token(const Token& token);
 
+        template <typename... Args>
+            static Expr_ptr_t<Expr_token> new_etoken(Args&&... args);
+
         const Token& ctoken() const                         { return _token; }
         Token& token()                                      { return _token; }
         static const Token& check_token(const Token& token);
@@ -65,6 +68,9 @@ namespace SOS {
         using Exprs = Elems<Expr>;
         using Places = Elems<Expr_place_ptr>;
 
+        using value_type = Places::value_type;
+        using iterator = Places::iterator;
+
         Expr()                                                      = default;
         virtual ~Expr()                                             = default;
         virtual Expr_place_ptr clone() const override;
@@ -76,6 +82,9 @@ namespace SOS {
         Expr(const string& input);
         Expr(istream& is);
         Expr(istream&& is);
+
+        template <typename... Args>
+            static Expr_ptr_t<Expr> new_expr(Args&&... args);
 
         virtual bool is_etoken() const noexcept override     { return false; }
         virtual explicit operator string () const noexcept override;
@@ -131,9 +140,14 @@ namespace SOS {
         Token& to_token_check(int idx);
         Expr& to_expr_check(int idx);
 
-        template <typename T> void add_new_place(T&& place_);
+        template <typename... Args> void add_new_etoken(Args&&... args);
+        template <typename... Args> void add_new_expr(Args&&... args);
         void erase_place(int idx_);
         void erase_places(int idx_, int count_ = 0);
+
+        template <typename T> void push_back(T&& place_ptr_)
+                                    { add_place_ptr(forward<T>(place_ptr_)); }
+        void reserve(size_t size_)                { places().reserve(size_); }
 
         template <typename Un_f> void for_each_expr(Un_f f);
 
@@ -157,6 +171,7 @@ namespace SOS {
     protected:
         Expr(istream& is, streampos& last_pos, unsigned depth);
         void parse(istream& is, streampos& last_pos, unsigned depth);
+
 
         Places& places()                                   { return _places; }
 

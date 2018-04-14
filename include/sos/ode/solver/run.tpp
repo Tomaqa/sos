@@ -23,6 +23,19 @@ namespace SOS {
             string line;
             getline(*is_ptr, line);
             _solver_ptr = new_solver(S(move(to_string(line))));
+            Expr keys_expr;
+            if (_solver_ptr->is_unified()) {
+                const Param_keys& pkeys = _solver_ptr->cunif_param_keys();
+                keys_expr = Expr(to_string(pkeys));
+            }
+            else {
+                Param_keyss&& pkeyss = _solver_ptr->cparam_keyss();
+                keys_expr.reserve(pkeyss.size());
+                for (auto&& pkeys : move(pkeyss)) {
+                    keys_expr.add_new_expr(to_string(move(pkeys)));
+                }
+            }
+            cout << to_string(keys_expr) << endl;
 
             cout << std::setprecision(8);
             while (getline(*is_ptr, line)) {

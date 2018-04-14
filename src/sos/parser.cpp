@@ -188,7 +188,7 @@ namespace SOS {
         expr.erase_places(1);
         expr.to_token(0) += "_" + ode_key_;
         const int steps_ = csteps(ode_key_);
-        expr.add_new_place(Expr_token(to_string(steps_-1)));
+        expr.add_new_etoken(to_string(steps_-1));
     }
 
     Expr::Token Parser::int_ode_identifier(const Ode_key& ode_key_)

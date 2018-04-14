@@ -1,12 +1,6 @@
 #include "expr.hpp"
 
 namespace SOS {
-    template <typename T>
-    Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)
-    {
-        return make_unique<T>(forward<T>(place_));
-    }
-
     string to_string(const Expr_place& rhs)
     {
         return move((string)rhs);
@@ -31,7 +25,7 @@ namespace SOS {
 
     Expr_place::Expr_place_ptr Expr_token::clone() const
     {
-        return new_place(Expr_token(*this));
+        return new_etoken(*this);
     }
 
     Expr_token::Expr_token(const Token& token)
@@ -54,7 +48,7 @@ namespace SOS {
 
     Expr_place::Expr_place_ptr Expr::clone() const
     {
-        return new_place(Expr(*this));
+        return new_expr(*this);
     }
 
     Expr::Expr(const Expr& rhs)
@@ -137,7 +131,7 @@ namespace SOS {
             }
             if (c == '(') {
                 last_pos = is.tellg();
-                add_new_place(Expr(is, last_pos, depth+1));
+                add_new_expr(is, last_pos, depth+1);
                 continue;
             }
             if (c == ')') {
@@ -150,7 +144,7 @@ namespace SOS {
             oss_buf << c;
             char c2 = is.peek();
             if (isspace(c2) || c2 == '(') {
-                add_new_place(Expr_token(oss_buf.str()));
+                add_new_etoken(oss_buf.str());
                 oss_buf.str("");
             }
         }
@@ -160,7 +154,7 @@ namespace SOS {
                + to_string(depth) + " not found.");
 
         if (!oss_buf.str().empty()) {
-            add_new_place(Expr_token(oss_buf.str()));
+            add_new_etoken(oss_buf.str());
         }
     }
 
@@ -345,18 +339,6 @@ namespace SOS {
         return ptr_to_expr_check((*this)[idx]);
     }
 
-    template <typename T>
-    void Expr::add_place_ptr(T&& place_ptr_)
-    {
-        places().emplace_back(forward<T>(place_ptr_));
-    }
-
-    template <typename T>
-    void Expr::add_new_place(T&& place_)
-    {
-        add_place_ptr(new_place(forward<T>(place_)));
-    }
-
     void Expr::erase_place(int idx_)
     {
         erase_places(idx_, 1);
@@ -411,7 +393,7 @@ namespace SOS {
                 subexpr.add_place_ptr(move(*it));
             }
             places().erase(begin()+3, end());
-            places()[2] = new_place(move(subexpr.to_binary()));
+            places()[2] = new_expr(move(subexpr.to_binary()));
         }
         for_each_expr([](Expr& e){ e.to_binary(); });
         return *this;
