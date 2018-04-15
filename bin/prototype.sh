@@ -6,11 +6,12 @@ UNIF=1
 
 ##############################
 
-# SMT_SOLVER=(cvc4 -L smt2 -i)
-SMT_SOLVER=(z3 -smt2 -in)
+SMT_SOLVER=(cvc4 -L smt2 -i)
+# SMT_SOLVER=(z3 -smt2 -in)
 # SMT_SOLVER=(~"/Data/Software/opensmt2/opensmt")
 
-ODE_SOLVER=(bin/euler_app)
+# ODE_SOLVER=(bin/euler_app)
+ODE_SOLVER=(bin/odeint_app)
 
 EVAL_CMD=(bin/eval_app)
 
@@ -32,6 +33,9 @@ SMT_OFIFO=`mktemp -u`
 ODE_IFIFO=`mktemp -u`
 ODE_OFIFO=`mktemp -u`
 
+EVAL_IFIFO=`mktemp -u`
+EVAL_OFIFO=`mktemp -u`
+
 ############################################################
 
 function cleanup {
@@ -40,8 +44,11 @@ function cleanup {
     exec 4<&-
     exec 5>&-
     exec 6<&-
+    exec 7>&-
+    exec 8<&-
     rm -f "$SMT_IFIFO" "$SMT_OFIFO"
     rm -f "$ODE_IFIFO" "$ODE_OFIFO"
+    rm -f "$EVAL_IFIFO" "$EVAL_OFIFO"
 }
 
 function failure {
@@ -176,8 +183,8 @@ function set_unif_keys {
         for i in ${!lODE_KEYS[@]}; do
             local key=${lODE_KEYS[$i]}
             find_elem UNIF_ODE_KEYS $key idx || {
-                printf -- "Unexpected error: '%s' key not found "\
-                          "in unified keys: '%s'" $key "${UNIF_ODE_KEYS[*]}"
+                printf -- "Unexpected error: '%s' key not found " $key
+                printf -- "in unified keys: '%s'\n" "${UNIF_ODE_KEYS[*]}"
                 exit 7
             }
             lODE_KEY_IDXS[$i]=$idx
@@ -204,28 +211,38 @@ function set_unif_keys {
 }
 
 function append_smt {
-    [[ -z $1 ]] && {
-        cat >&3
-        return
-    }
-    for i; do
-        printf -- "%s\n" "$i" >&3
-    done
+    if [[ -z $1 ]]; then
+        cat
+    else
+        for i; do
+            printf -- "%s\n" "$i"
+        done
+    fi >&3
 }
 
 function append_ode {
-    [[ -z $1 ]] && {
-        cat >&5
-        return
-    }
-    for i; do
-        printf -- "%s\n" "$i" >&5
-    done
+    if [[ -z $1 ]]; then
+        cat
+    else
+        for i; do
+            printf -- "%s\n" "$i"
+        done
+    fi >&5
 }
 
-# Filter
+#<1>-dest. variable
+#[*]-filter arguments
 function get_value {
-    "${EVAL_CMD[@]}"
+    local -n res=$1
+    shift 1
+    if [[ -z $1 ]]; then
+        cat
+    else
+        for i; do
+            printf -- "%s\n" "$i"
+        done
+    fi >&7
+    read res <&8
 }
 
 # 1 - var. identifier
@@ -235,23 +252,8 @@ function get_smt_value {
     read value <&4
     value="${value#* }"
     value="${value%))}"
-    value=`get_value <<<"$value"`
+    get_value value "$value"
     VALUES[$1]=$value
-}
-
-# 1 - step
-function add_smt_conflict {
-    local str=
-    for fkey in ${F_KEYS[@]}; do
-        set_links $fkey
-        str+="
-(= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]})
-(= ${lINIT_IDS[$1]} ${VALUES[${lINIT_IDS[$1]}]})
-(= ${lT_INIT_IDS[$1]} ${VALUES[${lT_INIT_IDS[$1]}]})
-(= ${lT_END_IDS[$1]} ${VALUES[${lT_END_IDS[$1]}]})"
-    done
-    append_smt "(assert (not (and ${str}
-)))"
 }
 
 # 1 - step
@@ -280,6 +282,14 @@ function get_smt_values {
             get_smt_value $var
         done
     done
+}
+
+#<1>-I/O variable with value
+function neg_to_expr {
+    local -n lVAR=$1
+    [[ $lVAR =~ ^- ]] && {
+        lVAR="(- ${lVAR#-})"
+    }
 }
 
 # 1 - step
@@ -331,23 +341,59 @@ function compute_odes {
     local values
     read values <&6
     ODE_VALUES=($values)
+
     return 0
 }
 
 # 1 - step
-function add_asserts {
-    for i in ${!F_KEYS[@]}; do
-        fkey=${F_KEYS[$i]}
-        set_links $fkey
-        append_smt <<KONEC
-(assert (=> (and (= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]})
-                 (= ${lINIT_IDS[$1]} ${VALUES[${lINIT_IDS[$1]}]})
-                 (= ${lT_INIT_IDS[$1]} ${VALUES[${lT_INIT_IDS[$1]}]})
-                 (= ${lT_END_IDS[$1]} ${VALUES[${lT_END_IDS[$1]}]})
-            ) (= (int-ode_${fkey} ${1}) ${ODE_VALUES[$i]})
-))
-KONEC
+# 2 - ODE function key
+#<3>- dest. variable to APPEND to
+function smt_assert_exprs {
+    local fkey=$2
+    local -n lRES=$3
+    set_links $fkey
+    local init_val=${VALUES[${lINIT_IDS[$1]}]}
+    local t_init_val=${VALUES[${lT_INIT_IDS[$1]}]}
+    local t_end_val=${VALUES[${lT_END_IDS[$1]}]}
+    for var in init_val t_init_val t_end_val; do
+        neg_to_expr $var
     done
+    lRES+="
+(= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]})
+(= ${lINIT_IDS[$1]} $init_val)
+(= ${lT_INIT_IDS[$1]} $t_init_val)
+(= ${lT_END_IDS[$1]} $t_end_val)"
+}
+
+# 1 - step
+function add_asserts {
+    local exprs
+    for i in ${!F_KEYS[@]}; do
+        exprs=
+        fkey=${F_KEYS[$i]}
+        smt_assert_exprs $1 $fkey exprs
+        local oval=${ODE_VALUES[$i]}
+        neg_to_expr oval
+        append_smt "(assert (=> (and $exprs
+) (= (int-ode_${fkey} ${1}) $oval)
+))"
+    done
+    append_smt "(push 1)"
+    for fkey in ${F_KEYS[@]}; do
+        set_links $fkey
+        append_smt "(assert (= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]}))"
+    done
+}
+
+# 1 - step
+function add_smt_conflict {
+    append_smt "(pop 1)"
+    local exprs=
+    for fkey in ${F_KEYS[@]}; do
+        smt_assert_exprs $1 $fkey exprs
+    done
+    append_smt "(assert (not (and ${exprs}
+)))"
 }
 
 # 1 - step
@@ -360,9 +406,8 @@ function do_step {
         1) return 1;;
         100)  if (( $s > 0 )); then
                   printf -- "Backtrack ...\n"
-                  (( s-- ))
-                  add_smt_conflict $s
-                  do_step $s
+                  add_smt_conflict $((s-1))
+                  do_step $((s-1)) && do_step $s
                   return $?
               else
                   printf -- "Not satisfiable!\n"
@@ -400,6 +445,13 @@ mkfifo -m 600 "$ODE_OFIFO"
 exec 5> >(tee ode_log >"$ODE_IFIFO")
 exec 6<"$ODE_OFIFO"
 
+mkfifo -m 600 "$EVAL_IFIFO"
+mkfifo -m 600 "$EVAL_OFIFO"
+
+"${EVAL_CMD[@]}" <"$EVAL_IFIFO" &>"$EVAL_OFIFO" &
+exec 7>"$EVAL_IFIFO"
+exec 8<"$EVAL_OFIFO"
+
 ##############################
 
 parse_input
@@ -429,6 +481,7 @@ for i in ${!F_KEYS[@]}; do
 done
 
 append_smt "(exit)"
+# append_smt "(get-model)" "(exit)"
 cat <&4
 
 exit 0

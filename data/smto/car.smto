@@ -8,14 +8,16 @@
 
 ;;; Constants
 
-(define-fun pi () Real 3.14159265)
+(define-fun T () Real 0.5)
 
-(define-fun r  () Real 5)
-(define-fun om () Real 2)
+(define-fun pi () Real 3.14159265)
 
 (define-fun p_lo  () Real (- 1))
 (define-fun p_hi  () Real    1 )
 (define-fun p_min () Real (- 1.5 ))
+
+(define-fun r  () Real 5)
+(define-fun om () Real 2)
 
 (define-fun t0   () Real 0)
 
@@ -28,11 +30,10 @@
 (define-fun ahead0   () Bool true)
 (define-fun canal0   () Bool false)
 
-(define-fun T () Real 0.5)
+;;; Constant invariants
 
-;;; Invariants
-
-(assert (and (<  p_min p_lo)
+(assert (and (>  p_hi  p_lo)
+             (<  p_min p_lo)
              (>= p0    p_lo)
              (<= p0    p_hi)
              (>= gam0 (- (/ pi 4)))
@@ -268,7 +269,7 @@
                       (and      correct2       left2  (not ahead2) (not canal2)
                            (= c2_2 c2_1) ))
                   (=> (and (<= c2_1 0))
-                      (and      correct1  (not left1)      ahead1  (not canal1)
+                      (and      correct2  (not left2)      ahead2  (not canal2)
                            (= c2_2 c2_1) ))
                   (=> (and (<= p2 p_lo))
                       (and (not correct2)      left2  (not ahead2) (not canal2)
@@ -276,10 +277,10 @@
          ))
          (=> (and      correct1  (not left1) (not ahead1) (not canal1) )
              (and (=> (and (>  c2_1 0) (<  p2 p_hi))
-                      (and      correct1  (not left1) (not ahead1) (not canal1)
+                      (and      correct2  (not left2) (not ahead2) (not canal2)
                            (= c2_2 c2_1) ))
                   (=> (and (<= c2_1 0))
-                      (and      correct1  (not left1)      ahead1  (not canal1)
+                      (and      correct2  (not left2)      ahead2  (not canal2)
                            (= c2_2 c2_1) ))
                   (=> (and (>= p2 p_hi))
                       (and (not correct2) (not left2) (not ahead2) (not canal2)

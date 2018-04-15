@@ -10,6 +10,8 @@ namespace SOS {
         {"-",   [](Arg a){ return -a; }},
         {"not", [](Arg a){ return !a; }},
         {"abs", [](Arg a){ return abs(a); }},
+        {"sqrt",[](Arg a){ return sqrt(a); }},
+        {"cbrt",[](Arg a){ return cbrt(a); }},
         {"sin", [](Arg a){ return sin(a); }},
         {"cos", [](Arg a){ return cos(a); }},
         {"tan", [](Arg a){ return tan(a); }},
