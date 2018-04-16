@@ -132,15 +132,19 @@
 
 ;;; Derivatives declaration and definition
 
-(declare-ode sqr (dsqr) ())
-(define-dt dsqr () (* 2 t))
+;(declare-ode sqr (dsqr) ())
+;(define-dt dsqr () (* 2 t))
+(define-dt sqr dsqr () (* 2 t))
 
-(declare-ode sqrt (dsqrt) ())
-(define-dt dsqrt () (/ 1 (* 2 (sqrt t))))
+;(declare-ode sqrt (dsqrt) ())
+;(define-dt dsqrt () (/ 1 (* 2 (sqrt t))))
+(define-dt sqrt dsqrt () (/ 1 (* 2 (sqrt t))))
 
-(declare-ode y (dy_exp_inc dy_exp_dec) ())
-(define-dt dy_exp_inc () y)
-(define-dt dy_exp_dec () (/ 1 t))
+;(declare-ode y (dy_exp_inc dy_exp_dec) ())
+;(define-dt dy_exp_inc () y)
+;(define-dt dy_exp_dec () (/ 1 t))
+(define-dt y dy_exp_inc () y)
+(define-dt y dy_exp_dec () (/ 1 t))
 
 ;;; Integration
 
