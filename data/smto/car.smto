@@ -195,26 +195,15 @@
              (= t_9  (+ t_8  T))
 ))
 
-;;; Derivatives declaration and definition
+;;; Derivatives definition
 
-;(declare-ode p (dp_move dp_fail) (gam r))
-;(define-dt dp_move (gam r) (* (- r) (sin gam)))
-;(define-dt dp_fail (gam r) 0)
 (define-dt p dp_move (gam r) (* (- r) (sin gam)))
 (define-dt p dp_fail (gam r) 0)
 
-;(declare-ode gam (dgam_left dgam_right dgam_ahead) (om))
-;(define-dt dgam_left  (om) (- om))
-;(define-dt dgam_right (om)    om )
-;(define-dt dgam_ahead (om) 0)
 (define-dt gam dgam_left  (om) (- om))
 (define-dt gam dgam_right (om)    om )
 (define-dt gam dgam_ahead (om)     0 )
 
-;(declare-ode c (dc_inc dc_dec dc_idle) ())
-;(define-dt dc_inc  ()    1 )
-;(define-dt dc_dec  () (- 2))
-;(define-dt dc_idle ()    0 )
 (define-dt c dc_inc  ()    1 )
 (define-dt c dc_dec  () (- 2))
 (define-dt c dc_idle ()    0 )

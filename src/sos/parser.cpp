@@ -101,17 +101,11 @@ namespace SOS {
         expect(cmd != "int-ode",
                "Unexpected command '"s + cmd + "' "
                + "at top level.");
-        // if (cmd == "declare-ode") {
-        //     process_declare_ode(move(expr));
-        //     return;
-        // }
         if (cmd == "define-dt") {
-            // process_define_dt(move(expr));
             process_define_dt(expr);
             return;
         }
         if (cmd == "define-ode-step") {
-            // process_define_ode_step(move(expr));
             process_define_ode_step(expr);
             return;
         }
@@ -124,67 +118,6 @@ namespace SOS {
         throw "At expression\n"s + to_string(expr) + "\n" + err;
     }
 
-    // void Parser::process_declare_ode(Expr&& expr)
-    // {
-    //     expect(expr.size() == 4,
-    //            "Expected ODE function name, "s
-    //            + "expression with dt variants "
-    //            + "and expression with parameter keys, got: "
-    //            + to_string(expr));
-
-    //     const Ode_key& ode_key_ = expr.cto_token_check(1);
-    //     expect(!has_ode_key(ode_key_),
-    //            "ODE function name '"s + ode_key_ + "' "
-    //            + "has already been declared.");
-
-    //     const Expr& dt_expr = expr.cto_expr_check(2);
-    //     expect(dt_expr.is_flat(),
-    //            "Expected expression with dt variant name identifiers, got: "s
-    //            + to_string(dt_expr));
-    //     for (auto&& dkey : dt_expr.transform_to_tokens()) {
-    //         add_dt_key(ode_key_, move(dkey));
-    //     }
-
-    //     const Expr& keys_expr = expr.cto_expr_check(3);
-    //     expect(keys_expr.is_flat(),
-    //            "Expected expression with parameter keys identifiers, got: "s
-    //            + to_string(keys_expr));
-    //     param_keys(ode_key_).reserve(keys_expr.size()+2);
-    //     param_keys(ode_key_).emplace_back(ode_key_);
-    //     Param_keys&& pkeys = keys_expr.transform_to_tokens();
-    //     move(std::begin(pkeys), std::end(pkeys),
-    //          std::back_inserter(param_keys(ode_key_)));
-    //     param_keys(ode_key_).emplace_back("t");
-
-    //     add_smt_expr({"(declare-fun "s
-    //                   + int_ode_identifier(ode_key_)
-    //                   + " (Real) Real)"});
-    // }
-
-    // void Parser::process_define_dt(Expr&& expr)
-    // {
-    //     expect(expr.size() == 4,
-    //            "Expected dt variant name, "s
-    //            + "expression with parameter keys "
-    //            + "and expression with dt specification, got: "
-    //            + to_string(expr));
-
-    //     const Dt_key& dt_key_ = expr.cto_token_check(1);
-    //     check_has_dt_key(dt_key_);
-
-    //     // !? check keys
-
-    //     Dt_spec dt_spec_ = expr[3]->is_etoken()
-    //                      ? Dt_spec("+ "s + move(expr.cto_token(3)))
-    //                      : move(expr.cto_expr(3)) ;
-    //     set_dt_spec(dt_key_, move(dt_spec_));
-
-    //     int dkey_idx = dt_key_idx(dt_key_);
-    //     add_smt_expr({"(define-fun "s + dt_key_
-    //                   + " () Dt "
-    //                   + to_string(dkey_idx) +")"});
-    // }
-
     void Parser::declare_ode(const Ode_key& ode_key_, Expr keys_expr)
     {
         if (has_ode_key(ode_key_)) return;
@@ -194,12 +127,6 @@ namespace SOS {
         expect(keys_expr.is_flat(),
                "Expected expression with parameter keys identifiers, got: "s
                + to_string(keys_expr));
-        // param_keys(ode_key_).reserve(keys_expr.size()+2);
-        // param_keys(ode_key_).emplace_back(ode_key_);
-        // Param_keys&& pkeys = move(keys_expr).transform_to_tokens();
-        // move(std::begin(pkeys), std::end(pkeys),
-        //      std::back_inserter(param_keys(ode_key_)));
-        // param_keys(ode_key_).emplace_back("t");
         add_param_keys(ode_key_, move(keys_expr));
 
         add_smt_expr({"(declare-fun "s
@@ -207,7 +134,6 @@ namespace SOS {
                       + " (Real) Real)"});
     }
 
-    // void Parser::process_define_dt(Expr&& expr)
     void Parser::process_define_dt(Expr& expr)
     {
         expect(expr.size() == 5,
@@ -234,7 +160,6 @@ namespace SOS {
 
         // ! check keys
 
-        // set_dt_spec(dt_key_, move(dt_spec_));
         add_dt_spec(ode_key_, dt_key_, move(dt_spec_));
 
         int dkey_idx = cdt_key_idx(dt_key_);
@@ -243,7 +168,6 @@ namespace SOS {
                       + to_string(dkey_idx) +")"});
     }
 
-    // void Parser::process_define_ode_step(Expr&& expr)
     void Parser::process_define_ode_step(Expr& expr)
     {
         expect(expr.size() == 2,
@@ -294,7 +218,6 @@ namespace SOS {
         expect(param_expr.is_flat(),
                "Expected parameter constants, got: "s
                + to_string(param_expr));
-        // Param_keys&& param_consts = param_expr.transform_to_tokens();
         Const_ids param_consts = move(param_expr.transform_to_tokens());
 
         add_const_ids_row(ode_key_,
@@ -321,7 +244,6 @@ namespace SOS {
     {
         expect(has_ode_key(ode_key_),
                "ODE function name '"s + ode_key_ + "' "
-               // + "has not been declared.");
                + "has not been defined.");
     }
 
@@ -349,12 +271,8 @@ namespace SOS {
         return odes_map_item(ode_key_).first;
     }
 
-    // int Parser::ode_key_idx(const Ode_key& ode_key_) const
     int Parser::code_key_idx(const Ode_key& ode_key_) const
     {
-        // const Odes_map& odes_map_ = codes_map();
-        // const auto& it = odes_map_.find(ode_key_);
-        // return std::distance(std::begin(odes_map_), it);
         return codes_map_item(ode_key_).second;
     }
 
@@ -366,13 +284,11 @@ namespace SOS {
     const Parser::Dts_spec_map&
         Parser::cdts_spec_map(const Ode_key& ode_key_) const
     {
-        // return get<0>(codes_map().at(ode_key_));
         return get<0>(codes_map_value(ode_key_));
     }
 
     Parser::Dts_spec_map& Parser::dts_spec_map(const Ode_key& ode_key_)
     {
-        // return get<0>(odes_map()[ode_key_]);
         return get<0>(odes_map_value(ode_key_));
     }
 
@@ -389,12 +305,8 @@ namespace SOS {
         return cdt_keys_map().count(dt_key_) == 1;
     }
 
-    // void Parser::check_has_dt_key(const Dt_key& dt_key_) const
     void Parser::check_has_not_dt_key(const Dt_key& dt_key_) const
     {
-        // expect(has_dt_key(dt_key_),
-        //        "dt variant name '"s + dt_key_ + "' "
-        //        + "has not been declared.");
         expect(!has_dt_key(dt_key_),
                "dt variant name '"s + dt_key_ + "' "
                + "has already been defined.");
@@ -424,14 +336,8 @@ namespace SOS {
         return dt_keys_map_item(dt_key_).first;
     }
 
-    // int Parser::dt_key_idx(const Dt_key& dt_key_) const
     int Parser::cdt_key_idx(const Dt_key& dt_key_) const
     {
-        // const Ode_key& ode_key_ = code_key(dt_key_);
-        // const Dts_spec_map& dts_spec_map_ = cdts_spec_map(ode_key_);
-        // const auto& it = dts_spec_map_.find(dt_key_);
-        // return std::distance(std::begin(dts_spec_map_), it);
-        // return get<1>(cdt_keys_map().at(dt_key_));
         return cdt_keys_map_item(dt_key_).second;
     }
 
@@ -442,8 +348,6 @@ namespace SOS {
 
     const Parser::Ode_key& Parser::code_key(const Dt_key& dt_key_) const
     {
-        // return cdt_keys_map().at(dt_key_);
-        // return get<0>(cdt_keys_map().at(dt_key_));
         return cdt_keys_map_value(dt_key_);
     }
 
@@ -452,35 +356,18 @@ namespace SOS {
         dts_spec_map(ode_key_).emplace(dt_key_, Dt_spec());
         const int dt_idx = cdt_keys(ode_key_).size();
         dt_keys(ode_key_).emplace_back(dt_key_);
-        // dt_keys_map().emplace(move(dt_key_), ode_key_);
-        // const int dt_idx = cdts_spec_map(ode_key_).size()-1;
-        // const int dt_idx = codes().size()-1;
-        // dt_keys_map().emplace(move(dt_key_), make_tuple(ode_key_, dt_idx));
         dt_keys_map().emplace(move(dt_key_), make_pair(ode_key_, dt_idx));
     }
 
-    // void Parser::set_dt_spec(const Dt_key& dt_key_, Dt_spec dt_spec_)
     void Parser::add_dt_spec(const Ode_key& ode_key_,
                              const Dt_key& dt_key_, Dt_spec dt_spec_)
     {
-        // dts_spec_map(code_key(dt_key_))[dt_key_] = move(dt_spec_);
         dts_spec_map(ode_key_)[dt_key_] = dt_spec_;
         ode_spec(ode_key_).emplace_back(move(dt_spec_));
     }
 
-    // // const Parser::Param_keys&
-    // const ODE::Param_keys&
-    //     Parser::cparam_keys(const Ode_key& ode_key_) const
-    // {
-    //     // return get<1>(codes_map().at(ode_key_));
-    //     return get<1>(codes_map_value(ode_key_));
-    // }
-
-    // Parser::Param_keys& Parser::param_keys(const Ode_key& ode_key_)
-    // ODE::Param_keys& Parser::param_keys(const Ode_key& ode_key_)
     ODE::Param_keys& Parser::param_keys_map(const Ode_key& ode_key_)
     {
-        // return get<1>(odes_map()[ode_key_]);
         return get<1>(odes_map_value(ode_key_));
     }
 
@@ -495,16 +382,8 @@ namespace SOS {
         param_keys(ode_key_) = cparam_keys(ode_key_);
     }
 
-    // const Parser::Const_ids& Parser::cconst_ids(const Ode_key& ode_key_) const
-    // {
-    //     // return get<2>(codes_map().at(ode_key_));
-    //     return get<2>(codes_map_value(ode_key_));
-    // }
-
-    // Parser::Const_ids& Parser::const_ids(const Ode_key& ode_key_)
     Parser::Const_ids_rows& Parser::const_ids_map(const Ode_key& ode_key_)
     {
-        // return get<2>(odes_map()[ode_key_]);
         return get<2>(odes_map_value(ode_key_));
     }
 
@@ -518,22 +397,12 @@ namespace SOS {
                                    pair<Const_id, Const_id> init_t_consts,
                                    Const_ids param_consts)
     {
-        // const_ids(ode_key_).emplace_back(make_tuple(move(dt_const),
-        // const_ids_map(ode_key_).emplace_back(make_tuple(move(dt_const),
-        //                                             move(init_const),
-        //                                             move(init_t_consts),
-        //                                             move(param_consts) ));
-        // auto ids_tup = make_tuple(move(dt_const),
-        //                           move(init_const),
-        //                           move(init_t_consts),
-        //                           move(param_consts) );
         auto ids_tup = make_tuple(move(dt_const),
                                   move(init_const),
                                   move(init_t_consts),
                                   move(param_consts) );
         const_ids_map(ode_key_).emplace_back(ids_tup);
         const_ids(ode_key_).emplace_back(move(ids_tup));
-        // const_ids(ode_key_).emplace_back(ids_tup);
     }
 
     void Parser::add_smt_expr(Expr expr)

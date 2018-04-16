@@ -12,9 +12,6 @@ namespace SOS {
                               Context&& context_) const
         {
             State x = move(context_.cx_init());
-            // predpokladam ze dx se automaticky alokuje
-            // na stejnou velikost jako x
-            // -> plytvani
             auto f = [this, ode_id_, dt_id_]
                          (const State& x_, State& dx_, Time t_){
                          eval_ode_step(ode_id_, dt_id_,

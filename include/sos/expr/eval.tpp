@@ -32,7 +32,6 @@ namespace SOS {
         {">",   [](Arg a, Arg b){ return a > b; }},
         {"<=",  [](Arg a, Arg b){ return a <= b; }},
         {">=",  [](Arg a, Arg b){ return a >= b; }},
-        {"not", [](Arg a, Arg b){ return !b; }},
         {"and", [](Arg a, Arg b){ return a && b; }},
         {"or",  [](Arg a, Arg b){ return a || b; }},
         {"=>",  [](Arg a, Arg b){ return !a || b; }},

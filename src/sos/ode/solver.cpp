@@ -104,7 +104,6 @@ namespace SOS {
             }
         }
 
-        // Solver::Param_keyss Solver::parse_param_keyss(const Expr& expr)
         Param_keyss Solver::parse_param_keyss(const Expr& expr)
         {
             if (!expr.is_deep()) {
@@ -118,7 +117,6 @@ namespace SOS {
             return move(param_keyss_);
         }
 
-        // Solver::Param_keys Solver::parse_param_keys(const Expr& expr)
         Param_keys Solver::parse_param_keys(const Expr& expr)
         {
             return move(expr.transform_to_tokens());
@@ -298,7 +296,6 @@ namespace SOS {
             return to_string(dt_eval_.cparam_keys().back()) == "t";
         }
 
-        // Solver::Param_keyss Solver::cparam_keyss() const
         Param_keyss Solver::cparam_keyss() const
         {
             if (empty()) return {};
@@ -311,34 +308,27 @@ namespace SOS {
             return move(param_keyss_);
         }
 
-        // const Solver::Param_keys& Solver::cunif_param_keys() const
         const Param_keys& Solver::cunif_param_keys() const
         {
             expect(is_unified(), "Parameter keys are not unified.");
             return cunif_param_keys_wo_check();
         }
 
-        // const Solver::Param_keys&
-        const Param_keys&
-            Solver::code_param_keys(Ode_id ode_id_) const
+        const Param_keys& Solver::code_param_keys(Ode_id ode_id_) const
         {
             return code_param_keys(code_eval(ode_id_));
         }
 
-        // const Solver::Param_keys&
-        const Param_keys&
-            Solver::code_param_keys(const Ode_eval& ode_eval_)
+        const Param_keys& Solver::code_param_keys(const Ode_eval& ode_eval_)
         {
             return ode_eval_.front().cparam_keys();
         }
 
-        // const Solver::Param_keys& Solver::cunif_param_keys_wo_check() const
         const Param_keys& Solver::cunif_param_keys_wo_check() const
         {
             return code_param_keys(code_eval());
         }
 
-        // const Solver::Param_key&
         const Param_key&
             Solver::code_param_key(Ode_id ode_id_, bool unified) const
         {
@@ -346,9 +336,7 @@ namespace SOS {
                                                     : def_ode_id];
         }
 
-        // Solver::Param_keys
-        Param_keys
-            Solver::unify_param_keys(Param_keyss&& param_keyss_)
+        Param_keys Solver::unify_param_keys(Param_keyss&& param_keyss_)
         {
             const int pkeys_size = param_keyss_.size();
             if (pkeys_size == 1 || all_equal(param_keyss_)) {

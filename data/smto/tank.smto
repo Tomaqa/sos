@@ -230,17 +230,11 @@
              (= t_19 (+ t_18 T))
 ))
 
-;;; Derivatives declaration and definition
+;;; Derivatives definition
 
-;(declare-ode y (dy_in dy_out) (inflow outflow))
-;(define-dt dy_in  (inflow outflow) (- inflow outflow))
-;(define-dt dy_out (inflow outflow) (- outflow))
 (define-dt y dy_in  (inflow outflow) (- inflow outflow))
 (define-dt y dy_out (inflow outflow) (- outflow))
 
-;(declare-ode tau (dtau_wait dtau_pump) ())
-;(define-dt dtau_wait () 1)
-;(define-dt dtau_pump () 0)
 (define-dt tau dtau_wait () 1)
 (define-dt tau dtau_pump () 0)
 

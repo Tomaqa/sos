@@ -18,9 +18,6 @@ namespace SOS {
 
         /////////////////////////////////////////////////////////////////
 
-        // using Odes_spec = Solver::Odes_spec;
-        // using Param_keys = Solver::Param_keys;
-        // using Param_keyss = Solver::Param_keyss;
         using Odes_spec = ODE::Odes_spec;
         using Param_keys = ODE::Param_keys;
         using Param_keyss = ODE::Param_keyss;
@@ -54,7 +51,6 @@ namespace SOS {
         /////////////////////////////////////////////////////////////////
 
         using Context = Solver::Context;
-        // using Ode_spec = Solver::Ode_spec;
         using Ode_spec = ODE::Ode_spec;
         using Solve_ode_output = vector<Real>;
         using Solve_ode_input = tuple<Ode_spec, Param_keys, Context>;
@@ -98,7 +94,6 @@ namespace SOS {
         using Solve_unif_odes_output = vector<State>;
         using Solve_unif_odes_input = tuple<Odes_spec, Param_keys, Context>;
         using Solve_unif_odes_params = tuple<Time>;
-        // using Dt_ids = Solver::Dt_ids;
         using Dt_ids = ODE::Dt_ids;
 
         template <typename Solver>

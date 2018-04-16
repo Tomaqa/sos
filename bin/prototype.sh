@@ -434,7 +434,6 @@ mkfifo -m 600 "$SMT_OFIFO"
 
 "${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
 # "${SMT_SOLVER[@]}" <"$SMT_IFIFO" >"$SMT_OFIFO" 2>/dev/null &
-# exec 3>"$SMT_IFIFO"
 exec 3> >(tee smt_log >"$SMT_IFIFO")
 exec 4<"$SMT_OFIFO"
 

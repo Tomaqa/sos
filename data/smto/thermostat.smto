@@ -70,11 +70,8 @@
              (= t_9 (+ t_8 T))
 ))
 
-;;; Derivatives declaration and definition
+;;; Derivatives definition
 
-;(declare-ode x (dx_on dx_off) ())
-;(define-dt dx_on  () (- 100 x))
-;(define-dt dx_off () (-  50 x))
 (define-dt x dx_on  () (- 100 x))
 (define-dt x dx_off () (-  50 x))
 
