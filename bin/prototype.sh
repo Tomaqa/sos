@@ -2,6 +2,21 @@
 
 INPUT_F="$1"
 
+SMT_OUTPUT_DIR=data/smt2
+ODE_OUTPUT_DIR=data/ode
+
+SMT_OUTPUT_F="$SMT_OUTPUT_DIR/"
+ODE_OUTPUT_F="$ODE_OUTPUT_DIR/"
+
+if [[ -z $INPUT_F ]]; then
+    SMT_OUTPUT_F+=stdin.smt2
+    ODE_OUTPUT_F+=stdin.ode
+else
+    INPUT_F_BASE=`basename "$INPUT_F"`
+    SMT_OUTPUT_F+="${INPUT_F_BASE%.*}.smt2"
+    ODE_OUTPUT_F+="${INPUT_F_BASE%.*}.ode"
+fi
+
 UNIF=1
 
 ##############################
@@ -433,15 +448,14 @@ mkfifo -m 600 "$SMT_IFIFO"
 mkfifo -m 600 "$SMT_OFIFO"
 
 "${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
-# "${SMT_SOLVER[@]}" <"$SMT_IFIFO" >"$SMT_OFIFO" 2>/dev/null &
-exec 3> >(tee smt_log >"$SMT_IFIFO")
+exec 3> >(tee "$SMT_OUTPUT_F" >"$SMT_IFIFO")
 exec 4<"$SMT_OFIFO"
 
 mkfifo -m 600 "$ODE_IFIFO"
 mkfifo -m 600 "$ODE_OFIFO"
 
 "${ODE_SOLVER[@]}" <"$ODE_IFIFO" &>"$ODE_OFIFO" &
-exec 5> >(tee ode_log >"$ODE_IFIFO")
+exec 5> >(tee "$ODE_OUTPUT_F" >"$ODE_IFIFO")
 exec 6<"$ODE_OFIFO"
 
 mkfifo -m 600 "$EVAL_IFIFO"
