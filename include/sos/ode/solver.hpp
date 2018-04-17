@@ -65,8 +65,6 @@ namespace SOS {
             using Param_keys_ptr = Dt_eval::Param_keys_ptr;
             using Param_keys_ptrs = vector<Param_keys_ptr>;
 
-            class Eval;
-
             static constexpr Dt_id def_dt_id = 0;
             static constexpr Time def_step_size = 1e-2;
 

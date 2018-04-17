@@ -1,0 +1,116 @@
+;;;; Function choosing model in SMT+ODE format
+;; `y' is continuous state
+;; `(inc)' is discrete state
+
+;;; Constants
+
+(define-fun T () Real 1.0)
+
+(define-fun t0   () Real 1)
+
+(define-fun sqr0   () Real t0)
+(define-fun sqrt0  () Real t0)
+
+(define-fun y0   () Real t0)
+
+(define-fun inc0 () Bool true)
+
+#define STEPS   10
+
+;;; Constant invariants
+
+
+;;; Declarations
+
+#def DECL_CONSTS(const type)
+#for (s 0 #STEPS)
+    (declare-fun #const()_#s () #type)
+#endfor
+#enddef
+
+#DECL_CONSTS(t     Real)
+#DECL_CONSTS(sqr   Real)
+#DECL_CONSTS(sqrt  Real)
+#DECL_CONSTS(y     Real)
+#DECL_CONSTS(inc   Bool)
+#DECL_CONSTS(dsqr  Dt)
+#DECL_CONSTS(dsqrt Dt)
+#DECL_CONSTS(dy    Dt)
+
+;;; Initializations
+
+(assert (and (= t_0 t0)
+             (= sqr_0 sqr0) (= sqrt_0 sqrt0)
+             (= y_0 y0)
+             (= inc_0 inc0)
+))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 $(- #STEPS 1))
+    (= t_$(+ #i 1)  (+ t_#i  T))
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
+
+;;; Derivatives definition
+
+(define-dt sqr dsqr () (* 2 t))
+
+(define-dt sqrt dsqrt () (/ 1 (* 2 (sqrt t))))
+
+(define-dt y dy_exp_inc () y)
+(define-dt y dy_exp_dec () (/ 1 t))
+
+;;; Integration
+
+#def INT_ODE(f)
+#for (i 0 $(- #STEPS 1))
+#let j $(+ #i 1)
+    (= #f()_#j (int-ode #f d#f()_#i (#f()_#i t_#i t_#j) ()) )
+#endlet
+#endfor
+#enddef
+
+(assert (and #INT_ODE(sqr )
+             #INT_ODE(sqrt)
+             #INT_ODE(y   )
+))
+
+;;; Derivatives connection
+
+(define-fun connect ( (dsqr_ Dt) (dsqrt_ Dt) (dy Dt)
+                      (inc Bool) ) Bool
+    (and (= dsqr_ dsqr) (= dsqrt_ dsqrt)
+         (or (and      inc  (= dy dy_exp_inc))
+             (and (not inc) (= dy dy_exp_dec))
+)))
+
+#def CONNECTS
+#for (i 0 #STEPS)
+    (connect dsqr_#i dsqrt_#i dy_#i inc_#i)
+#endfor
+#enddef
+
+(assert (and #CONNECTS))
+
+;;; States conditions
+
+;;; Jump conditions
+
+;;; Invariants
+
+(define-fun invariant ( (t Real) (sqr Real) (sqrt Real) (y Real) ) Bool
+    ;(and (<= y sqr) (>= y sqrt)
+    (and (<= y sqr) (>= y t)
+))
+
+#def INVARIANTS
+#for (i 0 #STEPS)
+    (invariant t_#i sqr_#i sqrt_#i y_#i)
+#endfor
+#enddef
+
+(assert (and #INVARIANTS))

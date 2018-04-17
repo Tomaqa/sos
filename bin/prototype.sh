@@ -432,7 +432,7 @@ function do_step {
                   return 2
               fi;;
     esac
-    (( $s == $MAX_STEP )) && return
+    (( $s == $MAX_STEP )) && return 0
     get_smt_values $s
     compute_odes $s
     add_asserts $s

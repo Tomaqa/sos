@@ -28,12 +28,16 @@ namespace SOS {
                 continue;
             }
 
+            int k = 0;
             while (getline(*is_ptr, line)) {
-                if (line.empty()) continue;
+                if (line.empty()) {
+                    if (k) break;
+                    continue;
+                }
+                k++;
                 Expr e_values(line);
                 Param_values values(e_values.transform_to_args<Arg>());
                 cout << _eval(move(values)) << endl;
-                break;
             }
         }
 

@@ -6,35 +6,35 @@ namespace SOS {
     template <typename Arg>
     const typename Expr::Eval<Arg>::template
         F_map<typename Expr::Eval<Arg>::Un_f> Expr::Eval<Arg>::un_fs{
-        {"+",   [](Arg a){ return a; }},
-        {"-",   [](Arg a){ return -a; }},
-        {"not", [](Arg a){ return !a; }},
-        {"abs", [](Arg a){ return abs(a); }},
-        {"sqrt",[](Arg a){ return sqrt(a); }},
-        {"cbrt",[](Arg a){ return cbrt(a); }},
-        {"sin", [](Arg a){ return sin(a); }},
-        {"cos", [](Arg a){ return cos(a); }},
-        {"tan", [](Arg a){ return tan(a); }},
-        {"exp", [](Arg a){ return exp(a); }},
-        {"ln",  [](Arg a){ return log(a); }},
+        {"+",    [](Arg a){ return a; }},
+        {"-",    [](Arg a){ return -a; }},
+        {"not",  [](Arg a){ return !a; }},
+        {"abs",  [](Arg a){ return abs(a); }},
+        {"sqrt", [](Arg a){ return sqrt(a); }},
+        {"cbrt", [](Arg a){ return cbrt(a); }},
+        {"sin",  [](Arg a){ return sin(a); }},
+        {"cos",  [](Arg a){ return cos(a); }},
+        {"tan",  [](Arg a){ return tan(a); }},
+        {"exp",  [](Arg a){ return exp(a); }},
+        {"ln",   [](Arg a){ return log(a); }},
     };
 
     template <typename Arg>
     const typename Expr::Eval<Arg>::template
         F_map<typename Expr::Eval<Arg>::Bin_f> Expr::Eval<Arg>::bin_fs{
-        {"+",   [](Arg a, Arg b){ return a + b; }},
-        {"-",   [](Arg a, Arg b){ return a - b; }},
-        {"*",   [](Arg a, Arg b){ return a * b; }},
-        {"/",   [](Arg a, Arg b){ return a / b; }},
-        {"^",   [](Arg a, Arg b){ return pow(a, b); }},
-        {"=",   [](Arg a, Arg b){ return a == b; }},
-        {"<",   [](Arg a, Arg b){ return a < b; }},
-        {">",   [](Arg a, Arg b){ return a > b; }},
-        {"<=",  [](Arg a, Arg b){ return a <= b; }},
-        {">=",  [](Arg a, Arg b){ return a >= b; }},
-        {"and", [](Arg a, Arg b){ return a && b; }},
-        {"or",  [](Arg a, Arg b){ return a || b; }},
-        {"=>",  [](Arg a, Arg b){ return !a || b; }},
+        {"+",    [](Arg a, Arg b){ return a + b; }},
+        {"-",    [](Arg a, Arg b){ return a - b; }},
+        {"*",    [](Arg a, Arg b){ return a * b; }},
+        {"/",    [](Arg a, Arg b){ return a / b; }},
+        {"^",    [](Arg a, Arg b){ return pow(a, b); }},
+        {"=",    [](Arg a, Arg b){ return a == b; }},
+        {"<",    [](Arg a, Arg b){ return a < b; }},
+        {">",    [](Arg a, Arg b){ return a > b; }},
+        {"<=",   [](Arg a, Arg b){ return a <= b; }},
+        {">=",   [](Arg a, Arg b){ return a >= b; }},
+        {"and",  [](Arg a, Arg b){ return a && b; }},
+        {"or",   [](Arg a, Arg b){ return a || b; }},
+        {"=>",   [](Arg a, Arg b){ return !a || b; }},
     };
 
     template <typename Arg>
