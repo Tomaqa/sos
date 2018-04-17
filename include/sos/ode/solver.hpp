@@ -16,6 +16,7 @@ namespace SOS {
             template <typename S> class Run;
 
             static constexpr Ode_id def_ode_id = 0;
+            static constexpr bool def_unify = false;
 
             Solver()                                                = default;
             virtual ~Solver()                                       = default;
@@ -24,14 +25,14 @@ namespace SOS {
             Solver(Solver&& rhs)                                    = default;
             Solver& operator =(Solver&& rhs)                        = default;
             Solver(Odes_spec odes_spec_, Param_keyss param_keyss_,
-                   bool unify = false);
+                   bool unify = def_unify);
             Solver(Odes_spec odes_spec_, Param_keys param_keys_);
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
-            Solver(Spec spec, bool unify = false);
-            Solver(const string& input, bool unify = false);
-            Solver(istream& is, bool unify = false);
-            Solver(istream&& is, bool unify = false);
-            Solver(const Expr& expr, bool unify = false);
+            Solver(Spec spec, bool unify = def_unify);
+            Solver(const string& input, bool unify = def_unify);
+            Solver(istream& is, bool unify = def_unify);
+            Solver(istream&& is, bool unify = def_unify);
+            Solver(const Expr& expr, bool unify = def_unify);
 
             size_t size() const noexcept       { return codes_spec().size(); }
             bool empty() const noexcept                { return size() == 0; }

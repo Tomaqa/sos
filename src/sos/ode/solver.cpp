@@ -145,9 +145,9 @@ namespace SOS {
         {
             const size_t n_odes = size();
             const size_t n_keyss = param_keyss_.size();
-            const bool unified = n_keyss == 1 && n_odes > 1;
+            const bool unified = n_keyss == 1 && n_odes >= 1;
             expect(unified || n_keyss == n_odes,
-                   "Size of ODEs and set of non-unified "s
+                   "Size of ODEs and set of independent "s
                    + "parameter keys mismatch: "
                    + to_string(n_odes) + " != " + to_string(n_keyss));
             for_each(param_keyss_, bind(&check_param_keys, _1));

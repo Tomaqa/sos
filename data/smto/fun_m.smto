@@ -23,8 +23,8 @@
 ;;; Declarations
 
 #def DECL_CONSTS(const type)
-#for (s 0 #STEPS)
-    (declare-fun #const()_#s () #type)
+#for (i 0 #STEPS)
+    (declare-fun #const()_#i () #type)
 #endfor
 #enddef
 
