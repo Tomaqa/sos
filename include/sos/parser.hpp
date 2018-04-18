@@ -134,5 +134,7 @@ namespace SOS {
         Smt_exprs _smt_exprs;
         Time _ode_step;
         bool _ode_step_set{false};
+        //! there may be some issue with move operations ?
+        //! I've experienced some ..
     };
 }

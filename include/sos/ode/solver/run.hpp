@@ -1,20 +1,17 @@
 #pragma once
 
 #include "sos.hpp"
+#include "util/run.hpp"
 #include "ode/solver.hpp"
 
 namespace SOS {
     namespace ODE {
         template <typename S>
-        class Solver::Run {
+        class Solver::Run : public Util::Run {
         public:
-            int run(int argc, const char* argv[]);
-        private:
-            using Solver_ptr = unique_ptr<S>;
-
-            static Solver_ptr new_solver(S&& solver_);
-
-            Solver_ptr _solver_ptr;
+            using Util::Run::Run;
+        protected:
+            virtual void do_stuff() override;
         };
     }
 }

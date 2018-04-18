@@ -1,20 +1,11 @@
 #include "parser/run.hpp"
 
-#include <iostream>
-
 namespace SOS {
-    using std::cin;
-    using std::cout;
-    using std::cerr;
-    using std::endl;
+    void Parser::Run::do_stuff()
+    {
+        Parser parser(*_is_ptr);
 
-    int Parser::Run::run(int argc, const char* argv[])
-    try {
-        Stream_ptr<istream> is_ptr(run_get_istream(argc, argv));
-
-        _parser = Parser(*is_ptr);
-
-        const Parser::Odes& odes_ = _parser.codes();
+        const Parser::Odes& odes_ = parser.codes();
         for (auto& odes_tup : odes_) {
             const Ode_key& ode_key_ = get<0>(odes_tup);
             const Dt_keys& dt_keys_ = get<1>(odes_tup);
@@ -33,12 +24,6 @@ namespace SOS {
             cerr << endl;
         }
 
-        cout << _parser.csmt_input() << endl;
-
-        return 0;
-    }
-    catch (const Error& err) {
-        cerr << err << endl;
-        return 1;
+        cout << parser.csmt_input() << endl;
     }
 }

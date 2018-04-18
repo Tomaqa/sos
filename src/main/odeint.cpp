@@ -5,5 +5,5 @@ using namespace SOS;
 
 int main(int argc, const char* argv[])
 {
-    return ODE::Solver::Run<ODE::Odeint>().run(argc, argv);
+    return ODE::Solver::Run<ODE::Odeint>(argc, argv).run();
 }

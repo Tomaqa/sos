@@ -158,7 +158,7 @@ namespace SOS {
         check_has_not_dt_key(dt_key_);
         add_dt_key(ode_key_, dt_key_);
 
-        // ! check keys
+        //! check keys
 
         add_dt_spec(ode_key_, dt_key_, move(dt_spec_));
 

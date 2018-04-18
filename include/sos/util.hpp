@@ -11,11 +11,11 @@ namespace SOS {
     namespace Util {
         template <typename T> using Lazy = function<T()>;
 
-        template <typename T> using Stream_ptr = T*;
-
         class Flag;
 
         template <typename Key, typename Value> class Const_map;
+
+        class Run;
 
         template <typename Cont, typename Un_f>
             Un_f for_each(Cont&& cont, Un_f f);
@@ -53,8 +53,6 @@ namespace SOS {
             vector<T> operator *(vector<T> lhs, T rhs);
         template <typename T>
             vector<T> operator *(T lhs, vector<T> rhs);
-
-        Stream_ptr<istream> run_get_istream(int argc, const char* argv[]);
     }
 
     class Util::Flag {

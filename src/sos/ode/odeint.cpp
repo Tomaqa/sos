@@ -1,5 +1,4 @@
 #include "ode/odeint.hpp"
-#include "ode/solver/context.hpp"
 
 /// Integrate routines
 #include <boost/numeric/odeint/integrate/integrate.hpp>
@@ -17,7 +16,8 @@ namespace SOS {
                          eval_ode_step(ode_id_, dt_id_,
                                        dx_[def_dt_id], x_, t_);
                      };
-            integrate(f, x, context_.ct_init(), context_.ct_end());
+            integrate(f, x, context_.ct_init(), context_.ct_end(),
+                      traject(ode_id_));
             return x[def_dt_id];
         }
 
@@ -28,18 +28,23 @@ namespace SOS {
             auto f = [this, &dt_ids_](const State& x_, State& dx_, Time t_){
                          eval_unif_odes_step(dt_ids_, dx_, x_, t_);
                      };
-            integrate(f, x, context_.ct_init(), context_.ct_end());
+            integrate(f, x, context_.ct_init(), context_.ct_end(),
+                      traject());
             return move(x);
         }
 
         size_t Odeint::integrate(Integrate_f f, State& x,
-                                 Time t_init_, Time t_end_) const
+                                 Time t_init_, Time t_end_,
+                                 Traject& traject_) const
         {
+            auto observer = [&traject_](const State& x_, Time t_){
+                traject_.add_step(x_, t_);
+            };
+
             size_t n_steps = odeint::integrate(f, x,
                                                t_init_, t_end_,
-                                               cstep_size()
-                                               /*, TObserver(states, times)*/
-                                               );
+                                               cstep_size(),
+                                               observer);
             return n_steps;
         }
     }

@@ -14,6 +14,7 @@ namespace SOS {
             virtual State eval_unif_odes(Dt_ids&& dt_ids_,
                                          Context&& context_) const override;
 
+            Time t_init(const Time t_init_) const;
             Time t_end(const Time t_end_) const;
         };
     }

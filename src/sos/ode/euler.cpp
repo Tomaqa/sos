@@ -1,5 +1,4 @@
 #include "ode/euler.hpp"
-#include "ode/solver/context.hpp"
 
 namespace SOS {
     namespace ODE {
@@ -13,11 +12,12 @@ namespace SOS {
             Real& dx = x[def_dt_id];
 
             const Time h = cstep_size();
-            const Time t_init_ = context_.ct_init();
+            const Time t_init_ = t_init(context_.ct_init());
             const Time t_end_ = t_end(context_.ct_end());
 
             for (Time t = t_init_; t < t_end_; t += h) {
                 dx += h * f(x, t);
+                traject(ode_id_).add_step(x, t);
             }
 
             return dx;
@@ -33,7 +33,7 @@ namespace SOS {
             State dx(size());
 
             const Time h = cstep_size();
-            const Time t_init_ = context_.ct_init();
+            const Time t_init_ = t_init(context_.ct_init());
             const Time t_end_ = t_end(context_.ct_end());
 
             for (Time t = t_init_; t < t_end_; t += h) {
@@ -41,14 +41,20 @@ namespace SOS {
                 dx *= h;
                 dx += x;
                 copy(dx, std::begin(x));
+                traject().add_step(x, t);
             }
 
             return move(dx);
         }
 
+        Time Euler::t_init(const Time t_init_) const
+        {
+            return t_init_ + cstep_size();
+        }
+
         Time Euler::t_end(const Time t_end_) const
         {
-            return t_end_ - cstep_size()/2;
+            return t_end_ + cstep_size()/2;
         }
     }
 }

@@ -26,6 +26,7 @@ namespace SOS {
             Time ct_init() const                 { return ct_bounds().first; }
             Time ct_end() const                 { return ct_bounds().second; }
             const State& cx_init() const                   { return _x_init; }
+            Time ct_distance() const          { return ct_end() - ct_init(); }
 
             void add_param_t();
         protected:

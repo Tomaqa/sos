@@ -34,7 +34,7 @@ namespace SOS {
                                apx_equal<typename T::value_type>);
         }
 
-        constexpr double eps = 1e-3;
+        constexpr double eps = 1e-2;
         template <>
         bool apx_equal(const double& a, const double& b)
         {

@@ -1,16 +1,16 @@
 #pragma once
 
 #include "sos.hpp"
+#include "util/run.hpp"
 #include "expr/eval.hpp"
 
 namespace SOS {
     template <typename Arg>
-    class Expr::Eval<Arg>::Run {
+    class Expr::Eval<Arg>::Run : public Util::Run {
     public:
-        int run(int argc, const char* argv[]);
-    private:
-        Expr _expr;
-        Eval<Arg> _eval;
+        using Util::Run::Run;
+    protected:
+        virtual void do_stuff() override;
     };
 }
 

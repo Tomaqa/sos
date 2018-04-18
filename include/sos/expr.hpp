@@ -148,6 +148,7 @@ namespace SOS {
         template <typename T> void push_back(T&& place_ptr_)
                                     { add_place_ptr(forward<T>(place_ptr_)); }
         void reserve(size_t size_)                { places().reserve(size_); }
+        void clear()                                     { places().clear(); }
 
         template <typename Un_f> void for_each_expr(Un_f f);
 

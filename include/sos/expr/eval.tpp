@@ -9,6 +9,8 @@ namespace SOS {
         {"+",    [](Arg a){ return a; }},
         {"-",    [](Arg a){ return -a; }},
         {"not",  [](Arg a){ return !a; }},
+        {"and",  [](Arg a){ return a; }},
+        {"or",   [](Arg a){ return a; }},
         {"abs",  [](Arg a){ return abs(a); }},
         {"sqrt", [](Arg a){ return sqrt(a); }},
         {"cbrt", [](Arg a){ return cbrt(a); }},
@@ -64,7 +66,6 @@ namespace SOS {
     typename Expr::Eval<Arg>::Param_values_ptr
         Expr::Eval<Arg>::new_param_values(Param_values&& param_values_)
     {
-        // kontrola probiha az pri volani
         return make_shared<Param_values>(move(param_values_));
     }
 
@@ -169,7 +170,7 @@ namespace SOS {
     template <typename T>
     T&& Expr::Eval<Arg>::check_param_keys(T&& param_keys_)
     {
-        // ! unieqness is not checked
+        //! unieqness is not checked
         for_each(param_keys_, bind(&Expr_token::check_token, _1));
         return forward<T>(param_keys_);
     }

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 INPUT_F="$1"
+TRAJ_OUTPUT_F="$2"
 
 SMT_OUTPUT_DIR=data/smt2
 ODE_OUTPUT_DIR=data/ode
@@ -25,12 +26,14 @@ SMT_SOLVER=(cvc4 -L smt2 -i)
 # SMT_SOLVER=(z3 -smt2 -in)
 # SMT_SOLVER=(~"/Data/Software/opensmt2/opensmt")
 
-# ODE_SOLVER=(bin/euler_app)
-ODE_SOLVER=(bin/odeint_app)
+APP_DIR=bin
 
-EVAL_CMD=(bin/eval_app)
+# ODE_SOLVER=("$APP_DIR/euler"  -o "$TRAJ_OUTPUT_F")
+ODE_SOLVER=("$APP_DIR/odeint" -o "$TRAJ_OUTPUT_F")
 
-PARSER_CMD=(bin/parser_app)
+EVAL_CMD=("$APP_DIR/eval")
+
+PARSER_CMD=("$APP_DIR/parser")
 
 ##############################
 
@@ -95,11 +98,7 @@ function set_links {
 function parse_input {
     local tmp_1_f=`mktemp`
     local tmp_2_f=`mktemp`
-    if [[ -z $INPUT_F ]]; then
-        "${PARSER_CMD[@]}" >"$tmp_1_f" 2>"$tmp_2_f"
-    else
-        "${PARSER_CMD[@]}" "$INPUT_F" >"$tmp_1_f" 2>"$tmp_2_f"
-    fi
+    "${PARSER_CMD[@]}" -i "$INPUT_F" >"$tmp_1_f" 2>"$tmp_2_f"
     (( $? )) && {
         cat "$tmp_1_f"
         cat "$tmp_2_f"

@@ -1,5 +1,4 @@
 #include "ode/solver.hpp"
-#include "ode/solver/context.hpp"
 
 #include <set>
 
@@ -10,7 +9,8 @@ namespace SOS {
         Solver::Solver(Odes_spec odes_spec_, Param_keyss param_keyss_,
                        bool unify)
             : _odes_spec(move(odes_spec_)),
-              _state_fs(size())
+              _state_fs(size()),
+              _trajects(size())
         {
             check_empty(param_keyss_);
             for_each(codes_spec(), bind(&Solver::check_ode_spec, _1));
@@ -65,8 +65,9 @@ namespace SOS {
                 parse_param_keyss(expr.cto_expr(pkeys_idx))
             ));
             check_empty(param_keyss_);
-            set_odes_eval(move(param_keyss_), unify);
             _state_fs.resize(size());
+            _trajects.resize(size());
+            set_odes_eval(move(param_keyss_), unify);
         }
         catch (const Error& err) {
             throw "Invalid format of input ODEs specification\n'"s
@@ -378,12 +379,14 @@ namespace SOS {
                                Ode_id ode_id_) const
         {
             add_param_t(ode_has_param_t(ode_id_), context_, ode_id_);
+            init_trajects(context_);
             return eval_ode(ode_id_, dt_id_, move(context_));
         }
 
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
         {
             check_dt_ids(dt_ids_);
+            init_trajects(contexts_.front());
             const bool unified = is_unified()
                                  && (contexts_.size() == 1
                                      || all_equal(contexts_));
@@ -408,6 +411,7 @@ namespace SOS {
             expect(is_unified(), "Attempt to solve unified ODEs,"s
                                  + " but parameter keys are not unified.");
             check_dt_ids(dt_ids_);
+            init_trajects(context_);
             return move(solve_unif_odes_wo_check(move(dt_ids_),
                                                  move(context_)));
         }
@@ -605,6 +609,24 @@ namespace SOS {
         ostream& operator <<(ostream& os, const Solver& rhs)
         {
             return (os << to_string(rhs));
+        }
+
+        Solver::Traject& Solver::traject(Ode_id ode_id_) const
+        {
+            return trajects()[ode_id_];
+        }
+
+        void Solver::init_trajects(const Context& context_) const
+        {
+            const size_t size_ =
+                (context_.ct_distance()/cstep_size()+1)*1.02;
+            if (is_unified()) {
+                traject().init(size_);
+                return;
+            }
+            for (auto& traj : trajects()) {
+                traj.init(size_);
+            }
         }
     }
 }

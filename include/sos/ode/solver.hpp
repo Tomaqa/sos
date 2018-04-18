@@ -15,6 +15,9 @@ namespace SOS {
 
             template <typename S> class Run;
 
+            class Traject;
+            using Trajects = vector<Traject>;
+
             static constexpr Ode_id def_ode_id = 0;
             static constexpr bool def_unify = false;
 
@@ -41,6 +44,7 @@ namespace SOS {
                                                   { _step_size = step_size_; }
 
             void add_ode_spec(Ode_spec ode_spec_, Param_keys param_keys_);
+
             bool is_unified() const;
             bool ode_has_param_t(Ode_id ode_id_) const;
             bool has_unif_param_t() const;
@@ -56,6 +60,11 @@ namespace SOS {
             State solve(istream& is) const;
             State solve(istream&& is) const;
             State solve(const Expr& expr) const;
+
+            const Trajects& ctrajects() const            { return _trajects; }
+            const Traject& ctraject(Ode_id ode_id_ = def_ode_id) const
+                                                  { return traject(ode_id_); }
+            const Traject& cunif_traject() const        { return ctraject(); }
 
             explicit operator string () const;
             friend string to_string(const Solver& rhs);
@@ -131,6 +140,10 @@ namespace SOS {
                                     Real& dx, const State& x, Time t) const;
             Real eval_unif_ode_step(Ode_id ode_id_, Dt_id dt_id_,
                                     const State& x, Time t) const;
+
+            Trajects& trajects() const                   { return _trajects; }
+            Traject& traject(Ode_id ode_id_ = def_ode_id) const;
+            void init_trajects(const Context& context_) const;
         private:
             using State_f = function<const State&(const State&, Time)>;
             using State_fs = vector<State_f>;
@@ -173,6 +186,10 @@ namespace SOS {
             mutable Flag _is_unified;
             mutable Flag _has_param_t;
             mutable State_fs _state_fs;
+            mutable Trajects _trajects;
         };
     }
 }
+
+#include "ode/solver/context.hpp"
+#include "ode/solver/traject.hpp"
