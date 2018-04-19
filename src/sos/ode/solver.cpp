@@ -12,7 +12,6 @@ namespace SOS {
               _state_fs(size()),
               _trajects(size())
         {
-            check_empty(param_keyss_);
             for_each(codes_spec(), bind(&Solver::check_ode_spec, _1));
             set_odes_eval(move(param_keyss_), unify);
         }
@@ -65,8 +64,6 @@ namespace SOS {
                 parse_param_keyss(expr.cto_expr(pkeys_idx))
             ));
             check_empty(param_keyss_);
-            _state_fs.resize(size());
-            _trajects.resize(size());
             set_odes_eval(move(param_keyss_), unify);
         }
         catch (const Error& err) {
@@ -74,8 +71,9 @@ namespace SOS {
                   + to_string(expr) + "'\n: " + err;
         }
 
-        void Solver::set_odes_eval(Param_keyss&& param_keyss_, bool unify)
+        void Solver::set_odes_eval(Param_keyss param_keyss_, bool unify)
         {
+            check_empty(param_keyss_);
             bool unified = check_param_keyss(param_keyss_);
             if (!unified && unify) {
                 param_keyss_ =
@@ -84,10 +82,15 @@ namespace SOS {
             }
             odes_eval().reserve(size());
             if (unified) {
-                add_unif_odes_eval(move(param_keyss_.front()));
+                Param_keys param_keys_ = move(param_keyss_.front());
+                add_unif_odes_eval(param_keys_);
+                state_fs().resize(1);
+                init_unif_traject(move(param_keys_));
             }
             else {
-                add_odes_eval(move(param_keyss_));
+                add_odes_eval(param_keyss_);
+                state_fs().resize(size());
+                init_trajects(move(param_keyss_));
             }
         }
 
@@ -202,7 +205,7 @@ namespace SOS {
             modified();
         }
 
-        void Solver::add_odes_eval(Param_keyss&& param_keyss_)
+        void Solver::add_odes_eval(Param_keyss param_keyss_)
         {
             transform(odes_spec(),
                       std::make_move_iterator(std::begin(param_keyss_)),
@@ -212,7 +215,7 @@ namespace SOS {
                       });
         }
 
-        void Solver::add_unif_odes_eval(Param_keys&& param_keys_)
+        void Solver::add_unif_odes_eval(Param_keys param_keys_)
         {
             Param_keys_ptr param_keys_ptr_ =
                 new_param_keys(move(param_keys_));
@@ -379,14 +382,14 @@ namespace SOS {
                                Ode_id ode_id_) const
         {
             add_param_t(ode_has_param_t(ode_id_), context_, ode_id_);
-            init_trajects(context_);
+            reset_traject(traject(ode_id_), context_);
             return eval_ode(ode_id_, dt_id_, move(context_));
         }
 
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
         {
             check_dt_ids(dt_ids_);
-            init_trajects(contexts_.front());
+            reset_trajects(contexts_);
             const bool unified = is_unified()
                                  && (contexts_.size() == 1
                                      || all_equal(contexts_));
@@ -411,7 +414,7 @@ namespace SOS {
             expect(is_unified(), "Attempt to solve unified ODEs,"s
                                  + " but parameter keys are not unified.");
             check_dt_ids(dt_ids_);
-            init_trajects(context_);
+            reset_unif_traject(context_);
             return move(solve_unif_odes_wo_check(move(dt_ids_),
                                                  move(context_)));
         }
@@ -616,17 +619,46 @@ namespace SOS {
             return trajects()[ode_id_];
         }
 
-        void Solver::init_trajects(const Context& context_) const
+        void Solver::init_unif_traject(Param_keys param_keys_) const
+        {
+            trajects().resize(1);
+            init_traject(traject(), move(param_keys_), has_unif_param_t());
+        }
+
+        void Solver::init_trajects(Param_keyss param_keyss_) const
+        {
+            const int size_ = size();
+            trajects().resize(size_);
+            for (int i = 0; i < size_; i++) {
+                init_traject(traject(i), move(param_keyss_[i]),
+                             ode_has_param_t(i));
+            }
+        }
+
+        void Solver::init_traject(Traject& traject_,
+                          Param_keys param_keys_,
+                          bool has_param_t) const
+        {
+            traject_.init(move(param_keys_), has_param_t);
+        }
+
+        void Solver::reset_unif_traject(const Context& context_) const
+        {
+            reset_traject(traject(), context_);
+        }
+
+        void Solver::reset_trajects(const Contexts& contexts_) const
+        {
+            for_each(trajects(), std::begin(contexts_),
+                     bind(&Solver::reset_traject, this, _1, _2));
+        }
+
+        void Solver::reset_traject(Traject& traject_,
+                                   const Context& context_) const
         {
             const size_t size_ =
                 (context_.ct_distance()/cstep_size()+1)*1.02;
-            if (is_unified()) {
-                traject().init(size_);
-                return;
-            }
-            for (auto& traj : trajects()) {
-                traj.init(size_);
-            }
+            traject_.reset(size_);
         }
     }
 }

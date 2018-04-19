@@ -106,8 +106,8 @@ namespace SOS {
             void check_dt_ids(const Dt_ids& dt_ids_) const;
 
             static Param_keys_ptr new_param_keys(Param_keys&& param_keys_);
-            void add_odes_eval(Param_keyss&& param_keyss_);
-            void add_unif_odes_eval(Param_keys&& param_keys_);
+            void add_odes_eval(Param_keyss param_keyss_);
+            void add_unif_odes_eval(Param_keys param_keys_);
             template <typename Keys> void
                 add_ode_eval(Ode_spec& ode_spec_, Keys&& keys_);
             static Ode_eval create_ode_eval(Ode_spec& ode_spec_,
@@ -143,12 +143,20 @@ namespace SOS {
 
             Trajects& trajects() const                   { return _trajects; }
             Traject& traject(Ode_id ode_id_ = def_ode_id) const;
-            void init_trajects(const Context& context_) const;
+            void init_unif_traject(Param_keys param_keys_) const;
+            void init_trajects(Param_keyss param_keyss_) const;
+            void init_traject(Traject& traject_,
+                              Param_keys param_keys_,
+                              bool has_param_t) const;
+            void reset_unif_traject(const Context& context_) const;
+            void reset_trajects(const Contexts& contexts_) const;
+            void reset_traject(Traject& traject_,
+                               const Context& context_) const;
         private:
             using State_f = function<const State&(const State&, Time)>;
             using State_fs = vector<State_f>;
 
-            void set_odes_eval(Param_keyss&& param_keyss_, bool unify);
+            void set_odes_eval(Param_keyss param_keyss_, bool unify);
             void parse_odes_spec(const Expr& expr);
             static Param_keyss parse_param_keyss(const Expr& expr);
             static Param_keys parse_param_keys(const Expr& expr);

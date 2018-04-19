@@ -44,9 +44,8 @@ namespace SOS {
         static constexpr const char* smt_init_cmds =
             "(set-option :print-success false)\n"
             "(set-option :produce-models true)\n"
-            // "(set-option :produce-proofs true)\n"
             "(set-logic QF_UFNRA)\n"
-            // "(set-logic QF_UFLRA)\n"
+            //! "(set-logic QF_UFLRA)\n"
             "(define-sort Dt () Real)\n";
 
         Odes& odes()                                         { return _odes; }

@@ -35,7 +35,7 @@ namespace SOS {
                 else {
                     _ofs << solver.ctrajects();
                 }
-                _ofs << endl << endl;
+                _ofs << endl;
             }
         }
     }

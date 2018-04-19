@@ -34,7 +34,8 @@ namespace SOS {
             void reserve(size_t size_);
             void clear();
 
-            void init(size_t size_);
+            void init(Param_keys param_keys_, bool has_param_t_);
+            void reset(size_t size_);
 
             void add_step(Step step_);
             void add_step(Time t, State x);
@@ -43,6 +44,8 @@ namespace SOS {
             Steps& steps();
         private:
             Steps _steps;
+            Param_keys _param_keys;
+            bool _has_param_t;
         };
     }
 }

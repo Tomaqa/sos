@@ -27,6 +27,7 @@ SMT_SOLVER=(cvc4 -L smt2 -i)
 # SMT_SOLVER=(~"/Data/Software/opensmt2/opensmt")
 
 APP_DIR=bin
+TOOLS_DIR=tools
 
 # ODE_SOLVER=("$APP_DIR/euler"  -o "$TRAJ_OUTPUT_F")
 ODE_SOLVER=("$APP_DIR/odeint" -o "$TRAJ_OUTPUT_F")
@@ -34,6 +35,8 @@ ODE_SOLVER=("$APP_DIR/odeint" -o "$TRAJ_OUTPUT_F")
 EVAL_CMD=("$APP_DIR/eval")
 
 PARSER_CMD=("$APP_DIR/parser")
+
+GP_TRAJ_SCRIPT="$TOOLS_DIR/traject.gp"
 
 ##############################
 
@@ -425,7 +428,6 @@ function do_step {
                   return $?
               else
                   printf -- "Not satisfiable!\n"
-                  # append_smt "(get-proof)" "(exit)"
                   append_smt "(exit)"
                   cat <&4
                   return 2
@@ -495,5 +497,11 @@ done
 append_smt "(exit)"
 # append_smt "(get-model)" "(exit)"
 cat <&4
+
+[[ -n $TRAJ_OUTPUT_F ]] && {
+    gnuplot -e "ifname='$TRAJ_OUTPUT_F';
+                ofname='${TRAJ_OUTPUT_F%.*}_plot.svg'" \
+                "$GP_TRAJ_SCRIPT"
+}
 
 exit 0

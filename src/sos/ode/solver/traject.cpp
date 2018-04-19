@@ -20,7 +20,15 @@ namespace SOS {
 
         string to_string(const Solver::Traject& rhs)
         {
-            return move(SOS::to_string(rhs.csteps()));
+            string str("");
+            str += "t " + SOS::to_string(rhs._param_keys) + "\n";
+            for (auto& p : rhs.csteps()) {
+                str += std::to_string(p.first) + "\t"
+                       + SOS::to_string(p.second)
+                       + "\n";
+            }
+            str += "\n";
+            return move(str);
         }
 
         ostream& operator <<(ostream& os, const Solver::Traject& rhs)
@@ -38,7 +46,15 @@ namespace SOS {
             steps().clear();
         }
 
-        void Solver::Traject::init(size_t size_)
+        void Solver::Traject::init(Param_keys param_keys_,
+                                   bool has_param_t_)
+        {
+            if (has_param_t_) param_keys_.pop_back();
+            _param_keys = move(param_keys_);
+            _has_param_t = has_param_t_;
+        }
+
+        void Solver::Traject::reset(size_t size_)
         {
             clear();
             reserve(size_);
@@ -46,6 +62,7 @@ namespace SOS {
 
         void Solver::Traject::add_step(Step step_)
         {
+            if (_has_param_t) step_.second.pop_back();
             steps().emplace_back(move(step_));
         }
 
