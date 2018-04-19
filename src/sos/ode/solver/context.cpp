@@ -27,11 +27,11 @@ namespace SOS {
             Expr& t_subexpr = expr.to_expr(0);
             expect(t_subexpr.size() == 2 && t_subexpr.is_flat(),
                    "Two tokens of time bounds expected.");
-            expect(t_subexpr.cto_etoken(0).get_value_check<Real>(t_init())
-                   && t_subexpr.cto_etoken(1).get_value_check<Real>(t_end()),
+            expect(t_subexpr.to_etoken(0).get_value_check<Real>(t_init())
+                   && t_subexpr.to_etoken(1).get_value_check<Real>(t_end()),
                    "Invalid values of time bounds.");
 
-            x_init() = expr.cto_expr(1).transform_to_args<Real>();
+            x_init() = expr.to_expr(1).transform_to_args<Real>();
 
             check_values();
         }

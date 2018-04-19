@@ -63,15 +63,18 @@ namespace SOS {
         static string preprocess_input(string&& input);
         static string preprocess_input(istream& is);
         void preprocess_expr(Expr& expr);
-        void process_expr(Expr& expr);
-        void declare_ode(const Ode_key& ode_key_, Expr keys_expr);
-        void process_define_dt(Expr& expr);
-        void process_define_ode_step(Expr& expr);
-        void process_assert(Expr& expr);
-        void process_int_ode(Expr& expr);
+
+        void parse_expr(Expr& expr);
+        void declare_ode(const Ode_key& ode_key_, Expr& keys_expr);
+        void parse_define_dt(Expr& expr);
+        void parse_define_ode_step(Expr& expr);
+        void parse_assert(Expr& expr);
+        void parse_int_ode(Expr& expr);
 
         static Const_id int_ode_identifier(const Ode_key& ode_key_);
     private:
+        using Token = Expr::Token;
+
         using Dts_spec_map = map<Dt_key, Dt_spec>;
         using Odes_map_value = tuple<Dts_spec_map,
                                      Param_keys, Const_ids_rows>;
@@ -79,16 +82,24 @@ namespace SOS {
         using Dt_keys_map_value = Ode_key;
         using Dt_keys_map = map<Dt_key, pair<Dt_keys_map_value, int>>;
 
-        using Smt_exprs = Expr::Exprs;
+        using Exprs = Expr::Exprs;
+        // using Parser_exprs = Exprs;
 
-        using Macro_key = Param_key;
+        using Macro_key = Token;
         using Macro_params = Param_keys;
         using Macro_body = string;
         using Macro = tuple<Macro_params, Macro_body>;
         using Macros_map = map<Macro_key, Macro>;
+
+        using Reserved_macro_f = function<void(const Parser *const,
+                                               Expr&, int&)>;
+        using Reserved_macro_fs_map = Const_map<Macro_key, Reserved_macro_f>;
+
         using Let_key = Macro_key;
-        using Let_body = string;
+        using Let_body = Macro_body;
         using Lets_map = map<Let_key, Let_body>;
+
+        static const Reserved_macro_fs_map reserved_macro_fs_map;
 
         const Odes_map& codes_map() const                { return _odes_map; }
         Odes_map& odes_map()                             { return _odes_map; }
@@ -124,7 +135,7 @@ namespace SOS {
                          const Dt_key& dt_key_, Dt_spec dt_spec_);
 
         Param_keys& param_keys_map(const Ode_key& ode_key_);
-        void add_param_keys(const Ode_key& ode_key_, const Expr& expr);
+        void add_param_keys(const Ode_key& ode_key_, Expr& expr);
 
         Const_ids_rows& const_ids_map(const Ode_key& ode_key_);
         int csteps(const Ode_key& ode_key_) const;
@@ -133,9 +144,50 @@ namespace SOS {
                                pair<Const_id, Const_id> init_t_consts,
                                Const_ids param_consts);
 
-        const Smt_exprs& csmt_exprs() const             { return _smt_exprs; }
-        Smt_exprs& smt_exprs()                          { return _smt_exprs; }
+        const Exprs& csmt_exprs() const                 { return _smt_exprs; }
+        Exprs& smt_exprs()                              { return _smt_exprs; }
         void add_smt_expr(Expr expr);
+
+        Macros_map& macros_map() const                 { return _macros_map; }
+        static bool is_macro_key(const Macro_key& macro_key_);
+        static bool is_reserved_macro_key(const Macro_key& macro_key_);
+        bool has_macro_key(const Macro_key& macro_key_) const;
+        void check_has_not_macro_key(const Macro_key& macro_key_) const;
+        Macro& macro(const Macro_key& macro_key_) const;
+        Macro_params& macro_params(const Macro_key& macro_key_) const;
+        Macro_body& macro_body(const Macro_key& macro_key_) const;
+        void add_macro_key(const Macro_key& macro_key_) const;
+        void add_macro(const Macro_key& macro_key_,
+                       Macro_params macro_params_,
+                       Macro_body macro_body_) const;
+
+        void preprocess_nested_expr(Expr& expr, int& pos, unsigned depth);
+        void parse_macro(Expr& expr, int& pos,
+                         const Macro_key& macro_key_, bool is_top) const;
+        void parse_top_macro(Expr& expr, int& pos,
+                             const Macro_key& macro_key_) const;
+        void parse_reserved_macro(Expr& expr, int& pos,
+                                  const Macro_key& macro_key_) const;
+        void parse_user_macro(Expr& expr, int& pos,
+                              const Macro_key& macro_key_) const;
+        void parse_macro_def(Expr& expr, int& pos) const
+                                        { parse_macro_def_helper(expr, pos); }
+        void parse_macro_define(Expr& expr, int& pos) const
+                                  { parse_macro_def_helper(expr, pos, true); }
+        void parse_macro_def_helper(Expr& expr, int& pos,
+                                    bool one_line = false) const;
+        void parse_macro_let(Expr& expr, int& pos) const;
+        void parse_macro_if(Expr& expr, int& pos) const
+                                         { parse_macro_if_helper(expr, pos); }
+        void parse_macro_ite(Expr& expr, int& pos) const
+                                   { parse_macro_if_helper(expr, pos, true); }
+        void parse_macro_if_helper(Expr& expr, int& pos,
+                                   bool else_branch = false) const;
+        void parse_macro_for(Expr& expr, int& pos) const;
+        template <typename Arg> Arg parse_arith_exp(Expr& expr) const;
+
+        // Parser_exprs& parser_exprs() const           { return _parser_exprs; }
+        // void add_parser_expr(Expr expr) const;
 
         //! there may be some issue with move operations ?
         //! I've experienced some ..
@@ -143,12 +195,13 @@ namespace SOS {
         Odes_map _odes_map;
         Dt_keys_map _dt_keys_map;
 
-        Smt_exprs _smt_exprs;
+        Exprs _smt_exprs;
 
         Time _ode_step;
         bool _ode_step_set{false};
 
-        Macros_map _macros_map;
-        Lets_map _lets_map;
+        // mutable Parser_exprs _parser_exprs;
+        mutable Macros_map _macros_map;
+        mutable Lets_map _lets_map;
     };
 }

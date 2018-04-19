@@ -157,9 +157,9 @@ namespace SOS {
             using State_fs = vector<State_f>;
 
             void set_odes_eval(Param_keyss param_keyss_, bool unify);
-            void parse_odes_spec(Expr expr);
-            static Param_keyss parse_param_keyss(const Expr& expr);
-            static Param_keys parse_param_keys(const Expr& expr);
+            void parse_odes_spec(Expr& expr);
+            static Param_keyss parse_param_keyss(Expr& expr);
+            static Param_keys parse_param_keys(Expr&& expr);
 
             void modified();
             static bool ode_has_param_t(const Ode_eval& ode_eval_);

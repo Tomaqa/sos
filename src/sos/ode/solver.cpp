@@ -58,10 +58,10 @@ namespace SOS {
                    + "at top level "
                    + "with optional '*' token in between "
                    + "(to unify parameter keys).");
-            parse_odes_spec(move(expr.to_expr(0)));
+            parse_odes_spec(expr.to_expr(0));
             const int pkeys_idx = parse_unify ? 2 : 1 ;
             Param_keyss param_keyss_(move(
-                parse_param_keyss(move(expr.to_expr(pkeys_idx)))
+                parse_param_keyss(expr.to_expr(pkeys_idx))
             ));
             check_empty(param_keyss_);
             set_odes_eval(move(param_keyss_), unify);
@@ -94,24 +94,24 @@ namespace SOS {
             }
         }
 
-        void Solver::parse_odes_spec(Expr expr)
+        void Solver::parse_odes_spec(Expr& expr)
         {
             expect(expr.is_deep(),
                    "Expected expressions "s
                    + "with ODE specifications.");
             _odes_spec.reserve(expr.size());
-            for (auto&& eptr : move(expr)) {
-                const Expr& espec = Expr::cptr_to_expr(eptr);
+            for (auto& eptr : expr) {
+                Expr& espec = Expr::ptr_to_expr(eptr);
                 Ode_spec ospec = espec.transform_to_exprs();
                 check_ode_spec(ospec);
                 _odes_spec.emplace_back(move(ospec));
             }
         }
 
-        Param_keyss Solver::parse_param_keyss(const Expr& expr)
+        Param_keyss Solver::parse_param_keyss(Expr& expr)
         {
             if (!expr.is_deep()) {
-                return Param_keyss{move(parse_param_keys(expr))};
+                return Param_keyss{move(parse_param_keys(move(expr)))};
             }
             Param_keyss param_keyss_;
             param_keyss_.reserve(expr.size());
@@ -121,7 +121,7 @@ namespace SOS {
             return param_keyss_;
         }
 
-        Param_keys Solver::parse_param_keys(const Expr& expr)
+        Param_keys Solver::parse_param_keys(Expr&& expr)
         {
             return expr.transform_to_tokens();
         }
@@ -453,7 +453,7 @@ namespace SOS {
                    "Expected two expressions of chosen dt variants "s
                    + "and context(s) for ODEs.");
 
-            Dt_ids dt_ids_ = expr.cto_expr(0).transform_to_args<Dt_id>();
+            Dt_ids dt_ids_ = expr.to_expr(0).transform_to_args<Dt_id>();
 
             Expr& ctx_expr = expr.to_expr(1);
             expect(ctx_expr.is_deep(),

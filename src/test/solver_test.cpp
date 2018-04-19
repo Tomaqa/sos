@@ -554,7 +554,7 @@ try {
            "Copy construction of 'Solver' "s
            + "with adding ODE specification failed"s);
 
-    //! 414 735 allocs
+    //! 414 776 allocs
 
     cout << endl << "Success." << endl;
     return 0;

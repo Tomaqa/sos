@@ -2,7 +2,18 @@
 
 #include <sstream>
 
+#include <iostream>
+
 namespace SOS {
+    const Parser::Reserved_macro_fs_map Parser::reserved_macro_fs_map{
+        {"#def",    &Parser::parse_macro_def},
+        {"#define", &Parser::parse_macro_define},
+        {"#let",    &Parser::parse_macro_let},
+        {"#if",     &Parser::parse_macro_if},
+        {"#ite",    &Parser::parse_macro_ite},
+        {"#for",    &Parser::parse_macro_for},
+    };
+
     Parser::Parser(istream& is)
         : Parser(Expr(preprocess_input(is)))
     { }
@@ -15,15 +26,30 @@ namespace SOS {
     //! potentionally inefficient and dangerous
     Parser::Parser(Expr expr)
     {
-        expect(expr.is_deep(),
-               "Non-expression occured at top level.");
+        preprocess_expr(expr);
+        // expect(expr.is_deep(),
+               // "Non-expression occured at top level.");
         smt_exprs().reserve(expr.size());
-        for (auto& e : expr.transform_to_exprs()) {
+        // for (auto&& e : expr.transform_to_exprs()) {
+        expr.for_each_expr([this](auto& e){
+            expect(!e.empty(),
+                   "Expected command expression, got empty expression.");
             expect(e.cfront()->is_etoken(),
                    "Expected command expression, got: "s
                    + to_string(e.cto_expr(0)));
-            process_expr(e);
-        }
+            parse_expr(e);
+        // }
+        });
+        // preprocess_expr(expr);
+        // smt_exprs().reserve(parser_exprs().size());
+        // for (auto& e : parser_exprs()) {
+        //     expect(!e.empty(),
+        //            "Expected command expression, got empty expression.");
+        //     expect(e.cfront()->is_etoken(),
+        //            "Expected command expression, got: "s
+        //            + to_string(e.cto_expr(0)));
+        //     parse_expr(e);
+        // }
     }
 
     const Parser::Ode& Parser::code(const Ode_key& ode_key_) const
@@ -99,33 +125,34 @@ namespace SOS {
 
     void Parser::preprocess_expr(Expr& expr)
     {
-
+        // parser_exprs().reserve(expr.size()*1.2);
+        int pos = 0;
+        unsigned depth = 0;
+        preprocess_nested_expr(expr, pos, depth);
     }
 
-    void Parser::process_expr(Expr& expr)
+    void Parser::parse_expr(Expr& expr)
     try {
-        const string& cmd = expr.cto_token(0);
+        const Token& cmd = expr.cto_token(0);
+        if (cmd == "define-dt") {
+            return parse_define_dt(expr);
+        }
+        if (cmd == "define-ode-step") {
+            return parse_define_ode_step(expr);
+        }
+        if (cmd == "assert") {
+            parse_assert(expr);
+        }
         expect(cmd != "int-ode",
                "Unexpected command '"s + cmd + "' "
                + "at top level.");
-        if (cmd == "define-dt") {
-            process_define_dt(expr);
-            return;
-        }
-        if (cmd == "define-ode-step") {
-            process_define_ode_step(expr);
-            return;
-        }
-        if (cmd == "assert") {
-            process_assert(expr);
-        }
         add_smt_expr(move(expr));
     }
     catch (const Error& err) {
         throw "At expression\n"s + to_string(expr) + "\n" + err;
     }
 
-    void Parser::declare_ode(const Ode_key& ode_key_, Expr keys_expr)
+    void Parser::declare_ode(const Ode_key& ode_key_, Expr& keys_expr)
     {
         if (has_ode_key(ode_key_)) return;
 
@@ -141,7 +168,7 @@ namespace SOS {
                       + " (Real) Real)"});
     }
 
-    void Parser::process_define_dt(Expr& expr)
+    void Parser::parse_define_dt(Expr& expr)
     {
         expect(expr.size() == 5,
                "Expected ODE function name, "s
@@ -157,7 +184,7 @@ namespace SOS {
                          ? Dt_spec("+ "s + move(expr.to_token(4)))
                          : move(expr.to_expr(4));
 
-        declare_ode(ode_key_, move(keys_expr));
+        declare_ode(ode_key_, keys_expr);
 
         check_has_not_dt_key(dt_key_);
         add_dt_key(ode_key_, dt_key_);
@@ -172,31 +199,30 @@ namespace SOS {
                       + to_string(dkey_idx) +")"});
     }
 
-    void Parser::process_define_ode_step(Expr& expr)
+    void Parser::parse_define_ode_step(Expr& expr)
     {
         expect(expr.size() == 2,
                "Expected initial ODE step size, got: "s
                + to_string(expr));
         expect(!_ode_step_set, "ODE step size has already been set.");
-        expect(expr.cto_etoken_check(1).get_value_check<Time>(_ode_step),
+        expect(expr.to_etoken_check(1).get_value_check<Time>(_ode_step),
                "ODE step size is invalid: "s
                + to_string(*expr[1]));
         _ode_step_set = true;
     }
 
-    void Parser::process_assert(Expr& expr)
+    void Parser::parse_assert(Expr& expr)
     {
         expr.for_each_expr([this](Expr& e){
             if (e.cfront()->is_etoken()
                 && e.cto_token(0) == "int-ode") {
-                process_int_ode(e);
-                return;
+                return parse_int_ode(e);
             }
-            process_assert(e);
+            parse_assert(e);
         });
     }
 
-    void Parser::process_int_ode(Expr& expr)
+    void Parser::parse_int_ode(Expr& expr)
     {
         expect(expr.size() == 5,
                "Expected ODE function name, "s
@@ -205,24 +231,24 @@ namespace SOS {
                + "and parameter values, got: "
                + to_string(expr));
 
-        const Ode_key& ode_key_ = expr.cto_token_check(1);
+        Ode_key& ode_key_ = expr.to_token_check(1);
         check_has_ode_key(ode_key_);
 
-        const Const_id& dt_const = expr.cto_token_check(2);
+        Const_id& dt_const = expr.to_token_check(2);
 
-        const Expr& init_expr = expr.cto_expr_check(3);
+        Expr& init_expr = expr.to_expr_check(3);
         expect(init_expr.size() == 3 && init_expr.is_flat(),
                "Expected initial values of ODE, got: "s
                + to_string(init_expr));
-        const Const_id& init_const = init_expr.cto_token(0);
-        auto init_t_consts = make_pair(move(init_expr.cto_token(1)),
-                                       move(init_expr.cto_token(2)));
+        Const_id& init_const = init_expr.to_token(0);
+        auto init_t_consts = make_pair(move(init_expr.to_token(1)),
+                                       move(init_expr.to_token(2)));
 
-        const Expr& param_expr = expr.cto_expr_check(4);
+        Expr& param_expr = expr.to_expr_check(4);
         expect(param_expr.is_flat(),
                "Expected parameter constants, got: "s
                + to_string(param_expr));
-        Const_ids param_consts = move(param_expr.transform_to_tokens());
+        Const_ids param_consts = param_expr.transform_to_tokens();
 
         add_const_ids_row(ode_key_,
                           move(dt_const), move(init_const),
@@ -376,11 +402,11 @@ namespace SOS {
         return get<1>(odes_map_value(ode_key_));
     }
 
-    void Parser::add_param_keys(const Ode_key& ode_key_, const Expr& expr)
+    void Parser::add_param_keys(const Ode_key& ode_key_, Expr& expr)
     {
         param_keys_map(ode_key_).reserve(expr.size()+2);
         param_keys_map(ode_key_).emplace_back(ode_key_);
-        Param_keys pkeys = move(expr.transform_to_tokens());
+        Param_keys pkeys = expr.transform_to_tokens();
         move(std::begin(pkeys), std::end(pkeys),
              std::back_inserter(param_keys_map(ode_key_)));
         param_keys_map(ode_key_).emplace_back("t");
@@ -423,4 +449,149 @@ namespace SOS {
         }
         return str;
     }
+
+    bool Parser::is_macro_key(const Macro_key& macro_key_)
+    {
+        return macro_key_[0] == '#';
+    }
+
+    bool Parser::is_reserved_macro_key(const Macro_key& macro_key_)
+    {
+        return reserved_macro_fs_map.includes(macro_key_);
+    }
+
+    bool Parser::has_macro_key(const Macro_key& macro_key_) const
+    {
+        return macros_map().count(macro_key_) == 1;
+    }
+
+    void Parser::check_has_not_macro_key(const Macro_key& macro_key_) const
+    {
+        expect(!has_macro_key(macro_key_),
+               "Macro named '"s + macro_key_ + "' "
+               + "has already been defined.");
+    }
+
+    Parser::Macro& Parser::macro(const Macro_key& macro_key_) const
+    {
+        return macros_map()[macro_key_];
+    }
+
+    Parser::Macro_params&
+        Parser::macro_params(const Macro_key& macro_key_) const
+    {
+        return get<0>(macro(macro_key_));
+    }
+
+    Parser::Macro_body& Parser::macro_body(const Macro_key& macro_key_) const
+    {
+        return get<1>(macro(macro_key_));
+    }
+
+    void Parser::add_macro_key(const Macro_key& macro_key_) const
+    {
+        macro(macro_key_);
+    }
+
+    void Parser::add_macro(const Macro_key& macro_key_,
+                           Macro_params macro_params_,
+                           Macro_body macro_body_) const
+    {
+        macro(macro_key_) = make_tuple(move(macro_params_),
+                                       move(macro_body_));
+    }
+
+    void Parser::preprocess_nested_expr(Expr& expr,
+                                        int& pos, unsigned depth)
+    {
+        const int size_ = expr.size();
+        const bool is_top = (depth == 0);
+        while (pos < size_) {
+            if (expr[pos]->is_etoken()) {
+                const Macro_key& macro_key_ = expr.cto_token(pos++);
+                if (is_macro_key(macro_key_)) {
+                    return parse_macro(expr, pos, macro_key_, is_top);
+                }
+                expect(!is_top,
+                       "Unexpected token at top level: '"s
+                       + macro_key_);
+                continue;
+            }
+            Expr& subexpr = expr.to_expr(pos++);
+            preprocess_nested_expr(subexpr, pos, depth+1);
+            // if (is_top) {
+                // add_parser_expr(move(subexpr));
+            // }
+        }
+    }
+
+    void Parser::parse_macro(Expr& expr, int& pos,
+                             const Macro_key& macro_key_, bool is_top) const
+    {
+        if (is_top) {
+            return parse_top_macro(expr, pos, macro_key_);
+        }
+        expect(!is_reserved_macro_key(macro_key_),
+               "Unexpected nested reserved macro: '"s
+               + macro_key_ + "'");
+        parse_user_macro(expr, pos, macro_key_);
+    }
+
+    void Parser::parse_top_macro(Expr& expr, int& pos,
+                                 const Macro_key& macro_key_) const
+    {
+        if (is_reserved_macro_key(macro_key_)) {
+            return parse_reserved_macro(expr, pos, macro_key_);
+        }
+        parse_user_macro(expr, pos, macro_key_);
+    }
+
+    void Parser::parse_reserved_macro(Expr& expr, int& pos,
+                                      const Macro_key& macro_key_) const
+    {
+        reserved_macro_fs_map[macro_key_](this, expr, pos);
+    }
+
+    void Parser::parse_user_macro(Expr& expr, int& pos,
+                                  const Macro_key& macro_key_) const
+    {
+        expect(has_macro_key(macro_key_),
+               "Macro was not defined: '"s
+               + macro_key_ + "'");
+    }
+
+    void Parser::parse_macro_def_helper(Expr& expr, int& pos,
+                                        bool one_line) const
+    {
+
+    }
+
+    void Parser::parse_macro_let(Expr& expr, int& pos) const
+    {
+
+    }
+
+    void Parser::parse_macro_if_helper(Expr& expr, int& pos,
+                                       bool else_branch) const
+    {
+        Expr& cond_expr = expr.to_expr_check(pos++);
+        if (!parse_arith_exp<int>(cond_expr)) return;
+    }
+
+    void Parser::parse_macro_for(Expr& expr, int& pos) const
+    {
+
+    }
+
+    template <typename Arg>
+    Arg Parser::parse_arith_exp(Expr& expr) const
+    {
+        return Arg();
+    }
+
+    // void Parser::add_parser_expr(Expr expr) const
+    // {
+    //     std::cout << "* " << expr << std::endl;
+    //     parser_exprs().emplace_back(move(expr));
+    // }
 }
