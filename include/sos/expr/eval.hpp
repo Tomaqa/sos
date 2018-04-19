@@ -22,12 +22,12 @@ namespace SOS {
         Eval& operator =(const Eval& rhs)                           = default;
         Eval(Eval&& rhs)                                            = default;
         Eval& operator =(Eval&& rhs)                                = default;
-        Eval(const Expr& expr_,
+        Eval(Expr expr_,
              Param_keys_ptr param_keys_ptr_,
              Param_values_ptr param_values_ptr_ = new_param_values({}));
-        Eval(const Expr& expr_, Param_keys param_keys_ = {});
-        Eval(const string& str, Param_keys param_keys_ = {})
-                                      : Eval(Expr(str), move(param_keys_)) { }
+        Eval(Expr expr_, Param_keys param_keys_ = {});
+        Eval(string str, Param_keys param_keys_ = {})
+                                : Eval(Expr(move(str)), move(param_keys_)) { }
 
         size_t size() const                   { return cparam_keys().size(); }
 

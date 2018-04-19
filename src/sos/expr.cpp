@@ -3,7 +3,7 @@
 namespace SOS {
     string to_string(const Expr_place& rhs)
     {
-        return move((string)rhs);
+        return (string)rhs;
     }
 
     ostream& operator <<(ostream& os, const Expr_place& rhs)
@@ -28,8 +28,8 @@ namespace SOS {
         return new_etoken(*this);
     }
 
-    Expr_token::Expr_token(const Token& token)
-        : _token(token)
+    Expr_token::Expr_token(Token token)
+        : _token(move(token))
     { }
 
     const Expr_place::Token& Expr_token::check_token(const Token& token)
@@ -77,8 +77,8 @@ namespace SOS {
         }
     }
 
-    Expr::Expr(const string& input)
-        : Expr(istringstream(input))
+    Expr::Expr(string input)
+        : Expr(istringstream(move(input)))
     { }
 
     Expr::Expr(istream& is)
@@ -422,7 +422,7 @@ namespace SOS {
                 places_.emplace_back(move(e));
                 continue;
             }
-            auto& subexpr = ptr_to_expr(e).flatten();
+            auto&& subexpr = move(ptr_to_expr(e).flatten());
             move(subexpr.begin(), subexpr.end(), std::back_inserter(places_));
         }
         places() = move(places_);
@@ -431,24 +431,24 @@ namespace SOS {
 
     Expr::Tokens Expr::transform_to_tokens() const
     {
-        expect(is_flat(), "Expression dous not contain only tokens.");
+        expect(is_flat(), "Expression does not contain only tokens.");
         Tokens tokens;
         tokens.reserve(size());
         std::transform(cbegin(), cend(),
                        std::back_inserter(tokens),
                        bind(&Expr::cptr_to_token, _1));
-        return move(tokens);
+        return tokens;
     }
 
     Expr::Exprs Expr::transform_to_exprs() const
     {
-        expect(is_deep(), "Expression dous not contain only subexpressions.");
+        expect(is_deep(), "Expression does not contain only subexpressions.");
         Exprs exprs;
         exprs.reserve(size());
         std::transform(cbegin(), cend(),
                        std::back_inserter(exprs),
                        bind(&Expr::cptr_to_expr, _1));
-        return move(exprs);
+        return exprs;
     }
 
 }

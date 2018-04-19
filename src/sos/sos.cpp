@@ -40,6 +40,6 @@ namespace SOS {
 
         str.assign(std::istreambuf_iterator<char>(rhs),
                    std::istreambuf_iterator<char>());
-        return move(str);
+        return str;
     }
 }

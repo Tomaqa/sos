@@ -12,9 +12,9 @@ namespace SOS {
         Oper& operator =(const Oper& rhs)                           = default;
         Oper(Oper&& rhs)                                            = default;
         Oper& operator =(Oper&& rhs)                                = default;
-        Oper(Param_keys_link& param_keys_,
-             Param_values_link& param_values_,
-             const Expr& expr_);
+        Oper(Param_keys_link& param_keys_l_,
+             Param_values_link& param_values_l_,
+             Expr&& expr_);
 
         size_t size() const                    { return param_keys().size(); }
         const Param_keys_link& cparam_keys_link() const;
@@ -29,16 +29,16 @@ namespace SOS {
         using Oper_ptrs = pair<Oper_ptr, Oper_ptr>;
 
         Param_keys::iterator find_param_key(const Param_key& key_) const;
-        Param_keys::iterator set_param_key(const Param_key& key_) const;
+        Param_keys::iterator set_param_key(Param_key key_) const;
     private:
         bool is_binary() const                          { return _is_binary; }
 
-        void set_lazy_args(const Expr& expr_);
-        template <int idx> void set_lazy_arg(const Expr& expr_);
-        template <int idx> Arg_lazy get_arg_lazy(const Expr& expr_);
+        void set_lazy_args(Expr& expr_);
+        template <int idx> void set_lazy_arg(Expr& expr_);
+        template <int idx> Arg_lazy get_arg_lazy(Expr& expr_);
 
         Arg_lazy arg_lazy(Arg arg) const noexcept;
-        Arg_lazy param_lazy(const Param_key& key_) const;
+        Arg_lazy param_lazy(Param_key key_) const;
         Arg_lazy oper_lazy(const Oper_ptr& oper_ptr_) const;
 
         //! potentionally inefficient

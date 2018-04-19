@@ -7,20 +7,22 @@ namespace SOS {
         : Parser(Expr(preprocess_input(is)))
     { }
 
-    Parser::Parser(const string& input)
-        : Parser(Expr(preprocess_input(input)))
+    Parser::Parser(string input)
+        : Parser(Expr(preprocess_input(move(input))))
     { }
 
-    Parser::Parser(const Expr& expr)
+    //! It requires to have whole input stored in memory,
+    //! potentionally inefficient and dangerous
+    Parser::Parser(Expr expr)
     {
         expect(expr.is_deep(),
                "Non-expression occured at top level.");
         smt_exprs().reserve(expr.size());
-        for (auto&& e : expr.transform_to_exprs()) {
+        for (auto& e : expr.transform_to_exprs()) {
             expect(e.cfront()->is_etoken(),
                    "Expected command expression, got: "s
                    + to_string(e.cto_expr(0)));
-            process_expr(forward<Expr>(e));
+            process_expr(e);
         }
     }
 
@@ -78,10 +80,10 @@ namespace SOS {
         return get<4>(ode(ode_key_));
     }
 
-    string Parser::preprocess_input(string input)
+    string Parser::preprocess_input(string&& input)
     {
         istringstream iss(move(input));
-        return move(preprocess_input(iss));
+        return preprocess_input(iss);
     }
 
     string Parser::preprocess_input(istream& is)
@@ -92,10 +94,15 @@ namespace SOS {
             str += tmp;
             getline(is, tmp);
         }
-        return move(str);
+        return str;
     }
 
-    void Parser::process_expr(Expr expr)
+    void Parser::preprocess_expr(Expr& expr)
+    {
+
+    }
+
+    void Parser::process_expr(Expr& expr)
     try {
         const string& cmd = expr.cto_token(0);
         expect(cmd != "int-ode",
@@ -127,7 +134,7 @@ namespace SOS {
         expect(keys_expr.is_flat(),
                "Expected expression with parameter keys identifiers, got: "s
                + to_string(keys_expr));
-        add_param_keys(ode_key_, move(keys_expr));
+        add_param_keys(ode_key_, keys_expr);
 
         add_smt_expr({"(declare-fun "s
                       + int_ode_identifier(ode_key_)
@@ -143,12 +150,9 @@ namespace SOS {
                + "and expression with dt specification, got: "
                + to_string(expr));
 
-        const Ode_key& ode_key_ = expr.cto_token_check(1);
-
-        const Dt_key& dt_key_ = expr.cto_token_check(2);
-
-        Expr keys_expr = move(expr.cto_expr_check(3));
-
+        Ode_key ode_key_ = move(expr.to_token_check(1));
+        Dt_key dt_key_ = move(expr.to_token_check(2));
+        Expr keys_expr = move(expr.to_expr_check(3));
         Dt_spec dt_spec_ = expr[4]->is_etoken()
                          ? Dt_spec("+ "s + move(expr.to_token(4)))
                          : move(expr.to_expr(4));
@@ -292,11 +296,11 @@ namespace SOS {
         return get<0>(odes_map_value(ode_key_));
     }
 
-    void Parser::add_ode_key(const Ode_key& ode_key_)
+    void Parser::add_ode_key(Ode_key ode_key_)
     {
         const int size_ = codes_map().size();
         ode_key_idx(ode_key_) = size_;
-        odes().emplace_back(make_tuple(ode_key_, Dt_keys(), Ode_spec(),
+        odes().emplace_back(make_tuple(move(ode_key_), Dt_keys(), Ode_spec(),
                                        Param_keys(), Const_ids_rows()));
     }
 
@@ -351,12 +355,13 @@ namespace SOS {
         return cdt_keys_map_value(dt_key_);
     }
 
-    void Parser::add_dt_key(const Ode_key& ode_key_, Dt_key dt_key_)
+    void Parser::add_dt_key(Ode_key ode_key_, Dt_key dt_key_)
     {
         dts_spec_map(ode_key_).emplace(dt_key_, Dt_spec());
         const int dt_idx = cdt_keys(ode_key_).size();
         dt_keys(ode_key_).emplace_back(dt_key_);
-        dt_keys_map().emplace(move(dt_key_), make_pair(ode_key_, dt_idx));
+        dt_keys_map().emplace(move(dt_key_),
+                              make_pair(move(ode_key_), dt_idx));
     }
 
     void Parser::add_dt_spec(const Ode_key& ode_key_,
@@ -371,7 +376,7 @@ namespace SOS {
         return get<1>(odes_map_value(ode_key_));
     }
 
-    void Parser::add_param_keys(const Ode_key& ode_key_, Expr expr)
+    void Parser::add_param_keys(const Ode_key& ode_key_, const Expr& expr)
     {
         param_keys_map(ode_key_).reserve(expr.size()+2);
         param_keys_map(ode_key_).emplace_back(ode_key_);
@@ -416,6 +421,6 @@ namespace SOS {
         for (const Expr& expr : csmt_exprs()) {
             str += to_string(expr) + "\n";
         }
-        return move(str);
+        return str;
     }
 }

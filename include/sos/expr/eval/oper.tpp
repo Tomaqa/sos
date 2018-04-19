@@ -2,13 +2,13 @@ namespace SOS {
     template <typename Arg>
     Expr::Eval<Arg>::Oper::Oper(Param_keys_link& param_keys_l_,
                                 Param_values_link& param_values_l_,
-                                const Expr& expr_)
+                                Expr&& expr_)
         : _param_keys_l(param_keys_l_), _param_values_l(param_values_l_)
     {
         const int size_ = expr_.size();
         expect(size_ == 2 || size_ == 3,
                "Expression is not unary nor binary.");
-        const F_key& key_ = expr_.cto_token_check(0);
+        F_key key_ = move(expr_.cto_token_check(0));
         _is_binary = (size_ == 3);
         if (is_binary()) {
             expect(bin_fs.includes(key_),
@@ -28,7 +28,7 @@ namespace SOS {
     }
 
     template <typename Arg>
-    void Expr::Eval<Arg>::Oper::set_lazy_args(const Expr& expr_)
+    void Expr::Eval<Arg>::Oper::set_lazy_args(Expr& expr_)
     {
         set_lazy_arg<0>(expr_);
         if (is_binary()) set_lazy_arg<1>(expr_);
@@ -36,31 +36,31 @@ namespace SOS {
 
     template <typename Arg>
     template <int idx>
-    void Expr::Eval<Arg>::Oper::set_lazy_arg(const Expr& expr_)
+    void Expr::Eval<Arg>::Oper::set_lazy_arg(Expr& expr_)
     {
-        get<idx>(_args_lazy) = get_arg_lazy<idx>(expr_);
+        get<idx>(_args_lazy) = move(get_arg_lazy<idx>(expr_));
     }
 
     template <typename Arg>
     template <int idx>
     typename Expr::Eval<Arg>::Oper::Arg_lazy
-        Expr::Eval<Arg>::Oper::get_arg_lazy(const Expr& expr_)
+        Expr::Eval<Arg>::Oper::get_arg_lazy(Expr& expr_)
     {
-        const auto& place_ = expr_[idx+1];
+        auto&& place_ = move(expr_[idx+1]);
         if (!place_->is_etoken()) {
-            const auto& subexpr = cptr_to_expr(place_);
+            auto&& subexpr = move(ptr_to_expr(place_));
             Oper_ptr& oper_ptr_ = get<idx>(_oper_ptrs);
             oper_ptr_ = new_oper(Oper(_param_keys_l, _param_values_l,
-                                      subexpr));
+                                      move(subexpr)));
             return oper_lazy(oper_ptr_);
         }
-        const auto& token_ = cptr_to_etoken(place_);
+        auto&& token_ = move(ptr_to_etoken(place_));
         Arg arg;
         if (token_.get_value_check(arg)) {
             return arg_lazy(arg);
         }
-        const Param_key& key_ = token_.ctoken();
-        return param_lazy(key_);
+        Param_key&& key_ = move(token_.token());
+        return param_lazy(move(key_));
     }
 
     template <typename Arg>
@@ -109,11 +109,11 @@ namespace SOS {
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Param_keys::iterator
-        Expr::Eval<Arg>::Oper::set_param_key(const Param_key& key_) const
+        Expr::Eval<Arg>::Oper::set_param_key(Param_key key_) const
     {
         auto pos = find_param_key(key_);
         if (pos != std::end(param_keys())) return pos;
-        return param_keys().insert(pos, key_);
+        return param_keys().emplace(pos, move(key_));
     }
 
     template <typename Arg>
@@ -125,9 +125,9 @@ namespace SOS {
 
     template <typename Arg>
     typename Expr::Eval<Arg>::Oper::Arg_lazy
-        Expr::Eval<Arg>::Oper::param_lazy(const Param_key& key_) const
+        Expr::Eval<Arg>::Oper::param_lazy(Param_key key_) const
     {
-        auto it = set_param_key(key_);
+        auto it = set_param_key(move(key_));
         int idx = std::distance(std::begin(param_keys()), it);
         return [params_l = &cparam_values(), idx](){
             return (*params_l)[idx];

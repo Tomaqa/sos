@@ -85,7 +85,7 @@ namespace SOS {
                      << endl << "  -> " << "( " << res1 << ")"
                      << endl;
             }
-            return move(res1);
+            return res1;
         }
 
         /////////////////////////////////////////////////////////////////
@@ -134,7 +134,7 @@ namespace SOS {
                      << endl << "  -> " << "( " << res1 << ")"
                      << endl;
             }
-            return move(res1);
+            return res1;
         }
 
         /////////////////////////////////////////////////////////////////
@@ -183,7 +183,7 @@ namespace SOS {
                      << endl << "  -> " << "( " << res1 << ")"
                      << endl;
             }
-            return move(res1);
+            return res1;
         }
 
         /////////////////////////////////////////////////////////////////
@@ -212,7 +212,7 @@ namespace SOS {
                      << endl << "  -> " << "( " << res1 << ")"
                      << endl;
             }
-            return move(res1);
+            return res1;
         }
 
         /////////////////////////////////////////////////////////////////
@@ -554,7 +554,7 @@ try {
            "Copy construction of 'Solver' "s
            + "with adding ODE specification failed"s);
 
-    //! 459 349 allocs
+    //! 414 735 allocs
 
     cout << endl << "Success." << endl;
     return 0;

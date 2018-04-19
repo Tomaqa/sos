@@ -25,7 +25,7 @@ namespace SOS {
         for (const auto& e : rhs) {
             str += to_string(e) + " ";
         }
-        return move(str);
+        return str;
     }
 
     template <typename Key, typename Value>
@@ -35,7 +35,7 @@ namespace SOS {
         for (const auto& e : rhs) {
             str += to_string(e) + ", ";
         }
-        return move(str);
+        return str;
     }
 
     template <typename T1, typename T2>
@@ -49,7 +49,7 @@ namespace SOS {
     {
       string str("");
       Aux::tuple_to_string(str, rhs, Aux::Gen_seq<sizeof...(Args)>());
-      return move(str);
+      return str;
     }
 
     template <typename T>

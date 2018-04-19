@@ -38,7 +38,7 @@ namespace SOS {
         Expr_token()                                                 = delete;
         virtual ~Expr_token()                                       = default;
         virtual Expr_place_ptr clone() const override final;
-        Expr_token(const Token& token);
+        Expr_token(Token token);
 
         template <typename... Args>
             static Expr_ptr_t<Expr_token> new_etoken(Args&&... args);
@@ -55,7 +55,7 @@ namespace SOS {
         virtual bool is_etoken() const noexcept override final
                                                               { return true; }
         virtual explicit operator string () const noexcept override final
-                                                    { return move(ctoken()); }
+                                                          { return ctoken(); }
     private:
         Token _token;
     };
@@ -79,7 +79,7 @@ namespace SOS {
         Expr(Expr&& rhs)                                            = default;
         Expr& operator =(Expr&& rhs)                                = default;
         Expr(initializer_list<Expr_place_ptr> list);
-        Expr(const string& input);
+        Expr(string input);
         Expr(istream& is);
         Expr(istream&& is);
 

@@ -40,17 +40,17 @@ namespace SOS {
     };
 
     template <typename Arg>
-    Expr::Eval<Arg>::Eval(const Expr& expr_,
+    Expr::Eval<Arg>::Eval(Expr expr_,
                           Param_keys_ptr param_keys_ptr_,
                           Param_values_ptr param_values_ptr_)
         : _param_keys_ptr(move(param_keys_ptr_)),
           _param_values_ptr(move(param_values_ptr_)),
-          _oper(param_keys_link(), param_values_link(), expr_)
+          _oper(param_keys_link(), param_values_link(), move(expr_))
     { }
 
     template <typename Arg>
-    Expr::Eval<Arg>::Eval(const Expr& expr_, Param_keys param_keys_)
-        : Eval(expr_, new_param_keys(move(param_keys_)) )
+    Expr::Eval<Arg>::Eval(Expr expr_, Param_keys param_keys_)
+        : Eval(move(expr_), new_param_keys(move(param_keys_)) )
     { }
 
     template <typename Arg>
@@ -191,13 +191,13 @@ namespace SOS {
     {
         string str = "[ "s + to_string(cparam_keys()) + "]";
         if (_valid_values) str += " <-- [ " + to_string(param_values()) + "]";
-        return move(str);
+        return str;
     }
 
     template <typename Arg>
     string to_string(const Expr::Eval<Arg>& rhs)
     {
-        return move((string)rhs);
+        return (string)rhs;
     }
 
     template <typename Arg>

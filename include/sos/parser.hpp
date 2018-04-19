@@ -33,8 +33,8 @@ namespace SOS {
         Parser(Parser&& rhs)                                        = default;
         Parser& operator =(Parser&& rhs)                            = default;
         Parser(istream& is);
-        Parser(const string& input);
-        Parser(const Expr& expr);
+        Parser(string input);
+        Parser(Expr expr);
 
         const Odes& codes() const                            { return _odes; }
         string csmt_input() const;
@@ -60,9 +60,10 @@ namespace SOS {
         const Const_ids_rows& cconst_ids(const Ode_key& ode_key_) const;
         Const_ids_rows& const_ids(const Ode_key& ode_key_);
 
-        static string preprocess_input(string input);
+        static string preprocess_input(string&& input);
         static string preprocess_input(istream& is);
-        void process_expr(Expr expr);
+        void preprocess_expr(Expr& expr);
+        void process_expr(Expr& expr);
         void declare_ode(const Ode_key& ode_key_, Expr keys_expr);
         void process_define_dt(Expr& expr);
         void process_define_ode_step(Expr& expr);
@@ -80,6 +81,15 @@ namespace SOS {
 
         using Smt_exprs = Expr::Exprs;
 
+        using Macro_key = Param_key;
+        using Macro_params = Param_keys;
+        using Macro_body = string;
+        using Macro = tuple<Macro_params, Macro_body>;
+        using Macros_map = map<Macro_key, Macro>;
+        using Let_key = Macro_key;
+        using Let_body = string;
+        using Lets_map = map<Let_key, Let_body>;
+
         const Odes_map& codes_map() const                { return _odes_map; }
         Odes_map& odes_map()                             { return _odes_map; }
         bool has_ode_key(const Ode_key& ode_key_) const;
@@ -94,7 +104,7 @@ namespace SOS {
         int& ode_key_idx(const Ode_key& ode_key_);
         const Dts_spec_map& cdts_spec_map(const Ode_key& ode_key_) const;
         Dts_spec_map& dts_spec_map(const Ode_key& ode_key_);
-        void add_ode_key(const Ode_key& ode_key_);
+        void add_ode_key(Ode_key ode_key_);
 
         const Dt_keys_map& cdt_keys_map() const       { return _dt_keys_map; }
         Dt_keys_map& dt_keys_map()                    { return _dt_keys_map; }
@@ -109,12 +119,12 @@ namespace SOS {
         int cdt_key_idx(const Dt_key& dt_key_) const;
         int& dt_key_idx(const Dt_key& dt_key_);
         const Ode_key& code_key(const Dt_key& dt_key_) const;
-        void add_dt_key(const Ode_key& ode_key_, Dt_key dt_key_);
+        void add_dt_key(Ode_key ode_key_, Dt_key dt_key_);
         void add_dt_spec(const Ode_key& ode_key_,
                          const Dt_key& dt_key_, Dt_spec dt_spec_);
 
         Param_keys& param_keys_map(const Ode_key& ode_key_);
-        void add_param_keys(const Ode_key& ode_key_, Expr expr);
+        void add_param_keys(const Ode_key& ode_key_, const Expr& expr);
 
         Const_ids_rows& const_ids_map(const Ode_key& ode_key_);
         int csteps(const Ode_key& ode_key_) const;
@@ -127,13 +137,18 @@ namespace SOS {
         Smt_exprs& smt_exprs()                          { return _smt_exprs; }
         void add_smt_expr(Expr expr);
 
+        //! there may be some issue with move operations ?
+        //! I've experienced some ..
         Odes _odes;
         Odes_map _odes_map;
         Dt_keys_map _dt_keys_map;
+
         Smt_exprs _smt_exprs;
+
         Time _ode_step;
         bool _ode_step_set{false};
-        //! there may be some issue with move operations ?
-        //! I've experienced some ..
+
+        Macros_map _macros_map;
+        Lets_map _lets_map;
     };
 }

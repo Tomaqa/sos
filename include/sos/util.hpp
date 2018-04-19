@@ -18,23 +18,11 @@ namespace SOS {
         class Run;
 
         template <typename Cont, typename Un_f>
-            Un_f for_each(Cont&& cont, Un_f f);
-        template <typename Cont1, typename InputIt2, typename Bin_f>
-            Bin_f for_each(Cont1&& cont1, InputIt2 first2, Bin_f f);
-        template <typename Cont, typename Un_f>
             bool all_of(const Cont& cont, Un_f f);
         template <typename Cont, typename Un_f>
             bool any_of(const Cont& cont, Un_f f);
         template <typename Cont, typename Un_f>
             bool none_of(const Cont& cont, Un_f f);
-        template <typename Cont, typename OutputIt>
-            OutputIt copy(Cont&& cont, OutputIt d_first);
-        template <typename Cont, typename OutputIt, typename Un_f>
-            OutputIt transform(Cont&& cont, OutputIt d_first, Un_f f);
-        template <typename Cont1, typename InputIt2,
-                  typename OutputIt, typename Bin_f>
-            OutputIt transform(Cont1&& cont1, InputIt2 first2,
-                               OutputIt d_first, Bin_f f);
         template <typename Cont,
                   typename Bin_f = std::equal_to<typename Cont::value_type>>
             bool all_equal(const Cont& cont, Bin_f f = Bin_f());
@@ -43,16 +31,41 @@ namespace SOS {
             bool equal(const Cont1& cont1, InputIt2 first2,
                        Bin_f f = Bin_f());
 
+        template <typename Cont, typename Un_f>
+            Un_f for_each(Cont& cont, Un_f f);
+        template <typename Cont, typename Un_f>
+            Un_f for_each(Cont&& cont, Un_f f);
+        template <typename Cont1, typename InputIt2, typename Bin_f>
+            Bin_f for_each(Cont1& cont1, InputIt2 first2, Bin_f f);
+        template <typename Cont1, typename InputIt2, typename Bin_f>
+            Bin_f for_each(Cont1&& cont1, InputIt2 first2, Bin_f f);
+        template <typename Cont, typename OutputIt>
+            OutputIt copy(const Cont& cont, OutputIt d_first);
+        template <typename Cont, typename OutputIt>
+            OutputIt move(Cont&& cont, OutputIt d_first);
+        template <typename Cont, typename OutputIt, typename Un_f>
+            OutputIt transform(Cont& cont, OutputIt d_first, Un_f f);
+        template <typename Cont, typename OutputIt, typename Un_f>
+            OutputIt transform(Cont&& cont, OutputIt d_first, Un_f f);
+        template <typename Cont1, typename InputIt2,
+                  typename OutputIt, typename Bin_f>
+            OutputIt transform(Cont1& cont1, InputIt2 first2,
+                               OutputIt d_first, Bin_f f);
+        template <typename Cont1, typename InputIt2,
+                  typename OutputIt, typename Bin_f>
+            OutputIt transform(Cont1&& cont1, InputIt2 first2,
+                               OutputIt d_first, Bin_f f);
+
         template <typename T>
-            vector<T>& operator +=(vector<T>& lhs, vector<T> rhs);
+            vector<T>& operator +=(vector<T>& lhs, const vector<T>& rhs);
         template <typename T>
-            vector<T> operator +(vector<T> lhs, vector<T> rhs);
+            vector<T> operator +(vector<T> lhs, const vector<T>& rhs);
         template <typename T>
-            vector<T>& operator *=(vector<T>& lhs, T rhs);
+            vector<T>& operator *=(vector<T>& lhs, const T& rhs);
         template <typename T>
-            vector<T> operator *(vector<T> lhs, T rhs);
+            vector<T> operator *(vector<T> lhs, const T& rhs);
         template <typename T>
-            vector<T> operator *(T lhs, vector<T> rhs);
+            vector<T> operator *(const T& lhs, vector<T> rhs);
     }
 
     class Util::Flag {

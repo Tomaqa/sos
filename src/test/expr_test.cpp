@@ -28,7 +28,7 @@ namespace SOS {
 
                 cout << input << " -> " << expr << endl;
             }
-            return move(to_string(expr));
+            return to_string(expr);
         }
 
         /////////////////////////////////////////////////////////////////
@@ -55,7 +55,7 @@ namespace SOS {
                        + to_string(expr2) + "'");
                 cout << input << " -> " << expr << endl;
             }
-            return move(to_string(expr));
+            return to_string(expr);
         }
 
         /////////////////////////////////////////////////////////////////
@@ -353,7 +353,7 @@ try {
          double, string>
          (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
 
-    // 3386 allocs
+    //! 4313 allocs
 
     cout << endl << "Success." << endl;
     return 0;

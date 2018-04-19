@@ -29,8 +29,8 @@ namespace SOS {
             : Solver(move(spec.first), move(spec.second), unify)
         { }
 
-        Solver::Solver(const string& input, bool unify)
-            : Solver(istringstream(input), unify)
+        Solver::Solver(string input, bool unify)
+            : Solver(istringstream(move(input)), unify)
         { }
 
         Solver::Solver(istream& is, bool unify)
@@ -44,7 +44,7 @@ namespace SOS {
             : Solver(is, unify)
         { }
 
-        Solver::Solver(const Expr& expr, bool unify)
+        Solver::Solver(Expr expr, bool unify)
         try {
             bool parse_unify = (
                  expr.size() == 3
@@ -58,10 +58,10 @@ namespace SOS {
                    + "at top level "
                    + "with optional '*' token in between "
                    + "(to unify parameter keys).");
-            parse_odes_spec(expr.cto_expr(0));
+            parse_odes_spec(move(expr.to_expr(0)));
             const int pkeys_idx = parse_unify ? 2 : 1 ;
             Param_keyss param_keyss_(move(
-                parse_param_keyss(expr.cto_expr(pkeys_idx))
+                parse_param_keyss(move(expr.to_expr(pkeys_idx)))
             ));
             check_empty(param_keyss_);
             set_odes_eval(move(param_keyss_), unify);
@@ -94,15 +94,15 @@ namespace SOS {
             }
         }
 
-        void Solver::parse_odes_spec(const Expr& expr)
+        void Solver::parse_odes_spec(Expr expr)
         {
             expect(expr.is_deep(),
                    "Expected expressions "s
                    + "with ODE specifications.");
             _odes_spec.reserve(expr.size());
-            for (auto& eptr : expr) {
+            for (auto&& eptr : move(expr)) {
                 const Expr& espec = Expr::cptr_to_expr(eptr);
-                Ode_spec ospec(move(espec.transform_to_exprs()));
+                Ode_spec ospec = espec.transform_to_exprs();
                 check_ode_spec(ospec);
                 _odes_spec.emplace_back(move(ospec));
             }
@@ -118,12 +118,12 @@ namespace SOS {
             transform(expr.transform_to_exprs(),
                       std::back_inserter(param_keyss_),
                       bind(&Solver::parse_param_keys, _1));
-            return move(param_keyss_);
+            return param_keyss_;
         }
 
         Param_keys Solver::parse_param_keys(const Expr& expr)
         {
-            return move(expr.transform_to_tokens());
+            return expr.transform_to_tokens();
         }
 
         void Solver::check_empty(const Param_keyss& param_keyss_) const
@@ -210,8 +210,8 @@ namespace SOS {
             transform(odes_spec(),
                       std::make_move_iterator(std::begin(param_keyss_)),
                       std::back_inserter(odes_eval()),
-                      [](Ode_spec& ospec, const Param_keys& keys_){
-                          return create_ode_eval(ospec, keys_);
+                      [](Ode_spec& ospec, Param_keys&& keys_){
+                          return create_ode_eval(ospec, move(keys_));
                       });
         }
 
@@ -231,7 +231,7 @@ namespace SOS {
         void Solver::add_ode_eval(Ode_spec& ode_spec_, Keys&& keys_)
         {
             odes_eval().emplace_back(
-                move(create_ode_eval(ode_spec_, forward<Keys>(keys_)))
+                create_ode_eval(ode_spec_, forward<Keys>(keys_))
             );
         }
 
@@ -241,7 +241,7 @@ namespace SOS {
         {
             Param_keys_ptr param_keys_ptr_ =
                 new_param_keys(move(param_keys_));
-            return move(create_ode_eval(ode_spec_, move(param_keys_ptr_)));
+            return create_ode_eval(ode_spec_, move(param_keys_ptr_));
         }
 
         Solver::Ode_eval
@@ -254,7 +254,7 @@ namespace SOS {
                       [&param_keys_ptr_](Dt_spec& dspec){
                           return dspec.get_eval<Real>(param_keys_ptr_);
                       });
-            return move(ode_eval_);
+            return ode_eval_;
         }
 
         void Solver::modified() {
@@ -309,7 +309,7 @@ namespace SOS {
                       [](const Ode_eval& oeval){
                           return code_param_keys(oeval);
                       });
-            return move(param_keyss_);
+            return param_keyss_;
         }
 
         const Param_keys& Solver::cunif_param_keys() const
@@ -351,17 +351,18 @@ namespace SOS {
             param_keys_.reserve(pkeys_size*2);
             set<Param_key> pkeys_set;
             transform(param_keyss_, std::back_inserter(param_keys_),
-                      [&pkeys_set](auto&& pkeys){
-                          auto&& pdt_key = move(pkeys.front());
+                      [&pkeys_set](auto& pkeys){
+                          auto pdt_key = move(pkeys.front());
                           expect(!pkeys_set.count(pdt_key),
                                  "First parameter key must be unique: "s
                                  + pdt_key);
                           pkeys_set.insert(pdt_key);
-                          return move(pdt_key);
+                          return pdt_key;
                       });
             bool has_t = false;
             for (auto&& pkeys : move(param_keyss_)) {
-                std::for_each(std::begin(pkeys)+1, std::end(pkeys),
+                std::for_each(std::make_move_iterator(std::begin(pkeys)+1),
+                              std::make_move_iterator(std::end(pkeys)),
                               [&param_keys_, &pkeys_set, &has_t]
                               (auto&& pkey){
                                   if (pkey == "t") {
@@ -375,7 +376,7 @@ namespace SOS {
             }
             if (has_t) param_keys_.emplace_back("t");
 
-            return move(param_keys_);
+            return param_keys_;
         }
 
         Real Solver::solve_ode(Dt_id dt_id_, Context context_,
@@ -394,18 +395,16 @@ namespace SOS {
                                  && (contexts_.size() == 1
                                      || all_equal(contexts_));
             if (unified) {
-                return move(
-                    solve_unif_odes_wo_check(move(dt_ids_),
-                                             move(contexts_.front()))
-                );
+                return solve_unif_odes_wo_check(move(dt_ids_),
+                                                move(contexts_.front()));
             }
             for_each(contexts_, std::begin(codes_eval()),
                     [this](Context& ctx, const Ode_eval& oeval){
                         const bool has_t = ode_has_param_t(oeval);
                         add_param_t(has_t, ctx, code_eval_id(oeval));
                     });
-            return move(crop_result(eval_odes(move(dt_ids_),
-                                              move(contexts_)) ));
+            return crop_result(eval_odes(move(dt_ids_),
+                                         move(contexts_)));
         }
 
         State Solver::solve_unif_odes(Dt_ids dt_ids_,
@@ -415,8 +414,8 @@ namespace SOS {
                                  + " but parameter keys are not unified.");
             check_dt_ids(dt_ids_);
             reset_unif_traject(context_);
-            return move(solve_unif_odes_wo_check(move(dt_ids_),
-                                                 move(context_)));
+            return solve_unif_odes_wo_check(move(dt_ids_),
+                                            move(context_));
         }
 
         State&& Solver::crop_result(State&& result) const
@@ -429,47 +428,45 @@ namespace SOS {
                                                Context context_) const
         {
             add_param_t(has_unif_param_t(), context_);
-            return move(crop_result(eval_unif_odes(move(dt_ids_),
-                                                   move(context_)) ));
+            return crop_result(eval_unif_odes(move(dt_ids_),
+                                              move(context_)));
         }
 
-        State Solver::solve(const string& input) const
+        State Solver::solve(string input) const
         {
-            return move(solve(Expr(input)));
+            return solve(Expr(move(input)));
         }
 
         State Solver::solve(istream& is) const
         {
-            return move(solve(Expr(is)));
+            return solve(Expr(is));
         }
 
         State Solver::solve(istream&& is) const
         {
-            return move(solve(is));
+            return solve(is);
         }
 
-        State Solver::solve(const Expr& expr) const
+        State Solver::solve(Expr expr) const
         {
             expect(expr.size() == 2 && expr.is_deep(),
                    "Expected two expressions of chosen dt variants "s
                    + "and context(s) for ODEs.");
 
-            Dt_ids dt_ids_(move(expr.cto_expr(0).transform_to_args<Dt_id>()));
+            Dt_ids dt_ids_ = expr.cto_expr(0).transform_to_args<Dt_id>();
 
-            Expr ctx_expr(move(expr.cto_expr(1)));
+            Expr& ctx_expr = expr.to_expr(1);
             expect(ctx_expr.is_deep(),
                    "Expected subexpressions with context(s) for ODEs.");
             if (is_unified() && ctx_expr.size() == 1) {
-                return move(
-                    solve_unif_odes(move(dt_ids_),
-                                    Context(move(ctx_expr.cto_expr(0)))
-                ));
+                return solve_unif_odes(move(dt_ids_),
+                                       Context(move(ctx_expr.to_expr(0))));
             }
             Contexts contexts_;
             contexts_.reserve(ctx_expr.size());
             transform(ctx_expr.transform_to_exprs(),
                       std::back_inserter(contexts_),
-                      [](Expr e){ return Context(move(e)); });
+                      [](Expr&& e){ return Context(move(e)); });
             return solve_odes(move(dt_ids_), move(contexts_));
         }
 
@@ -516,14 +513,14 @@ namespace SOS {
 
         State Solver::eval_odes(Dt_ids&& dt_ids_, Contexts&& contexts_) const
         {
-            State res;
             const int size_ = size();
+            State res;
             res.reserve(size_);
             for (int i = 0; i < size_; i++) {
                 res.emplace_back(eval_ode(i, dt_ids_[i],
                                           move(contexts_[i])));
             }
-            return move(res);
+            return res;
         }
 
         template <typename OutputIt>
@@ -601,12 +598,12 @@ namespace SOS {
                         + "\n";
                 }
             }
-            return move(str);
+            return str;
         }
 
         string to_string(const Solver& rhs)
         {
-            return move((string)rhs);
+            return (string)rhs;
         }
 
         ostream& operator <<(ostream& os, const Solver& rhs)
@@ -636,8 +633,8 @@ namespace SOS {
         }
 
         void Solver::init_traject(Traject& traject_,
-                          Param_keys param_keys_,
-                          bool has_param_t) const
+                                  Param_keys param_keys_,
+                                  bool has_param_t) const
         {
             traject_.init(move(param_keys_), has_param_t);
         }

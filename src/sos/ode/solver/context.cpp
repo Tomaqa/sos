@@ -10,28 +10,28 @@ namespace SOS {
             check_values();
         }
 
-        Solver::Context::Context(const string& input)
+        Solver::Context::Context(string input)
         try
-            : Context(Expr(input))
+            : Context(Expr(move(input)))
         { }
         catch (const Error& err) {
             throw "Invalid format of input context '"s
                   + input + "':\n" + err;
         }
 
-        Solver::Context::Context(const Expr& expr)
+        Solver::Context::Context(Expr expr)
         try {
             expect(expr.size() == 2 && expr.is_deep(),
                    "Two top subexpressions expected.");
 
-            const Expr& t_subexpr = expr.cto_expr(0);
+            Expr& t_subexpr = expr.to_expr(0);
             expect(t_subexpr.size() == 2 && t_subexpr.is_flat(),
                    "Two tokens of time bounds expected.");
             expect(t_subexpr.cto_etoken(0).get_value_check<Real>(t_init())
                    && t_subexpr.cto_etoken(1).get_value_check<Real>(t_end()),
                    "Invalid values of time bounds.");
 
-            x_init() = move(expr.cto_expr(1).transform_to_args<Real>());
+            x_init() = expr.cto_expr(1).transform_to_args<Real>();
 
             check_values();
         }
@@ -56,7 +56,7 @@ namespace SOS {
 
         string to_string(const Solver::Context& rhs)
         {
-            return move((string)rhs);
+            return (string)rhs;
         }
 
         ostream& operator <<(ostream& os, const Solver::Context& rhs)

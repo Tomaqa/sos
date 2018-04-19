@@ -32,10 +32,10 @@ namespace SOS {
             Solver(Odes_spec odes_spec_, Param_keys param_keys_);
             Solver(Ode_spec ode_spec_, Param_keys param_keys_);
             Solver(Spec spec, bool unify = def_unify);
-            Solver(const string& input, bool unify = def_unify);
+            Solver(string input, bool unify = def_unify);
             Solver(istream& is, bool unify = def_unify);
             Solver(istream&& is, bool unify = def_unify);
-            Solver(const Expr& expr, bool unify = def_unify);
+            Solver(Expr expr, bool unify = def_unify);
 
             size_t size() const noexcept       { return codes_spec().size(); }
             bool empty() const noexcept                { return size() == 0; }
@@ -56,10 +56,10 @@ namespace SOS {
                            Ode_id ode_id_ = def_ode_id) const;
             State solve_odes(Dt_ids dt_ids_, Contexts contexts_) const;
             State solve_unif_odes(Dt_ids dt_ids_, Context context_) const;
-            State solve(const string& input) const;
+            State solve(string input) const;
             State solve(istream& is) const;
             State solve(istream&& is) const;
-            State solve(const Expr& expr) const;
+            State solve(Expr expr) const;
 
             const Trajects& ctrajects() const            { return _trajects; }
             const Traject& ctraject(Ode_id ode_id_ = def_ode_id) const
@@ -157,7 +157,7 @@ namespace SOS {
             using State_fs = vector<State_f>;
 
             void set_odes_eval(Param_keyss param_keyss_, bool unify);
-            void parse_odes_spec(const Expr& expr);
+            void parse_odes_spec(Expr expr);
             static Param_keyss parse_param_keyss(const Expr& expr);
             static Param_keys parse_param_keys(const Expr& expr);
 

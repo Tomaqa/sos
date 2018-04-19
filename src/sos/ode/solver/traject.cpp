@@ -15,7 +15,7 @@ namespace SOS {
 
         Solver::Traject::operator string () const
         {
-            return move(to_string(*this));
+            return to_string(*this);
         }
 
         string to_string(const Solver::Traject& rhs)
@@ -28,7 +28,7 @@ namespace SOS {
                        + "\n";
             }
             str += "\n";
-            return move(str);
+            return str;
         }
 
         ostream& operator <<(ostream& os, const Solver::Traject& rhs)

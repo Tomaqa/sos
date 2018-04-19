@@ -94,7 +94,7 @@ namespace SOS {
                        bind(&Expr_token::get_value<Arg>,
                             bind(&Expr::cptr_to_etoken, _1))
                        );
-        return move(elems);
+        return elems;
     }
 
     template <typename Arg>

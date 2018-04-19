@@ -14,6 +14,7 @@ namespace SOS {
     using std::istream;
     using std::ofstream;
     using std::ifstream;
+    using std::stringstream;
     using std::istringstream;
     using std::ostringstream;
     using std::streampos;

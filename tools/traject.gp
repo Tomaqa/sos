@@ -22,4 +22,4 @@ do for [i=2:columns] {
 }
 
 plot for [j=2:columns] ifname using 1:j, \
-  "" using 1:(column(0) == 1 ? ymax : "") axes x1y2 with impulse notitle linecolor black linewidth 1 dashtype 2
+  "" using 1:(column(0) == 1 ? ymax : NaN) axes x1y2 with impulse notitle lc black lw 0.75 dashtype 2

@@ -44,7 +44,7 @@ namespace SOS {
                 traject().add_step(x, t);
             }
 
-            return move(dx);
+            return dx;
         }
 
         Time Euler::t_init(const Time t_init_) const

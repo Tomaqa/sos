@@ -30,7 +30,7 @@ namespace SOS {
                      };
             integrate(f, x, context_.ct_init(), context_.ct_end(),
                       traject());
-            return move(x);
+            return x;
         }
 
         size_t Odeint::integrate(Integrate_f f, State& x,
