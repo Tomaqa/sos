@@ -139,33 +139,34 @@ build/test/solver_test.o: src/test/solver_test.cpp include/test/test.hpp \
  include/sos/ode/solver/traject.hpp include/sos/ode/euler.hpp \
  include/sos/ode/odeint.hpp
 build/main/euler.o: src/main/euler.cpp include/sos/ode/solver/run.hpp \
- include/sos/sos.hpp include/sos/sos.tpp include/sos/ode/solver.hpp \
- include/sos/util.hpp include/sos/util.tpp include/sos/ode.hpp \
- include/sos/expr.hpp include/sos/expr.tpp include/sos/expr/eval.hpp \
- include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
- include/sos/expr/eval/oper.tpp include/sos/ode/solver/context.hpp \
- include/sos/ode/solver/traject.hpp include/sos/ode/solver/run.tpp \
- include/sos/ode/euler.hpp
+ include/sos/sos.hpp include/sos/sos.tpp include/sos/util/run.hpp \
+ include/sos/util.hpp include/sos/util.tpp include/sos/ode/solver.hpp \
+ include/sos/ode.hpp include/sos/expr.hpp include/sos/expr.tpp \
+ include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
+ include/sos/ode/solver/context.hpp include/sos/ode/solver/traject.hpp \
+ include/sos/ode/solver/run.tpp include/sos/ode/euler.hpp
 build/main/eval.o: src/main/eval.cpp include/sos/expr/eval/run.hpp \
- include/sos/sos.hpp include/sos/sos.tpp include/sos/expr/eval.hpp \
- include/sos/expr.hpp include/sos/util.hpp include/sos/util.tpp \
- include/sos/expr.tpp include/sos/expr/eval.tpp \
+ include/sos/sos.hpp include/sos/sos.tpp include/sos/util/run.hpp \
+ include/sos/util.hpp include/sos/util.tpp include/sos/expr/eval.hpp \
+ include/sos/expr.hpp include/sos/expr.tpp include/sos/expr/eval.tpp \
  include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
  include/sos/expr/eval/run.tpp
 build/main/parser.o: src/main/parser.cpp include/sos/parser/run.hpp \
- include/sos/sos.hpp include/sos/sos.tpp include/sos/parser.hpp \
- include/sos/util.hpp include/sos/util.tpp include/sos/ode.hpp \
- include/sos/expr.hpp include/sos/expr.tpp include/sos/expr/eval.hpp \
- include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
- include/sos/expr/eval/oper.tpp
+ include/sos/sos.hpp include/sos/sos.tpp include/sos/util/run.hpp \
+ include/sos/util.hpp include/sos/util.tpp include/sos/parser.hpp \
+ include/sos/ode.hpp include/sos/expr.hpp include/sos/expr.tpp \
+ include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
+ include/sos/parser/preprocess.hpp
 build/main/odeint.o: src/main/odeint.cpp include/sos/ode/solver/run.hpp \
- include/sos/sos.hpp include/sos/sos.tpp include/sos/ode/solver.hpp \
- include/sos/util.hpp include/sos/util.tpp include/sos/ode.hpp \
- include/sos/expr.hpp include/sos/expr.tpp include/sos/expr/eval.hpp \
- include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
- include/sos/expr/eval/oper.tpp include/sos/ode/solver/context.hpp \
- include/sos/ode/solver/traject.hpp include/sos/ode/solver/run.tpp \
- include/sos/ode/odeint.hpp
+ include/sos/sos.hpp include/sos/sos.tpp include/sos/util/run.hpp \
+ include/sos/util.hpp include/sos/util.tpp include/sos/ode/solver.hpp \
+ include/sos/ode.hpp include/sos/expr.hpp include/sos/expr.tpp \
+ include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
+ include/sos/ode/solver/context.hpp include/sos/ode/solver/traject.hpp \
+ include/sos/ode/solver/run.tpp include/sos/ode/odeint.hpp
 build/sos/sos.o: src/sos/sos.cpp include/sos/sos.hpp include/sos/sos.tpp
 build/sos/expr/eval.o: src/sos/expr/eval.cpp include/sos/expr/eval.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/expr.hpp \
@@ -183,9 +184,9 @@ build/sos/ode/solver/context.o: src/sos/ode/solver/context.cpp \
  include/sos/ode/solver/traject.hpp
 build/sos/ode/solver/run.o: src/sos/ode/solver/run.cpp \
  include/sos/ode/solver/run.hpp include/sos/sos.hpp include/sos/sos.tpp \
- include/sos/ode/solver.hpp include/sos/util.hpp include/sos/util.tpp \
- include/sos/ode.hpp include/sos/expr.hpp include/sos/expr.tpp \
- include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
+ include/sos/util/run.hpp include/sos/util.hpp include/sos/util.tpp \
+ include/sos/ode/solver.hpp include/sos/ode.hpp include/sos/expr.hpp \
+ include/sos/expr.tpp include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
  include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
  include/sos/ode/solver/context.hpp include/sos/ode/solver/traject.hpp \
  include/sos/ode/solver/run.tpp
@@ -220,16 +221,24 @@ build/sos/parser.o: src/sos/parser.cpp include/sos/parser.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp include/sos/ode.hpp include/sos/expr.hpp \
  include/sos/expr.tpp include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
- include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
+ include/sos/parser/preprocess.hpp
 build/sos/util/run.o: src/sos/util/run.cpp include/sos/util/run.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp
-build/sos/parser/run.o: src/sos/parser/run.cpp include/sos/parser/run.hpp \
- include/sos/sos.hpp include/sos/sos.tpp include/sos/parser.hpp \
+build/sos/parser/preprocess.o: src/sos/parser/preprocess.cpp \
+ include/sos/parser.hpp include/sos/sos.hpp include/sos/sos.tpp \
  include/sos/util.hpp include/sos/util.tpp include/sos/ode.hpp \
  include/sos/expr.hpp include/sos/expr.tpp include/sos/expr/eval.hpp \
  include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
- include/sos/expr/eval/oper.tpp
+ include/sos/expr/eval/oper.tpp include/sos/parser/preprocess.hpp
+build/sos/parser/run.o: src/sos/parser/run.cpp include/sos/parser/run.hpp \
+ include/sos/sos.hpp include/sos/sos.tpp include/sos/util/run.hpp \
+ include/sos/util.hpp include/sos/util.tpp include/sos/parser.hpp \
+ include/sos/ode.hpp include/sos/expr.hpp include/sos/expr.tpp \
+ include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
+ include/sos/parser/preprocess.hpp
 build/sos/expr.o: src/sos/expr.cpp include/sos/expr.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp include/sos/expr.tpp

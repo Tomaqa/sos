@@ -1,5 +1,7 @@
 #include <sstream>
 
+#include <iostream>
+
 namespace SOS {
     template <typename T>
     Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)
@@ -56,9 +58,22 @@ namespace SOS {
     }
 
     template <typename T>
+    void Expr::push_back(T&& place_ptr_)
+    {
+        emplace_back(forward<T>(place_ptr_));
+    }
+
+    template <typename... Args>
+    void Expr::emplace_back(Args&&... args)
+    {
+        places().emplace_back(forward<Args>(args)...);
+        maybe_reset_pos();
+    }
+
+    template <typename T>
     void Expr::add_place_ptr(T&& place_ptr_)
     {
-        places().emplace_back(forward<T>(place_ptr_));
+        emplace_back(forward<T>(place_ptr_));
     }
 
     template <typename... Args>

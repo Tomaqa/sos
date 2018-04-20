@@ -28,14 +28,19 @@ namespace SOS {
         using Args_lazy = pair<Arg_lazy, Arg_lazy>;
         using Oper_ptrs = pair<Oper_ptr, Oper_ptr>;
 
-        Param_keys::iterator find_param_key(const Param_key& key_) const;
-        Param_keys::iterator set_param_key(Param_key key_) const;
+        using iterator = Param_keys::iterator;
+
+        iterator find_param_key(const Param_key& key_) const;
+        iterator set_param_key(Param_key key_) const;
     private:
         bool is_binary() const                          { return _is_binary; }
 
         void set_lazy_args(Expr& expr_);
         template <int idx> void set_lazy_arg(Expr& expr_);
-        template <int idx> Arg_lazy get_arg_lazy(Expr& expr_);
+        // template <int idx> Arg_lazy get_arg_lazy(Expr& expr_);
+        // void set_lazy_args(Expr::iterator it);
+        // template <int idx> void set_lazy_arg(Expr::iterator it);
+        template <int idx> Arg_lazy get_arg_lazy(Expr_place_ptr& place_);
 
         Arg_lazy arg_lazy(Arg arg) const noexcept;
         Arg_lazy param_lazy(Param_key key_) const;

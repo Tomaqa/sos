@@ -7,7 +7,8 @@ namespace SOS {
             Expr expr(line);
             if (expr.empty()) continue;
             if (expr.size() == 1) {
-                cout << expr.cto_etoken(0) << endl;
+                // cout << expr.cto_etoken(0) << endl;
+                cout << expr.cget_etoken() << endl;
                 continue;
             }
 

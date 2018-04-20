@@ -41,6 +41,20 @@ namespace SOS {
         bool is_ode_step_set() const                 { return _ode_step_set; }
         Time code_step() const                           { return _ode_step; }
     protected:
+        using Token = Expr::Token;
+
+        using Dts_spec_map = map<Dt_key, Dt_spec>;
+        using Odes_map_value = tuple<Dts_spec_map,
+                                     Param_keys, Const_ids_rows>;
+        using Odes_map = map<Ode_key, pair<Odes_map_value, int>>;
+        using Dt_keys_map_value = Ode_key;
+        using Dt_keys_map = map<Dt_key, pair<Dt_keys_map_value, int>>;
+
+        using Exprs = Expr::Exprs;
+
+        class Preprocess;
+        using Preprocess_ptr = unique_ptr<Preprocess>;
+
         static constexpr const char* smt_init_cmds =
             "(set-option :print-success false)\n"
             "(set-option :produce-models true)\n"
@@ -60,10 +74,6 @@ namespace SOS {
         const Const_ids_rows& cconst_ids(const Ode_key& ode_key_) const;
         Const_ids_rows& const_ids(const Ode_key& ode_key_);
 
-        static string preprocess_input(string&& input);
-        static string preprocess_input(istream& is);
-        void preprocess_expr(Expr& expr);
-
         void parse_expr(Expr& expr);
         void declare_ode(const Ode_key& ode_key_, Expr& keys_expr);
         void parse_define_dt(Expr& expr);
@@ -72,33 +82,6 @@ namespace SOS {
         void parse_int_ode(Expr& expr);
 
         static Const_id int_ode_identifier(const Ode_key& ode_key_);
-    private:
-        using Token = Expr::Token;
-
-        using Dts_spec_map = map<Dt_key, Dt_spec>;
-        using Odes_map_value = tuple<Dts_spec_map,
-                                     Param_keys, Const_ids_rows>;
-        using Odes_map = map<Ode_key, pair<Odes_map_value, int>>;
-        using Dt_keys_map_value = Ode_key;
-        using Dt_keys_map = map<Dt_key, pair<Dt_keys_map_value, int>>;
-
-        using Exprs = Expr::Exprs;
-
-        using Macro_key = Token;
-        using Macro_params = Param_keys;
-        using Macro_body = string;
-        using Macro = tuple<Macro_params, Macro_body>;
-        using Macros_map = map<Macro_key, Macro>;
-
-        using Reserved_macro_f = function<void(const Parser *const,
-                                               Expr&, int&)>;
-        using Reserved_macro_fs_map = Const_map<Macro_key, Reserved_macro_f>;
-
-        using Let_key = Macro_key;
-        using Let_body = Macro_body;
-        using Lets_map = map<Let_key, Let_body>;
-
-        static const Reserved_macro_fs_map reserved_macro_fs_map;
 
         const Odes_map& codes_map() const                { return _odes_map; }
         Odes_map& odes_map()                             { return _odes_map; }
@@ -146,33 +129,8 @@ namespace SOS {
         const Exprs& csmt_exprs() const                 { return _smt_exprs; }
         Exprs& smt_exprs()                              { return _smt_exprs; }
         void add_smt_expr(Expr expr);
-
-        Macros_map& macros_map() const                 { return _macros_map; }
-        static bool is_macro_key(const Macro_key& macro_key_);
-        static bool is_reserved_macro_key(const Macro_key& macro_key_);
-        bool has_macro_key(const Macro_key& macro_key_) const;
-        void check_has_not_macro_key(const Macro_key& macro_key_) const;
-        Macro& macro(const Macro_key& macro_key_) const;
-        Macro_params& macro_params(const Macro_key& macro_key_) const;
-        Macro_body& macro_body(const Macro_key& macro_key_) const;
-        void add_macro(const Macro_key& macro_key_,
-                       Macro_params macro_params_,
-                       Macro_body macro_body_) const;
-
-        void preprocess_nested_expr(Expr& expr, unsigned depth);
-        void parse_macro(Expr& expr, int& pos,
-                         const Macro_key& macro_key_, bool is_top) const;
-        void parse_top_macro(Expr& expr, int& pos,
-                             const Macro_key& macro_key_) const;
-        void parse_reserved_macro(Expr& expr, int& pos,
-                                  const Macro_key& macro_key_) const;
-        void parse_user_macro(Expr& expr, int& pos,
-                              const Macro_key& macro_key_) const;
-        void parse_macro_def(Expr& expr, int& pos) const;
-        void parse_macro_let(Expr& expr, int& pos) const;
-        void parse_macro_if(Expr& expr, int& pos) const;
-        void parse_macro_for(Expr& expr, int& pos) const;
-        template <typename Arg> static Arg parse_value(Expr& expr, int& pos);
+    private:
+        Preprocess_ptr _preprocess_ptr;
 
         //! there may be some issue with move operations ?
         //! I've experienced some ..
@@ -184,8 +142,7 @@ namespace SOS {
 
         Time _ode_step;
         bool _ode_step_set{false};
-
-        mutable Macros_map _macros_map;
-        mutable Lets_map _lets_map;
     };
 }
+
+#include "parser/preprocess.hpp"

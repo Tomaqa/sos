@@ -1,31 +1,23 @@
 #include "parser.hpp"
+#include "parser/preprocess.hpp"
 
 #include <sstream>
 
-#include <iostream>
-
 namespace SOS {
-    const Parser::Reserved_macro_fs_map Parser::reserved_macro_fs_map{
-        {"#def",    &Parser::parse_macro_def},
-        {"#let",    &Parser::parse_macro_let},
-        {"#if",     &Parser::parse_macro_if},
-        {"#for",    &Parser::parse_macro_for},
-    };
-
     Parser::Parser(istream& is)
-        : Parser(Expr(preprocess_input(is)))
+        : Parser(Expr(Preprocess::parse_input(is)))
     { }
 
     Parser::Parser(string input)
-        : Parser(Expr(preprocess_input(move(input))))
+        : Parser(Expr(Preprocess::parse_input(move(input))))
     { }
 
     //! It requires to have whole input stored in memory,
     //! potentionally inefficient and dangerous
     Parser::Parser(Expr expr)
+        : _preprocess_ptr(make_unique<Preprocess>())
     {
-        preprocess_expr(expr);
-        std::cout << expr << std::endl;
+        _preprocess_ptr->parse_expr(expr);
         return;
         smt_exprs().reserve(expr.size());
         for (auto& eptr : expr) {
@@ -91,57 +83,10 @@ namespace SOS {
         return get<4>(ode(ode_key_));
     }
 
-    string Parser::preprocess_input(string&& input)
-    {
-        istringstream iss(move(input));
-        return preprocess_input(iss);
-    }
-
-    string Parser::preprocess_input(istream& is)
-    {
-        string str("");
-        int size_ = istream_remain_size(is);
-        if (size_ <= 0) return str;
-        str.reserve(size_*1.2);
-        char c;
-        string tmp;
-        tmp.reserve(40);
-        is >> std::noskipws;
-        while (is >> c) {
-            switch (c) {
-            default:
-                str += c;
-                break;
-            case ';':
-                getline(is, tmp);
-                break;
-            case '#':
-                str += c;
-                if (isspace(is.peek())) break;
-                is >> std::skipws >> tmp;
-                if (tmp != "define") {
-                    str += tmp;
-                }
-                else {
-                    getline(is, tmp);
-                    str += "def" + tmp + " " + c + "enddef";
-                }
-                is >> std::noskipws;
-                break;
-            }
-        }
-        return str;
-    }
-
-    void Parser::preprocess_expr(Expr& expr)
-    {
-        unsigned depth = 0;
-        preprocess_nested_expr(expr, depth);
-    }
-
     void Parser::parse_expr(Expr& expr)
     try {
-        const Token& cmd = expr.cto_token(0);
+        // const Token& cmd = expr.cto_token(0);
+        const Token& cmd = expr.cget_token();
         if (cmd == "define-dt") {
             return parse_define_dt(expr);
         }
@@ -185,12 +130,18 @@ namespace SOS {
                + "and expression with dt specification, got: "
                + to_string(expr));
 
-        Ode_key ode_key_ = move(expr.to_token_check(1));
-        Dt_key dt_key_ = move(expr.to_token_check(2));
-        Expr keys_expr = move(expr.to_expr_check(3));
-        Dt_spec dt_spec_ = expr[4]->is_etoken()
-                         ? Dt_spec("+ "s + move(expr.to_token(4)))
-                         : move(expr.to_expr(4));
+        // Ode_key ode_key_ = move(expr.to_token_check(1));
+        // Dt_key dt_key_ = move(expr.to_token_check(2));
+        // Expr keys_expr = move(expr.to_expr_check(3));
+        // Dt_spec dt_spec_ = expr[4]->is_etoken()
+        //                  ? Dt_spec("+ "s + move(expr.to_token(4)))
+        //                  : move(expr.to_expr(4));
+        Ode_key ode_key_ = move(expr.get_token_check());
+        Dt_key dt_key_ = move(expr.get_token_check());
+        Expr keys_expr = move(expr.get_expr_check());
+        Dt_spec dt_spec_ = expr.peek()->is_etoken()
+                         ? Dt_spec("+ "s + move(expr.get_token()))
+                         : move(expr.get_expr());
 
         declare_ode(ode_key_, keys_expr);
 
@@ -213,15 +164,18 @@ namespace SOS {
                "Expected initial ODE step size, got: "s
                + to_string(expr));
         expect(!_ode_step_set, "ODE step size has already been set.");
-        _ode_step = expr.to_etoken_check(1).get_value_check<Time>();
+        // _ode_step = expr.to_etoken_check(1).get_value_check<Time>();
+        _ode_step = expr.get_etoken_check().get_value_check<Time>();
         _ode_step_set = true;
     }
 
     void Parser::parse_assert(Expr& expr)
     {
         expr.for_each_expr([this](Expr& e){
-            if (e.cfront()->is_etoken()
-                && e.cto_token(0) == "int-ode") {
+            // if (e.cfront()->is_etoken()
+            //     && e.cto_token(0) == "int-ode") {
+            if (e.peek()->is_etoken()
+                && e.cget_token() == "int-ode") {
                 return parse_int_ode(e);
             }
             parse_assert(e);
@@ -237,20 +191,27 @@ namespace SOS {
                + "and parameter values, got: "
                + to_string(expr));
 
-        Ode_key& ode_key_ = expr.to_token_check(1);
+        // Ode_key& ode_key_ = expr.to_token_check(1);
+        Ode_key& ode_key_ = expr.get_token_check();
         check_has_ode_key(ode_key_);
 
-        Const_id& dt_const = expr.to_token_check(2);
+        // Const_id& dt_const = expr.to_token_check(2);
+        Const_id& dt_const = expr.get_token_check();
 
-        Expr& init_expr = expr.to_expr_check(3);
+        // Expr& init_expr = expr.to_expr_check(3);
+        Expr& init_expr = expr.get_expr_check();
         expect(init_expr.size() == 3 && init_expr.is_flat(),
                "Expected initial values of ODE, got: "s
                + to_string(init_expr));
-        Const_id& init_const = init_expr.to_token(0);
-        auto init_t_consts = make_pair(move(init_expr.to_token(1)),
-                                       move(init_expr.to_token(2)));
+        // Const_id& init_const = init_expr.to_token(0);
+        // auto init_t_consts = make_pair(move(init_expr.to_token(1)),
+        //                                move(init_expr.to_token(2)));
+        Const_id& init_const = init_expr.get_token();
+        auto init_t_consts = make_pair(move(init_expr.get_token()),
+                                       move(init_expr.get_token()));
 
-        Expr& param_expr = expr.to_expr_check(4);
+        // Expr& param_expr = expr.to_expr_check(4);
+        Expr& param_expr = expr.get_expr_check();
         expect(param_expr.is_flat(),
                "Expected parameter constants, got: "s
                + to_string(param_expr));
@@ -260,9 +221,12 @@ namespace SOS {
                           move(dt_const), move(init_const),
                           move(init_t_consts), move(param_consts));
 
-        expr.to_token(0) += "_" + ode_key_;
+        // expr.to_token(0) += "_" + ode_key_;
+        expr.get_token() += "_" + ode_key_;
         const int steps_ = csteps(ode_key_);
-        expr.erase_places(1);
+        // expr.erase_places(1, -1);
+        // expr.erase(-1);
+        expr.erase_pos(expr.end());
         expr.add_new_etoken(to_string(steps_-1));
     }
 
@@ -454,182 +418,5 @@ namespace SOS {
             str += to_string(expr) + "\n";
         }
         return str;
-    }
-
-    bool Parser::is_macro_key(const Macro_key& macro_key_)
-    {
-        return macro_key_[0] == '#';
-    }
-
-    bool Parser::is_reserved_macro_key(const Macro_key& macro_key_)
-    {
-        return reserved_macro_fs_map.includes(macro_key_);
-    }
-
-    bool Parser::has_macro_key(const Macro_key& macro_key_) const
-    {
-        return macros_map().count(macro_key_) == 1;
-    }
-
-    void Parser::check_has_not_macro_key(const Macro_key& macro_key_) const
-    {
-        expect(!has_macro_key(macro_key_),
-               "Macro named '"s + macro_key_ + "' "
-               + "has already been defined.");
-    }
-
-    Parser::Macro& Parser::macro(const Macro_key& macro_key_) const
-    {
-        return macros_map()[macro_key_];
-    }
-
-    Parser::Macro_params&
-        Parser::macro_params(const Macro_key& macro_key_) const
-    {
-        return get<0>(macro(macro_key_));
-    }
-
-    Parser::Macro_body& Parser::macro_body(const Macro_key& macro_key_) const
-    {
-        return get<1>(macro(macro_key_));
-    }
-
-    void Parser::add_macro(const Macro_key& macro_key_,
-                           Macro_params macro_params_,
-                           Macro_body macro_body_) const
-    {
-        macro(macro_key_) = make_tuple(move(macro_params_),
-                                       move(macro_body_));
-    }
-
-    void Parser::preprocess_nested_expr(Expr& expr, unsigned depth)
-    {
-        int pos = 0;
-        const int size_ = expr.size();
-        const bool is_top = (depth == 0);
-        while (pos < size_) {
-            if (expr[pos]->is_etoken()) {
-                const Macro_key& macro_key_ = expr.cto_token(pos++);
-                if (is_macro_key(macro_key_)) {
-                    return parse_macro(expr, pos, macro_key_, is_top);
-                }
-                expect(!is_top,
-                       "Unexpected token at top level: '"s
-                       + macro_key_ + "'");
-                continue;
-            }
-            Expr& subexpr = expr.to_expr(pos++);
-            preprocess_nested_expr(subexpr, depth+1);
-        }
-    }
-
-    void Parser::parse_macro(Expr& expr, int& pos,
-                             const Macro_key& macro_key_, bool is_top) const
-    {
-        if (is_top) {
-            return parse_top_macro(expr, pos, macro_key_);
-        }
-        expect(!is_reserved_macro_key(macro_key_),
-               "Unexpected nested reserved macro: '"s
-               + macro_key_ + "'");
-        parse_user_macro(expr, pos, macro_key_);
-    }
-
-    void Parser::parse_top_macro(Expr& expr, int& pos,
-                                 const Macro_key& macro_key_) const
-    {
-        if (is_reserved_macro_key(macro_key_)) {
-            return parse_reserved_macro(expr, pos, macro_key_);
-        }
-        parse_user_macro(expr, pos, macro_key_);
-    }
-
-    void Parser::parse_reserved_macro(Expr& expr, int& pos,
-                                      const Macro_key& macro_key_) const
-    {
-        reserved_macro_fs_map[macro_key_](this, expr, pos);
-    }
-
-    void Parser::parse_user_macro(Expr& expr, int& pos,
-                                  const Macro_key& macro_key_) const
-    {
-        expect(has_macro_key(macro_key_),
-               "Macro was not defined: '"s
-               + macro_key_ + "'");
-    }
-
-    void Parser::parse_macro_def(Expr& expr, int& pos) const
-    {
-        Macro_key& macro_key_ = expr.to_token_check(pos++);
-        check_has_not_macro_key(macro_key_);
-        Expr params_expr;
-        if (!expr[pos]->is_etoken()) {
-            params_expr = move(expr.to_expr(pos++));
-        }
-        Macro_params macro_params_ = params_expr.transform_to_tokens();
-        add_macro(macro_key_, macro_params_, {});
-    }
-
-    void Parser::parse_macro_let(Expr& expr, int& pos) const
-    {
-
-    }
-
-    void Parser::parse_macro_if(Expr& expr, int& pos) const
-    {
-        const int expr_size = expr.size();
-        const int if_pos = pos-1;
-        const bool cond = parse_value<int>(expr, pos);
-        int body_pos = pos;
-        int else_pos = -1;
-        const int if_size = body_pos-if_pos;
-
-        while (pos < expr_size) {
-            if (expr[pos]->is_etoken()) {
-                const Macro_key& mkey = expr.cto_token(pos);
-                if (mkey == "#endif") break;
-                if (mkey == "#else") {
-                    else_pos = pos;
-                }
-            }
-            pos++;
-        }
-        expect(pos < expr_size, "#endif not found.");
-        int end_pos = pos++;
-        const bool else_branch = (else_pos > if_pos);
-        const int end_size = end_pos-body_pos+1;
-        const int else_size = else_pos-body_pos+1;
-        const int end_else_size = end_pos-else_pos+1;
-
-        expr.erase_places(if_pos, if_size);
-        body_pos -= if_size;
-        else_pos -= if_size;
-        end_pos -= if_size;
-        if (cond) {
-            if (else_branch) {
-                return expr.erase_places(else_pos, end_else_size);
-            }
-            return expr.erase_place(end_pos);
-        }
-        if (!else_branch) {
-            return expr.erase_places(body_pos, end_size);
-        }
-        expr.erase_place(end_pos);
-        expr.erase_places(body_pos, else_size);
-    }
-
-    void Parser::parse_macro_for(Expr& expr, int& pos) const
-    {
-
-    }
-
-    template <typename Arg>
-    Arg Parser::parse_value(Expr& expr, int& pos)
-    {
-        Expr_token& literal = expr.to_etoken_check(pos++);
-        if (literal.ctoken() == "$") {
-            return expr.to_expr_check(pos++).get_eval<Arg>()();
-        }
-        return literal.get_value_check<Arg>();
     }
 }

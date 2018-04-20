@@ -46,7 +46,7 @@ namespace SOS {
     bool Util::equal(const Cont1& cont1, InputIt2 first2, Bin_f f)
     {
         return std::equal(std::begin(cont1), std::end(cont1),
-                          std::move(first2),
+                          first2,
                           std::move(f));
     }
 
@@ -92,15 +92,15 @@ namespace SOS {
     {
         return std::copy(std::begin(cont),
                          std::end(cont),
-                         std::move(d_first));
+                         d_first);
     }
 
     template <typename Cont, typename OutputIt>
     OutputIt Util::move(Cont&& cont, OutputIt d_first)
     {
-        return std::move(std::make_move_iterator(std::begin(cont)),
-                         std::make_move_iterator(std::end(cont)),
-                         std::move(d_first));
+        return std::move(std::begin(cont),
+                         std::end(cont),
+                         d_first);
     }
 
     template <typename Cont, typename OutputIt, typename Un_f>
@@ -108,7 +108,7 @@ namespace SOS {
     {
         return std::transform(std::begin(cont),
                               std::end(cont),
-                              std::move(d_first),
+                              d_first,
                               std::move(f));
     }
 
@@ -117,7 +117,7 @@ namespace SOS {
     {
         return std::transform(std::make_move_iterator(std::begin(cont)),
                               std::make_move_iterator(std::end(cont)),
-                              std::move(d_first),
+                              d_first,
                               std::move(f));
     }
 
@@ -128,8 +128,8 @@ namespace SOS {
     {
         return std::transform(std::begin(cont1),
                               std::end(cont1),
-                              std::move(first2),
-                              std::move(d_first),
+                              first2,
+                              d_first,
                               std::move(f));
     }
 
@@ -140,8 +140,8 @@ namespace SOS {
     {
         return std::transform(std::make_move_iterator(std::begin(cont1)),
                               std::make_move_iterator(std::end(cont1)),
-                              std::move(first2),
-                              std::move(d_first),
+                              first2,
+                              d_first,
                               std::move(f));
     }
 

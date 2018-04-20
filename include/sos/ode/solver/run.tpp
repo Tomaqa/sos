@@ -16,7 +16,7 @@ namespace SOS {
             }
             else {
                 Param_keyss&& pkeyss = solver.cparam_keyss();
-                keys_expr.reserve(pkeyss.size());
+                // keys_expr.reserve(pkeyss.size());
                 for (auto&& pkeys : move(pkeyss)) {
                     keys_expr.add_new_expr(to_string(move(pkeys)));
                 }
