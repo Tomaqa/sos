@@ -18,7 +18,8 @@ namespace SOS {
         : _preprocess_ptr(make_unique<Preprocess>())
     {
         _preprocess_ptr->parse_expr(expr);
-        return;
+        // !
+        // return;
         smt_exprs().reserve(expr.size());
         for (auto& eptr : expr) {
             Expr& e = Expr::ptr_to_expr(eptr);
@@ -85,7 +86,6 @@ namespace SOS {
 
     void Parser::parse_expr(Expr& expr)
     try {
-        // const Token& cmd = expr.cto_token(0);
         const Token& cmd = expr.cget_token();
         if (cmd == "define-dt") {
             return parse_define_dt(expr);
@@ -130,12 +130,6 @@ namespace SOS {
                + "and expression with dt specification, got: "
                + to_string(expr));
 
-        // Ode_key ode_key_ = move(expr.to_token_check(1));
-        // Dt_key dt_key_ = move(expr.to_token_check(2));
-        // Expr keys_expr = move(expr.to_expr_check(3));
-        // Dt_spec dt_spec_ = expr[4]->is_etoken()
-        //                  ? Dt_spec("+ "s + move(expr.to_token(4)))
-        //                  : move(expr.to_expr(4));
         Ode_key ode_key_ = move(expr.get_token_check());
         Dt_key dt_key_ = move(expr.get_token_check());
         Expr keys_expr = move(expr.get_expr_check());
@@ -164,7 +158,6 @@ namespace SOS {
                "Expected initial ODE step size, got: "s
                + to_string(expr));
         expect(!_ode_step_set, "ODE step size has already been set.");
-        // _ode_step = expr.to_etoken_check(1).get_value_check<Time>();
         _ode_step = expr.get_etoken_check().get_value_check<Time>();
         _ode_step_set = true;
     }
@@ -172,9 +165,7 @@ namespace SOS {
     void Parser::parse_assert(Expr& expr)
     {
         expr.for_each_expr([this](Expr& e){
-            // if (e.cfront()->is_etoken()
-            //     && e.cto_token(0) == "int-ode") {
-            if (e.peek()->is_etoken()
+            if (e.cfront()->is_etoken()
                 && e.cget_token() == "int-ode") {
                 return parse_int_ode(e);
             }
@@ -191,26 +182,20 @@ namespace SOS {
                + "and parameter values, got: "
                + to_string(expr));
 
-        // Ode_key& ode_key_ = expr.to_token_check(1);
         Ode_key& ode_key_ = expr.get_token_check();
         check_has_ode_key(ode_key_);
 
-        // Const_id& dt_const = expr.to_token_check(2);
         Const_id& dt_const = expr.get_token_check();
 
-        // Expr& init_expr = expr.to_expr_check(3);
         Expr& init_expr = expr.get_expr_check();
         expect(init_expr.size() == 3 && init_expr.is_flat(),
                "Expected initial values of ODE, got: "s
                + to_string(init_expr));
-        // Const_id& init_const = init_expr.to_token(0);
-        // auto init_t_consts = make_pair(move(init_expr.to_token(1)),
-        //                                move(init_expr.to_token(2)));
         Const_id& init_const = init_expr.get_token();
-        auto init_t_consts = make_pair(move(init_expr.get_token()),
-                                       move(init_expr.get_token()));
+        auto t_init_ = move(init_expr.get_token());
+        auto t_end_ = move(init_expr.get_token());
+        auto init_t_consts = make_pair(move(t_init_), move(t_end_));
 
-        // Expr& param_expr = expr.to_expr_check(4);
         Expr& param_expr = expr.get_expr_check();
         expect(param_expr.is_flat(),
                "Expected parameter constants, got: "s
@@ -221,12 +206,9 @@ namespace SOS {
                           move(dt_const), move(init_const),
                           move(init_t_consts), move(param_consts));
 
-        // expr.to_token(0) += "_" + ode_key_;
-        expr.get_token() += "_" + ode_key_;
+        expr.to_token(expr.begin()) += "_" + ode_key_;
         const int steps_ = csteps(ode_key_);
-        // expr.erase_places(1, -1);
-        // expr.erase(-1);
-        expr.erase_pos(expr.end());
+        expr.resize(1);
         expr.add_new_etoken(to_string(steps_-1));
     }
 

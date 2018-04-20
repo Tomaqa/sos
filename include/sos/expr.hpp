@@ -33,7 +33,7 @@ namespace SOS {
         friend bool operator ==(const Expr_place& lhs, const Expr_place& rhs);
         friend bool operator !=(const Expr_place& lhs, const Expr_place& rhs);
     protected:
-        template <typename T> static Expr_ptr_t<T> new_place(T&& place_);
+        template <typename T> static Expr_ptr_t<T> new_place(T&& place);
     };
 
     class Expr_token : public Expr_place {
@@ -70,7 +70,6 @@ namespace SOS {
         template <typename Arg> using Elems = vector<Arg>;
         using Tokens = Elems<Token>;
         using Exprs = Elems<Expr>;
-        // using Places = Elems<Expr_place_ptr>;
         using Places = list<Expr_place_ptr>;
 
         using value_type = Places::value_type;
@@ -99,8 +98,6 @@ namespace SOS {
         size_t size() const noexcept              { return cplaces().size(); }
         bool empty() const noexcept                    { return size() == 0; }
 
-        // const Expr_place_ptr& operator [](int idx) const;
-        // Expr_place_ptr& operator [](int idx);
         const Expr_place_ptr& cfront() const;
         const Expr_place_ptr& cback() const;
         Expr_place_ptr& front();
@@ -142,12 +139,6 @@ namespace SOS {
         static Expr_token& ptr_to_etoken(Expr_place_ptr& place_ptr);
         static Token& ptr_to_token(Expr_place_ptr& place_ptr);
         static Expr& ptr_to_expr(Expr_place_ptr& place_ptr);
-        // const Expr_token& cto_etoken(int idx) const;
-        // const Token& cto_token(int idx) const;
-        // const Expr& cto_expr(int idx) const;
-        // Expr_token& to_etoken(int idx);
-        // Token& to_token(int idx);
-        // Expr& to_expr(int idx);
         const Expr_token& cto_etoken(iterator it) const;
         const Token& cto_token(iterator it) const;
         const Expr& cto_expr(iterator it) const;
@@ -178,12 +169,6 @@ namespace SOS {
         static Expr_token& ptr_to_etoken_check(Expr_place_ptr& place_ptr);
         static Token& ptr_to_token_check(Expr_place_ptr& place_ptr);
         static Expr& ptr_to_expr_check(Expr_place_ptr& place_ptr);
-        // const Expr_token& cto_etoken_check(int idx) const;
-        // const Token& cto_token_check(int idx) const;
-        // const Expr& cto_expr_check(int idx) const;
-        // Expr_token& to_etoken_check(int idx);
-        // Token& to_token_check(int idx);
-        // Expr& to_expr_check(int idx);
         const Expr_token& cto_etoken_check(iterator it) const;
         const Token& cto_token_check(iterator it) const;
         const Expr& cto_expr_check(iterator it) const;
@@ -203,35 +188,18 @@ namespace SOS {
         Token& get_next_token_check();
         Expr& get_next_expr_check();
 
-        // template <typename T> void push_back(T&& place_ptr_)
-        //                        { places().push_back(forward<T>(place_ptr_)); }
-        // template <typename... Args> void emplace_back(Args&&... args)
-        //                     { places().emplace_back(forward<Args>(args)...); }
-        // iterator erase(const_iterator pos)
-        //                                        { return places().erase(pos); }
-        // iterator erase(const_iterator first, const_iterator last)
-        //                                { return places().erase(first, last); }
-        // void reserve(size_t size_)                { places().reserve(size_); }
-        // // void reserve(size_t size_)                                         { }
-        // void clear()                                     { places().clear(); }
-
         template <typename T> void push_back(T&& place_ptr_);
         template <typename... Args> void emplace_back(Args&&... args);
         iterator erase(const_iterator pos);
         iterator erase(const_iterator first, const_iterator last);
-        // void reserve(size_t size_);
-        // void reserve(size_t size_)                                         { }
         void resize(size_t size_);
         void clear();
 
         template <typename T> void add_place_ptr(T&& place_ptr_);
         template <typename... Args> void add_new_etoken(Args&&... args);
         template <typename... Args> void add_new_expr(Args&&... args);
-        // void erase_place(int idx_);
-        // void erase_places(int idx_, int count_);
-        // void erase(int size_);
-        void erase_pos();
-        void erase_pos(const_iterator last);
+        void erase_at_pos();
+        void erase_from_pos(const_iterator last);
 
         template <typename Un_f> void for_each_expr(Un_f f);
 

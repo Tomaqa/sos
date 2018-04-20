@@ -3,20 +3,6 @@
 namespace SOS {
     void Parser::Run::do_stuff()
     {
-
-        list<string> l1;
-        auto it = l1.end();
-        cout << (it == l1.end()) << endl;
-        l1.push_back("a");
-        cout << (it == l1.end()) << endl;
-        if (it == l1.end()) {
-            it = l1.begin();
-        }
-        cout << *it << endl;
-
-
-        return;
-
         Parser parser(*_is_ptr);
 
         const Parser::Odes& odes_ = parser.codes();

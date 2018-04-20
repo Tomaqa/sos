@@ -40,17 +40,17 @@ namespace SOS {
     };
 
     template <typename Arg>
-    Expr::Eval<Arg>::Eval(Expr expr_,
+    Expr::Eval<Arg>::Eval(Expr expr,
                           Param_keys_ptr param_keys_ptr_,
                           Param_values_ptr param_values_ptr_)
         : _param_keys_ptr(move(param_keys_ptr_)),
           _param_values_ptr(move(param_values_ptr_)),
-          _oper(param_keys_link(), param_values_link(), move(expr_))
+          _oper(param_keys_link(), param_values_link(), move(expr))
     { }
 
     template <typename Arg>
-    Expr::Eval<Arg>::Eval(Expr expr_, Param_keys param_keys_)
-        : Eval(move(expr_), new_param_keys(move(param_keys_)) )
+    Expr::Eval<Arg>::Eval(Expr expr, Param_keys param_keys_)
+        : Eval(move(expr), new_param_keys(move(param_keys_)) )
     { }
 
     template <typename Arg>

@@ -554,7 +554,8 @@ try {
            "Copy construction of 'Solver' "s
            + "with adding ODE specification failed"s);
 
-    //! 414 776 allocs
+    //! 414 776 allocs with Places being vector
+    //! 418 622 allocs with Places being list
 
     cout << endl << "Success." << endl;
     return 0;

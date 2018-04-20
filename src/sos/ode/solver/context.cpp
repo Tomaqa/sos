@@ -24,23 +24,13 @@ namespace SOS {
             expect(expr.size() == 2 && expr.is_deep(),
                    "Two top subexpressions expected.");
 
-            // Expr& t_subexpr = expr.to_expr(0);
-            // auto it = expr.begin();
-            // Expr& t_subexpr = expr.to_expr(it);
             Expr& t_subexpr = expr.get_expr();
             expect(t_subexpr.size() == 2 && t_subexpr.is_flat(),
                    "Two tokens of time bounds expected.");
-            // expect(t_subexpr.to_etoken(0).get_value_valid<Real>(t_init())
-            //        && t_subexpr.to_etoken(1).get_value_valid<Real>(t_end()),
-            // auto sit = t_subexpr.begin();
-            // expect(t_subexpr.to_etoken(sit).get_value_valid<Real>(t_init())
-            //        && t_subexpr.to_etoken(++sit).get_value_valid<Real>(t_end()),
             expect(t_subexpr.get_etoken().get_value_valid<Real>(t_init())
                    && t_subexpr.get_etoken().get_value_valid<Real>(t_end()),
                    "Invalid values of time bounds.");
 
-            // x_init() = expr.to_expr(1).transform_to_args<Real>();
-            // x_init() = expr.to_expr(++it).transform_to_args<Real>();
             x_init() = expr.get_expr().transform_to_args<Real>();
 
             check_values();

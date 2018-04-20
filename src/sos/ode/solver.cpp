@@ -46,18 +46,13 @@ namespace SOS {
 
         Solver::Solver(Expr expr, bool unify)
         try {
-            // auto it = expr.begin();
             bool parse_unify = (
                  expr.size() == 3
-                 // && !expr[0]->is_etoken() && !expr[2]->is_etoken()
-                 // && expr[1]->is_etoken() && expr.cto_token(1) == "*"
-                 // && !(*it)->is_etoken()
-                 // && (*++it)->is_etoken() && expr.cto_token(it) == "*"
-                 // && !(*++it)->is_etoken()
                  && !expr.cget()->is_etoken()
                  && expr.cpeek()->is_etoken() && expr.cget_token() == "*"
                  && !expr.cget()->is_etoken()
             );
+            expr.reset_pos();
             unify |= parse_unify;
             expect(parse_unify || (expr.size() == 2 && expr.is_deep()),
                    "Expected two expressions of ODEs specifications "s
@@ -65,18 +60,9 @@ namespace SOS {
                    + "at top level "
                    + "with optional '*' token in between "
                    + "(to unify parameter keys).");
-            // parse_odes_spec(expr.to_expr(0));
-            // const int pkeys_idx = parse_unify ? 2 : 1 ;
-            // it = expr.begin();
-            // parse_odes_spec(expr.to_expr(it));
-            // if (parse_unify) ++it;
             parse_odes_spec(expr.get_expr());
             if (parse_unify) expr.next();
-            Param_keyss param_keyss_(move(
-                // parse_param_keyss(expr.to_expr(pkeys_idx))
-                // parse_param_keyss(expr.to_expr(it))
-                parse_param_keyss(expr.get_expr())
-            ));
+            Param_keyss param_keyss_ = parse_param_keyss(expr.get_expr());
             check_empty(param_keyss_);
             set_odes_eval(move(param_keyss_), unify);
         }
@@ -125,7 +111,7 @@ namespace SOS {
         Param_keyss Solver::parse_param_keyss(Expr& expr)
         {
             if (!expr.is_deep()) {
-                return Param_keyss{move(parse_param_keys(move(expr)))};
+                return Param_keyss{parse_param_keys(move(expr))};
             }
             Param_keyss param_keyss_;
             param_keyss_.reserve(expr.size());
@@ -467,18 +453,13 @@ namespace SOS {
                    "Expected two expressions of chosen dt variants "s
                    + "and context(s) for ODEs.");
 
-            // Dt_ids dt_ids_ = expr.to_expr(0).transform_to_args<Dt_id>();
-            // auto it = expr.begin();
-            // Dt_ids dt_ids_ = expr.to_expr(0).transform_to_args<Dt_id>();
             Dt_ids dt_ids_ = expr.get_expr().transform_to_args<Dt_id>();
 
-            // Expr& ctx_expr = expr.to_expr(1);
             Expr& ctx_expr = expr.get_expr();
             expect(ctx_expr.is_deep(),
                    "Expected subexpressions with context(s) for ODEs.");
             if (is_unified() && ctx_expr.size() == 1) {
                 return solve_unif_odes(move(dt_ids_),
-                                       // Context(move(ctx_expr.to_expr(0))));
                                        Context(move(ctx_expr.get_expr())));
             }
             Contexts contexts_;

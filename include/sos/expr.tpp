@@ -4,9 +4,9 @@
 
 namespace SOS {
     template <typename T>
-    Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place_)
+    Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place)
     {
-        return make_unique<T>(forward<T>(place_));
+        return make_unique<T>(forward<T>(place));
     }
 
     ///////////////////////////////////////////////////////////////

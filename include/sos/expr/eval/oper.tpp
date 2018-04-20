@@ -2,18 +2,16 @@ namespace SOS {
     template <typename Arg>
     Expr::Eval<Arg>::Oper::Oper(Param_keys_link& param_keys_l_,
                                 Param_values_link& param_values_l_,
-                                Expr&& expr_)
+                                Expr&& expr)
         : _param_keys_l(param_keys_l_), _param_values_l(param_values_l_)
     {
-        const int size_ = expr_.size();
-        expect(size_ == 2 || size_ == 3,
+        const int size_ = expr.size();
+        const bool is_binary_ = (size_ == 3);
+        expect(is_binary_ || size_ == 2,
                "Expression is not unary nor binary.");
-        // F_key key_ = move(expr_.cto_token_check(0));
-        // auto it = expr_.begin();
-        // F_key key_ = move(expr_.cto_token_check(it));
-        F_key key_ = move(expr_.cget_token_check());
-        _is_binary = (size_ == 3);
-        if (is_binary()) {
+        _is_binary = is_binary_;
+        F_key key_ = move(expr.get_token_check());
+        if (is_binary_) {
             expect(bin_fs.includes(key_),
                    "First argument of binary expression "s
                    + "is not binary operation token: "s
@@ -27,47 +25,36 @@ namespace SOS {
                    + key_);
             _un_f = un_fs[key_];
         }
-        set_lazy_args(expr_);
-        // set_lazy_args(++it);
+        set_lazy_args(expr);
     }
 
     template <typename Arg>
-    void Expr::Eval<Arg>::Oper::set_lazy_args(Expr& expr_)
-    // void Expr::Eval<Arg>::Oper::set_lazy_args(Expr::iterator it)
+    void Expr::Eval<Arg>::Oper::set_lazy_args(Expr& expr)
     {
-        set_lazy_arg<0>(expr_);
-        if (is_binary()) set_lazy_arg<1>(expr_);
-        // set_lazy_arg<0>(it);
-        // if (is_binary()) set_lazy_arg<1>(++it);
+        set_lazy_arg<0>(expr);
+        if (is_binary()) set_lazy_arg<1>(expr);
     }
 
     template <typename Arg>
     template <int idx>
-    void Expr::Eval<Arg>::Oper::set_lazy_arg(Expr& expr_)
-    // void Expr::Eval<Arg>::Oper::set_lazy_arg(Expr::iterator it)
+    void Expr::Eval<Arg>::Oper::set_lazy_arg(Expr& expr)
     {
-        // get<idx>(_args_lazy) = move(get_arg_lazy<idx>(expr_));
-        // get<idx>(_args_lazy) = move(get_arg_lazy<idx>(*it));
-        std::get<idx>(_args_lazy) = move(get_arg_lazy<idx>(expr_.get()));
+        std::get<idx>(_args_lazy) = move(get_arg_lazy<idx>(expr.get()));
     }
 
     template <typename Arg>
     template <int idx>
     typename Expr::Eval<Arg>::Oper::Arg_lazy
-        // Expr::Eval<Arg>::Oper::get_arg_lazy(Expr& expr_)
-        Expr::Eval<Arg>::Oper::get_arg_lazy(Expr_place_ptr& place_)
+        Expr::Eval<Arg>::Oper::get_arg_lazy(Expr_place_ptr& place)
     {
-        // auto&& place_ = move(expr_[idx+1]);
-        // auto&& place_ = move(*it);
-        if (!place_->is_etoken()) {
-            auto&& subexpr = move(ptr_to_expr(place_));
-            // Oper_ptr& oper_ptr_ = get<idx>(_oper_ptrs);
+        if (!place->is_etoken()) {
+            auto&& subexpr = move(ptr_to_expr(place));
             Oper_ptr& oper_ptr_ = std::get<idx>(_oper_ptrs);
             oper_ptr_ = new_oper(Oper(_param_keys_l, _param_values_l,
                                       move(subexpr)));
             return oper_lazy(oper_ptr_);
         }
-        auto&& token_ = move(ptr_to_etoken(place_));
+        auto&& token_ = move(ptr_to_etoken(place));
         Arg arg;
         if (token_.get_value_valid(arg)) {
             return arg_lazy(arg);

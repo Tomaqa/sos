@@ -61,8 +61,6 @@ namespace SOS {
           _is_binary(rhs._is_binary),
           _is_flatten(rhs._is_flatten)
     {
-        invalidate_pos();
-        // reserve(rhs.size());
         for (const auto& e : rhs) {
             add_place_ptr(e->clone());
         }
@@ -173,16 +171,6 @@ namespace SOS {
         return (str += ")");
     }
 
-    // const Expr_place::Expr_place_ptr& Expr::operator [](int idx) const
-    // {
-    //     return cplaces()[idx];
-    // }
-
-    // Expr_place::Expr_place_ptr& Expr::operator [](int idx)
-    // {
-    //     return places()[idx];
-    // }
-
     const Expr_place::Expr_place_ptr& Expr::cfront() const
     {
         return cplaces().front();
@@ -210,8 +198,7 @@ namespace SOS {
 
     bool Expr::valid_pos() const
     {
-        // return pos() != end();
-        return _valid_pos;
+        return _valid_pos && pos() != end();
     }
 
     void Expr::check_pos() const
@@ -235,7 +222,6 @@ namespace SOS {
 
     void Expr::invalidate_pos()
     {
-        // pos() = end();
         _valid_pos = false;
     }
 
@@ -345,156 +331,35 @@ namespace SOS {
         return static_cast<Expr&>(*place_ptr);
     }
 
-    // const Expr_token& Expr::cto_etoken(int idx) const
     const Expr_token& Expr::cto_etoken(iterator it) const
     {
         return cptr_to_etoken(*it);
     }
 
-    // const Expr::Token& Expr::cto_token(int idx) const
     const Expr::Token& Expr::cto_token(iterator it) const
     {
-        // return cptr_to_token((*this)[idx]);
         return cptr_to_token(*it);
     }
 
-    // const Expr& Expr::cto_expr(int idx) const
     const Expr& Expr::cto_expr(iterator it) const
     {
-        // return cptr_to_expr((*this)[idx]);
         return cptr_to_expr(*it);
     }
 
-    // Expr_token& Expr::to_etoken(int idx)
     Expr_token& Expr::to_etoken(iterator it)
     {
-        // return ptr_to_etoken((*this)[idx]);
         return ptr_to_etoken(*it);
     }
 
-    // Expr::Token& Expr::to_token(int idx)
     Expr::Token& Expr::to_token(iterator it)
     {
-        // return ptr_to_token((*this)[idx]);
         return ptr_to_token(*it);
     }
 
-    // Expr& Expr::to_expr(int idx)
     Expr& Expr::to_expr(iterator it)
     {
-        // return ptr_to_expr((*this)[idx]);
         return ptr_to_expr(*it);
     }
-
-    void Expr::check_is_etoken(const Expr_place_ptr& place_ptr)
-    {
-        expect(place_ptr->is_etoken(),
-               "Expected token, got: "s
-               + to_string(*place_ptr));
-    }
-
-    void Expr::check_is_expr(const Expr_place_ptr& place_ptr)
-    {
-        expect(!place_ptr->is_etoken(),
-               "Expected expression, got: "s
-               + to_string(*place_ptr));
-    }
-
-    const Expr_token&
-        Expr::cptr_to_etoken_check(const Expr_place_ptr& place_ptr)
-    {
-        check_is_etoken(place_ptr);
-        return cptr_to_etoken(place_ptr);
-    }
-
-    const Expr::Token&
-        Expr::cptr_to_token_check(const Expr_place_ptr& place_ptr)
-    {
-        check_is_etoken(place_ptr);
-        return cptr_to_token(place_ptr);
-    }
-
-    const Expr& Expr::cptr_to_expr_check(const Expr_place_ptr& place_ptr)
-    {
-        check_is_expr(place_ptr);
-        return cptr_to_expr(place_ptr);
-    }
-
-    Expr_token& Expr::ptr_to_etoken_check(Expr_place_ptr& place_ptr)
-    {
-        check_is_etoken(place_ptr);
-        return ptr_to_etoken(place_ptr);
-    }
-
-    Expr::Token& Expr::ptr_to_token_check(Expr_place_ptr& place_ptr)
-    {
-        check_is_etoken(place_ptr);
-        return ptr_to_token(place_ptr);
-    }
-
-    Expr& Expr::ptr_to_expr_check(Expr_place_ptr& place_ptr)
-    {
-        check_is_expr(place_ptr);
-        return ptr_to_expr(place_ptr);
-    }
-
-    // const Expr_token& Expr::cto_etoken_check(int idx) const
-    const Expr_token& Expr::cto_etoken_check(iterator it) const
-    {
-        // return cptr_to_etoken_check((*this)[idx]);
-        return cptr_to_etoken_check(*it);
-    }
-
-    // const Expr::Token& Expr::cto_token_check(int idx) const
-    const Expr::Token& Expr::cto_token_check(iterator it) const
-    {
-        // return cptr_to_token_check((*this)[idx]);
-        return cptr_to_token_check(*it);
-    }
-
-    // const Expr& Expr::cto_expr_check(int idx) const
-    const Expr& Expr::cto_expr_check(iterator it) const
-    {
-        // return cptr_to_expr_check((*this)[idx]);
-        return cptr_to_expr_check(*it);
-    }
-
-    // Expr_token& Expr::to_etoken_check(int idx)
-    Expr_token& Expr::to_etoken_check(iterator it)
-    {
-        // return ptr_to_etoken_check((*this)[idx]);
-        return ptr_to_etoken_check(*it);
-    }
-
-    // Expr::Token& Expr::to_token_check(int idx)
-    Expr::Token& Expr::to_token_check(iterator it)
-    {
-        // return ptr_to_token_check((*this)[idx]);
-        return ptr_to_token_check(*it);
-    }
-
-    // Expr& Expr::to_expr_check(int idx)
-    Expr& Expr::to_expr_check(iterator it)
-    {
-        // return ptr_to_expr_check((*this)[idx]);
-        return ptr_to_expr_check(*it);
-    }
-
-    // void Expr::erase_place(int idx_)
-    // void Expr::erase_place(iterator it)
-    // {
-        // erase_places(idx_, 1);
-        // erase_places(it, 1);
-    // }
-
-    // void Expr::erase_places(int idx_, int count_)
-    // {
-    //     if (count_ == 0) return;
-    //     if (count_ < 0) {
-    //         count_ = size() - idx_;
-    //     }
-    //     erase(begin()+idx_, begin()+idx_+count_);
-    // }
 
     const Expr_token& Expr::cget_etoken() const
     {
@@ -554,6 +419,88 @@ namespace SOS {
     Expr& Expr::get_next_expr()
     {
         return ptr_to_expr(get_next());
+    }
+
+    void Expr::check_is_etoken(const Expr_place_ptr& place_ptr)
+    {
+        expect(place_ptr->is_etoken(),
+               "Expected token, got: "s
+               + to_string(*place_ptr));
+    }
+
+    void Expr::check_is_expr(const Expr_place_ptr& place_ptr)
+    {
+        expect(!place_ptr->is_etoken(),
+               "Expected expression, got: "s
+               + to_string(*place_ptr));
+    }
+
+    const Expr_token&
+        Expr::cptr_to_etoken_check(const Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return cptr_to_etoken(place_ptr);
+    }
+
+    const Expr::Token&
+        Expr::cptr_to_token_check(const Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return cptr_to_token(place_ptr);
+    }
+
+    const Expr& Expr::cptr_to_expr_check(const Expr_place_ptr& place_ptr)
+    {
+        check_is_expr(place_ptr);
+        return cptr_to_expr(place_ptr);
+    }
+
+    Expr_token& Expr::ptr_to_etoken_check(Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return ptr_to_etoken(place_ptr);
+    }
+
+    Expr::Token& Expr::ptr_to_token_check(Expr_place_ptr& place_ptr)
+    {
+        check_is_etoken(place_ptr);
+        return ptr_to_token(place_ptr);
+    }
+
+    Expr& Expr::ptr_to_expr_check(Expr_place_ptr& place_ptr)
+    {
+        check_is_expr(place_ptr);
+        return ptr_to_expr(place_ptr);
+    }
+
+    const Expr_token& Expr::cto_etoken_check(iterator it) const
+    {
+        return cptr_to_etoken_check(*it);
+    }
+
+    const Expr::Token& Expr::cto_token_check(iterator it) const
+    {
+        return cptr_to_token_check(*it);
+    }
+
+    const Expr& Expr::cto_expr_check(iterator it) const
+    {
+        return cptr_to_expr_check(*it);
+    }
+
+    Expr_token& Expr::to_etoken_check(iterator it)
+    {
+        return ptr_to_etoken_check(*it);
+    }
+
+    Expr::Token& Expr::to_token_check(iterator it)
+    {
+        return ptr_to_token_check(*it);
+    }
+
+    Expr& Expr::to_expr_check(iterator it)
+    {
+        return ptr_to_expr_check(*it);
     }
 
     const Expr_token& Expr::cget_etoken_check() const
@@ -618,24 +565,17 @@ namespace SOS {
 
     Expr::iterator Expr::erase(const_iterator pos)
     {
-        // return places().erase(pos);
         return erase(pos, ++pos);
     }
 
     Expr::iterator Expr::erase(const_iterator first, const_iterator last)
     {
-        // return places().erase(first, last);
         auto it = places().erase(first, last);
         if (first == pos()) {
             pos() = it;
         }
         return it;
     }
-
-    // void Expr::reserve(size_t size_)
-    // {
-    //     places().reserve(size_);
-    // }
 
     void Expr::resize(size_t size_)
     {
@@ -652,19 +592,12 @@ namespace SOS {
         invalidate_pos();
     }
 
-    // void Expr::erase(int size_)
-    // {
-    //     if (size_ == 0) return;
-    //     auto eit = (size_ > 0) ? pos()+size_ : end();
-    //     erase(pos(), eit);
-    // }
-
-    void Expr::erase_pos()
+    void Expr::erase_at_pos()
     {
         erase(pos(), end());
     }
 
-    void Expr::erase_pos(const_iterator last)
+    void Expr::erase_from_pos(const_iterator last)
     {
         erase(pos(), last);
     }
@@ -679,8 +612,6 @@ namespace SOS {
     Expr& Expr::simplify_top() noexcept
     {
         if (size() == 1 && !cfront()->is_etoken()) {
-            // places() = move(to_expr(0).places());
-            // places() = move(get_expr().places());
             Expr expr = move(to_expr(begin()));
             if (expr.empty()) {
                 clear();
@@ -715,19 +646,9 @@ namespace SOS {
         _is_binary = true;
         if (size() > 3) {
             Expr subexpr{cfront()->clone()};
-            // subexpr.reserve(size()-2);
-            // for (auto&& it = begin()+2, eit = end(); it != eit; ++it) {
-            //     subexpr.add_place_ptr(move(*it));
-            // }
-            // erase_places(3, -1);
-            // places()[2] = new_expr(move(subexpr.to_binary()));
-            // auto it = ++begin();
-            // ++it;
             auto it = begin();
             std::advance(it, 2);
             std::move(it, end(), std::back_inserter(subexpr));
-            // erase(++it, end());
-            // *--it = new_expr(move(subexpr.to_binary()));
             resize(3);
             *it = new_expr(move(subexpr.to_binary()));
         }
@@ -752,14 +673,13 @@ namespace SOS {
         if (_is_flatten) return *this;
         _is_flatten = true;
         Places places_;
-        // places_.reserve(size()*2);
         for (auto& e : places()) {
             if (e->is_etoken()) {
                 places_.emplace_back(move(e));
                 continue;
             }
             auto&& subexpr = move(ptr_to_expr(e).flatten());
-            move(subexpr.begin(), subexpr.end(), std::back_inserter(places_));
+            move(subexpr, std::back_inserter(places_));
         }
         places() = move(places_);
         return *this;

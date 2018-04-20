@@ -14,7 +14,7 @@ namespace SOS {
         Oper& operator =(Oper&& rhs)                                = default;
         Oper(Param_keys_link& param_keys_l_,
              Param_values_link& param_values_l_,
-             Expr&& expr_);
+             Expr&& expr);
 
         size_t size() const                    { return param_keys().size(); }
         const Param_keys_link& cparam_keys_link() const;
@@ -35,12 +35,9 @@ namespace SOS {
     private:
         bool is_binary() const                          { return _is_binary; }
 
-        void set_lazy_args(Expr& expr_);
-        template <int idx> void set_lazy_arg(Expr& expr_);
-        // template <int idx> Arg_lazy get_arg_lazy(Expr& expr_);
-        // void set_lazy_args(Expr::iterator it);
-        // template <int idx> void set_lazy_arg(Expr::iterator it);
-        template <int idx> Arg_lazy get_arg_lazy(Expr_place_ptr& place_);
+        void set_lazy_args(Expr& expr);
+        template <int idx> void set_lazy_arg(Expr& expr);
+        template <int idx> Arg_lazy get_arg_lazy(Expr_place_ptr& place);
 
         Arg_lazy arg_lazy(Arg arg) const noexcept;
         Arg_lazy param_lazy(Param_key key_) const;

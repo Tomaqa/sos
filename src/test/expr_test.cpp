@@ -353,7 +353,8 @@ try {
          double, string>
          (eval_data_double_init, expr_get_eval_res<double, initializer_list<double>>, expr_get_eval_msg);
 
-    //! 4313 allocs
+    //! 4313 allocs with Places being vector
+    //! 4995 allocs with Places being list
 
     cout << endl << "Success." << endl;
     return 0;
