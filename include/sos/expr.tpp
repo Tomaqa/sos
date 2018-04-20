@@ -16,7 +16,7 @@ namespace SOS {
     }
 
     template <typename Arg>
-    bool Expr_token::get_value_check(Arg& arg) const
+    bool Expr_token::get_value_valid(Arg& arg) const
     {
         istringstream iss(_token);
         return (bool)(iss >> arg);
@@ -26,15 +26,25 @@ namespace SOS {
     Arg Expr_token::get_value() const
     {
         Arg arg;
-        get_value_check(arg);
+        get_value_valid(arg);
         return arg;
     }
 
     template <typename Arg>
-    bool Expr_token::is_value() const
+    Arg Expr_token::get_value_check() const
+    {
+        Arg arg;
+        expect(get_value_valid(arg),
+               "Token value is not  of demanded type: '"s
+               + ctoken() + "'");
+        return arg;
+    }
+
+    template <typename Arg>
+    bool Expr_token::is_valid_value() const
     {
         Arg v;
-        return get_value_check(v);
+        return get_value_valid(v);
     }
 
     ///////////////////////////////////////////////////////////////
@@ -74,19 +84,26 @@ namespace SOS {
     }
 
     template <typename Arg>
-    bool Expr::has_values() const
+    bool Expr::has_valid_values() const
     {
         if (!is_flat()) return false;
         return std::all_of(cbegin(), cend(),
-                           bind(&Expr_token::is_value<Arg>,
+                           bind(&Expr_token::is_valid_value<Arg>,
                                 bind(&Expr::cptr_to_etoken, _1))
                            );
     }
 
     template <typename Arg>
+    void Expr::check_has_valid_values() const
+    {
+        expect(has_valid_values<Arg>(),
+               "Elements are not of demanded type.");
+    }
+
+    template <typename Arg>
     Expr::Elems<Arg> Expr::transform_to_args() const
     {
-        expect(has_values<Arg>(), "Elements are not of demanded type.");
+        check_has_valid_values<Arg>();
         Elems<Arg> elems;
         elems.reserve(size());
         std::transform(cbegin(), cend(),

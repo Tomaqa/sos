@@ -7,10 +7,8 @@
 namespace SOS {
     const Parser::Reserved_macro_fs_map Parser::reserved_macro_fs_map{
         {"#def",    &Parser::parse_macro_def},
-        {"#define", &Parser::parse_macro_define},
         {"#let",    &Parser::parse_macro_let},
         {"#if",     &Parser::parse_macro_if},
-        {"#ite",    &Parser::parse_macro_ite},
         {"#for",    &Parser::parse_macro_for},
     };
 
@@ -27,29 +25,16 @@ namespace SOS {
     Parser::Parser(Expr expr)
     {
         preprocess_expr(expr);
-        // expect(expr.is_deep(),
-               // "Non-expression occured at top level.");
+        std::cout << expr << std::endl;
+        return;
         smt_exprs().reserve(expr.size());
-        // for (auto&& e : expr.transform_to_exprs()) {
-        expr.for_each_expr([this](auto& e){
-            expect(!e.empty(),
-                   "Expected command expression, got empty expression.");
-            expect(e.cfront()->is_etoken(),
+        for (auto& eptr : expr) {
+            Expr& e = Expr::ptr_to_expr(eptr);
+            expect(!e.empty() && e.cfront()->is_etoken(),
                    "Expected command expression, got: "s
-                   + to_string(e.cto_expr(0)));
+                   + to_string(e));
             parse_expr(e);
-        // }
-        });
-        // preprocess_expr(expr);
-        // smt_exprs().reserve(parser_exprs().size());
-        // for (auto& e : parser_exprs()) {
-        //     expect(!e.empty(),
-        //            "Expected command expression, got empty expression.");
-        //     expect(e.cfront()->is_etoken(),
-        //            "Expected command expression, got: "s
-        //            + to_string(e.cto_expr(0)));
-        //     parse_expr(e);
-        // }
+        }
     }
 
     const Parser::Ode& Parser::code(const Ode_key& ode_key_) const
@@ -115,20 +100,43 @@ namespace SOS {
     string Parser::preprocess_input(istream& is)
     {
         string str("");
+        int size_ = istream_remain_size(is);
+        if (size_ <= 0) return str;
+        str.reserve(size_*1.2);
+        char c;
         string tmp;
-        while (getline(is, tmp, ';')) {
-            str += tmp;
-            getline(is, tmp);
+        tmp.reserve(40);
+        is >> std::noskipws;
+        while (is >> c) {
+            switch (c) {
+            default:
+                str += c;
+                break;
+            case ';':
+                getline(is, tmp);
+                break;
+            case '#':
+                str += c;
+                if (isspace(is.peek())) break;
+                is >> std::skipws >> tmp;
+                if (tmp != "define") {
+                    str += tmp;
+                }
+                else {
+                    getline(is, tmp);
+                    str += "def" + tmp + " " + c + "enddef";
+                }
+                is >> std::noskipws;
+                break;
+            }
         }
         return str;
     }
 
     void Parser::preprocess_expr(Expr& expr)
     {
-        // parser_exprs().reserve(expr.size()*1.2);
-        int pos = 0;
         unsigned depth = 0;
-        preprocess_nested_expr(expr, pos, depth);
+        preprocess_nested_expr(expr, depth);
     }
 
     void Parser::parse_expr(Expr& expr)
@@ -205,9 +213,7 @@ namespace SOS {
                "Expected initial ODE step size, got: "s
                + to_string(expr));
         expect(!_ode_step_set, "ODE step size has already been set.");
-        expect(expr.to_etoken_check(1).get_value_check<Time>(_ode_step),
-               "ODE step size is invalid: "s
-               + to_string(*expr[1]));
+        _ode_step = expr.to_etoken_check(1).get_value_check<Time>();
         _ode_step_set = true;
     }
 
@@ -488,11 +494,6 @@ namespace SOS {
         return get<1>(macro(macro_key_));
     }
 
-    void Parser::add_macro_key(const Macro_key& macro_key_) const
-    {
-        macro(macro_key_);
-    }
-
     void Parser::add_macro(const Macro_key& macro_key_,
                            Macro_params macro_params_,
                            Macro_body macro_body_) const
@@ -501,9 +502,9 @@ namespace SOS {
                                        move(macro_body_));
     }
 
-    void Parser::preprocess_nested_expr(Expr& expr,
-                                        int& pos, unsigned depth)
+    void Parser::preprocess_nested_expr(Expr& expr, unsigned depth)
     {
+        int pos = 0;
         const int size_ = expr.size();
         const bool is_top = (depth == 0);
         while (pos < size_) {
@@ -514,14 +515,11 @@ namespace SOS {
                 }
                 expect(!is_top,
                        "Unexpected token at top level: '"s
-                       + macro_key_);
+                       + macro_key_ + "'");
                 continue;
             }
             Expr& subexpr = expr.to_expr(pos++);
-            preprocess_nested_expr(subexpr, pos, depth+1);
-            // if (is_top) {
-                // add_parser_expr(move(subexpr));
-            // }
+            preprocess_nested_expr(subexpr, depth+1);
         }
     }
 
@@ -560,10 +558,16 @@ namespace SOS {
                + macro_key_ + "'");
     }
 
-    void Parser::parse_macro_def_helper(Expr& expr, int& pos,
-                                        bool one_line) const
+    void Parser::parse_macro_def(Expr& expr, int& pos) const
     {
-
+        Macro_key& macro_key_ = expr.to_token_check(pos++);
+        check_has_not_macro_key(macro_key_);
+        Expr params_expr;
+        if (!expr[pos]->is_etoken()) {
+            params_expr = move(expr.to_expr(pos++));
+        }
+        Macro_params macro_params_ = params_expr.transform_to_tokens();
+        add_macro(macro_key_, macro_params_, {});
     }
 
     void Parser::parse_macro_let(Expr& expr, int& pos) const
@@ -571,11 +575,47 @@ namespace SOS {
 
     }
 
-    void Parser::parse_macro_if_helper(Expr& expr, int& pos,
-                                       bool else_branch) const
+    void Parser::parse_macro_if(Expr& expr, int& pos) const
     {
-        Expr& cond_expr = expr.to_expr_check(pos++);
-        if (!parse_arith_exp<int>(cond_expr)) return;
+        const int expr_size = expr.size();
+        const int if_pos = pos-1;
+        const bool cond = parse_value<int>(expr, pos);
+        int body_pos = pos;
+        int else_pos = -1;
+        const int if_size = body_pos-if_pos;
+
+        while (pos < expr_size) {
+            if (expr[pos]->is_etoken()) {
+                const Macro_key& mkey = expr.cto_token(pos);
+                if (mkey == "#endif") break;
+                if (mkey == "#else") {
+                    else_pos = pos;
+                }
+            }
+            pos++;
+        }
+        expect(pos < expr_size, "#endif not found.");
+        int end_pos = pos++;
+        const bool else_branch = (else_pos > if_pos);
+        const int end_size = end_pos-body_pos+1;
+        const int else_size = else_pos-body_pos+1;
+        const int end_else_size = end_pos-else_pos+1;
+
+        expr.erase_places(if_pos, if_size);
+        body_pos -= if_size;
+        else_pos -= if_size;
+        end_pos -= if_size;
+        if (cond) {
+            if (else_branch) {
+                return expr.erase_places(else_pos, end_else_size);
+            }
+            return expr.erase_place(end_pos);
+        }
+        if (!else_branch) {
+            return expr.erase_places(body_pos, end_size);
+        }
+        expr.erase_place(end_pos);
+        expr.erase_places(body_pos, else_size);
     }
 
     void Parser::parse_macro_for(Expr& expr, int& pos) const
@@ -584,14 +624,12 @@ namespace SOS {
     }
 
     template <typename Arg>
-    Arg Parser::parse_arith_exp(Expr& expr) const
+    Arg Parser::parse_value(Expr& expr, int& pos)
     {
-        return Arg();
+        Expr_token& literal = expr.to_etoken_check(pos++);
+        if (literal.ctoken() == "$") {
+            return expr.to_expr_check(pos++).get_eval<Arg>()();
+        }
+        return literal.get_value_check<Arg>();
     }
-
-    // void Parser::add_parser_expr(Expr expr) const
-    // {
-    //     std::cout << "* " << expr << std::endl;
-    //     parser_exprs().emplace_back(move(expr));
-    // }
 }

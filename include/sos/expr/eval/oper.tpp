@@ -56,7 +56,7 @@ namespace SOS {
         }
         auto&& token_ = move(ptr_to_etoken(place_));
         Arg arg;
-        if (token_.get_value_check(arg)) {
+        if (token_.get_value_valid(arg)) {
             return arg_lazy(arg);
         }
         Param_key&& key_ = move(token_.token());

@@ -48,9 +48,10 @@ namespace SOS {
         static const Token& check_token(const Token& token);
         static bool valid_token(const Token& token);
 
-        template <typename Arg> bool get_value_check(Arg& arg) const;
+        template <typename Arg> bool get_value_valid(Arg& arg) const;
         template <typename Arg> Arg get_value() const;
-        template <typename Arg> bool is_value() const;
+        template <typename Arg> Arg get_value_check() const;
+        template <typename Arg> bool is_valid_value() const;
 
         virtual bool is_etoken() const noexcept override final
                                                               { return true; }
@@ -156,7 +157,8 @@ namespace SOS {
         Expr& to_binary();
         bool is_flat() const;
         bool is_deep() const;
-        template <typename Arg> bool has_values() const;
+        template <typename Arg> bool has_valid_values() const;
+        template <typename Arg> void check_has_valid_values() const;
         Expr& flatten();
         Tokens transform_to_tokens() const;
         Exprs transform_to_exprs() const;

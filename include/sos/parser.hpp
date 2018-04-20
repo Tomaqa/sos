@@ -83,7 +83,6 @@ namespace SOS {
         using Dt_keys_map = map<Dt_key, pair<Dt_keys_map_value, int>>;
 
         using Exprs = Expr::Exprs;
-        // using Parser_exprs = Exprs;
 
         using Macro_key = Token;
         using Macro_params = Param_keys;
@@ -156,12 +155,11 @@ namespace SOS {
         Macro& macro(const Macro_key& macro_key_) const;
         Macro_params& macro_params(const Macro_key& macro_key_) const;
         Macro_body& macro_body(const Macro_key& macro_key_) const;
-        void add_macro_key(const Macro_key& macro_key_) const;
         void add_macro(const Macro_key& macro_key_,
                        Macro_params macro_params_,
                        Macro_body macro_body_) const;
 
-        void preprocess_nested_expr(Expr& expr, int& pos, unsigned depth);
+        void preprocess_nested_expr(Expr& expr, unsigned depth);
         void parse_macro(Expr& expr, int& pos,
                          const Macro_key& macro_key_, bool is_top) const;
         void parse_top_macro(Expr& expr, int& pos,
@@ -170,24 +168,11 @@ namespace SOS {
                                   const Macro_key& macro_key_) const;
         void parse_user_macro(Expr& expr, int& pos,
                               const Macro_key& macro_key_) const;
-        void parse_macro_def(Expr& expr, int& pos) const
-                                        { parse_macro_def_helper(expr, pos); }
-        void parse_macro_define(Expr& expr, int& pos) const
-                                  { parse_macro_def_helper(expr, pos, true); }
-        void parse_macro_def_helper(Expr& expr, int& pos,
-                                    bool one_line = false) const;
+        void parse_macro_def(Expr& expr, int& pos) const;
         void parse_macro_let(Expr& expr, int& pos) const;
-        void parse_macro_if(Expr& expr, int& pos) const
-                                         { parse_macro_if_helper(expr, pos); }
-        void parse_macro_ite(Expr& expr, int& pos) const
-                                   { parse_macro_if_helper(expr, pos, true); }
-        void parse_macro_if_helper(Expr& expr, int& pos,
-                                   bool else_branch = false) const;
+        void parse_macro_if(Expr& expr, int& pos) const;
         void parse_macro_for(Expr& expr, int& pos) const;
-        template <typename Arg> Arg parse_arith_exp(Expr& expr) const;
-
-        // Parser_exprs& parser_exprs() const           { return _parser_exprs; }
-        // void add_parser_expr(Expr expr) const;
+        template <typename Arg> static Arg parse_value(Expr& expr, int& pos);
 
         //! there may be some issue with move operations ?
         //! I've experienced some ..
@@ -200,7 +185,6 @@ namespace SOS {
         Time _ode_step;
         bool _ode_step_set{false};
 
-        // mutable Parser_exprs _parser_exprs;
         mutable Macros_map _macros_map;
         mutable Lets_map _lets_map;
     };

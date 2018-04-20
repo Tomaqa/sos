@@ -48,6 +48,8 @@ namespace SOS {
     inline const string& to_string(const string& rhs)          { return rhs; }
     string to_string(istream& rhs);
 
+    int istream_remain_size(istream& is);
+
     template <typename T>
         ostream& operator <<(ostream& os, const vector<T>& rhs);
     template <typename Key, typename Value>

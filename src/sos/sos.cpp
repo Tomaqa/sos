@@ -31,15 +31,21 @@ namespace SOS {
     string to_string(istream& rhs)
     {
         string str;
-
-        rhs.seekg(0, std::ios::end);
-        int size_ = rhs.tellg();
+        int size_ = istream_remain_size(rhs);
         if (size_ <= 0) size_ = 32;
         str.reserve(size_);
-        rhs.seekg(0, std::ios::beg);
 
         str.assign(std::istreambuf_iterator<char>(rhs),
                    std::istreambuf_iterator<char>());
         return str;
+    }
+
+    int istream_remain_size(istream& is)
+    {
+        streampos pos = is.tellg();
+        is.seekg(0, std::ios::end);
+        auto size_ = is.tellg() - pos;
+        is.seekg(pos);
+        return size_;
     }
 }
