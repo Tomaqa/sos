@@ -171,6 +171,11 @@ namespace SOS {
         return (str += ")");
     }
 
+    Expr::operator bool () const
+    {
+        return valid_pos();
+    }
+
     const Expr_place::Expr_place_ptr& Expr::cfront() const
     {
         return cplaces().front();
@@ -198,7 +203,9 @@ namespace SOS {
 
     bool Expr::valid_pos() const
     {
-        return _valid_pos && pos() != end();
+        if (!_valid_pos) return false;
+        if (pos() == end()) invalidate_pos();
+        return _valid_pos;
     }
 
     void Expr::check_pos() const
@@ -213,14 +220,20 @@ namespace SOS {
         _valid_pos = true;
     }
 
-    void Expr::maybe_reset_pos()
+    void Expr::reset_pos_to_valid()
+    {
+        reset_pos();
+        valid_pos();
+    }
+
+    void Expr::maybe_set_pos()
     {
         if (!valid_pos()) {
             reset_pos();
         }
     }
 
-    void Expr::invalidate_pos()
+    void Expr::invalidate_pos() const
     {
         _valid_pos = false;
     }
@@ -245,11 +258,6 @@ namespace SOS {
         return *pos()++;
     }
 
-    const Expr_place::Expr_place_ptr& Expr::cget_next() const
-    {
-        return *++pos();
-    }
-
     Expr_place::Expr_place_ptr& Expr::peek()
     {
         return *pos();
@@ -260,9 +268,11 @@ namespace SOS {
         return *pos()++;
     }
 
-    Expr_place::Expr_place_ptr& Expr::get_next()
+    Expr_place::Expr_place_ptr Expr::extract()
     {
-        return *++pos();
+        Expr_place_ptr place = move(peek());
+        erase_at_pos();
+        return place;
     }
 
     const Expr_place::Expr_place_ptr& Expr::cpeek_check() const
@@ -289,16 +299,10 @@ namespace SOS {
         return get();
     }
 
-    const Expr_place::Expr_place_ptr& Expr::cget_next_check() const
+    Expr_place::Expr_place_ptr Expr::extract_check()
     {
         check_pos();
-        return cget_next();
-    }
-
-    Expr_place::Expr_place_ptr& Expr::get_next_check()
-    {
-        check_pos();
-        return get_next();
+        return extract();
     }
 
     const Expr_token& Expr::cptr_to_etoken(const Expr_place_ptr& place_ptr)
@@ -376,6 +380,21 @@ namespace SOS {
         return cptr_to_expr(cget());
     }
 
+    const Expr_token& Expr::cpeek_etoken() const
+    {
+        return cptr_to_etoken(cpeek());
+    }
+
+    const Expr::Token& Expr::cpeek_token() const
+    {
+        return cptr_to_token(cpeek());
+    }
+
+    const Expr& Expr::cpeek_expr() const
+    {
+        return cptr_to_expr(cpeek());
+    }
+
     Expr_token& Expr::get_etoken()
     {
         return ptr_to_etoken(get());
@@ -391,34 +410,37 @@ namespace SOS {
         return ptr_to_expr(get());
     }
 
-    const Expr_token& Expr::cget_next_etoken() const
+    Expr_token& Expr::peek_etoken()
     {
-        return cptr_to_etoken(cget_next());
+        return ptr_to_etoken(peek());
     }
 
-    const Expr::Token& Expr::cget_next_token() const
+    Expr::Token& Expr::peek_token()
     {
-        return cptr_to_token(cget_next());
+        return ptr_to_token(peek());
     }
 
-    const Expr& Expr::cget_next_expr() const
+    Expr& Expr::peek_expr()
     {
-        return cptr_to_expr(cget_next());
+        return ptr_to_expr(peek());
     }
 
-    Expr_token& Expr::get_next_etoken()
+    Expr_token Expr::extract_etoken()
     {
-        return ptr_to_etoken(get_next());
+        Expr_place_ptr place = extract();
+        return move(ptr_to_etoken(place));
     }
 
-    Expr::Token& Expr::get_next_token()
+    Expr::Token Expr::extract_token()
     {
-        return ptr_to_token(get_next());
+        Expr_place_ptr place = extract();
+        return move(ptr_to_token(place));
     }
 
-    Expr& Expr::get_next_expr()
+    Expr Expr::extract_expr()
     {
-        return ptr_to_expr(get_next());
+        Expr_place_ptr place = extract();
+        return move(ptr_to_expr(place));
     }
 
     void Expr::check_is_etoken(const Expr_place_ptr& place_ptr)
@@ -518,6 +540,21 @@ namespace SOS {
         return cptr_to_expr_check(cget_check());
     }
 
+    const Expr_token& Expr::cpeek_etoken_check() const
+    {
+        return cptr_to_etoken_check(cpeek_check());
+    }
+
+    const Expr::Token& Expr::cpeek_token_check() const
+    {
+        return cptr_to_token_check(cpeek_check());
+    }
+
+    const Expr& Expr::cpeek_expr_check() const
+    {
+        return cptr_to_expr_check(cpeek_check());
+    }
+
     Expr_token& Expr::get_etoken_check()
     {
         return ptr_to_etoken_check(get_check());
@@ -533,39 +570,45 @@ namespace SOS {
         return ptr_to_expr_check(get_check());
     }
 
-    const Expr_token& Expr::cget_next_etoken_check() const
+    Expr_token& Expr::peek_etoken_check()
     {
-        return cptr_to_etoken_check(cget_next_check());
+        return ptr_to_etoken_check(peek_check());
     }
 
-    const Expr::Token& Expr::cget_next_token_check() const
+    Expr::Token& Expr::peek_token_check()
     {
-        return cptr_to_token_check(cget_next_check());
+        return ptr_to_token_check(peek_check());
     }
 
-    const Expr& Expr::cget_next_expr_check() const
+    Expr& Expr::peek_expr_check()
     {
-        return cptr_to_expr_check(cget_next_check());
+        return ptr_to_expr_check(peek_check());
     }
 
-    Expr_token& Expr::get_next_etoken_check()
+    Expr_token Expr::extract_etoken_check()
     {
-        return ptr_to_etoken_check(get_next_check());
+        Expr_place_ptr place = extract_check();
+        return move(ptr_to_etoken_check(place));
     }
 
-    Expr::Token& Expr::get_next_token_check()
+    Expr::Token Expr::extract_token_check()
     {
-        return ptr_to_token_check(get_next_check());
+        Expr_place_ptr place = extract_check();
+        return move(ptr_to_token_check(place));
     }
 
-    Expr& Expr::get_next_expr_check()
+    Expr Expr::extract_expr_check()
     {
-        return ptr_to_expr_check(get_next_check());
+        Expr_place_ptr place = extract_check();
+        return move(ptr_to_expr_check(place));
     }
 
     Expr::iterator Expr::erase(const_iterator pos)
     {
-        return erase(pos, ++pos);
+        auto next_it = pos;
+        // return erase(pos, ++next_it);
+        next_it++;
+        return erase(pos, next_it);
     }
 
     Expr::iterator Expr::erase(const_iterator first, const_iterator last)
@@ -593,6 +636,11 @@ namespace SOS {
     }
 
     void Expr::erase_at_pos()
+    {
+        erase(pos());
+    }
+
+    void Expr::erase_from_pos()
     {
         erase(pos(), end());
     }

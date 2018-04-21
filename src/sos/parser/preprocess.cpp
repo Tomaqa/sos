@@ -55,8 +55,6 @@ namespace SOS {
 
     void Parser::Preprocess::parse_expr(Expr& expr)
     {
-        // !
-        return;
         unsigned depth = 0;
         parse_nested_expr(expr, depth);
         std::cout << expr << std::endl;
@@ -113,45 +111,6 @@ namespace SOS {
                                        move(macro_body_));
     }
 
-    // Expr_token& Parser::Preprocess::get_etoken(Expr& expr, int& pos)
-    // {
-    //     return expr.to_etoken(pos++);
-    // }
-
-    // Parser::Token& Parser::Preprocess::get_token(Expr& expr, int& pos)
-    // {
-    //     return expr.to_token(pos++);
-    // }
-
-    // Expr& Parser::Preprocess::get_expr(Expr& expr, int& pos)
-    // {
-    //     return expr.to_expr(pos++);
-    // }
-
-    // Expr_token& Parser::Preprocess::get_etoken_check(Expr& expr, int& pos)
-    // {
-    //     check_expr_pos(expr, pos);
-    //     return expr.to_etoken_check(pos++);
-    // }
-
-    // Parser::Token& Parser::Preprocess::get_token_check(Expr& expr, int& pos)
-    // {
-    //     check_expr_pos(expr, pos);
-    //     return expr.to_token_check(pos++);
-    // }
-
-    // Expr& Parser::Preprocess::get_expr_check(Expr& expr, int& pos)
-    // {
-    //     check_expr_pos(expr, pos);
-    //     return expr.to_expr_check(pos++);
-    // }
-
-    // void Parser::Preprocess::check_expr_pos(Expr& expr, int& pos)
-    // {
-    //     expect(pos < (int)expr.size(),
-    //            "Unexpected end of expression.");
-    // }
-
     void Parser::Preprocess::parse_nested_expr(Expr& expr, unsigned depth)
     {
         // int pos = 0;
@@ -172,9 +131,37 @@ namespace SOS {
         //     Expr& subexpr = get_expr(expr, pos);
         //     parse_nested_expr(subexpr, depth+1);
         // }
+        const bool is_top = (depth == 0);
+        while (expr) {
+            if (expr.cpeek()->is_etoken()) {
+                // Macro_key& macro_key_ = expr.get_token();
+                // Macro_key macro_key_ = expr.extract_token();
+                // const Macro_key& macro_key_ = expr.cpeek_token();
+                // const Macro_key& macro_key_ = expr.cpeek_token();
+                // std::cout << macro_key_ << std::endl;
+                // if (is_macro_key(macro_key_)) {
+                const Token& token = expr.cpeek_token();
+                if (is_macro_key(token)) {
+                    Macro_key macro_key_ = expr.extract_token();
+                    parse_macro(expr, macro_key_, is_top);
+                    continue;
+                }
+                expect(!is_top,
+                       "Unexpected token at top level: '"s
+                       + token + "'");
+                expr.next();
+                continue;
+            }
+            Expr& subexpr = expr.get_expr();
+            parse_nested_expr(subexpr, depth+1);
+        }
+        expr.reset_pos_to_valid();
     }
 
-    void Parser::Preprocess::parse_macro(Expr& expr, int& pos,
+    // void Parser::Preprocess::parse_macro(Expr& expr, int& pos,
+    //                                      const Macro_key& macro_key_,
+    //                                      bool is_top) const
+    void Parser::Preprocess::parse_macro(Expr& expr,
                                          const Macro_key& macro_key_,
                                          bool is_top) const
     {
@@ -185,28 +172,46 @@ namespace SOS {
         //        "Unexpected nested reserved macro: '"s
         //        + macro_key_ + "'");
         // parse_user_macro(expr, pos, macro_key_);
+        if (is_top) {
+            return parse_top_macro(expr, macro_key_);
+        }
+        expect(!is_reserved_macro_key(macro_key_),
+               "Unexpected nested reserved macro: '"s
+               + macro_key_ + "'");
+        parse_user_macro(expr, macro_key_);
     }
 
+    // void Parser::Preprocess::
+    //     parse_top_macro(Expr& expr, int& pos,
+    //                     const Macro_key& macro_key_) const
     void Parser::Preprocess::
-        parse_top_macro(Expr& expr, int& pos,
-                        const Macro_key& macro_key_) const
+        parse_top_macro(Expr& expr, const Macro_key& macro_key_) const
     {
         // if (is_reserved_macro_key(macro_key_)) {
         //     return parse_reserved_macro(expr, pos, macro_key_);
         // }
         // parse_user_macro(expr, pos, macro_key_);
+        if (is_reserved_macro_key(macro_key_)) {
+            return parse_reserved_macro(expr, macro_key_);
+        }
+        parse_user_macro(expr, macro_key_);
     }
 
+    // void Parser::Preprocess::
+    //     parse_reserved_macro(Expr& expr, int& pos,
+    //                          const Macro_key& macro_key_) const
     void Parser::Preprocess::
-        parse_reserved_macro(Expr& expr, int& pos,
-                             const Macro_key& macro_key_) const
+        parse_reserved_macro(Expr& expr, const Macro_key& macro_key_) const
     {
-        reserved_macro_fs_map[macro_key_](this, expr, pos);
+        // reserved_macro_fs_map[macro_key_](this, expr, pos);
+        reserved_macro_fs_map[macro_key_](this, expr);
     }
 
+    // void Parser::Preprocess::
+    //     parse_user_macro(Expr& expr, int& pos,
+    //                      const Macro_key& macro_key_) const
     void Parser::Preprocess::
-        parse_user_macro(Expr& expr, int& pos,
-                         const Macro_key& macro_key_) const
+        parse_user_macro(Expr& expr, const Macro_key& macro_key_) const
     {
         expect(has_macro_key(macro_key_),
                "Macro was not defined: '"s
@@ -214,7 +219,8 @@ namespace SOS {
         // ?
     }
 
-    void Parser::Preprocess::parse_macro_def(Expr& expr, int& pos) const
+    // void Parser::Preprocess::parse_macro_def(Expr& expr, int& pos) const
+    void Parser::Preprocess::parse_macro_def(Expr& expr) const
     {
         // const int expr_size = expr.size();
         // const int def_pos = pos-1;
@@ -264,12 +270,14 @@ namespace SOS {
         // add_macro(macro_key_, move(macro_params_), move(macro_body_));
     }
 
-    void Parser::Preprocess::parse_macro_let(Expr& expr, int& pos) const
+    // void Parser::Preprocess::parse_macro_let(Expr& expr, int& pos) const
+    void Parser::Preprocess::parse_macro_let(Expr& expr) const
     {
 
     }
 
-    void Parser::Preprocess::parse_macro_if(Expr& expr, int& pos) const
+    // void Parser::Preprocess::parse_macro_if(Expr& expr, int& pos) const
+    void Parser::Preprocess::parse_macro_if(Expr& expr) const
     {
         // const int expr_size = expr.size();
         // const int if_pos = pos-1;
@@ -314,20 +322,67 @@ namespace SOS {
         // }
         // expr.erase_place(end_pos);
         // expr.erase_places(body_pos, else_size);
+
+        const bool cond = arith_exp<int>(expr);
+        const auto tmp_pos = expr.pos();
+        expr.next();
+
+        auto if_f = cond
+                  ? [](Expr& e){ e.next(); }
+                  : [](Expr& e){ e.erase_at_pos(); } ;
+        auto else_f = cond
+                    ? [](Expr& e){ e.erase_at_pos(); }
+                    : [](Expr& e){ e.next(); } ;
+
+        bool else_branch = false;
+        while (expr) {
+            if (expr.cpeek()->is_etoken()) {
+                Macro_key& mkey = expr.peek_token();
+                if (mkey == "#endif") {
+                    expr.erase_at_pos();
+                    break;
+                }
+                if (mkey == "#else") {
+                    expr.erase_at_pos();
+                    else_branch = true;
+                    continue;
+                }
+            }
+            (else_branch ? else_f : if_f)(expr);
+        }
+        expr.pos() = tmp_pos;
+        expr.erase_at_pos();
     }
 
-    void Parser::Preprocess::parse_macro_for(Expr& expr, int& pos) const
+    // void Parser::Preprocess::parse_macro_for(Expr& expr, int& pos) const
+    void Parser::Preprocess::parse_macro_for(Expr& expr) const
     {
 
     }
 
     template <typename Arg>
-    Arg Parser::Preprocess::parse_value(Expr& expr, int& pos)
+    // Arg Parser::Preprocess::parse_value(Expr& expr, int& pos)
+    // Arg Parser::Preprocess::parse_value(Expr& expr)
+    Arg Parser::Preprocess::arith_exp(Expr& expr)
     {
         // Expr_token& literal = get_etoken_check(expr, pos);
         // if (literal.ctoken() == "$") {
         //     return get_expr_check(expr, pos).get_eval<Arg>()();
         // }
         // return literal.get_value_check<Arg>();
+        // Expr_token& literal = expr.get_etoken_check();
+        // if (literal.ctoken() == "$") {
+        //     return expr.get_expr_check().get_eval<Arg>()();
+        // }
+        // return literal.get_value_check<Arg>();
+        Expr_token& literal = expr.peek_etoken_check();
+        if (literal.ctoken() != "$") {
+            return literal.get_value_check<Arg>();
+        }
+        expr.next();
+        Arg arg = expr.extract_expr_check().get_eval<Arg>()();
+        expr.prev();
+        literal.set_value(arg);
+        return arg;
     }
 }

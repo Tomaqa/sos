@@ -15,8 +15,9 @@ namespace SOS {
         using Macro = tuple<Macro_params, Macro_body>;
         using Macros_map = map<Macro_key, Macro>;
 
-        using Reserved_macro_f = function<void(const Preprocess *const,
-                                               Expr&, int&)>;
+        // using Reserved_macro_f = function<void(const Preprocess *const,
+        //                                        Expr&, int&)>;
+        using Reserved_macro_f = function<void(const Preprocess*, Expr&)>;
         using Reserved_macro_fs_map = Const_map<Macro_key, Reserved_macro_f>;
 
         static const Reserved_macro_fs_map reserved_macro_fs_map;
@@ -35,27 +36,31 @@ namespace SOS {
 
         void parse_nested_expr(Expr& expr, unsigned depth);
     private:
-        static Expr_token& get_etoken(Expr& expr, int& pos);
-        static Token& get_token(Expr& expr, int& pos);
-        static Expr& get_expr(Expr& expr, int& pos);
-        static Expr_token& get_etoken_check(Expr& expr, int& pos);
-        static Token& get_token_check(Expr& expr, int& pos);
-        static Expr& get_expr_check(Expr& expr, int& pos);
-        static void check_expr_pos(Expr& expr, int& pos);
-
-        void parse_macro(Expr& expr, int& pos,
-                         const Macro_key& macro_key_, bool is_top) const;
-        void parse_top_macro(Expr& expr, int& pos,
-                             const Macro_key& macro_key_) const;
-        void parse_reserved_macro(Expr& expr, int& pos,
+        // void parse_macro(Expr& expr, int& pos,
+        //                  const Macro_key& macro_key_, bool is_top) const;
+        // void parse_top_macro(Expr& expr, int& pos,
+        //                      const Macro_key& macro_key_) const;
+        // void parse_reserved_macro(Expr& expr, int& pos,
+        //                           const Macro_key& macro_key_) const;
+        // void parse_user_macro(Expr& expr, int& pos,
+        //                       const Macro_key& macro_key_) const;
+        // void parse_macro_def(Expr& expr, int& pos) const;
+        // void parse_macro_let(Expr& expr, int& pos) const;
+        // void parse_macro_if(Expr& expr, int& pos) const;
+        // void parse_macro_for(Expr& expr, int& pos) const;
+        // template <typename Arg> static Arg parse_value(Expr& expr, int& pos);
+        void parse_macro(Expr& expr, const Macro_key& macro_key_,
+                         bool is_top) const;
+        void parse_top_macro(Expr& expr, const Macro_key& macro_key_) const;
+        void parse_reserved_macro(Expr& expr,
                                   const Macro_key& macro_key_) const;
-        void parse_user_macro(Expr& expr, int& pos,
-                              const Macro_key& macro_key_) const;
-        void parse_macro_def(Expr& expr, int& pos) const;
-        void parse_macro_let(Expr& expr, int& pos) const;
-        void parse_macro_if(Expr& expr, int& pos) const;
-        void parse_macro_for(Expr& expr, int& pos) const;
-        template <typename Arg> static Arg parse_value(Expr& expr, int& pos);
+        void parse_user_macro(Expr& expr, const Macro_key& macro_key_) const;
+        void parse_macro_def(Expr& expr) const;
+        void parse_macro_let(Expr& expr) const;
+        void parse_macro_if(Expr& expr) const;
+        void parse_macro_for(Expr& expr) const;
+        // template <typename Arg> static Arg parse_value(Expr& expr);
+        template <typename Arg> static Arg arith_exp(Expr& expr);
 
     private:
         mutable Macros_map _macros_map;

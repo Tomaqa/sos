@@ -49,6 +49,12 @@ namespace SOS {
         return get_value_valid(v);
     }
 
+    template <typename Arg>
+    void Expr_token::set_value(Arg arg)
+    {
+        token() = to_string(arg);
+    }
+
     ///////////////////////////////////////////////////////////////
 
     template <typename... Args>
@@ -67,7 +73,7 @@ namespace SOS {
     void Expr::emplace_back(Args&&... args)
     {
         places().emplace_back(forward<Args>(args)...);
-        maybe_reset_pos();
+        maybe_set_pos();
     }
 
     template <typename T>

@@ -18,8 +18,6 @@ namespace SOS {
         : _preprocess_ptr(make_unique<Preprocess>())
     {
         _preprocess_ptr->parse_expr(expr);
-        // !
-        // return;
         smt_exprs().reserve(expr.size());
         for (auto& eptr : expr) {
             Expr& e = Expr::ptr_to_expr(eptr);
@@ -133,7 +131,7 @@ namespace SOS {
         Ode_key ode_key_ = move(expr.get_token_check());
         Dt_key dt_key_ = move(expr.get_token_check());
         Expr keys_expr = move(expr.get_expr_check());
-        Dt_spec dt_spec_ = expr.peek()->is_etoken()
+        Dt_spec dt_spec_ = expr.cpeek()->is_etoken()
                          ? Dt_spec("+ "s + move(expr.get_token()))
                          : move(expr.get_expr());
 
