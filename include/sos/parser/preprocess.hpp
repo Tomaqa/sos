@@ -20,9 +20,11 @@ namespace SOS {
 
         static const Reserved_macro_fs_map reserved_macro_fs_map;
 
+        static bool is_macro_key(const Token& token);
+        static bool is_arith_exp(const Token& token);
+
         const Macros_map& cmacros_map() const          { return _macros_map; }
         Macros_map& macros_map()                       { return _macros_map; }
-        static bool is_macro_key(const Macro_key& macro_key_);
         static bool is_reserved_macro_key(const Macro_key& macro_key_);
         bool has_macro_key(const Macro_key& macro_key_) const;
         void check_has_not_macro_key(const Macro_key& macro_key_) const;
@@ -38,22 +40,28 @@ namespace SOS {
 
         void parse_nested_expr(Expr& expr, unsigned depth);
     private:
-        void parse_macro(Expr& expr, const Macro_key& macro_key_,
-                         unsigned depth);
-        void parse_reserved_macro(Expr& expr,
-                                  const Macro_key& macro_key_,
-                                  unsigned depth);
-        void parse_macro_def(Expr& expr, unsigned depth);
-        void parse_macro_let(Expr& expr, unsigned depth);
-        void parse_macro_if(Expr& expr, unsigned depth);
-        void parse_macro_for(Expr& expr, unsigned depth);
+        void check_token(const Expr& expr, const Token& token,
+                         unsigned depth) const;
 
-        void user_macro_exp(Expr& expr,
+        void exp_token(Expr& expr, const Token& token, unsigned depth);
+        void exp_macro(Expr& expr, const Macro_key& macro_key_,
+                       unsigned depth);
+        void exp_reserved_macro(Expr& expr,
+                                const Macro_key& macro_key_,
+                                unsigned depth);
+        void exp_macro_def(Expr& expr, unsigned depth);
+        void exp_macro_let(Expr& expr, unsigned depth);
+        void exp_macro_if(Expr& expr, unsigned depth);
+        void exp_macro_for(Expr& expr, unsigned depth);
+        void exp_user_macro(Expr& expr,
                             const Macro_key& macro_key_,
-                            unsigned depth);
-        template <typename Arg> static Arg arith_exp(Expr& expr);
-
-        void check_token(Expr& expr, const Token& token, unsigned depth);
+                            unsigned depth) const;
+        template <typename Arg> Arg eval_token(Expr& expr,
+                                               unsigned depth);
+        template <typename Arg> Arg eval_expr(Expr& expr,
+                                              unsigned depth);
+        template <typename Arg> void arith_exp(Expr& expr,
+                                               unsigned depth);
     private:
         Macros_map _macros_map;
     };
