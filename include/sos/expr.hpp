@@ -41,7 +41,7 @@ namespace SOS {
         Expr_token()                                                 = delete;
         virtual ~Expr_token()                                       = default;
         virtual Expr_place_ptr clone() const override final;
-        Expr_token(Token token);
+        template <typename Arg> Expr_token(Arg arg);
 
         template <typename... Args>
             static Expr_ptr_t<Expr_token> new_etoken(Args&&... args);
@@ -112,23 +112,23 @@ namespace SOS {
         iterator begin()                      { return std::begin(places()); }
         iterator end()                          { return std::end(places()); }
 
-        iterator& pos() const;
+        const_iterator cpos() const;
+        void set_pos(const_iterator it);
+        void set_pos(iterator it);
         bool valid_pos() const;
         void check_pos() const;
         void reset_pos();
         void reset_pos_to_valid();
         void maybe_set_pos();
-        void next() const;
-        void prev() const;
+        void next();
+        void prev();
 
         const Expr_place_ptr& cpeek() const;
-        const Expr_place_ptr& cget() const;
         Expr_place_ptr& peek();
         Expr_place_ptr& get();
         Expr_place_ptr extract();
 
         const Expr_place_ptr& cpeek_check() const;
-        const Expr_place_ptr& cget_check() const;
         Expr_place_ptr& peek_check();
         Expr_place_ptr& get_check();
         Expr_place_ptr extract_check();
@@ -151,9 +151,6 @@ namespace SOS {
         const Expr_token& cpeek_etoken() const;
         const Token& cpeek_token() const;
         const Expr& cpeek_expr() const;
-        const Expr_token& cget_etoken() const;
-        const Token& cget_token() const;
-        const Expr& cget_expr() const;
         Expr_token& get_etoken();
         Token& get_token();
         Expr& get_expr();
@@ -181,9 +178,6 @@ namespace SOS {
         Expr_token& to_etoken_check(iterator it);
         Token& to_token_check(iterator it);
         Expr& to_expr_check(iterator it);
-        const Expr_token& cget_etoken_check() const;
-        const Token& cget_token_check() const;
-        const Expr& cget_expr_check() const;
         const Expr_token& cpeek_etoken_check() const;
         const Token& cpeek_token_check() const;
         const Expr& cpeek_expr_check() const;
@@ -199,6 +193,10 @@ namespace SOS {
 
         template <typename T> void push_back(T&& place_ptr_);
         template <typename... Args> void emplace_back(Args&&... args);
+        template <typename T>
+            iterator insert(const_iterator pos, T&& place_ptr_);
+        template <typename... Args>
+            iterator emplace(const_iterator pos, Args&&... args);
         iterator erase(const_iterator pos);
         iterator erase(const_iterator first, const_iterator last);
         void resize(size_t size_);
@@ -207,6 +205,11 @@ namespace SOS {
         template <typename T> void add_place_ptr(T&& place_ptr_);
         template <typename... Args> void add_new_etoken(Args&&... args);
         template <typename... Args> void add_new_expr(Args&&... args);
+        template <typename T> iterator add_place_ptr_at_pos(T&& place_ptr_);
+        template <typename... Args>
+            iterator add_new_etoken_at_pos(Args&&... args);
+        template <typename... Args>
+            iterator add_new_expr_at_pos(Args&&... args);
         void erase_at_pos();
         void erase_from_pos();
         void erase_from_pos(const_iterator last);
@@ -237,6 +240,8 @@ namespace SOS {
 
         Places& places()                                   { return _places; }
 
+        iterator& pos();
+        iterator to_iterator(const_iterator it);
         void invalidate_pos() const;
     private:
         Expr& simplify_top() noexcept;
@@ -247,7 +252,7 @@ namespace SOS {
         bool _is_binary{false};
         bool _is_flatten{false};
 
-        mutable iterator _pos;
+        iterator _pos;
         mutable bool _valid_pos{false};
     };
 }

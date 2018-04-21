@@ -1,7 +1,5 @@
 #include <sstream>
 
-#include <iostream>
-
 namespace SOS {
     template <typename T>
     Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place)
@@ -10,6 +8,12 @@ namespace SOS {
     }
 
     ///////////////////////////////////////////////////////////////
+
+    template <typename Arg>
+    Expr_token::Expr_token(Arg arg)
+    {
+        set_value<Arg>(arg);
+    }
 
     template <typename... Args>
     Expr_place::Expr_ptr_t<Expr_token> Expr_token::new_etoken(Args&&... args)
@@ -77,6 +81,18 @@ namespace SOS {
     }
 
     template <typename T>
+    Expr::iterator Expr::insert(const_iterator pos, T&& place_ptr_)
+    {
+        return emplace(pos, forward<T>(place_ptr_));
+    }
+
+    template <typename... Args>
+    Expr::iterator Expr::emplace(const_iterator pos, Args&&... args)
+    {
+        return places().emplace(pos, forward<Args>(args)...);
+    }
+
+    template <typename T>
     void Expr::add_place_ptr(T&& place_ptr_)
     {
         emplace_back(forward<T>(place_ptr_));
@@ -92,6 +108,28 @@ namespace SOS {
     void Expr::add_new_expr(Args&&... args)
     {
         add_place_ptr(new_expr(forward<Args>(args)...));
+    }
+
+    template <typename T>
+    Expr::iterator Expr::add_place_ptr_at_pos(T&& place_ptr_)
+    {
+        return emplace(cpos(), forward<T>(place_ptr_));
+    }
+
+    template <typename... Args>
+    Expr::iterator Expr::add_new_etoken_at_pos(Args&&... args)
+    {
+        return add_place_ptr_at_pos(
+            Expr_token::new_etoken(forward<Args>(args)...)
+        );
+    }
+
+    template <typename... Args>
+    Expr::iterator Expr::add_new_expr_at_pos(Args&&... args)
+    {
+        return add_place_ptr_at_pos(
+            new_expr(forward<Args>(args)...)
+        );
     }
 
     template <typename Un_f>

@@ -1,7 +1,5 @@
 #include "expr.hpp"
 
-#include <iostream>
-
 namespace SOS {
     string to_string(const Expr_place& rhs)
     {
@@ -25,14 +23,15 @@ namespace SOS {
 
     ///////////////////////////////////////////////////////////////
 
+    template <>
+    Expr_token::Expr_token(Token token)
+        : _token(move(token))
+    { }
+
     Expr_place::Expr_place_ptr Expr_token::clone() const
     {
         return new_etoken(*this);
     }
-
-    Expr_token::Expr_token(Token token)
-        : _token(move(token))
-    { }
 
     const Expr_place::Token& Expr_token::check_token(const Token& token)
     {
@@ -196,15 +195,35 @@ namespace SOS {
         return places().back();
     }
 
-    Expr::iterator& Expr::pos() const
+    Expr::const_iterator Expr::cpos() const
     {
         return _pos;
+    }
+
+    Expr::iterator& Expr::pos()
+    {
+        return _pos;
+    }
+
+    void Expr::set_pos(const_iterator it)
+    {
+        pos() = to_iterator(it);
+    }
+
+    void Expr::set_pos(iterator it)
+    {
+        pos() = it;
+    }
+
+    Expr::iterator Expr::to_iterator(const_iterator it)
+    {
+        return erase(it, it);
     }
 
     bool Expr::valid_pos() const
     {
         if (!_valid_pos) return false;
-        if (pos() == end()) invalidate_pos();
+        if (cpos() == end()) invalidate_pos();
         return _valid_pos;
     }
 
@@ -216,7 +235,7 @@ namespace SOS {
 
     void Expr::reset_pos()
     {
-        pos() = begin();
+        set_pos(begin());
         _valid_pos = true;
     }
 
@@ -238,24 +257,19 @@ namespace SOS {
         _valid_pos = false;
     }
 
-    void Expr::next() const
+    void Expr::next()
     {
         ++pos();
     }
 
-    void Expr::prev() const
+    void Expr::prev()
     {
         --pos();
     }
 
     const Expr_place::Expr_place_ptr& Expr::cpeek() const
     {
-        return *pos();
-    }
-
-    const Expr_place::Expr_place_ptr& Expr::cget() const
-    {
-        return *pos()++;
+        return *cpos();
     }
 
     Expr_place::Expr_place_ptr& Expr::peek()
@@ -279,12 +293,6 @@ namespace SOS {
     {
         check_pos();
         return cpeek();
-    }
-
-    const Expr_place::Expr_place_ptr& Expr::cget_check() const
-    {
-        check_pos();
-        return cget();
     }
 
     Expr_place::Expr_place_ptr& Expr::peek_check()
@@ -363,21 +371,6 @@ namespace SOS {
     Expr& Expr::to_expr(iterator it)
     {
         return ptr_to_expr(*it);
-    }
-
-    const Expr_token& Expr::cget_etoken() const
-    {
-        return cptr_to_etoken(cget());
-    }
-
-    const Expr::Token& Expr::cget_token() const
-    {
-        return cptr_to_token(cget());
-    }
-
-    const Expr& Expr::cget_expr() const
-    {
-        return cptr_to_expr(cget());
     }
 
     const Expr_token& Expr::cpeek_etoken() const
@@ -525,21 +518,6 @@ namespace SOS {
         return ptr_to_expr_check(*it);
     }
 
-    const Expr_token& Expr::cget_etoken_check() const
-    {
-        return cptr_to_etoken_check(cget_check());
-    }
-
-    const Expr::Token& Expr::cget_token_check() const
-    {
-        return cptr_to_token_check(cget_check());
-    }
-
-    const Expr& Expr::cget_expr_check() const
-    {
-        return cptr_to_expr_check(cget_check());
-    }
-
     const Expr_token& Expr::cpeek_etoken_check() const
     {
         return cptr_to_etoken_check(cpeek_check());
@@ -612,8 +590,8 @@ namespace SOS {
     Expr::iterator Expr::erase(const_iterator first, const_iterator last)
     {
         auto it = places().erase(first, last);
-        if (first == pos()) {
-            pos() = it;
+        if (first == cpos()) {
+            set_pos(it);
         }
         return it;
     }
@@ -635,17 +613,17 @@ namespace SOS {
 
     void Expr::erase_at_pos()
     {
-        erase(pos());
+        erase(cpos());
     }
 
     void Expr::erase_from_pos()
     {
-        erase(pos(), end());
+        erase(cpos(), end());
     }
 
     void Expr::erase_from_pos(const_iterator last)
     {
-        erase(pos(), last);
+        erase(cpos(), last);
     }
 
     Expr& Expr::simplify() noexcept

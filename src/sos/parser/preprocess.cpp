@@ -5,10 +5,10 @@
 namespace SOS {
     const Parser::Preprocess::Reserved_macro_fs_map
         Parser::Preprocess::reserved_macro_fs_map{
-        {"#def",    &Parser::Preprocess::exp_macro_def},
-        {"#let",    &Parser::Preprocess::exp_macro_let},
-        {"#if",     &Parser::Preprocess::exp_macro_if},
-        {"#for",    &Parser::Preprocess::exp_macro_for},
+        {"#def",    &Parser::Preprocess::parse_macro_def},
+        {"#let",    &Parser::Preprocess::parse_macro_let},
+        {"#if",     &Parser::Preprocess::parse_macro_if},
+        {"#for",    &Parser::Preprocess::parse_macro_for},
     };
 
     string Parser::Preprocess::parse_input(string&& input)
@@ -67,7 +67,7 @@ namespace SOS {
         return token[0] == '#';
     }
 
-    bool Parser::Preprocess::is_arith_exp(const Token& token)
+    bool Parser::Preprocess::is_arith_expr(const Token& token)
     {
         return (token == "$");
     }
@@ -140,8 +140,7 @@ namespace SOS {
     {
         while (expr) {
             if (expr.cpeek()->is_etoken()) {
-                const Token& token = expr.cpeek_token();
-                exp_token(expr, token, depth);
+                parse_token(expr, depth);
                 continue;
             }
             Expr& subexpr = expr.get_expr();
@@ -151,45 +150,50 @@ namespace SOS {
     }
 
     void Parser::Preprocess::check_token(const Expr& expr,
-                                         const Token& token,
                                          unsigned depth) const
     {
+        const Token& token = expr.cpeek_token();
         expect(depth > 0,
                "Unexpected token at top level: '"s
                + token + "'");
     }
 
-    void Parser::Preprocess::exp_token(Expr& expr,
-                                       const Token& token,
-                                       unsigned depth)
+    template <typename F>
+    void Parser::Preprocess::parse_and_return(Expr& expr, F f)
     {
+        auto it = expr.cpos();
+        const bool was_begin = (it == expr.cbegin());
+        if (!was_begin) --it;
+        f();
+        if (was_begin) expr.reset_pos();
+        else expr.set_pos(++it);
+    }
+
+    void Parser::Preprocess::parse_token(Expr& expr, unsigned depth)
+    {
+        const Token& token = expr.cpeek_token();
         if (is_macro_key(token)) {
-            Macro_key mkey = expr.extract_token();
-            return exp_macro(expr, mkey, depth);
+            return parse_macro(expr, depth);
         }
-        if (is_arith_exp(token)) {
-            // expr.erase_at_pos();
-            // arith_exp<double>(expr, depth);
-            expr.erase_at_pos();
-            arith_exp<double>(expr, depth);
+        if (is_arith_expr(token)) {
+            exp_arith_expr<double>(expr, depth);
         }
-        check_token(expr, token, depth);
+        check_token(expr, depth);
         expr.next();
     }
 
-    void Parser::Preprocess::exp_macro(Expr& expr,
-                                       const Macro_key& macro_key_,
-                                       unsigned depth)
+    void Parser::Preprocess::parse_macro(Expr& expr, unsigned depth)
     {
-        if (is_reserved_macro_key(macro_key_)) {
-            return exp_reserved_macro(expr, macro_key_, depth);
+        Macro_key mkey = expr.extract_token();
+        if (is_reserved_macro_key(mkey)) {
+            return parse_reserved_macro(expr, mkey, depth);
         }
-        exp_user_macro(expr, macro_key_, depth);
+        parse_user_macro(expr, mkey, depth);
     }
 
     void Parser::Preprocess::
-        exp_reserved_macro(Expr& expr, const Macro_key& macro_key_,
-                           unsigned depth)
+        parse_reserved_macro(Expr& expr, const Macro_key& macro_key_,
+                             unsigned depth)
     {
         expect(depth == 0,
                "Unexpected nested reserved macro: '"s
@@ -197,7 +201,7 @@ namespace SOS {
         reserved_macro_fs_map[macro_key_](this, expr, depth);
     }
 
-    void Parser::Preprocess::exp_macro_def(Expr& expr, unsigned depth)
+    void Parser::Preprocess::parse_macro_def(Expr& expr, unsigned depth)
     {
         Macro_key macro_key_ = expr.extract_token_check();
         check_has_not_macro_key(macro_key_);
@@ -227,52 +231,51 @@ namespace SOS {
         add_macro(move(macro_key_), move(macro_params_), move(macro_body_));
     }
 
-    void Parser::Preprocess::exp_macro_let(Expr& expr, unsigned depth)
+    void Parser::Preprocess::parse_macro_let(Expr& expr, unsigned depth)
     {
 
     }
 
-    void Parser::Preprocess::exp_macro_if(Expr& expr, unsigned depth)
+    void Parser::Preprocess::parse_macro_if(Expr& expr, unsigned depth)
     {
-        const bool cond = eval_token<double>(expr, depth);
-
-        const auto keep_f = [](Expr& e){ e.next(); };
-        const auto del_f = [](Expr& e){ e.erase_at_pos(); };
-        const auto choose_f = [&keep_f, &del_f](bool keep){
-            return (keep) ? keep_f : del_f;
-        };
-
-        bool keep = cond;
-        auto f = choose_f(keep);
+        const bool cond = parse_eval_token<double>(expr, depth);
+        bool del = !cond;
         while (expr) {
-            if (expr.cpeek()->is_etoken()) {
-                const Token& token = expr.cpeek_token();
-                if (token == "#endif") {
+            if (!expr.cpeek()->is_etoken()) {
+                if (del) {
                     expr.erase_at_pos();
-                    break;
-                }
-                if (token == "#else") {
-                    expr.erase_at_pos();
-                    keep = !keep;
-                    f = choose_f(keep);
                     continue;
                 }
-                if (keep) {
-                    exp_token(expr, token, depth);
-                }
+                Expr& subexpr = expr.get_expr();
+                parse_nested_expr(subexpr, depth+1);
+                continue;
             }
-            f(expr);
+            const Token& token = expr.cpeek_token();
+            if (token == "#endif") {
+                expr.erase_at_pos();
+                break;
+            }
+            if (token == "#else") {
+                expr.erase_at_pos();
+                del = !del;
+                continue;
+            }
+            if (del) {
+                expr.erase_at_pos();
+                continue;
+            }
+            parse_token(expr, depth);
         }
     }
 
-    void Parser::Preprocess::exp_macro_for(Expr& expr, unsigned depth)
+    void Parser::Preprocess::parse_macro_for(Expr& expr, unsigned depth)
     {
 
     }
 
-    void Parser::Preprocess::exp_user_macro(Expr& expr,
-                                            const Macro_key& macro_key_,
-                                            unsigned depth) const
+    void Parser::Preprocess::parse_user_macro(Expr& expr,
+                                              const Macro_key& macro_key_,
+                                              unsigned depth) const
     {
         expect(has_macro_key(macro_key_),
                "Macro was not defined: '"s
@@ -281,17 +284,17 @@ namespace SOS {
     }
 
     template <typename Arg>
-    Arg Parser::Preprocess::eval_token(Expr& expr, unsigned depth)
+    Arg Parser::Preprocess::parse_eval_token(Expr& expr, unsigned depth)
     {
         Expr_token literal = expr.extract_etoken_check();
-        if (!is_arith_exp(literal.ctoken())) {
+        if (!is_arith_expr(literal.ctoken())) {
             return literal.get_value_check<Arg>();
         }
-        return eval_expr<Arg>(expr, depth);
+        return parse_eval_expr<Arg>(expr, depth);
     }
 
     template <typename Arg>
-    Arg Parser::Preprocess::eval_expr(Expr& expr, unsigned depth)
+    Arg Parser::Preprocess::parse_eval_expr(Expr& expr, unsigned depth)
     {
         Expr arith_expr = expr.extract_expr_check();
         parse_nested_expr(arith_expr, depth+1);
@@ -299,10 +302,18 @@ namespace SOS {
     }
 
     template <typename Arg>
-    void Parser::Preprocess::arith_exp(Expr& expr, unsigned depth)
+    void Parser::Preprocess::parse_arith_expr(Expr& expr, unsigned depth)
     {
-        Arg arg = eval_expr<Arg>(expr, depth);
-        // !
-        // expr.add_new_etoken_at_pos(arg);
+        expr.erase_at_pos();
+        Arg arg = parse_eval_expr<Arg>(expr, depth);
+        expr.add_new_etoken_at_pos(arg);
+    }
+
+    template <typename Arg>
+    void Parser::Preprocess::exp_arith_expr(Expr& expr, unsigned depth)
+    {
+        parse_and_return(expr, [this, &expr, depth](){
+            parse_arith_expr<Arg>(expr, depth);
+        });
     }
 }

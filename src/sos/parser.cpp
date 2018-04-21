@@ -84,7 +84,7 @@ namespace SOS {
 
     void Parser::parse_expr(Expr& expr)
     try {
-        const Token& cmd = expr.cget_token();
+        const Token& cmd = expr.get_token();
         if (cmd == "define-dt") {
             return parse_define_dt(expr);
         }
@@ -164,7 +164,7 @@ namespace SOS {
     {
         expr.for_each_expr([this](Expr& e){
             if (e.cfront()->is_etoken()
-                && e.cget_token() == "int-ode") {
+                && e.get_token() == "int-ode") {
                 return parse_int_ode(e);
             }
             parse_assert(e);

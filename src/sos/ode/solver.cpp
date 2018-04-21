@@ -48,9 +48,9 @@ namespace SOS {
         try {
             bool parse_unify = (
                  expr.size() == 3
-                 && !expr.cget()->is_etoken()
-                 && expr.cpeek()->is_etoken() && expr.cget_token() == "*"
-                 && !expr.cget()->is_etoken()
+                 && !expr.get()->is_etoken()
+                 && expr.cpeek()->is_etoken() && expr.get_token() == "*"
+                 && !expr.get()->is_etoken()
             );
             expr.reset_pos();
             unify |= parse_unify;
