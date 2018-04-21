@@ -606,9 +606,7 @@ namespace SOS {
     Expr::iterator Expr::erase(const_iterator pos)
     {
         auto next_it = pos;
-        // return erase(pos, ++next_it);
-        next_it++;
-        return erase(pos, next_it);
+        return erase(pos, ++next_it);
     }
 
     Expr::iterator Expr::erase(const_iterator first, const_iterator last)
