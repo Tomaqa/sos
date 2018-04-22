@@ -113,6 +113,7 @@ namespace SOS {
         iterator end()                          { return std::end(places()); }
 
         const_iterator cpos() const;
+        iterator pos();
         void set_pos(const_iterator it);
         void set_pos(iterator it);
         bool valid_pos() const;
@@ -240,7 +241,7 @@ namespace SOS {
 
         Places& places()                                   { return _places; }
 
-        iterator& pos();
+        iterator& rpos();
         iterator to_iterator(const_iterator it);
         void invalidate_pos() const;
     private:

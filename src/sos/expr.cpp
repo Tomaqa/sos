@@ -200,19 +200,24 @@ namespace SOS {
         return _pos;
     }
 
-    Expr::iterator& Expr::pos()
+    Expr::iterator Expr::pos()
+    {
+        return _pos;
+    }
+
+    Expr::iterator& Expr::rpos()
     {
         return _pos;
     }
 
     void Expr::set_pos(const_iterator it)
     {
-        pos() = to_iterator(it);
+        rpos() = to_iterator(it);
     }
 
     void Expr::set_pos(iterator it)
     {
-        pos() = it;
+        rpos() = it;
     }
 
     Expr::iterator Expr::to_iterator(const_iterator it)
@@ -259,12 +264,12 @@ namespace SOS {
 
     void Expr::next()
     {
-        ++pos();
+        ++rpos();
     }
 
     void Expr::prev()
     {
-        --pos();
+        --rpos();
     }
 
     const Expr_place::Expr_place_ptr& Expr::cpeek() const
@@ -279,7 +284,7 @@ namespace SOS {
 
     Expr_place::Expr_place_ptr& Expr::get()
     {
-        return *pos()++;
+        return *rpos()++;
     }
 
     Expr_place::Expr_place_ptr Expr::extract()

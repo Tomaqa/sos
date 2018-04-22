@@ -30,6 +30,12 @@ namespace SOS {
                   typename Bin_f = std::equal_to<typename Cont1::value_type>>
             bool equal(const Cont1& cont1, InputIt2 first2,
                        Bin_f f = Bin_f());
+        template <typename Cont, typename T = typename Cont::value_type>
+            auto find(const Cont& cont, const T& value);
+        template <typename Cont, typename Un_f>
+            auto find_if(const Cont& cont, Un_f f);
+        template <typename Cont, typename T = typename Cont::value_type>
+            bool includes(const Cont& cont, const T& value);
 
         template <typename Cont, typename Un_f>
             Un_f for_each(Cont& cont, Un_f f);

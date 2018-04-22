@@ -50,6 +50,24 @@ namespace SOS {
                           std::move(f));
     }
 
+    template <typename Cont, typename T>
+    auto Util::find(const Cont& cont, const T& value)
+    {
+        return std::find(std::begin(cont), std::end(cont), value);
+    }
+
+    template <typename Cont, typename Un_f>
+    auto Util::find_if(const Cont& cont, Un_f f)
+    {
+        return std::find_if(std::begin(cont), std::end(cont), f);
+    }
+
+    template <typename Cont, typename T>
+    bool Util::includes(const Cont& cont, const T& value)
+    {
+        return find(cont, value) != std::end(cont);
+    }
+
     template <typename Cont, typename Un_f>
     Un_f Util::for_each(Cont& cont, Un_f f)
     {
@@ -69,7 +87,7 @@ namespace SOS {
     template <typename Cont1, typename InputIt2, typename Bin_f>
     Bin_f Util::for_each(Cont1& cont1, InputIt2 first2, Bin_f f)
     {
-        for (auto&& first1 = std::begin(cont1), last1 = std::end(cont1);
+        for (auto first1 = std::begin(cont1), last1 = std::end(cont1);
              first1 != last1; ++first1, ++first2) {
             f(*first1, forward<typename InputIt2::reference>(*first2));
         }
@@ -79,7 +97,7 @@ namespace SOS {
     template <typename Cont1, typename InputIt2, typename Bin_f>
     Bin_f Util::for_each(Cont1&& cont1, InputIt2 first2, Bin_f f)
     {
-        for (auto&& first1 = std::make_move_iterator(std::begin(cont1)),
+        for (auto first1 = std::make_move_iterator(std::begin(cont1)),
              last1 = std::make_move_iterator(std::end(cont1));
              first1 != last1; ++first1, ++first2) {
             f(move(*first1), forward<typename InputIt2::reference>(*first2));

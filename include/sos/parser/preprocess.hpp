@@ -2,7 +2,11 @@
 
 #include "sos.hpp"
 
+#include <stack>
+
 namespace SOS {
+    using std::stack;
+
     class Parser::Preprocess {
     public:
         static string parse_input(string&& input);
@@ -11,12 +15,23 @@ namespace SOS {
     protected:
         using Macro_key = Token;
         using Macro_params = Param_keys;
+        using Macro_param = Macro_params::value_type;
         using Macro_body = Expr;
         using Macro = tuple<Macro_params, Macro_body>;
         using Macros_map = map<Macro_key, Macro>;
 
+        using Let_key = Macro_key;
+        using Let_body = Macro_body;
+        using Let = stack<Let_body>;
+        using Lets_map = map<Let_key, Let>;
+
+        // using Macro_params_link = const Macro_params*;
+        // using Macro_params_links = stack<Macro_params_link>;
+
         using Reserved_macro_f = function<void(Preprocess*, Expr&, unsigned)>;
         using Reserved_macro_fs_map = Const_map<Macro_key, Reserved_macro_f>;
+
+        using Exp_pos = Expr::iterator;
 
         static const Reserved_macro_fs_map reserved_macro_fs_map;
 
@@ -32,18 +47,42 @@ namespace SOS {
         Macro& macro(const Macro_key& macro_key_);
         const Macro_params& cmacro_params(const Macro_key& macro_key_) const;
         Macro_params& macro_params(const Macro_key& macro_key_);
+        static bool macro_params_has_param(const Macro_params& macro_params_,
+                                           const Macro_param& macro_param_);
+        bool macro_has_param(const Macro_key& macro_key_,
+                             const Macro_param& macro_param_) const;
         const Macro_body& cmacro_body(const Macro_key& macro_key_) const;
         Macro_body& macro_body(const Macro_key& macro_key_);
         void add_macro(const Macro_key& macro_key_,
                        Macro_params macro_params_,
                        Macro_body macro_body_);
 
+        const Lets_map& clets_map() const                { return _lets_map; }
+        Lets_map& clets_map()                            { return _lets_map; }
+        bool has_let_key(const Let_key& let_key_) const;
+        const Let& clet(const Let_key& let_key_) const;
+        Let& let(const Let_key& let_key_);
+        const Let_body& clet_body(const Let_key& let_key_) const;
+        Let_body& let_body(const Let_key& let_key_);
+        void push_let_body(const Let_key& let_key_, Let_body let_body_);
+        void pop_let_body(const Let_key& let_key_);
+
+        // const Macro_params_links& cmacro_params_ls() const
+        //                                           { return _macro_params_ls; }
+        // Macro_params_links& macro_params_ls()     { return _macro_params_ls; }
+        // bool has_macro_params_l() const;
+        // Macro_params_link macro_params_l() const;
+        // bool macro_params_l_has_param(const Macro_param& macro_param_) const;
+        // void push_macro_params_l(const Macro_params& macro_params_);
+        // void pop_macro_params_l();
+
         void parse_nested_expr(Expr& expr, unsigned depth);
     private:
         void check_token(const Expr& expr, unsigned depth) const;
 
-        template <typename F> void parse_and_return(Expr& expr, F f);
+        template <typename F> Exp_pos parse_and_return(Expr& expr, F f);
         void parse_token(Expr& expr, unsigned depth);
+        Exp_pos exp_token(Expr& expr, unsigned depth);
         void parse_macro(Expr& expr, unsigned depth);
         void parse_reserved_macro(Expr& expr,
                                   const Macro_key& macro_key_,
@@ -53,17 +92,27 @@ namespace SOS {
         void parse_macro_if(Expr& expr, unsigned depth);
         void parse_macro_for(Expr& expr, unsigned depth);
         void parse_user_macro(Expr& expr,
-                              const Macro_key& macro_key_,
-                              unsigned depth) const;
+                              Macro_key& macro_key_,
+                              unsigned depth);
         template <typename Arg> Arg parse_eval_token(Expr& expr,
                                                      unsigned depth);
         template <typename Arg> Arg parse_eval_expr(Expr& expr,
                                                     unsigned depth);
         template <typename Arg> void parse_arith_expr(Expr& expr,
                                                       unsigned depth);
-        template <typename Arg> void exp_arith_expr(Expr& expr,
-                                                    unsigned depth);
+        template <typename Arg> Exp_pos exp_arith_expr(Expr& expr,
+                                                       unsigned depth);
+
+        void parse_user_macro_push_params(Expr& expr,
+                                          const Macro_key& macro_key_,
+                                          unsigned depth);
+        void parse_user_macro_pop_params(Expr& expr,
+                                         const Macro_key& macro_key_);
     private:
         Macros_map _macros_map;
+        Lets_map _lets_map;
+        // Macro_params_link _macro_params_l{nullptr};
+        // Macro_params_links _macro_params_ls;
+        unsigned _macro_depth{0};
     };
 }
