@@ -37,6 +37,7 @@ namespace SOS {
         static bool is_macro_key(const Token& token);
         static bool is_macro_key_char(char c);
         static bool is_arith_expr(const Token& token);
+        static bool is_arith_expr_char(char c);
 
         const Macros_map& cmacros_map() const          { return _macros_map; }
         Macros_map& macros_map()                       { return _macros_map; }
@@ -70,9 +71,15 @@ namespace SOS {
 
         void parse_nested_expr(Expr& expr, unsigned depth);
     private:
-        // using Eval_t = double;
-        using Eval_t = int;
-        using For_eval_t = int;
+        using Eval_float_t = double;
+        using Eval_int_t = int;
+        using For_eval_t = Eval_int_t;
+
+        union Eval_t {
+            Eval_float_t f;
+            Eval_int_t i;
+        };
+        using Eval_t_marked = pair<Eval_t, bool>;
 
         void check_token(const Expr& expr, unsigned depth) const;
 
@@ -91,14 +98,13 @@ namespace SOS {
         void parse_user_macro(Expr& expr,
                               Macro_key& macro_key_,
                               unsigned depth);
-        template <typename Arg> Arg parse_eval_token(Expr& expr,
-                                                     unsigned depth);
-        template <typename Arg> Arg parse_eval_expr(Expr& expr,
-                                                    unsigned depth);
-        template <typename Arg> void parse_arith_expr(Expr& expr,
-                                                      unsigned depth);
-        template <typename Arg> Exp_pos exp_arith_expr(Expr& expr,
-                                                       unsigned depth);
+        // Def_eval_t parse_eval_arith_token(Expr& expr, unsigned depth);
+        // template <typename Arg> Arg parse_eval_arith_expr(Expr& expr,
+        //                                                   unsigned depth);
+        Eval_t_marked parse_eval_arith_token(Expr& expr, unsigned depth);
+        Eval_t_marked parse_eval_arith_expr(Expr& expr, unsigned depth);
+        void parse_arith_expr(Expr& expr, unsigned depth);
+        Exp_pos exp_arith_expr(Expr& expr, unsigned depth);
 
         void parse_token_single(Expr& expr, const Token& token,
                                 unsigned depth);

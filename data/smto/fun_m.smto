@@ -49,7 +49,7 @@
 
 #def T_STEPS
 #for (i 0 $(- #STEPS 1))
-#let j $(+ #i 1)
+#let j $i(+ #i 1)
     (= t_#j  (+ t_#i  T))
 #endlet j
 #endfor
@@ -71,7 +71,7 @@
 #def ASSERT_INT_ODE(f)
 (assert (and
 #for (i 0 $(- #STEPS 1))
-#let j $(+ #i 1)
+#let j $i(+ #i 1)
     (= #f##_#j (int-ode #f d#f##_#i (#f##_#i t_#i t_#j) ()) )
 #endlet j
 #endfor
