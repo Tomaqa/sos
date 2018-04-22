@@ -163,6 +163,42 @@ namespace SOS {
                               std::move(f));
     }
 
+    template <typename OutputCont, typename InputIt, typename Un_f>
+    OutputCont Util::split_if(InputIt first, InputIt last, Un_f f)
+    {
+        OutputCont d_cont;
+        if (first == last) return d_cont;
+        auto first2 = first;
+        for (++first2; first2 != last; ++first2) {
+            if (!f(*first2)) continue;
+            d_cont.emplace_back(std::make_move_iterator(first),
+                                std::make_move_iterator(first2));
+            first = first2;
+        }
+        if (first != first2) {
+            d_cont.emplace_back(std::make_move_iterator(first),
+                                std::make_move_iterator(first2));
+        }
+        return d_cont;
+    }
+
+    template <typename OutputCont, typename InputCont, typename Un_f>
+    OutputCont Util::split_if(InputCont&& cont, Un_f f)
+    {
+        return split_if<OutputCont>(std::begin(cont), std::end(cont), f);
+    }
+
+    template <typename OutputCont, typename InputCont, typename Un_f>
+    OutputCont Util::inplace_split_if(InputCont& cont, Un_f f)
+    {
+        if (cont.empty()) return OutputCont();
+        auto last = std::end(cont);
+        auto first = std::find_if(++std::begin(cont), last, f);
+        OutputCont d_cont = split_if<OutputCont>(first, last, f);
+        cont.erase(first, last);
+        return d_cont;
+    }
+
     template <typename T>
     vector<T>& Util::operator +=(vector<T>& lhs, const vector<T>& rhs)
     {

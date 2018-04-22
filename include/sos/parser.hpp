@@ -42,6 +42,7 @@ namespace SOS {
         Time code_step() const                           { return _ode_step; }
     protected:
         using Token = Expr::Token;
+        using Tokens = Expr::Tokens;
 
         using Dts_spec_map = map<Dt_key, Dt_spec>;
         using Odes_map_value = tuple<Dts_spec_map,

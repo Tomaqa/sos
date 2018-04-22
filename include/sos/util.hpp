@@ -62,6 +62,14 @@ namespace SOS {
             OutputIt transform(Cont1&& cont1, InputIt2 first2,
                                OutputIt d_first, Bin_f f);
 
+        template <typename OutputCont, typename InputIt, typename Un_f>
+            OutputCont split_if(InputIt first, InputIt last, Un_f f);
+        template <typename OutputCont, typename InputCont, typename Un_f>
+            OutputCont split_if(InputCont&& cont, Un_f f);
+        template <typename OutputCont, typename InputCont, typename Un_f>
+            OutputCont inplace_split_if(InputCont& cont, Un_f f);
+
+
         template <typename T>
             vector<T>& operator +=(vector<T>& lhs, const vector<T>& rhs);
         template <typename T>
