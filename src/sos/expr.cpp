@@ -101,7 +101,7 @@ namespace SOS {
             for (decltype(size_) i = 0; i < size_; i++) {
                 str += (char)is.get();
             }
-            throw "At '("s + str
+            throw "At '"s + str
                   + "':\n" + err;
         }
         simplify_top();

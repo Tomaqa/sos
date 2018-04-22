@@ -41,7 +41,7 @@ namespace SOS {
     {
         Arg arg;
         expect(get_value_valid(arg),
-               "Token value is not  of demanded type: '"s
+               "Token value is not of demanded type: '"s
                + ctoken() + "'");
         return arg;
     }

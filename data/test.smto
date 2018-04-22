@@ -1,0 +1,91 @@
+;;;; Function choosing model in SMT+ODE format
+;; `y' is continuous state
+;; `(inc)' is discrete state
+
+
+;;; Constants
+
+;$(+ 5 (* 6 100))
+;$()
+
+#if $(>= 1 1)
+(fdhsdf) ($(+ 5 (* 6 100)))
+#else
+ ( asfas) (jkt)
+#endif
+
+
+;#define STEPS 5
+#def STEPS(j) (1 2 #i 4 5) #enddef
+
+
+#let i 50
+#define i 50000
+(+ 5 #STEPS(3))
+#endlet i
+
+;(#STEPS)
+
+#def XY
+#if $(- 6 6)
+#else
+  nic
+#endif
+#enddef
+
+#def DESC(n)
+#if $( = #n 0 )
+#else
+  #n #DESC( $(- #n 1) )
+#endif
+#enddef
+
+#def ASC(n)
+#if $( = #n 0 )
+#else
+  #ASC( $(- #n 1) ) #n
+#endif
+#enddef
+
+#define FACT(n) (* #ASC(#n))
+
+#define A 5
+(#A)
+
+(#DESC(10))
+(#ASC(10))
+
+( $(+ 10 #FACT(5)) )
+
+(define-fun T (#XY) Real 1)
+
+#def XYZ
+#if 1
+#endif
+#enddef
+
+
+#STEPS(1)
+#XYZ
+
+#define S 5
+
+( $(+ 5 #S) )
+
+#for (i 0 #S)
+  (#i)
+#endfor
+
+#define x 0
+
+(define-fun t#x##_#x () Real 1)
+(define-fun #x##_#x () Real 1)
+
+(define-fun sqr0   () Real t0)
+(define-fun sqrt0  () Real t0)
+
+(define-fun y0   () Real t0)
+
+(define-fun inc0 () Bool true)
+
+;;; Constant invariants

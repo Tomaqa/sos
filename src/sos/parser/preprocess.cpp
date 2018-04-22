@@ -208,7 +208,7 @@ namespace SOS {
     }
 
     void Parser::Preprocess::parse_nested_expr(Expr& expr, unsigned depth)
-    {
+    try {
         while (expr) {
             if (expr.cpeek()->is_etoken()) {
                 parse_token(expr, depth);
@@ -218,6 +218,11 @@ namespace SOS {
             parse_nested_expr(subexpr, depth+1);
         }
         expr.reset_pos_to_valid();
+    }
+    catch (const Error& err) {
+        if (depth == 0) throw;
+        throw "At level "s + to_string(depth)
+              + ", '" + to_string(expr) + "':\n" + err;
     }
 
     void Parser::Preprocess::check_token(const Expr& expr,
@@ -251,43 +256,6 @@ namespace SOS {
             return parse_token_single(expr, token, depth);
         }
         parse_token_multi(expr, tokens, depth);
-    }
-
-    void Parser::Preprocess::
-        parse_token_single(Expr& expr, const Token& token,
-                           unsigned depth)
-    {
-        if (is_macro_key(token)) {
-            return parse_macro(expr, depth);
-        }
-        if (is_arith_expr(token)) {
-            exp_arith_expr<double>(expr, depth);
-        }
-        check_token(expr, depth);
-        expr.next();
-    }
-
-    void Parser::Preprocess::
-        parse_token_multi(Expr& expr, Tokens& tokens, unsigned depth)
-    {
-        const int size_ = tokens.size();
-        auto it = expr.pos();
-        expr.next();
-        for (auto&& t : tokens) {
-            expr.add_new_etoken_at_pos(move(t));
-        }
-        expr.set_pos(it);
-        auto eit = parse_and_return(expr, [this, &expr, depth, size_](){
-            for (int i = 0; i <= size_; i++) {
-                const Token& token = expr.cpeek_token();
-                parse_token_single(expr, token, depth);
-            }
-        });
-        if (expr.pos() == eit) return;
-        Token& token = expr.get_token_check();
-        while (expr.pos() != eit) {
-            token += expr.extract_token_check();
-        }
     }
 
     Parser::Preprocess::Exp_pos
@@ -329,20 +297,7 @@ namespace SOS {
         }
         //! do not parse this expression
         Macro_params macro_params_ = params_expr.transform_to_tokens();
-
-        Macro_body macro_body_;
-        bool found = false;
-        while (expr) {
-            Expr::Expr_place_ptr place = expr.extract();
-            if (place->is_etoken()
-                && Expr::cptr_to_token(place) == "#enddef") {
-                found = true;
-                break;
-            }
-            macro_body_.add_place_ptr(move(place));
-        }
-        expect(found, "#enddef not found.");
-
+        Macro_body macro_body_ = extract_macro_body(expr, "enddef");
         add_macro(move(macro_key_), move(macro_params_), move(macro_body_));
     }
 
@@ -354,11 +309,13 @@ namespace SOS {
 
         Let_body let_body_;
         if (expr.cpeek()->is_etoken()) {
+            exp_token(expr, depth+1);
             Token token = expr.extract_token();
             let_body_.add_new_etoken(move(token));
         }
         else {
             Expr body_expr = expr.extract_expr();
+            parse_nested_expr(body_expr, depth+1);
             let_body_ = move(body_expr);
         }
 
@@ -374,7 +331,7 @@ namespace SOS {
 
     void Parser::Preprocess::parse_macro_if(Expr& expr, unsigned depth)
     {
-        const bool cond = parse_eval_token<double>(expr, depth);
+        const bool cond = parse_eval_token<Eval_t>(expr, depth+1);
         bool del = !cond;
         while (expr) {
             if (!expr.cpeek()->is_etoken()) {
@@ -406,7 +363,26 @@ namespace SOS {
 
     void Parser::Preprocess::parse_macro_for(Expr& expr, unsigned depth)
     {
+        Expr params_expr = expr.extract_expr_check();
+        Macro_key var = params_expr.extract_token_check();
+        const For_eval_t init =
+            parse_eval_token<For_eval_t>(params_expr, depth+1);
+        const For_eval_t end =
+            parse_eval_token<For_eval_t>(params_expr, depth+1);
+        expect(!params_expr,
+               "Additional arguments of macro '#for': "s
+               + to_string(params_expr));
 
+        Macro_body macro_body_ = extract_macro_body(expr, "endfor");
+
+        push_let_body(var, {});
+        for (For_eval_t i = init; i <= end; ++i) {
+            let_body(var) = to_string(i);
+            Macro_body tmp_mbody = macro_body_;
+            parse_nested_expr(tmp_mbody, depth);
+            move(tmp_mbody, std::inserter(expr, expr.pos()));
+        }
+        pop_let_body(var);
     }
 
     void Parser::Preprocess::parse_user_macro(Expr& expr,
@@ -434,55 +410,10 @@ namespace SOS {
         }
     }
 
-    void Parser::Preprocess::
-        parse_user_macro_push_params(Expr& expr,
-                                     const Macro_key& macro_key_,
-                                     unsigned depth)
-    {
-        ++_macro_depth;
-        const Macro_params& macro_params_ = cmacro_params(macro_key_);
-        const int params_size = macro_params_.size();
-        const bool empty = (params_size == 0);
-        if (empty && !expr) return;
-
-        Expr params_expr;
-        if (!empty) {
-            expect(expr && !expr.cpeek()->is_etoken(),
-                   "Missing parameters of user macro '"s
-                   + macro_key_ + "'");
-            params_expr = expr.extract_expr();
-            parse_nested_expr(params_expr, depth);
-            const int pexpr_size = params_expr.size();
-            expect(pexpr_size == params_size,
-                   "Number of user macro '"s + macro_key_
-                   + "' parameters mismatch: "
-                   + to_string(pexpr_size) + " != "
-                   + to_string(params_size));
-        }
-        if (empty) return;
-
-        Macro_params ptokens = params_expr.transform_to_tokens();
-        Util::for_each(macro_params_,
-                       std::make_move_iterator(std::begin(ptokens)),
-                       [this](const Macro_param& mpar, Macro_param&& mval){
-                           push_let_body(mpar, move(mval));
-                       });
-    }
-
-    void Parser::Preprocess::
-        parse_user_macro_pop_params(Expr& expr,
-                                    const Macro_key& macro_key_)
-    {
-        --_macro_depth;
-        const Macro_params& macro_params_ = cmacro_params(macro_key_);
-        for (auto& mpar : macro_params_) {
-            pop_let_body(mpar);
-        }
-    }
-
     template <typename Arg>
     Arg Parser::Preprocess::parse_eval_token(Expr& expr, unsigned depth)
     {
+        exp_token(expr, depth);
         Expr_token literal = expr.extract_etoken_check();
         if (!is_arith_expr(literal.ctoken())) {
             return literal.get_value_check<Arg>();
@@ -515,6 +446,108 @@ namespace SOS {
         });
     }
 
+    void Parser::Preprocess::
+        parse_token_single(Expr& expr, const Token& token,
+                           unsigned depth)
+    {
+        if (is_macro_key(token)) {
+            return parse_macro(expr, depth);
+        }
+        if (is_arith_expr(token)) {
+            exp_arith_expr<Eval_t>(expr, depth);
+        }
+        check_token(expr, depth);
+        expr.next();
+    }
+
+    void Parser::Preprocess::
+        parse_token_multi(Expr& expr, Tokens& tokens, unsigned depth)
+    {
+        const int size_ = tokens.size();
+        auto it = expr.pos();
+        expr.next();
+        for (auto&& t : tokens) {
+            expr.add_new_etoken_at_pos(move(t));
+        }
+        expr.set_pos(it);
+        auto eit = parse_and_return(expr, [this, &expr, depth, size_](){
+            for (int i = 0; i <= size_; i++) {
+                const Token& token = expr.cpeek_token();
+                parse_token_single(expr, token, depth);
+            }
+        });
+        if (expr.pos() == eit) return;
+        Token& token = expr.get_token_check();
+        while (expr.pos() != eit) {
+            token += expr.extract_token_check();
+        }
+    }
+
+    Parser::Preprocess::Macro_body Parser::Preprocess::
+        extract_macro_body(Expr& expr, Token end_token)
+    {
+        end_token = "#"s + move(end_token);
+        Macro_body macro_body_;
+        bool found = false;
+        while (expr) {
+            Expr::Expr_place_ptr place = expr.extract();
+            if (place->is_etoken()
+                && Expr::cptr_to_token(place) == end_token) {
+                found = true;
+                break;
+            }
+            macro_body_.add_place_ptr(move(place));
+        }
+        expect(found, to_string(end_token) + " not found.");
+        return macro_body_;
+    }
+
+    void Parser::Preprocess::
+        parse_user_macro_push_params(Expr& expr,
+                                     const Macro_key& macro_key_,
+                                     unsigned depth)
+    {
+        ++_macro_depth;
+        const Macro_params& macro_params_ = cmacro_params(macro_key_);
+        const int params_size = macro_params_.size();
+        const bool empty = (params_size == 0);
+        if (empty && !expr) return;
+
+        Expr params_expr;
+        if (!empty) {
+            expect(expr && !expr.cpeek()->is_etoken(),
+                   "Missing parameters of user macro '"s
+                   + macro_key_ + "'");
+            params_expr = expr.extract_expr();
+            parse_nested_expr(params_expr, depth+1);
+            const int pexpr_size = params_expr.size();
+            expect(pexpr_size == params_size,
+                   "Number of user macro '"s + macro_key_
+                   + "' parameters mismatch: "
+                   + to_string(pexpr_size) + " != "
+                   + to_string(params_size));
+        }
+        if (empty) return;
+
+        Macro_params ptokens = params_expr.transform_to_tokens();
+        Util::for_each(macro_params_,
+                       std::make_move_iterator(std::begin(ptokens)),
+                       [this](const Macro_param& mpar, Macro_param&& mval){
+                           push_let_body(mpar, move(mval));
+                       });
+    }
+
+    void Parser::Preprocess::
+        parse_user_macro_pop_params(Expr& expr,
+                                    const Macro_key& macro_key_)
+    {
+        --_macro_depth;
+        const Macro_params& macro_params_ = cmacro_params(macro_key_);
+        for (auto& mpar : macro_params_) {
+            pop_let_body(mpar);
+        }
+    }
+
     Parser::Tokens
         Parser::Preprocess::split_token(Token& token)
     {
@@ -527,7 +560,7 @@ namespace SOS {
             tokens[0].erase(0, 1);
         }
         const int size_ = tokens.size();
-        for (int i = 1; i < size_; i++) {
+        for (int i = 0; i < size_; i++) {
             if (tokens[i] != "#") continue;
             if (i < size_-1) {
                 tokens[++i].erase(0, 1);

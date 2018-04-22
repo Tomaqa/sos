@@ -70,6 +70,10 @@ namespace SOS {
 
         void parse_nested_expr(Expr& expr, unsigned depth);
     private:
+        // using Eval_t = double;
+        using Eval_t = int;
+        using For_eval_t = int;
+
         void check_token(const Expr& expr, unsigned depth) const;
 
         template <typename F> Exp_pos parse_and_return(Expr& expr, F f);
@@ -99,12 +103,13 @@ namespace SOS {
         void parse_token_single(Expr& expr, const Token& token,
                                 unsigned depth);
         void parse_token_multi(Expr& expr, Tokens& tokens, unsigned depth);
-        Tokens split_token(Token& token);
+        Macro_body extract_macro_body(Expr& expr, Token end_token);
         void parse_user_macro_push_params(Expr& expr,
                                           const Macro_key& macro_key_,
                                           unsigned depth);
         void parse_user_macro_pop_params(Expr& expr,
                                          const Macro_key& macro_key_);
+        Tokens split_token(Token& token);
     private:
         Macros_map _macros_map;
         Lets_map _lets_map;
