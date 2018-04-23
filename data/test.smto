@@ -113,6 +113,12 @@
 ;#let q #if 1 ## #endif
 ;#let q 1
 ;#let q ##
-#let q
+#let q ##
 (#q)
 #endlet q
+
+;#define #g 5
+
+;#let #g
+;#endlet #g
+

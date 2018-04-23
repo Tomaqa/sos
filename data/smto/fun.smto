@@ -4,8 +4,6 @@
 
 ;;; Constants
 
-(define-fun T () Real 1.0)
-
 (define-fun t0   () Real 1)
 
 (define-fun sqr0   () Real t0)
@@ -15,7 +13,12 @@
 
 (define-fun inc0 () Bool true)
 
-#define STEPS   9
+#define T 1.0
+;#define T 0.1
+
+;#define STEPS   10
+#define STEPS   100
+;#define STEPS   1000
 
 ;;; Constant invariants
 
@@ -50,7 +53,7 @@
 #def T_STEPS
 #for (i 0 $(- #STEPS 1))
 #let j $d(+ #i 1)
-    (= t_#j  (+ t_#i  T))
+    (= t_#j  (+ t_#i  #T))
 #endlet j
 #endfor
 #enddef

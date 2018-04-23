@@ -8,16 +8,9 @@
 
 ;;; Constants
 
-(define-fun T () Real 0.35)
-
-(define-fun pi () Real 3.14159265)
-
 (define-fun p_lo  () Real (- 1))
 (define-fun p_hi  () Real    1 )
 (define-fun p_min () Real (- 1.5 ))
-
-(define-fun r  () Real 5)
-(define-fun om () Real 2)
 
 (define-fun t0   () Real 0)
 
@@ -30,179 +23,78 @@
 (define-fun ahead0   () Bool true)
 (define-fun canal0   () Bool false)
 
+#define PI 3.14159265
+
+#define R  5
+#define OM 2
+
+#define T 0.35
+
+#define STEPS 9
+#define STEPS-1 $d(- #STEPS 1)
+
 ;;; Constant invariants
 
 (assert (and (>  p_hi  p_lo)
              (<  p_min p_lo)
              (>= p0    p_lo)
              (<= p0    p_hi)
-             (>= gam0 (- (/ pi 4)))
-             (<= gam0    (/ pi 4) )
+             (>= gam0 (- (/ #PI 4)))
+             (<= gam0    (/ #PI 4) )
 ))
 
 ;;; Declarations
 
-(declare-fun t_0 () Real)
-(declare-fun t_1 () Real)
-(declare-fun t_2 () Real)
-(declare-fun t_3 () Real)
-(declare-fun t_4 () Real)
-(declare-fun t_5 () Real)
-(declare-fun t_6 () Real)
-(declare-fun t_7 () Real)
-(declare-fun t_8 () Real)
-(declare-fun t_9 () Real)
+#def DECL_CONSTS(const type)
+#for (i 0 #STEPS)
+    (declare-fun #const##_#i () #type)
+#endfor
+#enddef
 
-(declare-fun p_0 () Real)
-(declare-fun p_1 () Real)
-(declare-fun p_2 () Real)
-(declare-fun p_3 () Real)
-(declare-fun p_4 () Real)
-(declare-fun p_5 () Real)
-(declare-fun p_6 () Real)
-(declare-fun p_7 () Real)
-(declare-fun p_8 () Real)
-(declare-fun p_9 () Real)
+#DECL_CONSTS(t    Real)
+#DECL_CONSTS(p    Real)
+#DECL_CONSTS(gam  Real)
+#DECL_CONSTS(c_1  Real)
+#DECL_CONSTS(c_2  Real)
 
-(declare-fun gam_0 () Real)
-(declare-fun gam_1 () Real)
-(declare-fun gam_2 () Real)
-(declare-fun gam_3 () Real)
-(declare-fun gam_4 () Real)
-(declare-fun gam_5 () Real)
-(declare-fun gam_6 () Real)
-(declare-fun gam_7 () Real)
-(declare-fun gam_8 () Real)
-(declare-fun gam_9 () Real)
+#DECL_CONSTS(correct  Bool)
+#DECL_CONSTS(left     Bool)
+#DECL_CONSTS(ahead    Bool)
+#DECL_CONSTS(canal    Bool)
 
-(declare-fun c_0_1 () Real)
-(declare-fun c_1_1 () Real)
-(declare-fun c_2_1 () Real)
-(declare-fun c_3_1 () Real)
-(declare-fun c_4_1 () Real)
-(declare-fun c_5_1 () Real)
-(declare-fun c_6_1 () Real)
-(declare-fun c_7_1 () Real)
-(declare-fun c_8_1 () Real)
-(declare-fun c_9_1 () Real)
-(declare-fun c_0_2 () Real)
-(declare-fun c_1_2 () Real)
-(declare-fun c_2_2 () Real)
-(declare-fun c_3_2 () Real)
-(declare-fun c_4_2 () Real)
-(declare-fun c_5_2 () Real)
-(declare-fun c_6_2 () Real)
-(declare-fun c_7_2 () Real)
-(declare-fun c_8_2 () Real)
-(declare-fun c_9_2 () Real)
-
-(declare-fun correct_0 () Bool)
-(declare-fun correct_1 () Bool)
-(declare-fun correct_2 () Bool)
-(declare-fun correct_3 () Bool)
-(declare-fun correct_4 () Bool)
-(declare-fun correct_5 () Bool)
-(declare-fun correct_6 () Bool)
-(declare-fun correct_7 () Bool)
-(declare-fun correct_8 () Bool)
-(declare-fun correct_9 () Bool)
-
-(declare-fun left_0 () Bool)
-(declare-fun left_1 () Bool)
-(declare-fun left_2 () Bool)
-(declare-fun left_3 () Bool)
-(declare-fun left_4 () Bool)
-(declare-fun left_5 () Bool)
-(declare-fun left_6 () Bool)
-(declare-fun left_7 () Bool)
-(declare-fun left_8 () Bool)
-(declare-fun left_9 () Bool)
-
-(declare-fun ahead_0 () Bool)
-(declare-fun ahead_1 () Bool)
-(declare-fun ahead_2 () Bool)
-(declare-fun ahead_3 () Bool)
-(declare-fun ahead_4 () Bool)
-(declare-fun ahead_5 () Bool)
-(declare-fun ahead_6 () Bool)
-(declare-fun ahead_7 () Bool)
-(declare-fun ahead_8 () Bool)
-(declare-fun ahead_9 () Bool)
-
-(declare-fun canal_0 () Bool)
-(declare-fun canal_1 () Bool)
-(declare-fun canal_2 () Bool)
-(declare-fun canal_3 () Bool)
-(declare-fun canal_4 () Bool)
-(declare-fun canal_5 () Bool)
-(declare-fun canal_6 () Bool)
-(declare-fun canal_7 () Bool)
-(declare-fun canal_8 () Bool)
-(declare-fun canal_9 () Bool)
-
-(declare-fun dp_0 () Dt)
-(declare-fun dp_1 () Dt)
-(declare-fun dp_2 () Dt)
-(declare-fun dp_3 () Dt)
-(declare-fun dp_4 () Dt)
-(declare-fun dp_5 () Dt)
-(declare-fun dp_6 () Dt)
-(declare-fun dp_7 () Dt)
-(declare-fun dp_8 () Dt)
-(declare-fun dp_9 () Dt)
-
-(declare-fun dgam_0 () Dt)
-(declare-fun dgam_1 () Dt)
-(declare-fun dgam_2 () Dt)
-(declare-fun dgam_3 () Dt)
-(declare-fun dgam_4 () Dt)
-(declare-fun dgam_5 () Dt)
-(declare-fun dgam_6 () Dt)
-(declare-fun dgam_7 () Dt)
-(declare-fun dgam_8 () Dt)
-(declare-fun dgam_9 () Dt)
-
-(declare-fun dc_0 () Dt)
-(declare-fun dc_1 () Dt)
-(declare-fun dc_2 () Dt)
-(declare-fun dc_3 () Dt)
-(declare-fun dc_4 () Dt)
-(declare-fun dc_5 () Dt)
-(declare-fun dc_6 () Dt)
-(declare-fun dc_7 () Dt)
-(declare-fun dc_8 () Dt)
-(declare-fun dc_9 () Dt)
+#DECL_CONSTS(dp    Dt)
+#DECL_CONSTS(dgam  Dt)
+#DECL_CONSTS(dc    Dt)
 
 ;;; Initializations
 
 (assert (and (= t_0 t0)
              (= p_0 p0) (= gam_0 gam0)
-             (= c_0_1 c_0_2 c0)
+             (= c_1_0 c_2_0 c0)
              (= correct_0 correct0) (= left_0 left0)
              (= ahead_0 ahead0) (= canal_0 canal0)
 ))
 
 ;;; Steps definition
 
-(assert (and (= t_1  (+ t_0  T))
-             (= t_2  (+ t_1  T))
-             (= t_3  (+ t_2  T))
-             (= t_4  (+ t_3  T))
-             (= t_5  (+ t_4  T))
-             (= t_6  (+ t_5  T))
-             (= t_7  (+ t_6  T))
-             (= t_8  (+ t_7  T))
-             (= t_9  (+ t_8  T))
-))
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
 
 ;;; Derivatives definition
 
-(define-dt p dp_move (gam r) (* (- r) (sin gam)))
-(define-dt p dp_fail (gam r) 0)
+(define-dt p dp_move (gam) (* (- #R) (sin gam)))
+(define-dt p dp_fail (gam) 0)
 
-(define-dt gam dgam_left  (om) (- om))
-(define-dt gam dgam_right (om)    om )
-(define-dt gam dgam_ahead (om)     0 )
+(define-dt gam dgam_left  () (- #OM))
+(define-dt gam dgam_right ()    #OM )
+(define-dt gam dgam_ahead ()      0 )
 
 (define-dt c dc_inc  ()    1 )
 (define-dt c dc_dec  () (- 2))
@@ -210,38 +102,21 @@
 
 ;;; Integration
 
-(assert (and (= p_1 (int-ode p dp_0 (p_0 t_0 t_1) (gam_0 r)) )
-             (= p_2 (int-ode p dp_1 (p_1 t_1 t_2) (gam_1 r)) )
-             (= p_3 (int-ode p dp_2 (p_2 t_2 t_3) (gam_2 r)) )
-             (= p_4 (int-ode p dp_3 (p_3 t_3 t_4) (gam_3 r)) )
-             (= p_5 (int-ode p dp_4 (p_4 t_4 t_5) (gam_4 r)) )
-             (= p_6 (int-ode p dp_5 (p_5 t_5 t_6) (gam_5 r)) )
-             (= p_7 (int-ode p dp_6 (p_6 t_6 t_7) (gam_6 r)) )
-             (= p_8 (int-ode p dp_7 (p_7 t_7 t_8) (gam_7 r)) )
-             (= p_9 (int-ode p dp_8 (p_8 t_8 t_9) (gam_8 r)) )
+#def ASSERT_INT_ODE(f ivar ovar param empty)
+(assert (and
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+#let par #if $(not #empty) #param##_#i #endif
+    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) (#par)) )
+#endlet par
+#endlet j
+#endfor
 ))
+#enddef
 
-(assert (and (= gam_1 (int-ode gam dgam_0 (gam_0 t_0 t_1) (om)) )
-             (= gam_2 (int-ode gam dgam_1 (gam_1 t_1 t_2) (om)) )
-             (= gam_3 (int-ode gam dgam_2 (gam_2 t_2 t_3) (om)) )
-             (= gam_4 (int-ode gam dgam_3 (gam_3 t_3 t_4) (om)) )
-             (= gam_5 (int-ode gam dgam_4 (gam_4 t_4 t_5) (om)) )
-             (= gam_6 (int-ode gam dgam_5 (gam_5 t_5 t_6) (om)) )
-             (= gam_7 (int-ode gam dgam_6 (gam_6 t_6 t_7) (om)) )
-             (= gam_8 (int-ode gam dgam_7 (gam_7 t_7 t_8) (om)) )
-             (= gam_9 (int-ode gam dgam_8 (gam_8 t_8 t_9) (om)) )
-))
-
-(assert (and (= c_1_1 (int-ode c dc_0 (c_0_2 t_0 t_1) ()) )
-             (= c_2_1 (int-ode c dc_1 (c_1_2 t_1 t_2) ()) )
-             (= c_3_1 (int-ode c dc_2 (c_2_2 t_2 t_3) ()) )
-             (= c_4_1 (int-ode c dc_3 (c_3_2 t_3 t_4) ()) )
-             (= c_5_1 (int-ode c dc_4 (c_4_2 t_4 t_5) ()) )
-             (= c_6_1 (int-ode c dc_5 (c_5_2 t_5 t_6) ()) )
-             (= c_7_1 (int-ode c dc_6 (c_6_2 t_6 t_7) ()) )
-             (= c_8_1 (int-ode c dc_7 (c_7_2 t_7 t_8) ()) )
-             (= c_9_1 (int-ode c dc_8 (c_8_2 t_8 t_9) ()) )
-))
+#ASSERT_INT_ODE(p p p gam 0)
+#ASSERT_INT_ODE(gam gam gam ## 1)
+#ASSERT_INT_ODE(c c_2 c_1 ## 1)
 
 ;;; Derivatives connection
 
@@ -260,17 +135,13 @@
          (=> (and (not canal) (not ahead) (not correct)) (= dc dc_inc )  )
 ))
 
-(assert (and (connect dp_0 dgam_0 dc_0 correct_0 left_0 ahead_0 canal_0)
-             (connect dp_1 dgam_1 dc_1 correct_1 left_1 ahead_1 canal_1)
-             (connect dp_2 dgam_2 dc_2 correct_2 left_2 ahead_2 canal_2)
-             (connect dp_3 dgam_3 dc_3 correct_3 left_3 ahead_3 canal_3)
-             (connect dp_4 dgam_4 dc_4 correct_4 left_4 ahead_4 canal_4)
-             (connect dp_5 dgam_5 dc_5 correct_5 left_5 ahead_5 canal_5)
-             (connect dp_6 dgam_6 dc_6 correct_6 left_6 ahead_6 canal_6)
-             (connect dp_7 dgam_7 dc_7 correct_7 left_7 ahead_7 canal_7)
-             (connect dp_8 dgam_8 dc_8 correct_8 left_8 ahead_8 canal_8)
-             (connect dp_9 dgam_9 dc_9 correct_9 left_9 ahead_9 canal_9)
-))
+#def CONNECTS
+#for (i 0 #STEPS)
+    (connect dp_#i dgam_#i dc_#i correct_#i left_#i ahead_#i canal_#i)
+#endfor
+#enddef
+
+(assert (and #CONNECTS))
 
 ;;; States conditions
 
@@ -282,17 +153,13 @@
          (=>       left           (and (not canal)              (not ahead) ))
 ))
 
-(assert (and (states correct_0 left_0 ahead_0 canal_0)
-             (states correct_1 left_1 ahead_1 canal_1)
-             (states correct_2 left_2 ahead_2 canal_2)
-             (states correct_3 left_3 ahead_3 canal_3)
-             (states correct_4 left_4 ahead_4 canal_4)
-             (states correct_5 left_5 ahead_5 canal_5)
-             (states correct_6 left_6 ahead_6 canal_6)
-             (states correct_7 left_7 ahead_7 canal_7)
-             (states correct_8 left_8 ahead_8 canal_8)
-             (states correct_9 left_9 ahead_9 canal_9)
-))
+#def STATES
+#for (i 0 #STEPS)
+    (states correct_#i left_#i ahead_#i canal_#i)
+#endfor
+#enddef
+
+(assert (and #STATES))
 
 ;;; Jump conditions
 
@@ -361,13 +228,12 @@
          ))
 ))
 
-(assert (and (jump correct_0 correct_1 left_0 left_1 ahead_0 ahead_1 canal_0 canal_1 p_1 c_1_1 c_1_2)
-             (jump correct_1 correct_2 left_1 left_2 ahead_1 ahead_2 canal_1 canal_2 p_2 c_2_1 c_2_2)
-             (jump correct_2 correct_3 left_2 left_3 ahead_2 ahead_3 canal_2 canal_3 p_3 c_3_1 c_3_2)
-             (jump correct_3 correct_4 left_3 left_4 ahead_3 ahead_4 canal_3 canal_4 p_4 c_4_1 c_4_2)
-             (jump correct_4 correct_5 left_4 left_5 ahead_4 ahead_5 canal_4 canal_5 p_5 c_5_1 c_5_2)
-             (jump correct_5 correct_6 left_5 left_6 ahead_5 ahead_6 canal_5 canal_6 p_6 c_6_1 c_6_2)
-             (jump correct_6 correct_7 left_6 left_7 ahead_6 ahead_7 canal_6 canal_7 p_7 c_7_1 c_7_2)
-             (jump correct_7 correct_8 left_7 left_8 ahead_7 ahead_8 canal_7 canal_8 p_8 c_8_1 c_8_2)
-             (jump correct_8 correct_9 left_8 left_9 ahead_8 ahead_9 canal_8 canal_9 p_9 c_9_1 c_9_2)
-))
+#def JUMPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (jump correct_#i correct_#j left_#i left_#j ahead_#i ahead_#j canal_#i canal_#j p_#j c_1_#j c_2_#j)
+#endlet j
+#endfor
+#enddef
+
+(assert (and #JUMPS))

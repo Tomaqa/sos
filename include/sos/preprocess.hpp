@@ -41,6 +41,7 @@ namespace SOS {
 
         static bool is_macro_key(const Token& token);
         static bool is_macro_key_char(char c);
+        static void check_is_not_macro_key(const Token& token);
         static bool is_arith_expr(const Token& token);
         static bool is_arith_expr_char(char c);
 

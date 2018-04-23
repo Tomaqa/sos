@@ -77,6 +77,13 @@ namespace SOS {
         return c == '#';
     }
 
+    void Preprocess::check_is_not_macro_key(const Token& token)
+    {
+        expect(!is_macro_key(token),
+               "Specify the macro name '"s + to_string(token)
+               + "' as a simple token without '#'");
+    }
+
     bool Preprocess::is_arith_expr(const Token& token)
     {
         return is_arith_expr_char(token[0]);
@@ -292,6 +299,7 @@ namespace SOS {
     void Preprocess::parse_macro_def(Expr& expr, unsigned depth)
     {
         Macro_key macro_key_ = expr.extract_token_check();
+        check_is_not_macro_key(macro_key_);
         check_has_not_macro_key(macro_key_);
         Expr params_expr;
         if (expr && !expr.cpeek()->is_etoken()) {
@@ -307,6 +315,7 @@ namespace SOS {
     {
         ++_macro_depth;
         Let_key let_key_ = expr.extract_token_check();
+        check_is_not_macro_key(let_key_);
         expect(expr, "Expected definition of '"s
                      + let_key_ + "' #let.");
 
