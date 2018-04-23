@@ -1,13 +1,15 @@
 #pragma once
 
 #include "sos.hpp"
+#include "util.hpp"
+#include "expr.hpp"
 
 #include <stack>
 
 namespace SOS {
     using std::stack;
 
-    class Parser::Preprocess {
+    class Preprocess {
     public:
         Preprocess();
 
@@ -15,8 +17,11 @@ namespace SOS {
         static string parse_input(istream& is);
         void parse_expr(Expr& expr);
     protected:
+        using Token = Expr::Token;
+        using Tokens = Expr::Tokens;
+
         using Macro_key = Token;
-        using Macro_params = Param_keys;
+        using Macro_params = Tokens;
         using Macro_param = Macro_params::value_type;
         using Macro_body = Expr;
         using Macro = tuple<Macro_params, Macro_body>;

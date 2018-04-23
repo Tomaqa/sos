@@ -42,7 +42,6 @@ namespace SOS {
         Time code_step() const                           { return _ode_step; }
     protected:
         using Token = Expr::Token;
-        using Tokens = Expr::Tokens;
 
         using Dts_spec_map = map<Dt_key, Dt_spec>;
         using Odes_map_value = tuple<Dts_spec_map,
@@ -52,9 +51,6 @@ namespace SOS {
         using Dt_keys_map = map<Dt_key, pair<Dt_keys_map_value, int>>;
 
         using Exprs = Expr::Exprs;
-
-        class Preprocess;
-        using Preprocess_ptr = unique_ptr<Preprocess>;
 
         static constexpr const char* smt_init_cmds =
             "(set-option :print-success false)\n"
@@ -131,8 +127,6 @@ namespace SOS {
         Exprs& smt_exprs()                              { return _smt_exprs; }
         void add_smt_expr(Expr expr);
     private:
-        Preprocess_ptr _preprocess_ptr;
-
         //! there may be some issue with move operations ?
         //! I've experienced some ..
         Odes _odes;
@@ -145,5 +139,3 @@ namespace SOS {
         bool _ode_step_set{false};
     };
 }
-
-#include "parser/preprocess.hpp"

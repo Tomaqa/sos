@@ -1,5 +1,5 @@
 #include "parser.hpp"
-#include "parser/preprocess.hpp"
+#include "preprocess.hpp"
 
 #include <sstream>
 
@@ -15,9 +15,8 @@ namespace SOS {
     //! It requires to have whole input stored in memory,
     //! potentionally inefficient and dangerous
     Parser::Parser(Expr expr)
-        : _preprocess_ptr(make_unique<Preprocess>())
     {
-        _preprocess_ptr->parse_expr(expr);
+        Preprocess().parse_expr(expr);
         smt_exprs().reserve(expr.size());
         for (auto& eptr : expr) {
             Expr& e = Expr::ptr_to_expr(eptr);
