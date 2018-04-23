@@ -22,7 +22,7 @@ namespace SOS {
 
         void Run::init()
         {
-            set_file_names();
+            getopts();
             set_istream_ptr();
             set_ostream_ptr();
         }
@@ -36,27 +36,11 @@ namespace SOS {
                    + "\n    -o    Sets output file name";
         }
 
-        void Run::set_file_names()
+        void Run::getopts()
         try {
             int c;
-            while ((c = getopt(_argc, _argv, ":hi:o:")) != EOF) {
-                switch (c) {
-                case 'h':
-                    throw Error();
-                case 'i':
-                    _ifile = optarg;
-                    break;
-                case 'o':
-                    _ofile = optarg;
-                    break;
-                case ':':
-                    throw Error("Option -"s + (char)optopt
-                                + " requires operand"
-                                + "\n");
-                case '?':
-                    throw Error("Unrecognized option: -"s + (char)optopt
-                                + "\n");
-                }
+            while ((c = getopt(_argc, _argv, getopt_str().c_str())) != EOF) {
+                process_opt(c);
             }
             if (_argc - optind == 1) {
                 _ifile = _argv[optind++];
@@ -67,6 +51,32 @@ namespace SOS {
         }
         catch (const Error& err) {
             throw err + usage() + "\n";
+        }
+
+        string Run::getopt_str() const noexcept
+        {
+            return ":hi:o:";
+        }
+
+        void Run::process_opt(char c)
+        {
+            switch (c) {
+            case 'h':
+                throw Error();
+            case 'i':
+                _ifile = optarg;
+                break;
+            case 'o':
+                _ofile = optarg;
+                break;
+            case ':':
+                throw Error("Option -"s + (char)optopt
+                            + " requires operand"
+                            + "\n");
+            case '?':
+                throw Error("Unrecognized option: -"s + (char)optopt
+                            + "\n");
+            }
         }
 
         void Run::set_istream_ptr(istream* std_is_ptr)

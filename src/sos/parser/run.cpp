@@ -3,7 +3,12 @@
 namespace SOS {
     void Parser::Run::do_stuff()
     {
-        Parser parser(*_is_ptr);
+        Parser parser(*_is_ptr, _preprocess_only);
+
+        if (_preprocess_only) {
+            cout << parser.preprocessed_input() << endl;
+            return;
+        }
 
         const Parser::Odes& odes_ = parser.codes();
         for (auto& odes_tup : odes_) {
@@ -25,5 +30,20 @@ namespace SOS {
         }
 
         cout << parser.csmt_input() << endl;
+    }
+
+    string Parser::Run::getopt_str() const noexcept
+    {
+        return Util::Run::getopt_str() + "E";
+    }
+
+    void Parser::Run::process_opt(char c)
+    {
+        Util::Run::process_opt(c);
+        switch (c) {
+        case 'E':
+            _preprocess_only = true;
+            break;
+        }
     }
 }

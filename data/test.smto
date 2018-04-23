@@ -64,6 +64,9 @@
 #endif
 #enddef
 
+( !!!!!!!!!! )
+#define a 1
+( $(and #a) )
 
 #STEPS(1)
 #XYZ
@@ -89,3 +92,27 @@
 (define-fun inc0 () Bool true)
 
 ;;; Constant invariants
+
+#def FUN(param empty)
+#let i 1
+#let par #if $(not #empty) #param##_#i #endif
+    (#par)
+    ;(#param)
+#endlet par
+#endlet i
+#enddef
+
+#FUN(x 0)
+;#FUN(x 1)
+
+#define Q
+
+(#Q)
+
+;#let q #if 1 #endif
+;#let q #if 1 ## #endif
+;#let q 1
+;#let q ##
+#let q
+(#q)
+#endlet q

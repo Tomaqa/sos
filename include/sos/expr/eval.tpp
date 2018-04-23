@@ -163,7 +163,7 @@ namespace SOS {
     template <typename Arg>
     Arg Expr::Eval<Arg>::operator ()() const
     {
-        return call();
+        return operator()({});
     }
 
     template <typename Arg>

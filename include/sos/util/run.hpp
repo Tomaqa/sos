@@ -30,7 +30,9 @@ namespace SOS {
             virtual void init();
             virtual void do_stuff()                                        { }
 
-            void set_file_names();
+            void getopts();
+            virtual string getopt_str() const noexcept;
+            virtual void process_opt(char c);
             void set_istream_ptr(istream* std_is_ptr = &cin);
             void set_ostream_ptr(ostream* std_os_ptr = &cout);
 

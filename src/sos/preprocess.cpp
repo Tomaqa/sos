@@ -1,6 +1,8 @@
 #include "preprocess.hpp"
 #include "expr/eval.hpp"
 
+#include <iostream>
+
 namespace SOS {
     const Preprocess::Reserved_macro_fs_map
         Preprocess::reserved_macro_fs_map{
@@ -303,13 +305,21 @@ namespace SOS {
 
     void Preprocess::parse_macro_let(Expr& expr, unsigned depth)
     {
+        ++_macro_depth;
         Let_key let_key_ = expr.extract_token_check();
         expect(expr, "Expected definition of '"s
                      + let_key_ + "' #let.");
 
         Let_body let_body_;
+
         if (expr.cpeek()->is_etoken()) {
-            exp_token(expr, depth+1);
+            auto it = exp_token(expr, depth+1);
+            if (it == expr.cpos()) {
+                expr.add_new_etoken_at_pos("");
+                expr.prev();
+            }
+        }
+        if (expr.cpeek()->is_etoken()) {
             Token token = expr.extract_token();
             let_body_.add_new_etoken(move(token));
         }
@@ -320,6 +330,7 @@ namespace SOS {
         }
 
         push_let_body(move(let_key_), move(let_body_));
+        --_macro_depth;
     }
 
     void Preprocess::parse_macro_endlet(Expr& expr, unsigned depth)

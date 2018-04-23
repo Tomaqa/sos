@@ -4,27 +4,22 @@
 #include <sstream>
 
 namespace SOS {
-    Parser::Parser(istream& is)
-        : Parser(Expr(Preprocess::parse_input(is)))
+    Parser::Parser(istream& is, bool preprocess_only)
+        : Parser(Expr(Preprocess::parse_input(is)), preprocess_only)
     { }
 
-    Parser::Parser(string input)
-        : Parser(Expr(Preprocess::parse_input(move(input))))
+    Parser::Parser(string input, bool preprocess_only)
+        : Parser(Expr(Preprocess::parse_input(move(input))), preprocess_only)
     { }
 
     //! It requires to have whole input stored in memory,
     //! potentionally inefficient and dangerous
-    Parser::Parser(Expr expr)
+    Parser::Parser(Expr expr, bool preprocess_only)
     {
         Preprocess().parse_expr(expr);
-        smt_exprs().reserve(expr.size());
-        for (auto& eptr : expr) {
-            Expr& e = Expr::ptr_to_expr(eptr);
-            expect(!e.empty() && e.cfront()->is_etoken(),
-                   "Expected command expression, got: "s
-                   + to_string(e));
-            parse_expr(e);
-        }
+        _expr = move(expr);
+        if (preprocess_only) return;
+        parse_top_expr();
     }
 
     const Parser::Ode& Parser::code(const Ode_key& ode_key_) const
@@ -79,6 +74,18 @@ namespace SOS {
     Parser::Const_ids_rows& Parser::const_ids(const Ode_key& ode_key_)
     {
         return get<4>(ode(ode_key_));
+    }
+
+    void Parser::parse_top_expr()
+    {
+        smt_exprs().reserve(_expr.size());
+        for (auto& eptr : _expr) {
+            Expr& e = Expr::ptr_to_expr(eptr);
+            expect(!e.empty() && e.cfront()->is_etoken(),
+                   "Expected command expression, got: "s
+                   + to_string(e));
+            parse_expr(e);
+        }
     }
 
     void Parser::parse_expr(Expr& expr)
@@ -388,6 +395,15 @@ namespace SOS {
     void Parser::add_smt_expr(Expr expr)
     {
         smt_exprs().emplace_back(move(expr));
+    }
+
+    string Parser::preprocessed_input() const
+    {
+        string str("");
+        for (auto& eptr : _expr) {
+            str += to_string(*eptr) + "\n";
+        }
+        return str;
     }
 
     string Parser::csmt_input() const

@@ -32,10 +32,11 @@ namespace SOS {
         Parser& operator =(const Parser& rhs)                       = default;
         Parser(Parser&& rhs)                                        = default;
         Parser& operator =(Parser&& rhs)                            = default;
-        Parser(istream& is);
-        Parser(string input);
-        Parser(Expr expr);
+        Parser(istream& is, bool preprocess_only = false);
+        Parser(string input, bool preprocess_only = false);
+        Parser(Expr expr, bool preprocess_only = false);
 
+        string preprocessed_input() const;
         const Odes& codes() const                            { return _odes; }
         string csmt_input() const;
         bool is_ode_step_set() const                 { return _ode_step_set; }
@@ -71,6 +72,7 @@ namespace SOS {
         const Const_ids_rows& cconst_ids(const Ode_key& ode_key_) const;
         Const_ids_rows& const_ids(const Ode_key& ode_key_);
 
+        void parse_top_expr();
         void parse_expr(Expr& expr);
         void declare_ode(const Ode_key& ode_key_, Expr& keys_expr);
         void parse_define_dt(Expr& expr);
@@ -129,6 +131,8 @@ namespace SOS {
     private:
         //! there may be some issue with move operations ?
         //! I've experienced some ..
+        Expr _expr;
+
         Odes _odes;
         Odes_map _odes_map;
         Dt_keys_map _dt_keys_map;

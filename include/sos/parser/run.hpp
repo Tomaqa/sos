@@ -10,5 +10,10 @@ namespace SOS {
         using Util::Run::Run;
     protected:
         virtual void do_stuff() override;
+
+        virtual string getopt_str() const noexcept override;
+        virtual void process_opt(char c) override;
+    private:
+        bool _preprocess_only{false};
     };
 }

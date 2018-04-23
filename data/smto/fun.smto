@@ -2,7 +2,6 @@
 ;; `y' is continuous state
 ;; `(inc)' is discrete state
 
-
 ;;; Constants
 
 (define-fun T () Real 1.0)
@@ -16,98 +15,27 @@
 
 (define-fun inc0 () Bool true)
 
+#define STEPS   9
+
 ;;; Constant invariants
 
 
 ;;; Declarations
 
-(declare-fun t_0 () Real)
-(declare-fun t_1 () Real)
-(declare-fun t_2 () Real)
-(declare-fun t_3 () Real)
-(declare-fun t_4 () Real)
-(declare-fun t_5 () Real)
-(declare-fun t_6 () Real)
-(declare-fun t_7 () Real)
-(declare-fun t_8 () Real)
-(declare-fun t_9 () Real)
+#def DECL_CONSTS(const type)
+#for (i 0 #STEPS)
+    (declare-fun #const##_#i () #type)
+#endfor
+#enddef
 
-(declare-fun sqr_0 () Real)
-(declare-fun sqr_1 () Real)
-(declare-fun sqr_2 () Real)
-(declare-fun sqr_3 () Real)
-(declare-fun sqr_4 () Real)
-(declare-fun sqr_5 () Real)
-(declare-fun sqr_6 () Real)
-(declare-fun sqr_7 () Real)
-(declare-fun sqr_8 () Real)
-(declare-fun sqr_9 () Real)
-
-(declare-fun sqrt_0 () Real)
-(declare-fun sqrt_1 () Real)
-(declare-fun sqrt_2 () Real)
-(declare-fun sqrt_3 () Real)
-(declare-fun sqrt_4 () Real)
-(declare-fun sqrt_5 () Real)
-(declare-fun sqrt_6 () Real)
-(declare-fun sqrt_7 () Real)
-(declare-fun sqrt_8 () Real)
-(declare-fun sqrt_9 () Real)
-
-(declare-fun y_0 () Real)
-(declare-fun y_1 () Real)
-(declare-fun y_2 () Real)
-(declare-fun y_3 () Real)
-(declare-fun y_4 () Real)
-(declare-fun y_5 () Real)
-(declare-fun y_6 () Real)
-(declare-fun y_7 () Real)
-(declare-fun y_8 () Real)
-(declare-fun y_9 () Real)
-
-(declare-fun inc_0 () Bool)
-(declare-fun inc_1 () Bool)
-(declare-fun inc_2 () Bool)
-(declare-fun inc_3 () Bool)
-(declare-fun inc_4 () Bool)
-(declare-fun inc_5 () Bool)
-(declare-fun inc_6 () Bool)
-(declare-fun inc_7 () Bool)
-(declare-fun inc_8 () Bool)
-(declare-fun inc_9 () Bool)
-
-(declare-fun dsqr_0 () Dt)
-(declare-fun dsqr_1 () Dt)
-(declare-fun dsqr_2 () Dt)
-(declare-fun dsqr_3 () Dt)
-(declare-fun dsqr_4 () Dt)
-(declare-fun dsqr_5 () Dt)
-(declare-fun dsqr_6 () Dt)
-(declare-fun dsqr_7 () Dt)
-(declare-fun dsqr_8 () Dt)
-(declare-fun dsqr_9 () Dt)
-
-(declare-fun dsqrt_0 () Dt)
-(declare-fun dsqrt_1 () Dt)
-(declare-fun dsqrt_2 () Dt)
-(declare-fun dsqrt_3 () Dt)
-(declare-fun dsqrt_4 () Dt)
-(declare-fun dsqrt_5 () Dt)
-(declare-fun dsqrt_6 () Dt)
-(declare-fun dsqrt_7 () Dt)
-(declare-fun dsqrt_8 () Dt)
-(declare-fun dsqrt_9 () Dt)
-
-(declare-fun dy_0 () Dt)
-(declare-fun dy_1 () Dt)
-(declare-fun dy_2 () Dt)
-(declare-fun dy_3 () Dt)
-(declare-fun dy_4 () Dt)
-(declare-fun dy_5 () Dt)
-(declare-fun dy_6 () Dt)
-(declare-fun dy_7 () Dt)
-(declare-fun dy_8 () Dt)
-(declare-fun dy_9 () Dt)
+#DECL_CONSTS(t     Real)
+#DECL_CONSTS(sqr   Real)
+#DECL_CONSTS(sqrt  Real)
+#DECL_CONSTS(y     Real)
+#DECL_CONSTS(inc   Bool)
+#DECL_CONSTS(dsqr  Dt)
+#DECL_CONSTS(dsqrt Dt)
+#DECL_CONSTS(dy    Dt)
 
 ;;; Initializations
 
@@ -119,16 +47,15 @@
 
 ;;; Steps definition
 
-(assert (and (= t_1  (+ t_0  T))
-             (= t_2  (+ t_1  T))
-             (= t_3  (+ t_2  T))
-             (= t_4  (+ t_3  T))
-             (= t_5  (+ t_4  T))
-             (= t_6  (+ t_5  T))
-             (= t_7  (+ t_6  T))
-             (= t_8  (+ t_7  T))
-             (= t_9  (+ t_8  T))
-))
+#def T_STEPS
+#for (i 0 $(- #STEPS 1))
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
 
 ;;; Derivatives definition
 
@@ -141,38 +68,19 @@
 
 ;;; Integration
 
-(assert (and (= sqr_1 (int-ode sqr dsqr_0 (sqr_0 t_0 t_1) ()) )
-             (= sqr_2 (int-ode sqr dsqr_1 (sqr_1 t_1 t_2) ()) )
-             (= sqr_3 (int-ode sqr dsqr_2 (sqr_2 t_2 t_3) ()) )
-             (= sqr_4 (int-ode sqr dsqr_3 (sqr_3 t_3 t_4) ()) )
-             (= sqr_5 (int-ode sqr dsqr_4 (sqr_4 t_4 t_5) ()) )
-             (= sqr_6 (int-ode sqr dsqr_5 (sqr_5 t_5 t_6) ()) )
-             (= sqr_7 (int-ode sqr dsqr_6 (sqr_6 t_6 t_7) ()) )
-             (= sqr_8 (int-ode sqr dsqr_7 (sqr_7 t_7 t_8) ()) )
-             (= sqr_9 (int-ode sqr dsqr_8 (sqr_8 t_8 t_9) ()) )
+#def ASSERT_INT_ODE(f)
+(assert (and
+#for (i 0 $(- #STEPS 1))
+#let j $d(+ #i 1)
+    (= #f##_#j (int-ode #f d#f##_#i (#f##_#i t_#i t_#j) ()) )
+#endlet j
+#endfor
 ))
+#enddef
 
-(assert (and (= sqrt_1 (int-ode sqrt dsqrt_0 (sqrt_0 t_0 t_1) ()) )
-             (= sqrt_2 (int-ode sqrt dsqrt_1 (sqrt_1 t_1 t_2) ()) )
-             (= sqrt_3 (int-ode sqrt dsqrt_2 (sqrt_2 t_2 t_3) ()) )
-             (= sqrt_4 (int-ode sqrt dsqrt_3 (sqrt_3 t_3 t_4) ()) )
-             (= sqrt_5 (int-ode sqrt dsqrt_4 (sqrt_4 t_4 t_5) ()) )
-             (= sqrt_6 (int-ode sqrt dsqrt_5 (sqrt_5 t_5 t_6) ()) )
-             (= sqrt_7 (int-ode sqrt dsqrt_6 (sqrt_6 t_6 t_7) ()) )
-             (= sqrt_8 (int-ode sqrt dsqrt_7 (sqrt_7 t_7 t_8) ()) )
-             (= sqrt_9 (int-ode sqrt dsqrt_8 (sqrt_8 t_8 t_9) ()) )
-))
-
-(assert (and (= y_1 (int-ode y dy_0 (y_0 t_0 t_1) ()) )
-             (= y_2 (int-ode y dy_1 (y_1 t_1 t_2) ()) )
-             (= y_3 (int-ode y dy_2 (y_2 t_2 t_3) ()) )
-             (= y_4 (int-ode y dy_3 (y_3 t_3 t_4) ()) )
-             (= y_5 (int-ode y dy_4 (y_4 t_4 t_5) ()) )
-             (= y_6 (int-ode y dy_5 (y_5 t_5 t_6) ()) )
-             (= y_7 (int-ode y dy_6 (y_6 t_6 t_7) ()) )
-             (= y_8 (int-ode y dy_7 (y_7 t_7 t_8) ()) )
-             (= y_9 (int-ode y dy_8 (y_8 t_8 t_9) ()) )
-))
+#ASSERT_INT_ODE(sqr )
+#ASSERT_INT_ODE(sqrt)
+#ASSERT_INT_ODE(y   )
 
 ;;; Derivatives connection
 
@@ -183,17 +91,13 @@
              (and (not inc) (= dy dy_exp_dec))
 )))
 
-(assert (and (connect dsqr_0 dsqrt_0 dy_0 inc_0)
-             (connect dsqr_1 dsqrt_1 dy_1 inc_1)
-             (connect dsqr_2 dsqrt_2 dy_2 inc_2)
-             (connect dsqr_3 dsqrt_3 dy_3 inc_3)
-             (connect dsqr_4 dsqrt_4 dy_4 inc_4)
-             (connect dsqr_5 dsqrt_5 dy_5 inc_5)
-             (connect dsqr_6 dsqrt_6 dy_6 inc_6)
-             (connect dsqr_7 dsqrt_7 dy_7 inc_7)
-             (connect dsqr_8 dsqrt_8 dy_8 inc_8)
-             (connect dsqr_9 dsqrt_9 dy_9 inc_9)
-))
+#def CONNECTS
+#for (i 0 #STEPS)
+    (connect dsqr_#i dsqrt_#i dy_#i inc_#i)
+#endfor
+#enddef
+
+(assert (and #CONNECTS))
 
 ;;; States conditions
 
@@ -206,14 +110,10 @@
     (and (<= y sqr) (>= y t)
 ))
 
-(assert (and (invariant t_0 sqr_0 sqrt_0 y_0)
-             (invariant t_1 sqr_1 sqrt_1 y_1)
-             (invariant t_2 sqr_2 sqrt_2 y_2)
-             (invariant t_3 sqr_3 sqrt_3 y_3)
-             (invariant t_4 sqr_4 sqrt_4 y_4)
-             (invariant t_5 sqr_5 sqrt_5 y_5)
-             (invariant t_6 sqr_6 sqrt_6 y_6)
-             (invariant t_7 sqr_7 sqrt_7 y_7)
-             (invariant t_8 sqr_8 sqrt_8 y_8)
-             (invariant t_9 sqr_9 sqrt_9 y_9)
-))
+#def INVARIANTS
+#for (i 0 #STEPS)
+    (invariant t_#i sqr_#i sqrt_#i y_#i)
+#endfor
+#enddef
+
+(assert (and #INVARIANTS))
