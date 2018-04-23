@@ -336,9 +336,9 @@ namespace SOS {
 
     void Parser::Preprocess::parse_macro_if(Expr& expr, unsigned depth)
     {
-        // const bool cond = parse_eval_token<Def_eval_t>(expr, depth+1);
-        Eval_t_marked val_m = parse_eval_arith_token(expr, depth+1);
-        const bool cond = val_m.second ? val_m.first.f : val_m.first.i;
+        const bool cond = ceval_value<bool>(
+            parse_eval_arith_token(expr, depth+1)
+        );
         bool del = !cond;
         while (expr) {
             if (!expr.cpeek()->is_etoken()) {
@@ -372,23 +372,15 @@ namespace SOS {
     {
         Expr params_expr = expr.extract_expr_check();
         Macro_key var = params_expr.extract_token_check();
-        // const For_eval_t init =
-        //     parse_eval_arith_token<For_eval_t>(params_expr, depth+1);
-        // const For_eval_t end =
-        //     parse_eval_arith_token<For_eval_t>(params_expr, depth+1);
-        const Eval_t_marked init_m =
-            parse_eval_arith_token(params_expr, depth+1);
-        const Eval_t_marked end_m =
-            parse_eval_arith_token(params_expr, depth+1);
+        const For_eval_t init = ceval_value<For_eval_t>(
+            parse_eval_arith_token(params_expr, depth+1)
+        );
+        const For_eval_t end = ceval_value<For_eval_t>(
+            parse_eval_arith_token(params_expr, depth+1)
+        );
         expect(!params_expr,
                "Additional arguments of macro '#for': "s
                + to_string(params_expr));
-        const For_eval_t init = init_m.second
-                              ? init_m.first.f
-                              : init_m.first.i ;
-        const For_eval_t end = end_m.second
-                             ? end_m.first.f
-                             : end_m.first.i ;
 
         Macro_body macro_body_ = extract_macro_body(expr, "endfor");
 
@@ -427,39 +419,28 @@ namespace SOS {
         }
     }
 
-    // Parser::Preprocess::Def_eval_t
-    //     Parser::Preprocess::parse_eval_arith_token(Expr& expr, unsigned depth)
     Parser::Preprocess::Eval_t_marked
         Parser::Preprocess::parse_eval_arith_token(Expr& expr, unsigned depth)
     {
         exp_token(expr, depth);
-        // Expr_token literal = expr.extract_etoken_check();
         const Expr_token& literal = expr.cpeek_etoken_check();
         if (!is_arith_expr(literal.ctoken())) {
-            // return literal.get_value_check<Def_eval_t>();
-            // Def_eval_t ret = literal.get_value_check<Def_eval_t>();
-            Eval_float_t ret = literal.get_value_check<Eval_float_t>();
+            const Eval_float_t ret = literal.get_value_check<Eval_float_t>();
             expr.erase_at_pos();
-            return {{ret}, true};
+            return new_eval_marked_float(ret);
         }
-        // return parse_eval_expr<Arg>(expr, depth);
         return parse_eval_arith_expr(expr, depth);
     }
 
     Parser::Preprocess::Eval_t_marked
         Parser::Preprocess::parse_eval_arith_expr(Expr& expr, unsigned depth)
     {
-        // Expr arith_expr = expr.extract_expr_check();
-        // parse_nested_expr(arith_expr, depth+1);
-        // return arith_expr.get_eval<Arg>()();
-
         Token token = expr.extract_token();
-
         const char arith_char = token[0];
         token.erase(0, 1);
+
         bool valid_arith_token = false;
-        bool is_int = false;
-        // bool is_float = false;
+        bool is_float = true;
         if (token.empty()) valid_arith_token = true;
         else {
             if (token.size() == 1) {
@@ -469,10 +450,9 @@ namespace SOS {
                     valid_arith_token = false;
                     break;
                 case 'd': case 'i':
-                    is_int = true;
+                    is_float = false;
                     break;
                 case 'f':
-                    // is_float = true;
                     break;
                 }
             }
@@ -484,29 +464,27 @@ namespace SOS {
         Expr arith_expr = expr.extract_expr_check();
         parse_nested_expr(arith_expr, depth+1);
 
-        // if (!is_int && !is_float)
-        //     return arith_expr.get_eval<Def_eval_t>()();
-        // if (is_int) return arith_expr.get_eval<Eval_int_t>()();
-        // return arith_expr.get_eval<Eval_float_t>()();
-        Eval_t_marked val_m;
-        val_m.second = !is_int;
-        if (is_int) {
-            val_m.first.i = arith_expr.get_eval<Eval_int_t>()();
-        }
-        else {
-            val_m.first.f = arith_expr.get_eval<Eval_float_t>()();
-        }
-        return val_m;
+        // Eval_t_marked val_m;
+        // val_m.second = is_float;
+        // if (is_float) val_m.first.f = arith_expr.get_eval<Eval_float_t>()();
+        // else val_m.first.i = arith_expr.get_eval<Eval_int_t>()();
+        // return val_m;
+        if (is_float)
+            return new_eval_marked_float(
+                arith_expr.get_eval<Eval_float_t>()()
+            );
+        return new_eval_marked_int(arith_expr.get_eval<Eval_int_t>()());
     }
 
     void Parser::Preprocess::parse_arith_expr(Expr& expr, unsigned depth)
     {
-        // expr.erase_at_pos();
-        // Arg arg = parse_eval_expr<Arg>(expr, depth);
-        // expr.add_new_etoken_at_pos(arg);
-        Eval_t_marked val_m = parse_eval_arith_expr(expr, depth);
-        if (val_m.second) expr.add_new_etoken_at_pos(val_m.first.f);
-        else expr.add_new_etoken_at_pos(val_m.first.i);
+        // const Eval_t_marked val_m = parse_eval_arith_expr(expr, depth);
+        // if (val_m.second) expr.add_new_etoken_at_pos(val_m.first.f);
+        // else expr.add_new_etoken_at_pos(val_m.first.i);
+        const auto val_m = parse_eval_arith_expr(expr, depth);
+        if (ceval_is_float(val_m))
+            expr.add_new_etoken_at_pos(ceval_value<Eval_float_t>(val_m));
+        else expr.add_new_etoken_at_pos(ceval_value<Eval_int_t>(val_m));
     }
 
     Parser::Preprocess::Exp_pos
@@ -638,5 +616,65 @@ namespace SOS {
             }
         }
         return tokens;
+    }
+
+    template <typename Arg>
+    Parser::Preprocess::Eval_t_marked
+        Parser::Preprocess::new_eval_marked_helper(Arg val, bool is_float)
+    {
+        Eval_t_marked val_m;
+        eval_value<Arg>(val_m) = val;
+        eval_is_float(val_m) = is_float;
+        return val_m;
+    }
+
+    Parser::Preprocess::Eval_t_marked
+        Parser::Preprocess::new_eval_marked_float(Eval_float_t val)
+    {
+        return new_eval_marked_helper(val, true);
+    }
+
+    Parser::Preprocess::Eval_t_marked
+        Parser::Preprocess::new_eval_marked_int(Eval_int_t val)
+    {
+        return new_eval_marked_helper(val, false);
+    }
+
+    Parser::Preprocess::Eval_t
+        Parser::Preprocess::ceval_union(const Eval_t_marked& val_m)
+    {
+        return val_m.first;
+    }
+
+    Parser::Preprocess::Eval_t&
+        Parser::Preprocess::eval_union(Eval_t_marked& val_m)
+    {
+        return val_m.first;
+    }
+
+    bool Parser::Preprocess::ceval_is_float(const Eval_t_marked& val_m)
+    {
+        return val_m.second;
+    }
+
+    bool& Parser::Preprocess::eval_is_float(Eval_t_marked& val_m)
+    {
+        return val_m.second;
+    }
+
+    template <typename Arg>
+    Arg Parser::Preprocess::ceval_value(const Eval_t_marked& val_m)
+    {
+        if (ceval_is_float(val_m))
+            return ceval_union(val_m).f;
+        return ceval_union(val_m).i;
+    }
+
+    template <typename Arg>
+    Arg& Parser::Preprocess::eval_value(Eval_t_marked& val_m)
+    {
+        if (ceval_is_float(val_m))
+            return (Arg&)eval_union(val_m).f;
+        return (Arg&)eval_union(val_m).i;
     }
 }

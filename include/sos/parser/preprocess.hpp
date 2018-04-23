@@ -98,9 +98,6 @@ namespace SOS {
         void parse_user_macro(Expr& expr,
                               Macro_key& macro_key_,
                               unsigned depth);
-        // Def_eval_t parse_eval_arith_token(Expr& expr, unsigned depth);
-        // template <typename Arg> Arg parse_eval_arith_expr(Expr& expr,
-        //                                                   unsigned depth);
         Eval_t_marked parse_eval_arith_token(Expr& expr, unsigned depth);
         Eval_t_marked parse_eval_arith_expr(Expr& expr, unsigned depth);
         void parse_arith_expr(Expr& expr, unsigned depth);
@@ -115,7 +112,21 @@ namespace SOS {
                                           unsigned depth);
         void parse_user_macro_pop_params(Expr& expr,
                                          const Macro_key& macro_key_);
-        Tokens split_token(Token& token);
+        static Tokens split_token(Token& token);
+
+        template <typename Arg>
+            static Eval_t_marked
+                new_eval_marked_helper(Arg val, bool is_float);
+        static Eval_t_marked new_eval_marked_float(Eval_float_t val);
+        static Eval_t_marked new_eval_marked_int(Eval_int_t val);
+        static Eval_t ceval_union(const Eval_t_marked& val_m);
+        static Eval_t& eval_union(Eval_t_marked& val_m);
+        static bool ceval_is_float(const Eval_t_marked& val_m);
+        static bool& eval_is_float(Eval_t_marked& val_m);
+        template <typename Arg>
+            static Arg ceval_value(const Eval_t_marked& val_m);
+        template <typename Arg>
+            static Arg& eval_value(Eval_t_marked& val_m);
     private:
         Macros_map _macros_map;
         Lets_map _lets_map;
