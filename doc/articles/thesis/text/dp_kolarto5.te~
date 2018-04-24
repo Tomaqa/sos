@@ -1,0 +1,2967 @@
+% options:
+% hidelinks remove colour boxes around hyperlinks
+\documentclass[thesis=M,czech]{FITthesis}[2012/06/26]
+
+\usepackage[utf8]{inputenc} % LaTeX source encoded as UTF-8
+
+\usepackage{graphicx} %graphics files inclusion
+\usepackage{dirtree} %directory tree visualisation
+
+\usepackage{amsmath} %advanced maths
+\usepackage{mathtools}
+% \usepackage{amssymb} %additional math symbols
+
+\renewcommand{\arraystretch}{1.15}
+
+\usepackage{microtype}
+
+% \usepackage{letltxmacro}
+
+%%%%%%%%%%%%%%%%%
+
+\usepackage{enumitem}
+\setitemize{noitemsep,topsep=2pt,parsep=4pt}
+\setenumerate{noitemsep,topsep=2pt,parsep=4pt}
+\setenumerate[2]{label=\roman*.}
+\setdisplayed{topsep=4pt}
+
+%%%%%%%%%%%%%%%%%
+
+\setcounter{tocdepth}{1}
+
+%%%% List of acronyms
+\usepackage[acronym,toc,numberedsection=autolabel]{glossaries}
+
+\newcommand{\acrlabel}[1]{acr:#1}
+\newcommand{\acr}[1]{\acrshort{\acrlabel{#1}}}
+\newcommand{\acrl}[1]{\acrlong{\acrlabel{#1}}}
+\newcommand{\acrf}[1]{\acrfull{\acrlabel{#1}}}
+\newcommand{\acrfc}[1]{\acrl{#1}, \acr{#1}}
+
+\newcommand{\newacr}[3]{\newacronym{\acrlabel{#1}}{#2}{#3}}
+
+\makeglossaries
+
+\newacr{api}{API}{Application programming interface}
+\newacr{ansi}{ANSI}{American National Standards Institute}
+\newacr{ascii}{ASCII}{American Standard Code for~Information Interchange}
+\newacr{gpl}{GPL}{General Public License}
+\newacr{gnu}{GNU}{GNU's Not Unix!}
+\newacr{os}{OS}{Operační systém}
+\newacr{pdf}{PDF}{Portable Document Format}
+
+\newacr{simd}{SIMD}{Single instruction multiple data}
+\newacr{omp}{OpenMP}{Open Multi-Processing}
+\newacr{mpi}{MPI}{Message Passing Interface}
+
+\newacr{tmp}{TMP}{Template Metaprogramming}
+
+\newacr{bmc}{BMC}{Bounded Model Checking}
+\newacr{cnf}{CNF}{Conjunctive normal form}
+\newacr{dpll}{DPLL}{Davis--Putnam--Logemann--Loveland}
+\newacr{sat}{SAT}{Boolean satisfiability problem}
+\newacr{smt}{SMT}{Satisfiability Modulo Theories}
+\newacr{np}{NP}{Nondeterministic polynomial time}
+\newacr{qbf}{QBF}{Quantified Boolean formulas}
+\newacr{fol}{FOL}{First-order logic}
+\newacr{ltl}{LTL}{Linear time logic}
+\newacr{ctl}{CTL}{Computation tree logic}
+\newacr{dimacs}{DIMACS}{Center for Discrete
+   Mathematics and Theoretical Computer Science}
+\newacr{cvc}{CVC}{Cooperating Validity Checker}
+
+\newacr{ode}{ODE}{Ordinary differential equation}
+\newacr{dae}{DAE}{Differential-algebraic equation}
+\newacr{ivp}{IVP}{Initial value problem}
+\newacr{sundials}{SUNDIALS}{SUite of Nonlinear and
+   DIfferential/ALgebraic Equation Solvers}
+\newacr{bdf}{BDF}{Backward differentiation formula}
+
+% \newcommand{\glosItem}[2]{\item[\itab{#1}]\tab{#2}}
+% \newcommand{\glosSymb}[2]{\glosItem{\ensuremath{#1}}{#2}}
+% \newcommand{\glosOpSymb}[2]{\glosSymb{#1{A},#1{a}}{#2 $A,a$}}
+% \newcommand{\glosBinOpSymb}[2]{\glosSymb{A#1B}{#2 $A$ a $B$}}
+% \glosOpSymb{\vec}{Vektor}
+% \glosOpSymb{\mat}{Matice}
+% \glosOpSymb{\pred}{Predikovaná hodnota}
+% \glosOpSymb{\gues}{Průběžně odhadovaná hodnota}
+% \glosOpSymb{\rand}{Náhodná proměnná}
+% \glosOpSymb{\mean}{Očekávaná hodnota náhodné proměnné}
+% \glosOpSymb{\trans}{Transpozice}
+% \glosOpSymb{\conj}{Konjugace}
+% \glosOpSymb{\ctrans}{Konjugovaná transpozice}
+% \glosOpSymb{\inv}{Inverze}
+% \glosOpSymb{\norm}{Eukleidovská vektorová norma}
+% \glosBinOpSymb{*}{Konvoluce mezi}
+% \glosBinOpSymb{}{Násobení}
+% \glosOpSymb{\id}{Identifikátor}
+% \glosSymb{\zvec}{Nulový vektor}
+% \glosSymb{\zmat}{Nulová matice}
+% \glosSymb{\imat}{Jednotková matice}
+
+%%%%%%%%%%%%%%%%%
+%%%% Debug commands
+
+\newcommand{\cmt}[1]{\textit{/* #1 */}}
+
+%%%%%%%%%%%%%%%%%
+%%%% Text mode commands
+
+\newcommand{\id}[1]{\texttt{#1}}
+
+\newcommand{\hl}[1]{\textit{#1}}
+\newcommand{\hll}[1]{\textbf{#1}}
+
+\newcommand{\name}[1]{\hl{#1}}
+
+\newcommand{\cit}[1]{\cite{#1}}
+\newcommand{\rf}[1]{\ref{#1}}
+\newcommand{\rfeq}[1]{(\rf{eq:#1})}
+
+\newcommand{\reg}{\textsuperscript{\textregistered}}
+
+\newcommand{\itab}[1]{\hspace{0em}\rlap{#1}}
+\newcommand{\tab}[1]{\hspace{.2\textwidth}\rlap{#1}}
+
+%%%%%%%%%%%%%%%%%
+%%%% Math mode commands
+
+\newcommand{\tg}{\mathop{\mathrm{tg}}} %cesky tangens
+\newcommand{\cotg}{\mathop{\mathrm{cotg}}} %cesky cotangens
+
+%% Vectors and matrices
+\renewcommand{\vec}[1]{\ensuremath{\boldsymbol{#1}}}
+\newcommand{\mat}[1]{\ensuremath{\mathbb{#1}}}
+\newcommand{\set}[1]{\ensuremath{\mathcal{#1}}}
+
+\newcommand{\trans}[1]{\ensuremath{#1^\top}}
+\newcommand{\conj}[1]{\ensuremath{\overline{#1}}}
+\newcommand{\ctrans}[1]{\ensuremath{#1^*}}
+\newcommand{\inv}[1]{\ensuremath{#1^{-1}}}
+\newcommand{\norm}[1]{\ensuremath{\left\lVert#1\right\rVert}}
+
+\newcommand{\der}[1]{\ensuremath{\dot{#1}}}
+\newcommand{\dvec}[1]{\der{\vec{#1}}}
+
+\newcommand{\pred}[1]{\ensuremath{\tilde{#1}}}
+\newcommand{\pvec}[1]{\pred{\vec{#1}}}
+\newcommand{\pmat}[1]{\pred{\mat{#1}}}
+
+\newcommand{\gues}[1]{\ensuremath{\hat{#1}}}
+\newcommand{\gvec}[1]{\gues{\vec{#1}}}
+\newcommand{\gmat}[1]{\gues{\mat{#1}}}
+%%
+
+%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%
+
+\department{Katedra číslicového návrhu}
+\title{SMT řešič s~diferenciálními rovnicemi}
+\authorGN{Tomáš} %(křestní) jméno autora
+\authorFN{Kolárik} %příjmení autora
+\authorWithDegrees{Bc. Tomáš Kolárik} %jméno autora
+                                      %včetně současných akademických titulů
+\author{Tomáš Kolárik} %jméno autora bez akademických titulů
+\supervisor{doc. Dipl.-Ing. Dr. techn. Stefan Ratschan}
+\acknowledgements{Děkuji zejména celé své rodině
+za~veškerou podporu a motivaci během celého studia.
+Dále panu vedoucímu doc. Dipl.-Ing. Dr. techn. Stefanu Ratschanovi
+za trpělivou a ochotnou asistenci s~touto prací.}
+\abstractCS{
+% Cíl
+% Postupy, metody
+% Výsledky, užitek
+% Závěr
+}
+\abstractEN{
+
+}
+\placeForDeclarationOfAuthenticity{V~Praze}
+\declarationOfAuthenticityOption{2} %volba Prohlášení (číslo 1--6)
+\keywordsCS{\acr{sat}, \acr{smt}, numerické metody pro~\acr{ode},
+analýza hybridních systémů}
+\keywordsEN{\acr{sat}, \acr{smt}, numerical methods for~\acr{ode}s,
+hybrid systems analysis}
+% \website{http://site.example/thesis} %volitelná URL práce,
+   % objeví se v tiráži~---~úplně odstraňte, nemáte-li URL práce
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Mon 03 Jul 2017 12:10:52 AM CEST
+\begin{introduction}\label{ch:intro}
+% Úvod
+Většina lidí si z~informačních technologií
+jako první vybaví stolní počítače,
+notebooky či mobily.
+Dnešní mobilní telefony jsou specifické tím,
+že jejich funkce značně souvisí s~vnějšími podněty z~reálného světa:
+komunikují přes různá bezdrátová připojení,
+pořizují zvukové i~obrazové záznamy,
+ovládají se dotykovou obrazovkou, atd.
+To všechno znamená interakci s~fyzikálním světem
+pomocí různých snímačů a akčních členů.
+Existuje však odvětví zařízení,
+které se od mobilů liší v~podstatě jen v~jediné,
+nicméně naprosto zásadní specifikaci.
+Jsou to bezpečnostně kritické systémy reálného času,
+jejichž hlavní rozdíl tkví v~tom,
+že na~základě vnějších podnětů
+\hl{musí} být vykonány dané akce
+bezpodmínečně do~nějakého časového okamžiku.
+Jakmile se to nestane (ať už opožděně nebo vůbec),
+dojde k~nějaké katastrofě,
+jejíž následky budou velmi drahé
+(finanční prostředky, ale i~lidské životy).
+Typickým příkladem takových systémů
+jsou např. dopravní prostředky (letadla, tramvaje)
+a průmyslová zařízení (robotické stroje).
+S~rostoucími požadavky na~tyto systémy
+však závratně roste počet různých stavů,
+ve~kterých se mohou nacházet,
+a které také chceme rozlišovat
+na~přípustné a nepřípustné.
+Jak lze ale uchopit takto komplexní problémy,
+které ještě musí splňovat časové požadavky?
+
+% Význam tématu pro společnost
+Takové systémy už lidstvo používá mnoho desítek let,
+přesto je téma této práce aktuální.
+Je to způsobeno tím,
+že do~určité doby stačilo tyto systémy jen simulovat,
+tj. vygenerovat reprezentativní sadu vstupních dat
+a kontrolovat výstupy, zda odpovídají zadání.
+To naráží na~potíž,
+že u~bezpečnostně kritických aplikací je záhodno
+testovat téměř všechny možné přípustné vstupy.
+Vzhledem k~tomu,
+že množství kombinací různých vstupních dat
+roste exponenciálně s~počtem sledovaných specifikací,
+došli vývojáři do~bodu,
+kdy byl tento postup testování již příliš
+dlouhý, drahý a nespolehlivý.
+Tehdy se začalo přecházet na~jiný způsob
+ověření spolehlivosti systémů~---~pomocí
+jejich \hl{modelu}~---~matematického popisu,
+který zanedbává nedůležitá hlediska
+a soustředí se na~funkce systému.
+Pro~takový zjednodušený model systému
+potom lze formálně (zcela přesně) dokázat,
+zda mohou či nemohou nastat zakázané stavy.
+Ve~své práci se zabývám možnými nástroji
+sloužícími k~ověření takovýchto modelů systémů.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Mon 03 Jul 2017 12:10:25 AM CEST
+\begin{section}{Cíl práce}\label{s:intro:goal}
+% Zaměření
+Systémy jsou typicky modelovány \hl{přechodovým systémem},
+který popisuje možné stavy systému a přechody mezi nimi
+(stavový prostor).
+Jednoduché systémy lze modelovat diskrétním časem a libovolnými stavy.
+K~jejich analýze lze použít \acr{sat} řešič
+rozšířený o~rovnice a nerovnice
+(aritmetická omezení)~---~\name{\acrf{smt}}~\cit{smt}.
+Problém nastává, pokud chceme modelovat čas spojitě,
+což je pro~fyzikální systémy zcela přirozené.
+Pak je nutné sáhnout po~diferenciálních rovnicích,
+neboť je přechod ve~spojitých veličinách chápán
+jako změna~---~derivace.
+Zadání je omezeno na~obyčejné diferenciální rovnice
+(obsahují funkce pouze jedné nezávislé proměnné)~---~\name{\acrf{ode}}.
+\acr{smt} řešiče a řešiče diferenciálních rovnic
+již existují, ale často jen separátně.
+Cílem mé práce bylo vhodně zvolit
+oba jednotlivé existující řešiče a propojit je.
+To souviselo také s~nutností definovat
+společný vstupní jazyk a snažit se držet standardů.
+
+% Motivace
+Mou osobní motivací bylo zejména mé zalíbení
+v~\acr{sat} řešičích, se kterými jsem v~minulosti reálně pracoval,
+a také v~modelování systémů přechodovými systémy.
+Není náhodou, že se tyto premisy shodují přesně se zadáním.
+
+% Struktura a návaznost
+\cmt{Struktura a návaznost \dots.}
+\end{section} %%Cíl práce
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{section}{Požadavky zadání}\label{s:intro:req}
+Zadání požaduje propojení existujících \acr{smt} a \acr{ode} řešičů
+a s~tím související úkoly:
+\begin{itemize}
+\item najít \acr{ode} řešič používající klasické numerické metody,
+\item srovnat výsledný program s~existujícími
+   \acr{smt}+\acr{ode} řešiči a dosáhnout pokud možno větší výkonnosti,
+\item navrhnout společné rozhraní
+   a vstupní jazyk pro~\acr{smt}+\acr{ode}
+   na~základě \name{\acr{smt}-LIB} standardu~\cit{smtlib},
+\item implementovat návrh.
+\end{itemize}
+\end{section} %%Požadavky zadání
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{section}{Rešerše}\label{s:intro:search}
+Nejprve bylo nutné se seznámit
+s~již existujícími nástroji, které:
+\begin{itemize}
+\item řeší jak \acr{smt}, tak \acr{ode},
+   ale používají pomalou intervalovou aritmetiku;
+\item řeší jen \acr{smt},
+\item řeší jen \acr{ode} pomocí klasických numerických metod.
+\end{itemize}
+\end{section} %%Rešerše
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{introduction}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sat 24 Mar 2018 10:19:00 AM CET
+\chapter{Teoretická část}\label{ch:theory}
+V~této kapitole se zabývám
+teoretickými podklady problémů spjatými s~touto prací.
+Pojmy neuvádím zcela přesně,
+spíše dávám přednost srozumitelnosti.
+Tato práce klade větší důraz na~praktickou část.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Fri 09 Mar 2018 12:23:51 AM CET
+\begin{section}{Formulace problémů}\label{s:theory:formulation}
+Tato sekce popisuje konkrétní problémy a jejich varianty,
+kterými se v~této práci zabývám.
+Možnosti jejich řešení jsou uvedeny až v~následující sekci rešerše řešičů.
+
+%%%%%%%%%%%%%
+
+% Tue 20 Mar 2018 09:36:48 PM CET
+\begin{subsection}{Problém splnitelnosti: \acr{sat}}
+label{ss:theory:formulation:sat}
+Problém splnitelnosti Booleovské formule
+je základním problémem
+ze~třídy \acr{np}-úplných problémů%
+\footnote{U~tohoto \acr{np} problému
+bylo jako u~prvního prokázáno,
+že na~něj lze v~polynomiálním čase převést
+jakoukoli úlohu ze třídy \acr{np}~\cit{cook-art}.}
+v~oboru teorie složitosti.
+Jedná se o~široce studovaný problém
+implementovaný v~řadě velmi efektivních specializovaných řešičů,
+které jsou využívány v~různých aplikacích,
+díky možnosti převoditelnosti.
+Přestože se jedná o~těžký problém,
+i~rozsáhlé praktické instance
+(např. se stovkami tisíc proměnných)
+je možné řešit rychle,
+neboť výskyt instancí s~těmi nejobtížnějšími kombinacemi
+je v~praxi nepravděpodobný.
+
+\acr{sat} je definován jako úloha nalezení ohodnocení
+Booleovských proměnných \vec{y}
+ve~formuli $F$ v~Booleově algebře,
+tj.
+\begin{equation}\label{eq:sat}
+   \exists \vec{y} : \: F(\vec{y}) = 1
+\end{equation}
+Výstupem je buď nalezené ohodnocení \vec{y},
+nebo (typicky) \id{unsat} v~případě, že formule není splnitelná.
+
+Základní verze obsahuje existenční kvantifikátor $\exists$.
+Pokud je použit obecný kvantifikátor $\forall$,
+jedná se o~problém tautologie, který je co-\acr{np}-úplný
+(doplněk k~\acr{np}-úplnému).
+Pokud je povolena kombinace obou kvantifikátorů,
+hovoříme o~problému \name{kvantifikované Booleovské proměnné}
+(angl. \name{\acr{qbf}})
+a dostáváme se o~třídu složitosti výše.
+
+Existují i~optimalizační varianty tohoto problému,
+často ve~formě vážené splnitelnosti,
+kde proměnné nebo klauzule mají přiřazeny váhy
+a úkolem je nalézt řešení s~maximální vahou
+proměnných či klauzulí, které jsou či nejsou splněny, apod.
+
+%%%
+
+% Wed 07 Mar 2018 04:44:23 PM CET
+\begin{paragraph}{\acrf{bmc}}\label{p:theory:formulation:sat:bmc}
+(omezené ověření modelu)
+je jedna z~hlavních aplikací \acr{sat} problému,
+které slouží k~automatizované formální verifikaci
+systému reprezentovaného přechodovým systémem~\cit{bmc-art}.
+Hlavním cílem je dokázání správnosti modelu,
+tj. zda není možné dospět do~zakázaných stavů.
+K~účelům specifikace takových přechodových systémů
+se používá temporální logika,
+většinou \acr{ltl} nebo \acr{ctl}.
+
+Základní myšlenka techniky \acr{bmc} spočívá
+v~symbolickém nalezení protipříkladu,
+který má omezenou délku, vůči zkoumané formuli ze specifikací.
+Využívá \acr{sat} řešiče~---~nalezení
+ohodnocení proměnných znamená nalezení protipříkladu,
+neboli porušení specifikací.
+Opačný případ je obtížnější,
+neboť teprve projití cest pokrývajících všechny dosažitelné stavy
+dokazuje, že zakázané stavy nemohou nastat,
+což může vyžadovat prohledání obrovského stavového prostoru.
+Algoritmus se tedy opakuje se zvyšující délkou zkoumaných cest
+dokud není nalezen protipříklad,
+nebo dokud není dosaženo maximální meze.
+
+Alternativní použití \acr{bmc} spočívá ve~zkoumání
+negované formule~---~potom nalezení protipříkladu
+omezené délky naopak znamená,
+že formule je vždy splněna.
+\end{paragraph} %% \acrf{bmc}
+
+%%%
+
+\end{subsection} %%Problém splnitelnosti: \acr{sat}
+
+%%%%%%%%%%%%%
+
+% Sat 24 Mar 2018 07:06:03 PM CET
+\begin{subsection}{\acrf{smt}}\label{ss:theory:formulation:smt}
+Jedná se o~rozšíření problému \acr{sat}
+o~další domény než je Booleova algebra,
+tzn. dokáže operovat i~s~proměnnými,
+jejichž definiční obor je rozsáhlejší než jen
+${\{0,1\}}$, nemusí být dokonce ani \hl{konečný}%
+\footnote{Zatím se bavíme o~matematickém modelu,
+v~konečném důsledku jsou však domény v~implementacích
+vždy konečné, protože počítače mají omezenou velikost.
+Univerzum však není v~\acr{smt} podstatné.}
+(např. v~našem případě kombinování s~\acr{ode}
+jsou typickou doménou reálná čísla).
+Stále je hlavním zájmem ověřování
+splnitelnosti vstupních formulí.
+
+Klíčovým pojmem v~\acr{smt} je \name{teorie},
+která je zodpovědná za~definování
+funkcí a pravidel nad~jejími prvky.
+Speciálním případem teorie je
+též teorie Booleovy algebry,
+která bývá v~\acr{smt} řešičích
+implementována jako teorie základní.
+
+Hlavní motivací \acr{smt} oproti \acr{sat}
+je využití aritmetických funkcí a pravidel,
+které zlepšují vyjadřovací schopnosti daného jazyka.
+Řešení \acr{smt} může být také efektivnější,
+než kdyby byla formule celá zakódována do~\acr{sat}.
+Složitost rozhodování \acr{smt} se ale dramaticky liší
+s~ohledem na~zvolenou teorii: může být i~polynomiální,
+ale i~horší než exponenciální~\cit{theories-book}.
+
+%%%%%%%
+
+% Sat 24 Mar 2018 10:28:42 AM CET
+\begin{subsubsection}{Teorie}\label{p:theory:formulation:smt:theory}
+Teorie prvního řádu (angl. \name{First-order theory})
+je vyjádřena v~predikátové logice prvního řádu%
+\footnote{Vyšší řády povolují predikáty uvnitř predikátů či funkcí apod.}.
+Teorie definuje konečně mnoho pravidel
+nad~\hl{abstraktními} prvky,
+tj.~aniž by definovala jejich univerzum;
+postup je opačný~---~přípustné prvky
+jsou určeny výhradně jako důsledek pravidel teorie.
+
+%%%
+
+% Sat 24 Mar 2018 11:23:29 AM CET
+\begin{paragraph}{(Predikátová) logika prvního řádu}
+\label{p:theory:formulation:smt:theory:fol}
+(angl. \name{\acrfc{fol}}).
+Hlavní rozdíl oproti Booleově algebře
+(resp. výrokové logice)
+je ten, že termy formulí mohou být hodnoty
+libovolné domény~\cit{theories-book}.
+
+Formule \acr{fol} se skládají
+z~proměnných a konstant, predikátů, funkcí,
+logických operací a kvantifikátorů.
+Termy jsou konstanty, proměnné a funkce.
+Predikáty jsou funkce,
+které nabývají jen logických hodnot.
+Literál je logická proměnná či konstanta,
+predikát, nebo jejich negace.
+
+Interpretace formule přiřazuje
+elementy, funkce a predikáty nad~nějakou konkrétní doménou
+symbolům konstant či proměnných, funkcí a predikátů formule.
+Formule je nazývána jako splnitelná,
+pokud existuje interpretace,
+v~níž je formule vyhodnocena jako pravdivá.
+Splnitelnost je primárním rozhodovacím problémem ve~\acr{fol}.
+
+Formální jazyk \acr{fol} je definován jako množina
+správně formovaných formulí,
+které jsou splnitelné.
+Jazyk je \name{rozhodnutelný},
+pokud existuje konečný algoritmus,
+který korektně rozhoduje,
+zda libovolné slovo patří či nepatří do jazyka.
+\end{paragraph} %%(Predikátová) logika prvního řádu
+
+%%%
+
+\bigskip
+
+\acr{fol} obecně není rozhodnutelná,
+některé teorie však ano.
+Důležité u~teorií
+(či alespoň některých jejich podmnožin)
+je zejména to,
+aby byly rozhodnutelné efektivně,
+a ne nutně obecně,
+ale v~praktických případech.
+Díky rozhodnutelnosti lze pak formule
+automatizovaně analyzovat.
+
+%%%
+
+% Sat 24 Mar 2018 01:06:59 PM CET
+\begin{paragraph}{Definice.}\label{p:theory:formulation:smt:theory:def}
+Teorie je definována
+\name{značením} a množinou \name{axiomů}.
+Značení je množina symbolů konstant, funkcí a predikátů
+bez konkrétního významu.
+Axiom je uzavřená \acr{fol} formule
+obsahující pouze prvky ze~značení teorie.
+Formule teorie mohou proti axiomům
+navíc obsahovat proměnné, logické operace
+a kvantifikátory.
+\end{paragraph} %%Definice.
+
+%%%
+
+\bigskip
+
+\name{Fragment} teorie je její podmnožina přípustných formulí.
+Častým fragmentem teorií
+je fragment bez~kvantifikátorů%
+\footnote{Tyto formule však stále implicitně obsahují
+univerzální kvantifikátory pro~všechny proměnné.}.
+Fragmenty jsou užitečné zejména v~případech,
+kdy jsou lépe rozhodnutelné.
+Obecně lze říci,
+že čím limitovanější teorie je,
+tím má blíže k~rozhodnutelnosti%
+\footnote{\acr{fol} je též teorie,
+ale nijak limitovaná~---~bez axiomů.}.
+
+Součástí každé formule teorie
+jsou implicitně také všechny její axiomy.
+Proto je nutné vždy uvést, jaká teorie má být použita.
+Příklady teorií jsou teorie celých či reálných čísel
+a teorie různých datových struktur
+(pole, seznam, bitový vektor, fronta, hash tabulka, \dots)
+apod. Základní příklady jsou rozvedeny dále podle~\cit{theories-book}.
+
+%%%
+
+% Sat 24 Mar 2018 01:59:38 PM CET
+\begin{paragraph}{Teorie rovnosti.}
+\label{p:theory:formulation:smt:theory:equal}
+Kromě symbolů konstant, funkcí a predikátů
+obsahuje jen jediný interpretovaný binární predikát $=$,
+jehož chování je definováno axiomy:
+\begin{enumerate}
+\item \name{Reflexivita}:
+   $\forall x : \: x = x$
+\item \name{Symetrie}:
+   $\forall x,y : \: x = y \Rightarrow y = x$
+\item \name{Tranzitivita}:
+   $\forall x,y,z : \: x = y \: \land \: y = z \Rightarrow x = z$
+\item \name{Funkční kongruence}:
+   $\forall \vec{x},\vec{y} : \:
+      \left( \forall i = 1, \dots, n : \: x_i = y_i \right)
+      \Rightarrow f(\vec{x}) = f(\vec{y})$ \\
+   pro~všechna kladná přirozená čísla $n$ a $n$-ární funkce $f$.
+\item \name{Predikátová kongruence}:
+   $\forall \vec{x},\vec{y} : \:
+      \left( \forall i = 1, \dots, n : \: x_i = y_i \right)
+      \Rightarrow p(\vec{x}) \Leftrightarrow p(\vec{y})$ \\
+   pro~všechna kladná přirozená čísla $n$ a $n$-ární predikáty $p$.
+\end{enumerate}
+
+Teorie rovnosti je nerozhodnutelná stejně jako \acr{fol},
+protože povoluje všechna značení (obsahující $=$).
+Nicméně, fragment bez~kvantifikátorů
+už je efektivně rozhodnutelný.
+\end{paragraph} %%Teorie rovnosti.
+
+%%%
+
+% Sat 24 Mar 2018 04:29:35 PM CET
+\begin{paragraph}{Teorie celých čísel.}
+\label{p:theory:formulation:smt:theory:int}
+Existují tři základní teorie celých čísel:
+
+\hll{Peanova aritmetika} má značení
+$\{ {0, 1}, {+, \cdot}, = \}$
+(${0,1}$ jsou konstanty;
+${+,\cdot}$ binární funkce;
+a $=$ binární predikát)
+a následující axiomy:
+\begin{enumerate}
+\item $\forall x : \: \neg ( x + 1 = 0 )$
+\item $\forall x,y : \: x+1 = y+1 \Rightarrow x = y$
+\item \label{i:theory:int:ind}
+   $F(0) \: \land \: \left( \forall x : \: F(x) \Rightarrow F(x+1) \right)
+      \Rightarrow \forall x : \: F(x)$
+\item $\forall x : \: x+0 = x$
+\item $\forall x,y : \: x + (y+1) = (x+y) + 1$
+\item \label{i:theory:int:times0}
+   $\forall x : \: x \cdot 0 = 0$
+\item \label{i:theory:int:timessuc}
+   $\forall x,y : \: x \cdot (y+1) = x \cdot y + x$
+\end{enumerate}
+Tyto axiomy definují sčítání, násobení a rovnost
+přirozených čísel a také \name{indukci}
+(axiom~\rf{i:theory:int:ind}).
+Tato teorie bohužel není rozhodnutelná
+(ani bez~kvantifikatorů;
+na vině je operace násobení)
+a dokonce není ani úplná%
+\footnote{Tj.~existují v~ní formule, které nelze dokázat.}.
+
+\hll{Presburgerova aritmetika} vychází z~Peanovy,
+ale vynechává operaci násobení,
+a tedy i~axiomy \rf{i:theory:int:times0} a \rf{i:theory:int:timessuc}.
+Tato teorie je již rozhodnutelná,
+a to dokonce i~s~kvantifikátory.
+Operace odčítání a nerovností je možné modelovat%
+\footnote{Odčítání převedením na~druhou stranu rovnosti,
+a nerovnosti přičtením nové konstanty do~rovnosti.},
+a je tedy možné vyjádřit celou teorii celých čísel
+bez~násobení.
+
+\hll{Teorie celých čísel} má stejné vyjadřovací schopnosti
+jako Presburgerova aritmetika,
+ale má přirozenější a přívětivější značení:
+obsahuje všechna celá čísla jako konstanty,
+operaci odčítání a predikáty nerovností.
+Také obsahuje unární funkce
+umožňující používat celočíselné násobky proměnných.
+
+Nadále budou používány dva pojmy:
+\hl{lineární}, resp. \hl{nelineární}
+teorie celých čísel
+jako teorie celých čísel bez~násobení,
+resp. s~násobením.
+\end{paragraph} %%Teorie celých čísel.
+
+%%%
+
+% Sat 24 Mar 2018 05:39:05 PM CET
+\begin{paragraph}{Teorie reálných čísel.}
+\label{p:theory:formulation:smt:theory:real}
+I~zde se teorie dělí na \hl{lineární} a \hl{nelineární}
+s~ohledem na~použití operace násobení.
+
+\hll{Nelineární teorie reálných čísel}
+bývá také označována jednoduše jako teorie reálných čísel.
+Má značení $\{ {0, 1}, {+, -, \cdot}, =, \geq \}$
+a obsahuje komplexní axiomatizaci
+zahrnující všechny axiomy:
+\begin{enumerate}
+\item \hl{tělesa} nad~${(+, \cdot)}$
+   (tj.~axiomy Abelovské grupy nad~${(+)}$ a okruhu nad ${(\cdot)}$),
+\item úplného uspořádání $\geq$,
+\item uspořádaného tělesa
+   (navíc uspořádanost sčítání a násobení),
+\item existence kvadratického kořene pro~všechny elementy,
+\item existence alespoň jednoho kořene všech polynomů lichého stupně.
+\end{enumerate}
+Tato teorie je rozhodnutelná i~s~násobením,
+nicméně asymptotická složitost rozhodovací procedury
+je dvojnásobně exponenciální.
+
+\hll{Lineární teorie reálných čísel},
+také označována jako teorie racionálních čísel%
+\footnote{Důvod je ten, že každá interpretace teorie,
+vzhledem k~jejím axiomům,
+je ekvivalentní s~použitím
+jak domény reálných, tak racionálních čísel.},
+omezuje nelineární teorii reálných čísel
+vyjmutím operace násobení
+a s~tím i~axiomů pro~násobení a existenci kořenů;
+k~tomu přidává axiom, že neutrální prvek ($0$)
+je jediným prvkem s~konečným řádem v~Abelovské grupě nad~($+$);
+a axiom o~dělitelnosti prvků
+(každý prvek je sumou jiného prvku).
+Horní asymptotická složitost se u~této teorie sice nezměnila,
+ale v~průměru je tato teorie efektivně rozhodnutelná,
+zejména její fragment bez~kvantifikátorů.
+\end{paragraph} %%Teorie reálných čísel.
+
+%%%
+
+\bigskip
+
+Teorie mohou být navzájem \hl{kombinovány}
+(např. teorie polí společně s~teorií celých čísel)
+při~splněných určitých podmínek,
+např. jejich značení by měla být,
+až na výjimku predikátu $=$, disjunktní
+(jinak je nutné společné symboly
+zavést nově).
+Tato možnost je poměrně důležitá,
+jinak by bylo zavádění kombinace teorií
+jako explicitní nové teorie komplikované.
+\end{subsubsection} %%Teorie
+
+%%%%%%%
+
+\end{subsection} %%\acrf{smt}
+
+%%%%%%%%%%%%%
+
+% Wed 21 Mar 2018 01:56:56 AM CET
+\begin{subsection}{\acrf{ode}}\label{ss:theory:formulation:ode}
+Diferenciální rovnice je rovnice pro~nějakou \hl{neznámou} funkci
+a obsahující její derivace,
+což je běžné pro~fyzikální vztahy reálného světa.
+\hl{Obyčejná} diferenciální rovnice (\name{\acr{ode}})
+obsahuje derivace vztažené pouze
+k~\hl{jediné nezávislé proměnné},
+což je zpravidla čas~\cit{ode}.
+Řešení tohoto speciálního případu je obecně mnohem jednodušší,
+přesto však stále není obecně možné nalézt analytické řešení,
+a proto se používají numerické metody~\cit{odeint-art}.
+
+Kromě omezení na~\acr{ode} dále vymezuji
+následující vlastnosti:
+diferenciální rovnice je \name{prvního řádu}%
+\footnote{Rovnice obsahuje pouze první derivace,
+což však není omezující,
+neboť každá rovnice vyšších řádů
+lze přepsat na~soustavu rovnic prvního řádu%
+~\cit{ode-valid-runge_kutta-art}\cit{ode-lec}.},
+má pevné počáteční podmínky~---~\name{\acrf{ivp}},
+a je \name{explicitní}%
+\footnote{Derivace funkce je řešena explicitně,
+tj.~nevyskytuje se jako argument jiné funkce.}.
+
+Existuje několik možných formulací tohoto problému,
+zde je definován jako hledání řešení soustavy rovnic
+$n$ neznámých funkcí
+(s~výše uvedenými vlastnostmi):
+\begin{equation}\label{eq:ode}
+\begin{split}
+   \vec{\der{y}}(t) &= \vec{f} \! \left( t, \vec{y}(t) \right) \\
+   \vec{y}(t_0)     &= \vec{y_0}
+\end{split}
+\end{equation}
+kde ${t \in \set{R}}$ je nezávislá proměnná a \set{R}
+je množina reálných čísel;
+${\forall i = 1,} \dots, n : \:
+{y^i \in \vec{y}} : \: {\set{R} \rightarrow \set{R}}$
+je neznámá diferencovatelná funkce $t$,
+${\der{y}^i \in \vec{\der{y}}}$ je derivace $y^i$ podle $t$,
+a ${f^i \in \vec{f}} : \: {\set{R}^{n+1} \rightarrow \set{R}}$
+je funkce Lipschitz-spojitá v~\vec{y}\,%
+\footnote{Tento předpoklad podle Picard--Lindelöfova teorému zaručuje,
+že řešení takové \acr{ode} existuje právě jedno; viz.~\cit{ode-lec}.};
+${t_0 \in \set{R}}$ je počáteční hodnota nezávislé proměnné $t$,
+která společně s~${\vec{y_0} \in \set{R}^{n}}$ určuje počáteční podmínky.
+Pro~jednoduchost nejsou uvažovány případy,
+kdy některá funkce není definována na~celé \set{R}.
+
+Vztahy \rfeq{ode}
+lze přepsat do~ekvivalentního tvaru s~integrálem~\cit{ode-lec}:
+\begin{equation}
+   \vec{y}(t) = \vec{y_0} + \int_{t_0}^{t} \vec{f} \!
+      \left( \tau, \vec{y}(\tau) \right) \, \text{d}\tau
+\end{equation}
+proto bývají někdy numerická řešení \acr{ode}
+nazývány jako \name{numerická integrace}.
+\end{subsection} %%\acrf{ode}
+
+%%%%%%%%%%%%%
+
+\end{section} %%Formulace problémů}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sat 24 Mar 2018 10:42:01 AM CET
+\begin{section}{Hybridní systémy}\label{s:theory:hybrid}
+(Dynamický) systém se nazývá \name{hybridním},
+pokud vykazuje jak diskrétní, tak spojité změny.
+Diskrétní změny je charakterizováno \name{skoky} (angl. \name{jumps}),
+spojité \name{toky} (angl. \name{flows}).
+Skoky jsou obvykle popsány \name{konečným automatem},
+toky pomocí soustav \acr{ode}.
+
+Diskrétní systémy se používají pro~jejich snadný návrh a analýzu;
+spojité zejména proto, že popisují procesy z~reálného světa
+(fyzikální, chemické, biologické, \dots),
+jelikož čas je spojitý.
+Všechny digitální počítače jsou diskrétními systémy
+s~omezenou přesností,
+je na~nich však možné spojité jevy aproximovat.
+
+Hybridní systémy musejí interagovat s~vnějším světem,
+často v~reálném čase.
+Jedná se tedy o~\name{reaktivní} systémy.
+Obvyklými požadavky na~tyto systémy
+jsou (kromě jiných) spolehlivost a bezpečnost%
+\footnote{V~tomto případě je míněna
+bezpečnost z~hlediska spolehlivého selhání
+neohrožující majetek či lidi (angl. safety).
+Bezpečnost ve~významu zabezpečení
+vůči neautorizovanému přístupu (angl. security)
+je často také důležitá.}.
+Aby mohly být tyto vlastnosti do~vysoké míry zaručeny,
+je nutné využít matematický aparát.
+
+%%%
+
+% Sat 17 Mar 2018 11:03:23 AM CET
+\begin{paragraph}{Hybridní automat.}\label{s:theory:hybrid:auto}
+Hybridní systém lze jako celek
+matematicky modelovat jako \name{hybridní automat}.
+\name{Stav} hybridního automatu
+je definován diskrétním řídícím \name{módem}
+a spojitými \name{proměnnými}.
+Diskrétní změna stavu odpovídá skoku
+(v~konečném automatu),
+spojitá změna pak toku
+(průběhu \acr{ode}).
+Módy mohou mít také definovány \name{invarianty}.
+
+Analýza hybridního systému pak spočívá
+v~rozhodování o~množině stavů,
+zda je dosažitelná či naopak
+a za jakých podmínek.
+
+Existuje několik nástrojů
+analyzujících hybridní systémy
+modelované jako hybridní automaty,
+ale většinou nejsou založeny
+na~problému \acr{smt}.
+\cmt{Proč? Proč je to lepší/horší?}
+\end{paragraph} %%Hybridní automat.
+
+%%%
+
+\bigskip
+
+Obě domény samostatně se dnes
+používají standardně pro~modelování systémů
+a jejich analýzu;
+k~tomu jsou hojně využívány
+\acr{sat} či \acr{smt} řešiče pro~diskrétní
+a \acr{ode} řešiče pro~spojité systémy.
+Výzvou této práce je obě domény efektivně kombinovat
+a zároveň využít nástrojů
+vycházejících z~fenoménu problému \acr{sat}.
+\end{section} %%Hybridní systémy
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sat 24 Mar 2018 07:35:28 PM CET
+\chapter{Možnosti řešení problematiky}\label{ch:search}
+V~této kapitole rozebírám možnosti řešení problémů
+uvedených v~kapitole~\rf{ch:theory}
+a provádím rešerši existujících řešičů.
+Uvedené řešiče jsou jak izolované (jen \acr{smt} či \acr{ode}),
+tak hybridní (kombinují oba problémy),
+ale s~odlišným typem \acr{ode} řešiče, než na jaký jsme cílili.
+Pro~úplnost také uvádím sekci ohledně řešení problému \acr{sat}.
+
+U~řešičů zmiňuji více či méně podrobně
+jejich vlastnosti a zdůvodňuji proč jsem je použil či nepoužil.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 06 Mar 2018 11:22:22 PM CET
+\begin{section}{\acr{sat} řešiče}\label{s:search:sat}
+Ač zde uvádím tuto kategorii řešičů,
+používal jsem je jen nepřímo,
+neboť jsou součástí \acr{smt} řešičů.
+
+Z~důvodů implementačních a konvence
+je většinou vstup do~řešičů uváděn
+v~konjuktivní normální formě (angl. \acr{cnf}),
+neboli jako konjunkce klauzulí,
+kde klauzule je disjunkce literálů.
+Standardně se používá \acr{dimacs}-\acr{cnf} formát.
+
+Většina dnešních \acr{sat} řešičů
+využívá v~základu algoritmus \acrf{dpll},
+který používá několik hlavních operací~\cit{smt-de_moura}:
+\begin{itemize}
+\item základní simplifikace klauzulí,
+\item \hl{substituce}~---~přiřazení hodnoty proměnné,
+\item \hl{propagace}~---~aplikace deduktivních pravidel,
+   zejména pravidla jednotkové klauzule%
+   \footnote{Klauzule s~jediným literálem
+   vynucuje jednoznačné ohodnocení této proměnné, aby mohla být celá
+   \acr{cnf} formule splněna.},
+\item \hl{návrat}~---~navrácení do~nějakého předchozího bodu substituce
+   při~nalezení konfliktních ohodnocení.
+\end{itemize}
+
+Každý lepší řešič také implementuje nějakou formu učení,
+které spočívá v~přidávání dalších klauzulí
+na~základě průběžně nacházených konfliktů.
+
+Známými \acr{sat} řešiči jsou např. Mini\acr{sat}~\cit{minisat}%
+\footnote{Mini\acr{sat} zvítězil
+ve~všech průmyslových kategoriích
+v~soutěži \name{\acr{sat} 2005 competition}
+a je často integrován pro~svůj
+minimalistický a snadno rozšiřitelný návrh.},
+Pico\acr{sat} a CryptoMini\acr{sat}.
+Příklady použití \acr{sat} řešičů jsou:
+\begin{itemize}
+\item \acrf{bmc},
+\item funkční testování obvodů:\\
+   logický obvod s~injektovanou poruchou
+   je převeden do~Booleovské formule
+   a je ověřena její splnitelnost,
+\item statická analýza kódu programu,
+\item plánování a grafové problémy
+\end{itemize}
+a mnoho dalších. Obecně se však většinou jedná
+o~nějakou formu formální verifikace.
+\end{section} %% \acr{sat} řešiče
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Mon 09 Apr 2018 02:31:50 PM CEST
+\begin{section}{Řešení \acr{smt} problému}\label{s:search:smt}
+Jak už bylo zmíněno v~sekci~\rf{ss:theory:formulation:smt},
+zásadní vliv na~výpočet má teorie použitá ve~vstupní formuli.
+\acr{smt} řešiče typicky ovládají jen některé teorie
+a jejich fragmenty, nebo některé rozhodují jen s~omezenou efektivitou.
+
+Řešič má za~úkol nalézt splňující ohodnocení
+pro~všechny termy vstupní formule,
+které se nazývá \name{model}.
+Výstupem pak je zpravidla \id{sat} a (volitelně) model.
+Pokud formule není splnitelná,
+řešiče většinou umožňují vygenerovat
+\hl{důkaz} jako certifikát dokládající nesplnitelnost.
+Výstupem pak je zpravidla \id{unsat}
+a (volitelně) důkaz.
+Také se může stát,
+že o~splnitelnosti vstupu není možné rozhodnout
+(např. pokud řešič nemá implementovány
+všechny funkcionality nutné pro~daný vstup).
+Výstupem pak může být např. \id{unknown}.
+
+Existují dva základní přístupy k~řešení \acr{smt} problémů:
+\name{pilný} (angl. \name{eager}) a \name{líný} (angl. \name{lazy}),
+nebo i~jejich kombinace~\cit{smt-stanford}.
+
+%%%
+
+% Sat 10 Mar 2018 03:55:11 PM CET
+\begin{paragraph}{Pilný přístup}\label{p:search:smt:eager}
+soustředí většinu výpočtů
+do~\hl{externího} \acr{sat} řešiče tak,
+že se snaží v~\hl{jediném kroku} celou \acr{smt} formuli zakódovat
+do~\acr{sat} formule (např. celá čísla pomocí bitů
+jako Booleovských proměnných).
+
+Výkonnost tohoto postupu je zcela závislá na~použitém \acr{sat} řešiči
+a nevyužívá zřejmých faktů vázaných k~dané teorii
+(např. komutativita)~\cit{smt}.
+Na~druhou stranu je z~hlediska rozhraní a výpočtu
+v~podstatě nezávislý na~použitém \acr{sat} řešiči.
+Je flexibilnější než druhý přístup,
+protože část specifickou pro~teorii tvoří \uv{jen}
+optimalizovaný překlad formule,
+samotný výpočet už ne.
+\end{paragraph} %%Pilný přístup
+
+%%%
+
+% Sun 18 Mar 2018 10:32:18 PM CET
+\begin{paragraph}{Líný přístup}\label{p:search:smt:lazy}
+spočívá v~použití \acr{sat} řešiče
+založeném na~\acr{dpll}
+a \set{T}-řešiče
+jako dvou více či méně \hl{spolupracujících komponent}
+(varianty \name{online} a \name{offline}~\cit{smt-stanford}),
+kde \set{T} je nějaká teorie.
+
+Predikáty teorie (resp. omezení, např. lineární nerovnice)
+jsou překládány \set{T}-řešičem
+na~abstraktní Booleovské literály,
+které je interní \acr{sat} řešič schopen pojmout.
+V~případě, že je taková formule splnitelná (nutná podmínka),
+\set{T}-řešič je použit pro~ověření vytvořeného modelu,
+zda je ohodnocení predikátů splnitelné i~v~dané teorii \set{T}.
+Tento proces probíhá opakovaně
+dokud není dosaženo konvergence~\cit{smt-de_moura}.
+Tedy, oba řešiče navzájem intenzivně komunikují
+a formování Booleovské formule probíhá (typicky) inkrementálně%
+\footnote{To také umožňuje dynamicky
+přídávat a odebírat formule s~omezeními.}
+s~možností návratů.
+V~případě \name{online} varianty jsou oba řešiče
+více propojeny a \set{T}-řešič využívá funkce \acr{sat} řešiče přímo.
+
+\set{T}-řešič musí být navržen
+speciálně pro~danou teorii \set{T}, typicky \hl{ad hoc}.
+\end{paragraph} %%Líný přístup
+
+%%%
+
+\bigskip
+
+Dalším hlediskem je, zda je \acr{smt} řešič jako celek
+\name{inkrementální}, který umožňuje
+dynamické formování vstupních formulí
+a vícenásobné ověřování splnitelnosti nad různými kontexty.
+Neinkrementální řešič pracuje jen nad~jediným statickým kontextem
+jakožto celým vstupem. Inkrementální umožňuje
+průběžně přidávat či odebírat omezení,
+která se typicky ukládají do~\hl{zásobníku}.
+Ověření splnitelnosti pak lze provést kdykoliv
+nad~obsahem vrcholu zásobníku.
+
+\acr{smt} řešiče často pracují nad~kombinací více teorií
+kvůli větší expresivitě.
+V~takovém případě je z~hlediska výkonu
+důležité udržovat teorie v~hierarchii
+a v~každém kroku použít
+jen nezbytně nutnou úroveň~\cit{smt-stanford}.
+
+%%%%%%%%%%%%%
+
+% Mon 09 Apr 2018 02:39:23 PM CEST
+\begin{subsection}{\acr{smt}-LIB standard}\label{ss:search:smt:smtlib}
+\acr{smt}-LIB je iniciativa
+založená pro~účely rozvoje výzkumu a vývoje \acr{smt} řešičů,
+jejíž nejvýznamnější činností
+je standardizace teorií
+a vstupně-výstupního jazyka pro~řešiče~\cit{smtlib}.
+S~tím souvisí udržování komunity vývojářů
+a souboru standardizovaných výkonnostních úloh (benchmarks),
+ve~kterých jednotlivé týmy soutěží např. v~rámci \name{\acr{smt}-COMP},
+podobně jako tomu je u~komunity \acr{sat} řešičů.
+
+\acr{smt}-LIB jako teorie označuje
+teorie v~základním znění bez~dalších omezení.
+Pro~konkrétní fragment teorie,
+ve~kterém je daná vstupní formule vyjádřena,
+se používá termín \name{logika}.
+Tyto logiky se pak navzájem kombinují
+či se redukují jejich restrikce.
+Z~pohledu řešiče (konformního s~tímto standardem)
+se operuje pouze s~logikami;
+teorie slouží pouze jako teoretický základ.
+
+Pro~odlišení prvků pocházejících z~různých teorií
+se používají \name{druhy} prvků (angl. \name{sort}),
+které připomínají datové typy programovacích jazyků.
+Proměnné ve~formuli jsou označovány jako konstanty%
+\footnote{Proměnná by mohla vyvolávat dojem,
+že lze do~proměnných, podobně jako v~programovacích jazycích,
+dynamicky přiřazovat hodnoty, což nelze.};
+pojmy term a predikát
+nejsou používány~---~všechny konstrukty
+formule \acr{fol} jsou vyjádřeny
+pomocí konstant a funkcí,
+které jsou případně logického druhu.
+
+Momentálně existuje verze 2 standardu,
+která definuje hierarchii dílčích logik,
+z~důvodu možnosti aplikace efektivnějších výpočtů pro~jednodušší formule,
+a protože pak lze v~rámci izolovaných logik
+efektivněji srovnávat řešiče navzájem.
+Logiky povolují jen některé druhy konstant a funkcí
+(podle použitých teorií)
+a případně povolují i~definici volných druhů.
+
+%%%
+
+% Sat 24 Mar 2018 10:45:22 PM CET
+\begin{paragraph}{Názvosloví logik.}\label{p:search:smt:smtlib:name}
+Standard definuje konvence pro~pojmenování jednotlivých logik
+podle použitých teorií, např.:
+\begin{itemize}
+\item \id{BV} (bit vectors)~---~teorie bitových vektorů omezené šířky,
+\item \id{IA} (integer arithmetic)~---~teorie celých čísel,
+\item \id{RA} (reals arithmetic)~---~teorie reálných čísel,
+\item \id{IRA}~---~kombinace \id{IA} a \id{RA},
+\end{itemize}
+a jejich fragmentů jako předpony:
+\begin{enumerate}
+\item \id{QF\_} (quantifier-free)~---~fragment bez~kvantifikátorů,
+\item \id{UF} (uninterpreted functions)~---~fragment povolující
+   použití volných druhů prvků a neinterpretovaných funkcí,
+\item \id{L}, resp. \id{N} (linear, resp. non-linear)~---~lineární,
+   resp. nelineární fragment aritmetické logiky.
+\end{enumerate}
+
+Příklady některých logik:
+\id{BV}, \id{UF}, \id{QF\_LRA}, \id{QF\_UFNRA}, \id{UFNIA}, \dots
+\end{paragraph} %%Názvosloví logik.
+
+%%%
+
+\bigskip
+
+Základní příkazy jazyka jsou deklarace či definice konstant a funkcí,
+nových druhů, a přidávání formulí do \name{asercí}.
+neboli podmínek, které musí být splněny.
+Ověření splnitelnosti pak spočívá v~hledání ohodnocení
+všech konstant a funkcí splňující konjunkci všech asercí,
+podobně jako v~\acr{sat} řešičích.
+
+Jazyk lze použít i~pro~inkrementální řešiče,
+pro~které lze využít operací přidávání a odebírání
+asercí ze~zásobníku.
+Ověření splnitelnosti pak vždy probíhá
+nad~vrcholem zásobníku.
+
+Základní vlastnosti standardu verze~2
+uvádí např. tento tutoriál~\cit{smtlib-tutorial-art}.
+Podrobný popis \acr{smt}-LIB standardu verze 2.6
+je k~nalezení v~referenčním dokumentu~\cit{smtlib-reference-art}.
+\end{subsection} %%\acr{smt}-LIB standard
+
+%%%%%%%%%%%%%
+
+% Sat 24 Mar 2018 07:49:48 PM CET
+\begin{subsection}{\acr{smt} řešiče}\label{ss:search:smt:solver}
+\cmt{Všechny zde uvedené \acr{smt} řešiče používají
+líný přístup \cmt{jakto?}.}
+Použití \acr{smt} řešičů se do~značné míry kryje se \acr{sat} řešiči,
+často je nahradily, resp. rozšířily.
+
+%%%
+
+% Sun 18 Mar 2018 10:04:17 PM CET
+\begin{paragraph}{Open\acr{smt}}\label{p:search:smt:solver:opensmt}
+(konkrétně jeho druhá verze)
+je inkrementální open-source \acr{smt} řešič napsán v~jazyce C++,
+který podporuje standardní iniciativu
+\acr{smt}-LIB~\cit{opensmt}\cit{opensmt-art}.
+Je postaven
+nad~\acr{sat} řešičem Mini\acr{sat}2.
+Nástroj byl implementován
+s~důrazem na~snadnou rozšiřitelnost o~nové \set{T}-řešiče,
+současně však zůstává efektivní%
+\footnote{V~letech 2008 a 2009
+byl oceněn v~soutěži \name{\acr{smt}-COMP}
+jako nejrychlejší open-source \acr{smt} řešič
+ve~čtyřech logikách ze~\acr{smt}-LIB.}.
+
+Open\acr{smt} používá líný přístup.
+Jeho architektura je dekomponována do~tří hlavních bloků:
+preprocesor a \acr{sat} a \set{T}-řešič.
+\set{T}-řešiče mají standardizované rozhraní,
+které slouží ke~komunikaci se \acr{sat} řešičem a také vzájemné,
+je-li použita kombinace více logik, a tedy \set{T}-řešičů.
+\set{T}-řešiče lze také přizpůsobovat
+konkrétním problémům,
+v~případě že je lze řešit efektivněji než v~obecném případě.
+
+Řešič lze v~aplikacích používat také odděleně
+jako \name{černou skříňku} (angl. \name{black box}),
+a to buď prostřednictvím volání funkcí \acr{api},
+nebo zpracováním formule jako textového vstupu
+(např. ve~formátu \acr{smt}-LIB).
+
+\cmt{Vyjmenovat logiky}
+\end{paragraph} %%Open\acr{smt}
+
+%%%
+
+% Wed 07 Mar 2018 02:06:57 PM CET
+\begin{paragraph}{\acr{cvc}4}\label{p:search:smt:solver:cvc4}
+je open-source \acr{smt} řešič~\cit{cvc4}.
+Stejně jako Open\acr{smt} je navržen
+pro~snadné rozšiřování a poskytuje rozhraní v~C++
+a také rozhraní textové přes vstupní jazyk,
+tzn. že nástroj lze použít jak jako knihovnu,
+tak samostatně.
+
+\acr{cvc}4 přijímá vlastní vstupní jazyk,
+nebo standard \acr{smt}-LIB verze 1 nebo 2,
+kde však neposkytuje plnou functionalitu
+(nelineární aritmetiky nejsou zatím adekvátně podporovány).
+Má již vestavěno několik základních teorií,
+např. číselné aritmetiky, bitvektory, řetězce \dots
+Podporuje kvantifikátory
+a je schopen generovat modely.
+
+\cmt{1. v~\acr{smt}-COMP 2017}
+\cmt{složitější než Open\acr{smt}}
+\cmt{Vyjmenovat logiky}
+\cmt{\cit{cvc4-art}}
+\end{paragraph} %%\acr{cvc}4
+
+%%%
+
+\end{subsection} %%\acr{smt} řešiče}
+
+%%%%%%%%%%%%%
+
+\end{section} %%Řešení \acr{smt} problému
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Mon 12 Mar 2018 10:16:54 PM CET
+\begin{section}{Numerické metody řešení \acr{ode}}\label{s:search:ode}
+Tyto metody numericky \hl{aproximují} průběh \acr{ode}.
+Obecně používají nějaký \name{krok},
+který určuje vzdálenost mezi sousedními vypočítávanými body.
+Krok může být fixní či variabilní.
+Některé metody používají více kroků,
+což kromě různých vzdáleností také znamená,
+že hodnota bodů závisí na~více než jednom předchozím bodu.
+Obecně platí, že čím menší je zvolený krok,
+tím je menší odchylka od exaktního řešení,
+ale současně vzrůstá výpočetní složitost.
+
+%%%
+
+% Mon 12 Mar 2018 10:16:43 PM CET
+\begin{paragraph}{Značení.}\label{p:search:ode:sign}
+$t_n$ je hodnota nezávislé proměnné $t$ v~$n$-tém kroku;
+$h_n = {t_{n+1} - t_{n}}$ je vzdálenost mezi kroky v~$n$-tém kroku
+($h$ pokud je délka konstantní);
+${y_n \sim y(t_n)}$;
+${f_n \sim f(t_n, y_n)}$.
+
+O~metodě je volně řečeno, že je (má přesnost) \name{řádu} $p$,
+pokud její odchylka aproximace od~exaktního řešení
+konverguje k~${\set{O}( h^{\set{O}(p)} )}$\:%
+\footnote{Jedná se o~intiutivní definici,
+přesné definice řádu metody,
+lokální a globální chyby a dalších termínů
+nalezne čtenář např. zde~\cit{ode-nsolve-intro}.}.
+\end{paragraph} %%Značení.
+
+%%%
+
+\bigskip
+
+Metody řešení \acr{ode} se dělí
+na~\name{explicitní} a \name{implicitní}.
+Explicitní metody počítají každý bod explicitně
+pouze na~základě dosud zjištěných hodnot, např.
+\begin{equation}\label{eq:ode:explicit}
+   y_{n+1} = y_n + h f_n
+\end{equation}
+kdežto implicitní získávají každý bod implicitně z~řešení rovnice,
+která obsahuje i~dosud neznámé hodnoty, např.
+\begin{equation}\label{eq:ode:implicit}
+   y_{n+1} = y_{n} + h f_{n+1}
+\end{equation}
+Explicitní metody jsou časově efektivnější,
+ale nehodí se pro~řešení
+\name{rovnic se silným tlumením} (angl. \name{stiff})%
+\footnote{Pro rovnice se silným tlumením
+neexistuje přesná definice.
+Jsou volně definovány
+jako takové, kde je pro~explicitní metody buď nutné nastavit
+velmi malou velikost kroku,
+nebo je řešení nestabilní~\cit{ode-nsolve},
+na rozdíl od implicitních metod,
+které mohou naopak být stabilní
+i~pro~jakoukoli zvolenou velikost kroku~\cit{ode-nsolve-intro}.
+Tyto rovnice často obsahují funkce s~několika
+časovými škálami s~rozdílnými granularitami.},
+u~kterých je výpočet \hl{nestabilní}.
+Implicitní metody jsou mnohem pomalejší, ale obecně stabilnější
+a právě vhodné pro~tyto těžké rovnice~\cit{ode-nsolve-intro}.
+Míra nestability se odvíjí od nutnosti nastavit co nejmenší krok tak,
+aby byla odchylka od~exaktního řešení přijatelná.
+
+Základní metodou pro~řešení \acr{ode}
+je \name{Eulerova metoda},
+která má jak explicitní
+(vztah \rfeq{ode:explicit}),
+tak implicitní
+(vztah \rfeq{ode:implicit})
+variantu,
+kde $h$ může a nemusí být konstantní.
+Metoda vychází ze standardní derivační aproximace~\cit{ode-nsolve-book}:
+\begin{equation}\label{eq:der:apx}
+   \der{y}(t) \approx \frac{y(t+h) - y(t)}{h}
+\end{equation}
+neboli posunu po~tečně ke křivce funkce.
+Tato metoda je poměrně nepřesná,
+ale je snadno pochopitelná
+a většina numerických metod z~ní vychází~\cit{ode-nsolve-intro}.
+
+Existují dvě známé rodiny metod pro~numerické řešení \acr{ode}:
+\name{lineární vícekrokové metody}
+a \name{metody Runge--Kutta}.
+Obě skupiny souhrnně nazývám
+\name{klasickými numerickými metodami}
+a jsou uvedeny v~následující podsekci.
+Již existující hybridní řešiče
+však používají jiné metody než tyto,
+případně jejich nadstavby.
+Liší se tím,
+že na~rozdíl od~klasických \acr{ode} řešičů
+garantují rozsah chyby aproximace, ale jsou příliš pomalé.
+Jejich princip je popsán v~další podsekci.
+
+%%%%%%%%%%%%%
+
+% Mon 12 Mar 2018 10:17:05 PM CET
+\begin{subsection}{Klasické numerické metody}\label{ss:search:ode:classic}
+Použití těchto metod bylo hlavním cílem této práce,
+neboť jsou rychlejší než metody použité ve~stávajících hybridních řešičích.
+
+Lineární vícekrokové i~Runge--Kutta metody sdílejí několik společných rysů:
+\begin{itemize}
+\item řeší \acr{ivp} \acr{ode} prvního řádu,
+\item průběh funkce počítají na~základě jedné a více předchozích hodnot,
+\item vyskytují se v~nich jak explicitní, tak implicitní metody,
+\item spadá do~nich Eulerova metoda,
+\item garantují konvergenci aproximační chyby
+   ve~vztahu k~velikosti kroku $h$ a k~řádu $p$~\cit{ode-nsolve-book},
+   nikoliv však její přesný rozsah,
+\item výstupem jsou páry ${(t_n, y_n)}$.
+\end{itemize}
+
+Obě skupiny spadají do~\name{obecných lineárních metod}
+jako speciální případy~\cit{ode-nsolve-intro},
+toto zobecnění ale nebude v~tomto dokumentu diskutováno.
+
+%%%%%%%
+
+% Mon 12 Mar 2018 10:17:15 PM CET
+\begin{subsubsection}{Lineární vícekrokové metody}
+\label{sss:search:ode:classic:lmm}
+Jedná se o~obvyklou variantu (obecných) vícekrokových metod.
+Vícekrokové metody při~výpočtech využívají hodnoty několika předchozích kroků,
+které se uchovávají a mohou být použity i~vícekrát.
+Lineární varianta používá \hl{lineární kombinaci}
+těchto hodnot~\cit{ode-nsolve-lec}:
+\begin{equation}\label{eq:ode:lmm}
+   \sum_{j=0}^{k} \alpha_{j} y_{n+j} =
+      h \sum_{j=0}^{k} \beta_{j} f_{n+j}
+\end{equation}
+kde $k$ je počet zpětně sledovaných kroků,
+${\alpha_{j} \in \set{R}}$ a ${\beta_{j} \in \set{R}}$ jsou konstanty,
+přičemž ${\alpha_{k} \neq 0}$ a ${\alpha_{0} \neq 0 \lor \beta_{0} \neq 0}$.
+Pro~${\beta_k = 0}$ je metoda explicitní, jinak je implicitní.
+Podle $k$ je konkrétní metoda nazývána jako $k$-kroková.
+
+Funkce $f$ je vyčíslována v~pravidelně rozložených bodech
+(vyskytuje se vždy ve~formě $f_n$),
+což umožňuje zpětné používaní těchto hodnot
+při větším počtu kroků.
+Je to hlavní důvod,
+proč je počet vyhodnocení $f$
+obecně menší, než u~Runge--Kutta metod,
+které hodnoty předchozích mezikroků nevyužívají.
+Pokud je vyčíslení $f$ náročné,
+pak významně závisí na~jejím počtu~---~v~těchto případech
+jsou tyto metody
+většinou efektivnější než metody Runge--Kutta
+v~rámci požadované přesnosti.
+Nevýhodou těchto metod však je,
+že je nutné prvních ${k-1}$ kroků spočítat jinou metodou
+(kromě počátečních podmínek nejsou známy)~\cit{ode-nsolve-book}.
+
+Následují příklady těchto metod
+podle~\cit{ode-nsolve-lec} a \cit{ode-nsolve-book}.
+
+%%%
+
+% Sat 24 Mar 2018 08:09:54 PM CET
+\begin{paragraph}{Eulerova metoda}\label{p:search:ode:classic:lmm:euler}
+(vztahy \rfeq{ode:explicit} a \rfeq{ode:implicit}).
+Získáme ji dosazením ${k = 1}$, ${\alpha_{1} = 1}$, ${\alpha_{0} = -1}$
+a ${\beta_{1} = 0}$, ${\beta_{0} = 1}$ pro~explicitní,
+resp. ${\beta_{1} = 1}$, ${\beta_{0} = 0}$ pro~implicitní variantu,
+do~\rfeq{ode:lmm}.
+Jedná se o~\hl{jednokrokovou} metodu řádu ${p = 1}$.
+\end{paragraph} %%Eulerova metoda
+
+%%%
+
+% Sat 24 Mar 2018 08:24:43 PM CET
+\begin{paragraph}{Lichoběžníková metoda:}\label{p:search:ode:classic:lmm:trap}
+\begin{equation}\label{eq:ode:lmm:trap}
+   y_{n+1} - y_{n} = \frac{h}{2} \left( f_{n+1} + f_{n} \right)
+\end{equation}
+(${k = 1}$, ${\alpha_{1} = 1}$, ${\alpha_{0} = -1}$,
+${\beta_{1} = \beta_{0} = \frac{1}{2}}$)
+je \hl{implicitní} a \hl{jednokroková}
+metoda řádu ${p = 2}$.
+\end{paragraph} %%Lichoběžníková metoda:
+
+%%%
+
+% Sat 24 Mar 2018 08:27:40 PM CET
+\begin{paragraph}{Adams--Bashforthovy metody}
+\label{p:search:ode:classic:lmm:adamsb}
+jsou tvaru ${\alpha_{k} = 1}$, ${\alpha_{k-1} = -1}$,
+$\alpha_{k-2} = \dots = \alpha_{0} = \beta_k = 0$,
+a ${\forall_{j \neq k} \: \beta_{j}}$ jsou zvolena jednoznačně
+pomocí interpolace polynomem%
+\footnote{Jedná se o aproximaci průběhu funkce $y$ pomocí polynomu $P$
+tak, aby ${y(x_i) = P(x_i)}$ pro ${x_0, \dots, x_n}$.}
+stupně~$q$ funkcí $f$ v~bodech ${t_{n+k-1}, \dots, t_{n}}$ tak,
+aby ${q+1 = p = k}$.
+Spadá sem tedy i~explicitní Eulerova metoda
+(${q = 0}$, ${k = p = 1}$, vztah \rfeq{ode:explicit}).
+
+Příklady dalších metod:
+\begin{alignat*}{99}
+   &q = 1, \: k = p = 2 &&: \  y_{n+2} - y_{n+1} &&= \:
+      & \frac{h}{2}\: & ( &    &         \: \: &    &         \: \:
+      &  3 & f_{n+1} \:-\: &   & f_{n} ) \\
+   &q = 2, \: k = p = 3 &&: \  y_{n+3} - y_{n+2} &&= \:
+      & \frac{h}{12}  & ( &    &         \: \: & 23 & f_{n+2} \:-\:
+      & 16 & f_{n+1} \:+\: & 5 & f_{n} ) \\
+   &q = 3, \: k = p = 4 &&: \  y_{n+4} - y_{n+3} &&= \:
+      & \frac{h}{24}  & ( & 55 & f_{n+3} \:-\: & 59 & f_{n+2} \:+\:
+      & 37 & f_{n+1} \:-\: & 9 & f_{n} )
+\end{alignat*}
+
+Jsou to efektivní \hl{explicitní} $k$-krokové metody,
+často používané pro~rovnice bez~silného tlumení.
+\end{paragraph} %%Adams--Bashforthovy metody
+
+%%%
+
+% Sat 24 Mar 2018 08:32:38 PM CET
+\begin{paragraph}{Adams--Moultonovy metody}
+\label{p:search:ode:classic:lmm:adamsm}
+mají shodný tvar s~Adams--Bashforthovými metodami
+s~těmi rozdíly, že jsou \hl{implicitní},
+tj.~${\beta_k \neq 0}$,
+a ${q+1 = p = k+1}$
+s~výjimkou pro~${q = 0}$, kde ${k = 1}$
+(implicitní Eulerova metoda, vztah~\rfeq{ode:implicit}).
+Spadá sem i~lichoběžníková metoda
+(${q = k = 1}, {p = 2}$, vztah~\rfeq{ode:lmm:trap}).
+
+Další příklady:
+\begin{alignat*}{99}
+   &q = k = 2, \: p = 3 &&: \quad y_{n+2} - y_{n+1} &&= \:
+      & \frac{h}{12} & ( &   &         \: \: &  5 & f_{n+2} \:+\:
+      & 8 & f_{n+1} \:-\: &   & f_{n} ) \\
+   &q = k = 3, \: p = 4 &&: \quad y_{n+3} - y_{n+2} &&= \:
+      & \frac{h}{24} & ( & 9 & f_{n+3} \:+\: & 19 & f_{n+2} \:-\:
+      & 5 & f_{n+1} \:+\: &   & f_{n} )
+\end{alignat*}
+\end{paragraph} %%Adams--Moultonovy metody
+
+%%%
+
+% Sat 24 Mar 2018 08:34:17 PM CET
+\begin{paragraph}{\acrf{bdf}}\label{p:search:ode:classic:lmm:bdf}
+jsou \hl{implicitní} $k$-krokové metody často používané
+pro~rovnice se silným tlumením
+pro~jejich vlastnosti stability
+(ač jen pro~${k \leq 6}$).
+
+Jejich tvar je
+${\beta_{k-1} = \dots} = {\beta_{0} = 0}$,
+ostatní koeficienty ($\beta_{k}$ a ${\forall \alpha_{j}}$)
+jsou zvoleny tak, aby ${q = p = k}$
+(opět pomocí interpolace,
+tentokrát ale pro~funkce $y$).
+Spadá sem opět implicitní Eulerova metoda
+(${q = k = p = 1}$~%
+\footnote{Pro~vztah~\rfeq{ode:implicit}
+jakožto Adams--Moultonovy metody platilo ${q = 0}$,
+tentokrát se však jedná o~polynom na~levé straně rovnosti~\rfeq{ode:lmm},
+tedy ${q = 1}$.}).
+
+Příklady:
+\begin{alignat*}{99}
+   &q = k = p = 2&&: \quad &    &               &  3 & y_{n+2} \:-\:
+      & 4 & y_{n+1} \:+\: &   & y_{n} &&= \: & 2 & h f_{n+2} \\
+   &q = k = p = 3&&: \quad & 11 & y_{n+3} \:-\: & 18 & y_{n+2} \:+\:
+      & 9 & y_{n+1} \:-\: & 2 & y_{n} &&= \: & 6 & h f_{n+3}
+\end{alignat*}
+\end{paragraph} %%\acrf{bdf}}
+
+%%%
+
+\end{subsubsection} %%Lineární vícekrokové metody
+
+%%%%%%%
+
+% Sun 11 Mar 2018 03:42:25 PM CET
+\begin{subsubsection}{Runge--Kutta metody}\label{sss:search:ode:classic:rk}
+Tyto iterativní metody vycházejí z~aproximace
+pomocí rozvoje Taylorova polynomu,
+které jsou ale pomalé z~důvodu požadavku
+na~výpočet derivací vyšších řádů~\cit{ode-nsolve-book}.
+Runge--Kutta metody toto obchází
+vícenásobným vyčíslováním funkce $f$
+v~několika bodech (mezikrocích)
+z~intervalu $[t_{n}, t_{n+1}]$.
+Tím je dosaženo vyšších řádů přesnosti $p$.
+
+Přesto se jedná o~metodu \hl{jednokrokovou},
+kde každý krok sestává z~několika mezikroků, \name{fází}.
+Jedná se o~to,
+že hodnoty mezikroků jsou obecně různé
+a nemohou být znovu využívány tak,
+jak tomu je u~vícekrokových metod,
+obecně totiž platí,
+že po~každém kroku Runge--Kutta metod
+jsou všechny mezikroky zapomenuty.
+
+To může činit potíže,
+pokud je vyčíslení funkce $f$ náročné,
+neboť je nutné ji počítat často.
+Nicméně, tyto metody
+mají odlišné vlastnosti stability
+od~vícekrokových metod
+a jejich použití může být mnohdy výhodnější,
+zejména u~rovnic se silným tlumením.
+Dále tyto metody umožňují lepší průběžné řízení chyby aproximace
+či adaptaci na~ni
+a mohou být použity jako základ
+řešičů s~garancí rozsahu chyby~\cit{ode-valid-runge_kutta-art}.
+
+Obecná $s$-fázová Runge--Kutta metoda je definována
+podle~\cit{ode-nsolve-book}\cit{ode-valid-runge_kutta-art} vztahy
+\begin{equation}\label{eq:ode:rk}
+\begin{split}
+   y_{n+1} &= y_{n} + h \sum_{i=1}^{s} b_{i} k_{i} \\
+   k_{i}   &= f \! \left( t_{n} + c_{i} h, z_{i} \right) \\
+   z_{i}   &= y_{n} + h \sum_{j=1}^{S_{i}} a_{i,j} k_{j} \\
+   c_{i}   &= \sum_{j=1}^{i-1} a_{i,j}
+\end{split}
+\end{equation}
+kde ${\forall b_{i}}, c_{i}, a_{i,j}$ jsou konstanty
+plně charakterizující konkrétní Runge--Kutta metodu,
+uspořádané do~tzv. \name{Butcherovy tabulky}:
+\begin{equation}\label{eq:ode:rk:tab}
+\begin{array}{r|cccc}
+   c_{1}  & a_{1,1} & a_{1,2} & \cdots & a_{1,s} \\
+   c_{2}  & a_{2,1} & a_{2,2} & \cdots & a_{2,s} \\
+   \vdots & \vdots  & \vdots  & \ddots & \vdots  \\
+   c_{s}  & a_{s,1} & a_{s,2} & \cdots & a_{s,s} \\ \hline
+          & b_{1}   & b_{2}   & \cdots & b_{s}
+\end{array}
+\end{equation}
+Jejich hodnoty jsou hledány podle Taylorova rozvoje
+a podle požadovaného řádu metody $p$.
+Není znám přesný vztah pro $p$ a $s$,
+ale obecně platí ${p \leq s}$.
+
+Hodnota $S_{i}$ ve~vztahu pro $z_{i}$ rozlišuje typ metody:
+\begin{itemize}
+\item \hl{explicitní}: ${S_{i} \coloneqq i-1}$,
+   tj. ${\forall_{i,j} \: i \leq j : \: a_{i,j} = 0}$;
+   ${c_{1} = 0}$;
+   ${\forall k_{i}}$ závisí pouze na ${k_{j}, \: j < i}$;
+   Butcherova tabulka je v~striktně dolním trojúhelníkovém tvaru
+   s~nulovou diagonálou;
+   z~toho vyplývá ${z_{1} = y_{n}}, {k_{1} = f_{n}}$;
+\item \hl{implicitní}: ${S_{i} \coloneqq s}$;
+   ${\exists_{i,j} \: i \leq j : \: a_{i,j} \neq 0}$.
+\end{itemize}
+
+Příklady Runge--Kutta metod:
+
+%%%
+
+% Sat 24 Mar 2018 08:42:08 PM CET
+\begin{paragraph}{Eulerova metoda}\label{sss:search:ode:classic:rk:euler}
+(vztahy \rfeq{ode:explicit}
+a \rfeq{ode:implicit})~---~${s = p = 1}$,
+${b_{1} = 1}$ a
+${c_{1} = a_{1,1} = 0}$ pro explicitní;
+${c_{1} = a_{1,1} = 1}$ pro implicitní metodu:
+\begin{equation*}
+\begin{split}
+   y_{n+1}             &= y_{n} + h k \\
+   k                   &= f \! \left( t_{n} + h, y_{n} + h k \right)
+      = f \! \left( t_{n+1}, y_{n+1} \right) \\
+   \Rightarrow y_{n+1} &= y_{n} + h f_{n+1}
+\end{split}
+\end{equation*}
+
+Jejich Butcherovy tabulky:
+\begin{equation*}
+\begin{array}{r|c}
+   0  &   \\ \hline
+      & 1
+\end{array}
+\qquad
+\begin{array}{r|c}
+   1  & 1 \\ \hline
+      & 1
+\end{array}
+\end{equation*}
+\end{paragraph} %%Eulerova metoda
+
+%%%
+
+% Sat 24 Mar 2018 08:43:46 PM CET
+\begin{paragraph}{Lichoběžníková metoda}
+\label{sss:search:ode:classic:rk:trap}
+(vztah~\rfeq{ode:lmm:trap})~---~${s = p = 2}$, je implicitní.
+
+Tabulka:
+\begin{equation*}
+\begin{array}{r|cc}
+   0  &           0 &           0 \\
+   1  & \frac{1}{2} & \frac{1}{2} \\ \hline
+      & \frac{1}{2} & \frac{1}{2}
+\end{array}
+\end{equation*}
+\end{paragraph} %%Lichoběžníková metoda
+
+%%%
+
+% Sat 24 Mar 2018 08:44:02 PM CET
+\begin{paragraph}{Klasická Runge--Kutta metoda (RK4):}
+\label{sss:search:ode:classic:rk:rk4}
+\begin{equation}\label{eq:ode:rk:rk4}
+\begin{split}
+   y_{n+1} &= y_{n} + \frac{h}{6} ( k_1 + 2 k_2 + 2 k_3 + k_4 ) \\
+   k_1     &= f_n \\
+   k_2     &= f \! \left( t_n + \frac{h}{2}, y_n + \frac{h}{2} k_1 \right) \\
+   k_3     &= f \! \left( t_n + \frac{h}{2}, y_n + \frac{h}{2} k_2 \right) \\
+   k_4     &= f \! \left( t_n + h, y_n + h k_3 \right)
+\end{split}
+\end{equation}
+je \hl{explicitní} metoda s~parametry ${s = p = 4}$.
+
+Tabulka:
+\begin{equation*}
+\begin{array}{r|cccc}
+             0  &             &             &             &             \\
+   \frac{1}{2}  & \frac{1}{2} &             &             &             \\
+   \frac{1}{2}  &           0 & \frac{1}{2} &             &             \\
+             1  &           0 &           0 &           1 &             \\
+\hline
+                & \frac{1}{6} & \frac{1}{3} & \frac{1}{3} & \frac{1}{6}
+\end{array}
+\end{equation*}
+\end{paragraph} %%Klasická Runge--Kutta metoda (RK4):
+
+%%%
+
+\bigskip
+
+Existují také \hl{adaptivní} Runge--Kutta metody,
+které v~každém kroce počítají odhad chyby aproximace,
+podle níž se dynamicky mění délka kroku $h_n$.
+\end{subsubsection} %%Runge--Kutta metody
+
+%%%%%%%
+
+% Sat 24 Mar 2018 07:59:43 PM CET
+\begin{subsubsection}{\acr{ode} řešiče}\label{sss:search:ode:classic:solver}
+Následují řešiče, které některé z~uvedených klasických metod implementují.
+
+%%%
+
+\begin{paragraph}{\acr{sundials}}\label{p:search:ode:classic:solver:sundials}
+(\name{\acrl{sundials}}) je nástroj napsán v~jazyce
+\acr{ansi} C~\cit{sundials}.
+Pracuje s~třídami datových vektorů,
+nad~kterými lze vytvářet uživatelsky definované
+datové struktury a operace v~rámci aplikačního rozhraní.
+Má implementovány výchozí struktury
+s~předdefinovanými operacemi
+jak pro~sériové prostředí,
+tak i~paralelní se sdílenou (\name{\acr{omp}})
+nebo distribuovanou (\name{\acr{mpi}}) pamětí.
+Veškerá paralelizace je obsažena
+pouze v~rámci specifických operací nad~danými vektory
+(a lze ji rovněž uživatelsky implementovat),
+a tudíž není rozlišováno mezi sériovým a paralelním kódem aplikace.
+
+\acr{sundials} sestává z~více komponent.
+Diskutuji pouze jedinou z~nich~---~\name{CV\acr{ode}},
+který je určen pro~řešení \acr{ode}.
+Další komponenty řeší
+také diferenciální algebraické rovnice
+(\name{\acr{dae}})~---~\name{IDA}~---~a nelineární
+algebraické systémy~---~\name{KINSOL}.
+CV\acr{ode} je výsledkem
+přepsání řešiče \name{V\acr{ode}} z~Fortranu do~C,
+počínaje už rokem 1993~\cit{sundials-art}.
+
+\cmt{CV\acr{ode}S --- includes forward and disjoint sensitivity analysis}
+\end{paragraph} %%\acr{sundials}
+
+%%%
+
+\begin{paragraph}{odeint}\label{p:search:ode:classic:solver:odeint}
+je flexibilní C++ knihovna
+pro~numerické řešení \acr{ode}~\cit{odeint}.
+Je navržena v~duchu šablonového metaprogramování
+(\name{\acr{tmp}})~---~veškeré její numerické algoritmy
+jsou nezávislé na~použitých datových kontejnerech.
+Také díky komfortnímu aplikačnímu rozhraní
+je implementace numerických simulací rychlá a snadná.
+
+Knihovna je součástí rodiny C++ knihoven \name{Boost}~\cit{boost-libs}.
+Obsahuje pouze hlavičkové soubory
+a umožňuje změnit chování numerických operací~---~tímto způsobem
+lze např. použít odeint
+se \acr{simd} operacemi~\cit{odeint-art}.
+
+\cmt{gsl}
+\end{paragraph} %%odeint
+
+%%%
+
+\end{subsubsection} %%\acr{ode} řešiče
+
+%%%%%%%
+
+\end{subsection} %%Klasické numerické metody
+
+%%%%%%%%%%%%%
+
+% Wed 14 Mar 2018 04:59:37 PM CET
+\begin{subsection}{Garantovaná řešení}\label{ss:search:ode:valid}
+Tato řešení využívají \name{intervalovou aritmetiku}%
+\footnote{Nejsou nám známy metody s~garantovaným rozsahem aproximační chyby
+založená na~jiném principu, než je intervalová aritmetika.},
+což umožňuje jednak specifikovat počáteční podmínky
+s~nějakou nejistotou jakožto intervalový rozsah,
+druhak obalení úseků výsledku do~intervalových uzávěrů,
+tzn.~že meze odchylky aproximace od~exaktního řešení
+jsou přesně známy.
+Taková řešení se nazývají jako \name{garantovaná}
+(angl. \name{guaranteed} nebo \name{validated}).
+Některé zdroje tento problém formulují
+jako problém s~intervalovými počátečními podmínkami
+(\name{Interval}~\acr{ivp}, \name{I\acr{ivp}})%
+~\cit{ode-valid-runge_kutta-art},
+některé setrvávají u~názvu \acr{ivp}.
+Garance rozsahu řešení je klíčovým rozdílem
+těchto metod
+od klasických řešičů \acr{ode}
+ze~sekce~\rf{ss:search:ode:classic}.
+
+%%%
+
+% Wed 14 Mar 2018 09:20:11 PM CET
+\begin{paragraph}{Značení.}\label{p:search:ode:sign}
+${[t_n]}$ je interval ${[t_{n}, t_{n+1}]}$ délky $h_n$;
+${[y_n]}$ je uzávěr ${[y^{min}_{n}, y^{max}_{n}}]$ v~bodě $t_n$
+(tj.~garantované meze řešení v~$t_n$);
+${[\pred{y}_n]}$ je uzávěr ${[\pred{y}^{min}_{n}, \pred{y}^{max}_{n}}]$
+pro~celé ${[t_n]}$.
+\end{paragraph} %%Značení.
+
+%%%
+
+\bigskip
+
+Celý výpočet je rozdělen do~kroků v~bodech $t_n$.
+Je-li metoda jednokroková,
+je její průběh následující~\cit{ode-valid-runge_kutta-art}:
+\begin{enumerate}
+\item v~každém kroku se operuje nad~intervalem ${[t_{n}]}$,
+\item nejprve je hledán volnější uzávěr ${[\pred{y}_n]}$,
+\item ${\forall t \in [t_n]}$ je garantována existence
+   ${\forall y_n \in [y_n]}$, přičemž
+   ${[y_n] \subseteq [\pred{y}_n]}$,
+\item délka $h_n$ je největší možná v~souladu s~garantovaným řešením,
+\item výpočet ${[y_{n+1}]}$.
+\end{enumerate}
+Výstupem jsou trojice ${(t_n, [y_n], [\pred{y}_n])}$
+obsahující uzávěry (namísto diskrétních hodnot).
+
+Tyto metody používají interní \acr{ode} řešiče
+stávajících hybridních řešičů,
+které jsou uvedeny v~následující sekci.
+\end{subsection} %%Garantovaná řešení
+
+%%%%%%%%%%%%%
+
+\end{section} %%Numerické metody řešení \acr{ode}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sat 24 Mar 2018 10:30:12 AM CET
+\begin{section}{Hybridní řešiče}\label{s:search:hybrid}
+Řešiče, které umí analyzovat modely hybridních systémů,
+již existují,
+nicméně nezachází dobře s~praktickými úlohami z~reálného světa.
+A~to proto, že používají řešiče pro~\acr{ode}
+s~intervalovou aritmetikou,
+která je zbytečně přesná a ve~výsledku pomalá,
+neboť je exaktní ve~smyslu zaručení rozsahu chyby aproximace
+(viz.~sekce~\rf{ss:search:ode:valid}).
+
+Našim cílem bylo sestrojit řešič,
+který nemusí být tolik přesný,
+ale dokáže analyzovat
+modely i~rozsáhlých systémů
+v~únosně krátké době,
+a tím by byl použitelný i~v~praxi,
+použitím klasických numerických metod
+(viz.~sekce~\rf{ss:search:ode:classic}).
+
+Zkoumané hybridní řešiče nám však posloužily
+jako zdroj cenných informací
+pramenících z~kombinace diskrétního a spojitého modelu
+a také nás inspirovaly ve~volbě vstupního jazyka.
+S~těmito řešiči budou také srovnány výsledky našeho produktu.
+
+\cmt{\cit{hydlogic-art}}
+
+%%%
+
+\begin{paragraph}{i\acr{sat}-\acr{ode}}\label{p:search:hybrid:isat-ode}
+\uv{kombinuje \name{i\acr{sat}},
+který řeší rozsáhlé Boolovské kombinace aritmetických omezení,
+s~rovnicemi \acr{ode}}~\cit{isat-ode}\cit{isat-ode-art}.
+
+K~řešení \acr{ode} používá interní nástroj
+\name{VN\acr{ode}-LP}~\cit{vnode-lp},
+který se nejprve pokouší dokázat,
+že existuje jediné řešení problému,
+a poté hledá meze, do~kterých toto řešení spadá.
+
+Podobně jako v~našem případě kombinuje oba nástroje odděleně,
+tj. oba jsou samostatně použitelné na~svou podmnožinu úloh.
+
+Projekt nezveřejnil zdrojové kódy,
+přístupný je jen dynamicky linkovaný binární soubor
+s~externími závislostmi
+a je stále ve~stádiu vývoje.
+
+\cmt{Zatím jsem nebyl schopen spustit kvůli chybějícím starým knihovnám.}
+\end{paragraph} %%i\acr{sat}-\acr{ode}
+
+%%%
+
+% Fri 23 Mar 2018 09:44:23 PM CET
+\begin{paragraph}{dReal}\label{p:search:hybrid:dreal}
+je nástroj napsán v~jazyce C++, který rozhoduje,
+zda je vstupní formule nesplnitelná (\id{unsat}),
+nebo $\delta$-splnitelná (\id{$\delta$-sat})~\cit{dreal}.
+Nesplnitelnost je rozhodnuta exaktně a doložena důkazem;
+$\delta$-splnitelnost je numericky aproximována
+(resp. exaktně rozhodnuta na~zjednodušené formuli)
+s~přesností $\delta$ (racionální číslo).
+\cmt{Přesněji: řeší exaktně 'delta-perturbated' formule,
+nevím zda je to přepsáno správně.}
+
+dReal je postaven nad~některými existujícími nástroji,
+zejména Open\acr{smt}2~\cit{opensmt} a Mini\acr{sat}~\cit{minisat}
+a na~straně diferenciálních rovnic pak CAPD
+(viz.~\cit{dreal-smt-format-art}),
+který počítá intervalové uzávěry \acr{ode}.
+Zpracovává nelineární logiky
+reálných čísel, zejména nad~polynomy,
+trigonometrickými či exponenciálními funkcemi,
+rozšířené o~\acr{ode}.
+
+Integrace nástrojů je v~implementaci řešena interně.
+Základ tvoří lineární \set{T}-řešič v~Open\acr{smt},
+který je doplněn o~nelineární logiku a \acr{ode}.
+Konkrétně rozšiřuje logiku \id{QF\_LRA}
+na~\id{QF\_NRA} a ještě
+o~diferenciální rovnice, nazvanou \id{QF\_NRA\_\acr{ode}}.
+Z~hlediska jazyka spočívá rozšíření v~přidání několika málo příkazů
+pro~definice \acr{ode}, nastavení invariant,
+propojení diskrétních stavů s~\acr{ode} apod.
+Nad tímto vstupem operuje řešič přímo,
+tj.~\acr{smt} a \acr{ode} část
+se nespouští zvlášť v~nezávislých komponentách.
+Tento vstupní jazyk~\cit{dreal-smt-format-art}
+byl hlavním zdrojem naší inspirace
+při~návrhu vlastního vstupního jazyka.
+
+Program také používá vlastní specifikační jazyk,
+ze~kterého se generují nástrojem dReach \acr{smt} formule
+podle zvoleného počtu kroků%
+\footnote{dReal tento proces
+nazývá přímo jako \acr{bmc}.}.
+Tento předstupeň je lépe lidsky čitelný
+a navíc brání chybám
+vzniklým z~ručního vytváření rozsáhlých \acr{smt} formulí.
+
+V~projektu je zahrnuto několik výkonnostních úloh
+ve~vstupních jazycích dReal (specifikace i~\acr{smt} formule).
+\cmt{např. dron se očividně počítá hodně dlouho;
+v~testech (ctest) několik úloh timeoutuje}
+
+\cmt{\cit{dreal-smo-art}}
+\end{paragraph} %%dReal
+
+%%%
+
+\end{section} %%Hybridní řešiče
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Mon 16 Apr 2018 09:11:53 PM CEST
+\chapter{Návrh zvoleného řešení}\label{ch:design}
+V~této kapitole rozebírám teoretický návrh řešení problému
+zvolený před~vlastní implementací.
+Zatím neuvádím implementační detaily
+a konkrétní používáné nástroje a programovací jazyky.
+Nejprve popíši specifikaci celého nástroje
+a jeho vstupy (vstupní jazyk,
+v~němž budou přijímány textové vstupy)
+a výstupy.
+Následně uvedu softwarový model celého řešiče.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Mon 16 Apr 2018 09:11:34 PM CEST
+\begin{section}{Specifikace nástroje}\label{s:design:spec}
+\cmt{požadavky apod.}
+
+%%%%%%%%%%%%%
+
+% Mon 16 Apr 2018 09:16:09 PM CEST
+\begin{subsection}{Vstupní jazyk}\label{ss:design:spec:ilang}
+Vstupním jazykem je záhodno postihnout
+použití \acr{smt} formulí
+a současně umožnit definovat \acr{ode}
+a propojit je s~diskrétními \acr{smt} stavy.
+Vycházel jsem z~jazyka \acr{smt}-LIB
+(viz.~sekce \rf{ss:search:smt:smtlib})
+a ze~vstupního jazyka nástroje dReal
+(viz.~sekce \rf{p:search:hybrid:dreal}).
+Použité názvosloví vychází z~\acr{smt}-LIB.
+
+Ač je náš vstupní jazyk podobný na~ty referované,
+není s~nimi přímo kompatibilní,
+tzn.~že \hl{není konformní} se~standardem \acr{smt}-LIB,
+který je relativně robustní,
+umožňuje nastavovat různé logiky,
+podporuje inkrementální operace, apod.
+Také definuje výstupní jazyk.
+Náš řešič sice interně tento jazyk využívá,
+ale svůj vstup omezuje
+pouze na~(vstupní) specifikace modelů
+v~\hl{nelineární teorii reálných čísel bez kvantifikátorů}
+s~možností používat volné funkční symboly
+(v~\acr{smt}-LIB tomu odpovídá logika \id{QF\_UFNRA}),
+a na~neinkrementální ověření splnitelnosti
+společně s~\acr{ode}.
+
+Jazyk používá plně uzávorkovanou prefixovou notaci%
+\footnote{Tato syntaxe je známa zejména z~jazyka \name{Lisp}.}.
+Podmnožina příkazů týkající se~jen specifikace \acr{smt} formulí
+je převzata ze~\acr{smt}-LIB,
+a k~nim jsou ortogonálně doplněny
+příkazy týkající se nadstavby o~\acr{ode}.
+Obě skupiny jsou popsány ve~zvláštních podsekcích.
+
+Vstupní jazyky jsou obecně definovány tak,
+aby byly pokud možno nezávislé na~konkrétně použitých řešičích.
+
+%%%
+
+% Tue 20 Mar 2018 11:39:27 PM CET
+\begin{paragraph}{Značení.}\label{ss:design:spec:ilang:sign}
+\id{<>} není součástí syntaxe a ohraničuje či seskupuje argumenty
+(nejsou-li již nějak ohraničeny);
+\id{*} značí, že dotčený ohraničený řetězec
+se může opakovat vícekrát nebo být prázdný;
+\id{+} je stejné s~\id{*} kromě toho,
+že řetězec se musí vyskytnout alespoň jednou;
+\id{|} značí více možností pro~jednu pozici argumentu.
+\end{paragraph} %%Značení.
+
+%%%
+
+%%%%%%%
+
+% Tue 20 Mar 2018 11:39:39 PM CET
+\begin{subsubsection}{Syntaxe jazyka}\label{sss:design:spec:ilang:syntax}
+Vstupní jazyk je sekvence \name{tokenů}, \name{výrazů},
+bílých znaků a komentářů.
+
+%%%
+
+% Tue 20 Mar 2018 11:39:45 PM CET
+\begin{paragraph}{Bílé znaky.}\label{p:design:spec:ilang:struct:ws}
+Povolenými bílými znaky jsou:
+\begin{center}
+\begin{tabular}{r|ccc}
+   Název       & mezera & tabulátor & nová řádka \\ \hline
+   \acr{ascii} &   $32$ &       $9$ &  $(13+{})10$ \\
+\end{tabular}
+\end{center}
+
+S~výjimkou oddělení tokenů jsou bílé znaky ignorovány.
+\end{paragraph} %%Bílé znaky.
+
+%%%
+
+% Tue 20 Mar 2018 11:39:53 PM CET
+\begin{paragraph}{Komentář.}\label{p:design:spec:ilang:struct:cmt}
+Jako komentář je interpretován každý úsek řádku
+začínající znakem \hll{\id{;}} až po~konec řádku.
+Jejich obsah je zcela ignorován.
+\end{paragraph} %%Komentář.
+
+%%%
+
+% Mon 26 Mar 2018 11:07:09 PM CEST
+\begin{paragraph}{Token}\label{p:design:spec:ilang:struct:token}
+je sekvence znaků závisle na~typu tokenu.
+Dělí se na~\name{identifikátory}
+a \name{literály}.
+
+\hll{Identifikátory} sestávají z~alfanumerických znaků a znaků
+\begin{center}
+\id{+ \  - \  * \  / \  \^{} \  = \  < \  > \  \_ \  . \  ?}
+\end{center}
+Musí být předem deklarovány nebo rezervovány
+a nesmí začínat číslicí%
+\footnote{Vzhledem k~jen minimálním restrikcím na~název identifikátoru
+je vhodné, aby se uživatel vyvaroval zavádějících názvů,
+např. obsahujících symboly operátorů
+(\id{a<b} apod.),
+a aby důsledně odděloval tokeny bílými znaky
+nebo do~výrazů.}.
+Reprezentují buď \name{příkazy}
+(pak se vždy jedná o~rezervovaný token;
+jsou interpretovány výhradně interně v~řešiči),
+nebo \name{funkce},
+které mohou být i~uživatelsky definované,
+či \name{druh} prvků, výrazů apod. (angl. \name{sort}).
+Speciálním případem funkce je \name{konstanta},
+která nemá žádné argumenty.
+Pojem proměnných se nepoužívá,
+neboť hodnotám identifikátorů nelze dynamicky přiřazovat nové hodnoty,
+stejně jako v~\acr{smt}-LIB.
+
+\hll{Literály} jsou bezejmenné konstanty
+nějakého druhu.
+Numerické obsahují číslice a případně desetinnou tečku (\id{\hll{.}});
+na~začátku nejsou povoleny přídavné \id{0} ani znaménko;
+desetinná čísla musí obsahovat číslici před i~po~desetinné tečce;
+není podporován semilogaritmický tvar.
+Booleovské literály jsou \id{true} a \id{false}.
+\end{paragraph} %%Token
+
+%%%
+
+% Tue 20 Mar 2018 11:40:01 PM CET
+\begin{paragraph}{Výraz}\label{p:design:spec:ilang:struct:expr}
+je sekvence
+\begin{center}
+\id{( <expr>* ) | <token>}
+\end{center}
+kde \id{<expr>*} jsou vnořené výrazy
+a \id{<token>} je token povolený v~kontextu daného výrazu.
+První token výrazu odlišuje,
+zda a o~jaký se jedná příkaz, funkci či literál.
+Příkazy nemusí mít druh návratové hodnoty,
+funkce ano.
+
+Bílé znaky a komentáře nejsou v~sekvenci zahrnuty;
+při~vyhodnocení je jejich obsah ignorován.
+\end{paragraph} %%Výraz
+
+%%%
+
+\end{subsubsection} %%Syntaxe jazyka
+
+%%%%%%%
+
+% Tue 20 Mar 2018 11:40:06 PM CET
+\begin{subsubsection}{\acr{smt} konstrukty}\label{sss:design:spec:ilang:smt}
+Je použita pouze podmnožina konstruktů
+týkající se zvolené teorie
+uvedené v~sekci \rf{ss:design:spec:ilang}.
+Jedná se o~druhy výrazů
+a o~rezervované příkazy a funkce.
+
+%%%
+
+% Tue 20 Mar 2018 11:40:10 PM CET
+\begin{paragraph}{Druhy prvků:}\label{p:design:spec:ilang:smt:sorts}
+\begin{itemize}
+\item \id{Bool}~---~logický typ,
+\item \id{Real}~---~typ reálných čísel.
+\end{itemize}
+Celočíselný druh není akceptován;
+pro~diskrétní konstanty je nutno využít výhradně druh \id{Bool},
+typicky pro~diskrétní stav systému, který je konečný.
+\end{paragraph} %%Druhy prvků:
+
+%%%
+
+% Mon 16 Apr 2018 11:26:16 AM CEST
+\begin{paragraph}{Rezervované funkce.}\label{p:design:spec:ilang:smt:reserved}
+Zahrnuty jsou následující funkce (resp. operátory)
+se~standardní sémantikou:
+\begin{center}
+\id{+ \  - \  * \  / \  = \  < \  > \  <= \  >=
+   \  not \  and \  or  \  =>}
+\end{center}
+\cmt{asociativity, chainability, ite, distinct}
+\end{paragraph} %%Rezervované funkce.
+
+%%%
+
+% Tue 20 Mar 2018 11:40:17 PM CET
+\begin{paragraph}{\id{declare-fun}}\label{p:design:spec:ilang:smt:declfun}
+slouží k~deklaraci nové funkce (resp. konstanty)
+bez její interpretace.
+Je tvaru
+\begin{center}
+\id{(declare-fun <fun\_name> (<arg\_sort>*) <sort>)}
+\end{center}
+Argumenty příkazu:
+\begin{itemize}
+\item \id{<fun\_name>}~---~název identifikátoru funkce,
+\item \id{<arg\_sort>*}~---~výčet identifikátorů druhů
+   argumentů funkce (prázdné v~případě konstanty),
+\item \id{<sort>}~---~identifikátor druhu návratové hodnoty.
+\end{itemize}
+Příklady:
+\begin{center}
+\id{(declare-fun y (Real) Real)}\\
+\id{(declare-fun empty? () Bool)}
+\end{center}
+\end{paragraph} %%\id{declare-fun}
+
+%%%
+
+% Mon 26 Mar 2018 11:13:04 PM CEST
+\begin{paragraph}{\id{define-fun}}\label{p:design:spec:ilang:smt:defun}
+rozšiřuje%
+\footnote{Každá funkce je buď jen deklarována,
+nebo definována, ne obojí.}
+\id{declare\--fun} o~definici funkce:
+\begin{center}
+\id{(define-fun <fun\_name> ((<arg> <arg\_sort>)*) <sort> <expr>)}
+\end{center}
+se~shodnými argumenty kromě:
+\begin{itemize}
+\item \id{(<arg> <arg\_sort>)*}~---~výčet párů identifikátorů
+   názvu argumentů funkce a jejich druhů,
+\item \id{<expr>}~---~výraz definující chování funkce
+   s~druhem návratové hodnoty \id{<sort>}
+   a (ne nutně) obsahující jednotlivé argumenty \id{<arg>}.
+\end{itemize}
+Příklad:
+\begin{center}
+\id{(define-fun v ((s Real) (t Real)) Real (/ s t))}
+\end{center}
+\end{paragraph} %%\id{define-fun}
+
+%%%
+
+% Tue 20 Mar 2018 11:40:25 PM CET
+\begin{paragraph}{\id{assert}}\label{p:design:spec:ilang:smt:assert}
+zavádí formule modelu, které musejí být splněny:
+\begin{center}
+\id{(assert <expr>)}
+\end{center}
+kde \id{<expr>} je výraz s~druhem návratové hodnoty \id{Bool}.
+Příklad:
+\begin{center}
+\id{(assert (or (= mode a) (= mode b) ))}
+\end{center}
+\end{paragraph} %%\id{assert}
+
+%%%
+
+\end{subsubsection} %%\acr{smt} konstrukty}
+
+%%%%%%%
+
+% Sat 07 Apr 2018 04:45:58 PM CEST
+\begin{subsubsection}{Konstrukty \acr{ode}}
+\label{sss:design:spec:ilang:ode}
+V~kontextu \acr{ode} lze zjednodušovat
+syntaxi příkazů,
+jelikož je pravidlem,
+že název nezávislé proměnné v~\acr{ode} je vždy \id{t},
+a že druhy funkcí i~jejich derivací a nezávislé proměnné je \id{Real}.
+Tyto skutečnosti tedy není nutné zmiňovat.
+
+Vstup může obsahovat vícero závislých či nezávislých
+diferenciálních rovnic, označovaných jako \id{ode}.
+Každá \id{ode} dále sestává z~jedné či více variant derivací,
+z~nichž v~každém kroce je platná právě jedna z~nich.
+Varianty derivací jsou označovány jako \id{dt}
+a umožňují volit různé předpisy pro~derivace neznámých funkcí
+závisle na~aktuálním stavu celého systému.
+
+%%%
+
+% Sat 07 Apr 2018 07:17:16 PM CEST
+\begin{paragraph}{Nové druhy prvků:}\label{p:design:spec:ilang:ode:sorts}
+\begin{itemize}
+\item \id{Dt}~---~druh určující zvolenou variantu derivace \id{dt}.
+\end{itemize}
+\end{paragraph} %%Nové druhy prvků:
+
+%%%
+
+% Mon 16 Apr 2018 01:24:27 PM CEST
+\begin{paragraph}{Nové rezervované funkce.}\label{p:design:spec:ilang:ode:reserved}
+\acr{smt} logiky neumějí dobře zacházet s~některými
+nelineárními reálnými funkcemi,
+k~nimž lze využít \acr{ode} řešič
+a namísto s~funkcemi pracovat s~konstantami,
+jimž jsou přiřazeny výsledky integrování.
+Přidány jsou následující funkce (resp. operátory):
+\begin{center}
+\id{\^{} \  abs \  sqrt \  cbrt \  sin \  cos \  tan \  exp \  ln }
+\end{center}
+\end{paragraph} %%Nové rezervované funkce.
+
+%%%
+
+% Mon 16 Apr 2018 01:32:11 PM CEST
+\begin{paragraph}{\id{define-dt}}\label{p:design:spec:ilang:ode:dt}
+slouží k~definici \id{dt}, tj.~výrazu popisujícího variantu derivace funkce,
+a současně k~deklaraci \id{ode} neznámé funkce
+u~první zmíněné varianty \id{dt}.
+
+Tvar příkazu:
+\begin{center}
+\id{(define-dt <fun\_name> <dt\_name> (<arg>*) <expr>)}
+\end{center}
+s~argumenty:
+\begin{itemize}
+\item \id{<fun\_name>}~---~název identifikátoru neznámé funkce nezávislé
+   proměnné \id{t} obsahující všechny varianty \id{dt},
+\item \id{<dt\_name>}~---~název identifikátoru varianty
+   derivace funkce \id{<fun\_name>},
+\item \id{<arg>*}~---~identifikátory argumentů výrazu,
+   které jsou druhu \id{Real} a musí být
+   \hl{shodné} u~všech variant \id{dt};
+   \hl{neobsahují} funkci \id{<fun\_name>}
+   a nezávislou proměnnou \id{t},
+   které jsou zahrnuty implicitně,
+\item \id{<expr>}~---~výraz popisující tvar derivace funkce,
+   který může obsahovat funkci \id{<fun\_name>}
+   a nezávislou proměnnou \id{t}\:%
+   \footnote{Funkce se uvádí bez~závislosti na~\id{t},
+   tj.~jako konstanta.}
+   a jednotlivé argumenty \id{<arg>}.
+\end{itemize}
+Příklady:
+\begin{center}
+\id{(define-dt x dx () 1)}\\
+\id{(define-dt y dy\_on () (- (* (/ 3 t) y) 2))}\\
+\id{(define-dt z dz\_a (k) (+ (/ 1 z) k))}
+\end{center}
+
+Identifikátory \id{<fun\_name>}
+je nutné používat výhradně uvnitř \id{int-ode} příkazů.
+Identifikátory \id{<dt\_name>} jsou zavedeny jako konstanty druhu \id{Dt},
+které lze používat uvnitř příkazů \id{assert}
+pro~účely propojení se~stavem systému.
+\end{paragraph} %%\id{define-dt}
+
+%%%
+
+% Mon 16 Apr 2018 01:38:58 PM CEST
+\begin{paragraph}{\id{int-ode}}\label{p:design:spec:ilang:ode:int}
+obaluje výraz integrace neznámé funkce v~konkrétním kroce
+a dosazuje do~\id{ode} hodnoty či konstanty.
+Návratová hodnota výrazu je druhu \id{Real} a lze jej používat
+uvnitř příkazů \id{assert}.
+
+Tvar příkazu:
+\begin{center}
+\id{(int-ode <fun\_name> <dt> (<init> <t\_1> <t\_2>) (<arg\_val>*))}
+\end{center}
+s~argumenty:
+\begin{itemize}
+\item \id{<fun\_name>}~---~identifikátor neznámé derivované funkce
+   zavedený příkazy \id{define\--dt},
+\item \id{<dt>}~---~konstanta druhu \id{Dt}, která určuje
+   některou z~variant derivací \id{dt} definovaných příkazy \id{define\--dt},
+   pro~daný krok,
+\item \id{<init>}~---~počáteční hodnota funkce \id{<fun\_name>}
+   v~bodě \id{<t\_1>},
+\item \id{<t\_1> <t\_2>}~---~počáteční a koncová hodnota
+   nezávislé proměnné \id{t},
+\item \id{<arg\_val>*}~---~argumenty druhu \id{Real} předané
+   výrazu zvolené varianty derivace.
+\end{itemize}
+Příklady:
+\begin{center}
+\id{(int-ode x dx\_0 (x\_0 t\_0 t\_1) ())} \\
+\id{(int-ode y dy\_1 (y\_1 t\_1 t\_2) ())} \\
+\id{(int-ode z dz\_1 (z\_1 t\_1 t\_2) (k\_1))}
+\end{center}
+\end{paragraph} %%\id{int-ode}
+
+%%%
+
+% Sat 07 Apr 2018 07:01:24 PM CEST
+\begin{paragraph}{\id{define-ode-step}}\label{p:design:spec:ilang:ode:step}
+definuje (počáteční) velikost kroku
+v~interním \acr{ode} řešiči:
+\begin{center}
+\id{(define-ode-step <h>)}
+\end{center}
+kde \id{<h>} je konstanta druhu \id{Real}.
+\end{paragraph} %%\id{define-ode-step}
+
+%%%
+
+\end{subsubsection} %%Konstrukty \acr{ode}
+
+%%%%%%%
+
+% Sat 07 Apr 2018 07:50:08 PM CEST
+\begin{subsubsection}{Struktura a použití jazyka}
+\label{sss:design:spec:ilang:struct}
+V~této podsekci je uvedena doporučená struktura vstupu,
+aby validně popisoval model hybridního systému
+a umožňoval jeho analýzu našim nástrojem.
+
+Vzhledem k~tomu, že se v~jazyce nevyskytují žádné proměnné,
+není možné, aby se průběh stavu systému v~rámci jednoho kroku dynamicky měnil.
+Jelikož je vstup statický,
+je pro~modelování průběhu nutné využít mnoha konstant
+o~předem známém počtu,
+tzn.~že už při~modelování systému je nutné určit \hl{počet kroků simulace}%
+\footnote{Pozor, jedná se o~jiné kroky než kroky \acr{ode} řešiče.}.
+Rozložení kroků je určeno hodnotami konstant nezávislé proměnné \id{t},
+mezi nimiž dochází k~integraci.
+V~těchto krocích také dochází se skokům.
+
+Následují jednotlivé sekce,
+které by se měly objevit ve~vstupech.
+Kromě těchto smí uživatel používat
+i~další \acr{smt} konstrukty tohoto jazyka.
+
+%%%
+
+% Mon 16 Apr 2018 01:32:51 PM CEST
+\begin{paragraph}{Deklarace a inicializace konstant.}
+\label{p:design:spec:ilang:struct:const}
+Všechny konstanty použité ve~všech krocích simulace
+musejí být deklarovány a konstanty počátečního kroku
+musí být i~definovány.
+Každé konstantě je vhodné dát jako příponu číslo kroku,
+kterého se týká.
+
+Je vhodné deklarovat konstanty pro~jednotlivé kroky
+nezávislé proměnné \id{t},
+průběhů neznámých funkcí, diskrétních stavů
+a konstant voleb variant derivací \id{dt}.
+(Pozor na~konflikt identifikátorů konstant \id{dt}
+s~identifikátory variant derivací
+z~příkazu \id{define\--dt}.)
+
+Příklad:
+\begin{verbatim}
+(define-fun t0   () Real 0) (define-fun y0 () Real 1)
+(define-fun run0 () Bool false)
+(declare-fun t_0    () Real) (declare-fun t_1    () Real)
+(declare-fun y_0    () Real) (declare-fun y_1    () Real)
+(declare-fun run_0  () Bool) (declare-fun run_1  () Bool)
+(declare-fun dy_0   () Dt)
+(assert (and (= t_0 t0) (= y_0 y0) (= run_0 run0) ))
+\end{verbatim}
+\end{paragraph} %%Deklarace a inicializace konstant.
+
+%%%
+
+% Sat 07 Apr 2018 08:01:34 PM CEST
+\begin{paragraph}{Nastavení kroků}\label{p:design:spec:ilang:struct:step}
+znamená definovat hodnoty konstant \id{t\_i}.
+Nejjednodušším způsobem je zavedení konstatní délky kroku \id{T}, např.:
+\begin{verbatim}
+(define-fun T () Real 1)
+(assert (and (= t_1 (+ t_0 T)) (= t_2 (+ t_1 T)) ))
+\end{verbatim}
+\end{paragraph} %%Nastavení kroků.
+
+%%%
+
+% Mon 16 Apr 2018 01:34:14 PM CEST
+\begin{paragraph}{Definice derivací funkcí}
+\label{p:design:spec:ilang:struct:ode}
+se provádí pomocí příkazů \id{define\--dt}.
+Příklad:
+\begin{verbatim}
+(define-dt y dy_run  ()    1 )
+(define-dt y dy_idle () (- 1))
+\end{verbatim}
+
+Varianty derivací \id{dt} \hl{nesmí} kolidovat s~konstantami
+volených variant v~jednotlivých krocích, př.:
+\begin{verbatim}
+(declare-fun dy_0   () Dt) (declare-fun dy_1   () Dt)
+...
+(define-ft y dy_1   () 1)  ;; conflict !!
+\end{verbatim}
+\end{paragraph} %%Definice derivací funkcí
+
+%%%
+
+% Sat 07 Apr 2018 08:05:17 PM CEST
+\begin{paragraph}{Integrace}\label{p:design:spec:ilang:struct:int}
+se provádí příkazem \id{int\--ode}.
+Dochází tím k~propojení konkrétních vstupních a výstupních konstant
+druhu \id{Real} a konstant druhu \id{Dt}.
+Příklad:
+\begin{verbatim}
+(assert (and (= y_1 (int-ode y dy_0 (y_0 t_0 t_1) ()))
+             (= y_2 (int-ode y dy_1 (y_1 t_1 t_2) ()))
+))
+\end{verbatim}
+\end{paragraph} %%Integrace
+
+%%%
+
+% Sat 07 Apr 2018 08:05:17 PM CEST
+\begin{paragraph}{Volba variant derivací}
+\label{p:design:spec:ilang:struct:connect}
+se provádí pomocí příkazu \id{assert},
+ve~kterém se kombinuje libovolný stav systému
+a konstanty druhu \id{Dt}.
+Tím dochází k~propojení diskrétní a spojité domény modelu.
+
+Doporučujeme zkonstruovat pomocnou funkci \id{connect}, př.:
+\begin{verbatim}
+(define-fun connect ((dy Dt) (run Bool)) Bool
+    (and (=>      run  (= dy dy_run ))
+         (=> (not run) (= dy dy_idle))
+))
+\end{verbatim}
+
+Příklad s~použitím funkce \id{connect}:
+\begin{verbatim}
+(assert (and (connect dy_0 run_0)
+             (connect dy_1 run_1)
+))
+\end{verbatim}
+\end{paragraph} %%Volba variant derivací
+
+%%%
+
+% Sat 07 Apr 2018 08:22:32 PM CEST
+\begin{paragraph}{Definice skoků.}\label{p:design:spec:ilang:struct:jump}
+Skoky, tj.~změny diskrétního stavu,
+lze definovat též pomocí asercí
+mezi sousedními stavy a dalšími proměnnými.
+
+Doporučujeme zkonstruovat pomocnou funkci \id{jump}, př.:
+\begin{verbatim}
+(define-fun jump ((run1 Bool) (run2 Bool) (y2 Real)) Bool
+    (and (=> (and      run1  (<  y2 bound_1) )      run2  )
+         (=> (and      run1  (>= y2 bound_1) ) (not run2) )
+         (=> (and (not run1) (>  y2 bound_2) ) (not run2) )
+         (=> (and (not run1) (<= y2 bound_2) )      run2  )
+))
+\end{verbatim}
+
+Příklad s~použitím funkce \id{jump}:
+\begin{verbatim}
+(assert (and (jump run_0 run_1 y_1)
+             (jump run_1 run_2 y_2)
+))
+\end{verbatim}
+\end{paragraph} %%Definice skoků.
+
+%%%
+
+\end{subsubsection} %%Struktura a použití jazyka
+
+%%%%%%%
+
+\end{subsection} %%Vstupní jazyk
+
+%%%%%%%%%%%%%
+
+% Mon 16 Apr 2018 09:14:44 PM CEST
+\begin{subsection}{Výstupy}\label{ss:design:spec:out}
+Jsou tři různé odpovědi na~vstupní specifikaci,
+stejně jako u~\acr{smt} řešičů
+(sekce~\rf{s:search:smt}):
+\id{unsat} s~důkazem, \id{sat} s~modelem,
+nebo \id{unknown}
+(u~nás nejčastěji z~důvodu neúplných
+počátečních podmínek pro~\acr{ode}).
+
+\cmt{doplnit}
+\end{subsection} %%Výstupy
+
+%%%%%%%%%%%%%
+
+\end{section} %%Specifikace nástroje
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Mon 09 Apr 2018 02:15:54 PM CEST
+\begin{section}{Softwarová architektura}\label{s:design:arch}
+V~následující sekci popíši abstraktní návrh
+modelu komponent celého řešiče,
+jejich vztahů a rozhraní a rozdělení zodpovědností.
+Poté rozeberu interní návrh jednotlivých komponent.
+
+%%%%%%%%%%%%%
+
+% Mon 09 Apr 2018 02:17:08 PM CEST
+\begin{subsection}{Model komponent}\label{ss:design:arch:comp}
+Stěžejními komponentami jsou \acr{smt} a \acr{ode} řešič.
+Úkolem je zajistit jejich vzájemnou komunikaci
+a řídit centrální algoritmus celého procesu
+od~přijmutí vstupu ve~vstupním jazyce po výpis výsledků.
+
+Průběh výpočtu se řídí zejména \acr{smt} řešičem.
+První otázkou bylo, zda celý systém řídit
+z~\acr{smt} řešiče, nebo jej použít jako samostatnou komponentu
+a centrální bod umístit mimo něj.
+Pokud by byl \acr{smt} řešič centrálním bodem,
+mohly by být maximálně využity všechny jeho funkce.
+Nevýhodou by však byla nutnost
+zvolit konkrétní řešič
+a komunikaci s~\acr{ode} řešičem
+implementovat uvnitř,
+což by vyžadovalo podrobnější obeznámení se
+s~fungováním \acr{smt} řešiče.
+Je však tento postup nutný?
+
+Pokud by byl \acr{smt} řešič
+implementován jako černá skříňka,
+bylo by použití celého systému mnohem flexibilnější.
+\acr{smt} řešiče jsou stále v~aktivním vývoji
+a možnost použít libovolnou verzi
+by bylo velkým přínosem.
+Proto bylo snahou nalézt řešení
+využívající tohoto postupu.
+
+%%%%%%%
+
+% Tue 9 Apr 2018 20:40:26 AM CEST
+\begin{subsubsection}{\acr{smt} řešič jako nezávislá komponenta}
+\label{sss:design:arch:comp:smt}
+\acr{smt} řešič lze použít
+jako téměř nezávislou komponentu,
+pokud splňuje tyto požadavky:
+\begin{itemize}
+\item je inkrementální,
+\item je konformní s~\acr{smt}-LIB standardem.
+\end{itemize}
+Každý takový řešič pak lze používat
+a komunikovat s~ním výhradně prostřednictvím
+\acr{smt}-LIB jazyka,
+tj.~přes soubory nebo standardní vstup a výstup.
+
+Vzhledem k~tomu, že \acr{smt}-LIB
+obsahuje operace se~zásobníkem asercí,
+je možné dynamicky přidávat a odebírat
+klauzule, což lze použít
+pro~přijímání hodnot z~\acr{ode} řešiče.
+Tento postup je možný z~toho důvodu,
+že \acr{ode} řešič v~našem pojetí
+pracuje výhradně s~pevnými počátečními podmínkami
+a má tedy i~jednoznačný výstup.
+Hodnoty konstant jsou získávány postupně
+od~počátečních podmínek a přidávány jako nové aserce.
+Svým způsobem lze tento postup použít
+i~jako opakovaně generované celistvé statické vstupy
+pro~neinkrementální \acr{smt} řešič,
+ale předpokládá se, že inkrementální řešič
+si bude počínat efektivněji.
+
+Tímto je získáno velké flexibility
+ze~strany \acr{smt} řešiče,
+vzhledem k~tomu, že \acr{smt}-LIB standard
+podporuje většina řešičů.
+Jediné potenciální riziko
+je neefektivní počínání řešičů
+v~inkrementálním módu,
+tj.~pokud doba výpočtu
+významně neklesá s~přidáním jen malého množství
+nových asercí oproti počátečnímu stavu s celým vstupem.
+Používání textového rozhraní pomocí \acr{smt}-LIB
+by mělo mít zanedbatelný vliv na~výkon
+oproti použití programového rozhraní,
+v~porovnání s~dobou samotných výpočtů
+\acr{smt} a \acr{ode} řešičů.
+\end{subsubsection} %%\acr{smt} řešič jako nezávislá komponenta
+
+%%%%%%%
+
+% Tue 9 Apr 2018 20:40:26 AM CEST
+\begin{subsubsection}{\acr{ode} řešič}\label{sss:design:arch:comp:ode}
+\acr{ode} řešič postačuje použít jako samostatnou komponentu,
+jelikož má fungovat jako
+filtr~---~pro~každý vstup vrátí odpovídající výstup.
+Výjimkou je jen jeho inicializace,
+kdy se musí nastavit tvary diferenciálních rovnic.
+Konkrétní rozhraní nehraje důležitou roli,
+jen je důležité dávat pozor na~nastavení přesnosti
+čísel s~pohyblivou řádovou čárkou,
+protože \acr{smt} řešič pracuje s~racionálními čísly,
+které jsou exaktní. To může činit potíže zejména
+při~komunikaci prostřednictvím znakových řetězců.
+
+Důležitým požadavkem je však to,
+aby byl řešič schopen přijímat
+specifikace diferenciálních rovnic
+dynamicky jako text,
+protože tak jsou reprezentovány ve~vstupním jazyce.
+Např. řešiče odeint a \acr{sundials}
+přijímají specifikace jako kompilované funkce
+přímo v~programovacím jazyce,
+což je efektivní, ale pro tento účel
+nevhodná varianta.
+
+Komponentu s~\acr{ode} řešičem
+by bylo také vhodné navrhnout tak,
+aby nějakým způsobem obalovala
+obecné funkcionality řešiče
+bez~ohledu na konkrétní použitý řešič.
+Toho lze docílit navržením komponenty
+jako abstraktní třídy
+obstarávající veřejné rozhraní
+a konkrétní implementaci přenechat
+na~odvozených třídách.
+\end{subsubsection} %%\acr{ode} řešič
+
+%%%%%%%
+
+% Tue 9 Apr 2018 20:40:26 AM CEST
+\begin{subsubsection}{Centrální komponenta}
+\label{sss:design:arch:comp:center}
+Zodpovědností centrálního bodu je řídit
+průběh výpočtu a komunikaci mezi oběma řešiči.
+Díky několika možným rozhraním u~obou řešičů
+je návrh poměrně volný
+a důraz je kladen hlavně na~zvolený řídící algoritmus,
+který musí korektně ověřit všechny možnosti
+ohodnocení vstupních konstant a funkcí
+a být přiměřeně efektivní.
+Návrh algoritmu je uveden v~následující sekci.
+\end{subsubsection} %%Centrální komponenta
+
+%%%%%%%
+
+% Tue 9 Apr 2018 20:40:22 AM CEST
+\begin{subsubsection}{Zpracování vstupu}\label{sss:design:arch:comp:parse}
+Vstupní jazyk je navržen podobně
+jako jazyk \acr{smt}-LIB standardu,
+což značně usnadňuje zpracování vstupu,
+jelikož stačí zpracovat jen přidané \acr{ode} konstrukty
+a celý zbytek vstupu poslat s~jen minimálními změnami
+\acr{smt} řešiči jako inicializaci.
+\acr{ode} řešič je nutné inicializovat
+definicemi všech diferenciálních rovnic
+a jejich argumentů.
+\end{subsubsection} %%Zpracování vstupu
+
+%%%%%%%
+
+\end{subsection} %%Model komponent
+
+%%%%%%%%%%%%%
+
+% Mon 09 Apr 2018 07:32:09 PM CEST
+\begin{subsection}{Řídící algoritmus}\label{ss:design:arch:alg}
+Postup je následující:
+\begin{enumerate}
+\item Překlad vstupní formule:
+   \begin{enumerate}
+   \item Inicializace \acr{smt} řešiče,
+      tj.~zaslání modifikovaného vstupu
+      bez~specifikací diferenciálních rovnic.
+      Tento vstup musí obsahovat jednoznačné počáteční podmínky.
+   \item Inicializace \acr{ode} řešiče,
+      tj.~zaslání specifikací diferenciálních rovnic.
+   \end{enumerate}
+\item Nastav krok simulace na 0: \id{s := 0}.
+\item \label{i:design:alg:check-sat}
+   Ověření splnitelnosti \acr{smt} formule:
+   \begin{itemize}
+   \item Je-li splnitelná, získej model~---~ohodnocení konstant.
+   \item Není-li splnitelná, proveď návrat:
+      \begin{enumerate}
+      \item Přidej konfliktní klauzuli (aserci)
+         znemožňující aktuální ohodnocení konstant.
+      \item Vrať se do~předchozího kroku simulace:
+         \id{s-{}-}.
+      \item Pokud \id{s < 0}, vstup není splnitelný. Konec.
+      \item Jdi na~bod~\rf{i:design:alg:check-sat}.
+      \end{enumerate}
+   \end{itemize}
+\item Pokud je dosažen požadovaný počet kroků simulace,
+   jdi na~bod~\rf{i:design:alg:end}.
+\item Proveď výpočet všech diferenciálních rovnic
+   v~rámci kroku simulace.
+   Výstupem jsou jednoznačné hodnoty.
+\item Přidej získané hodnoty jako nové aserce
+   závisící na~hodnotách z~bodu~\rf{i:design:alg:check-sat}
+   v~rámci kroku simulace.
+\item Přejdi do~dalšího kroku simulace: \id{s+{}+}.
+   Jdi na~bod~\rf{i:design:alg:check-sat}.
+\item \label{i:design:alg:end}
+   Vypiš získaný model. Konec.
+\end{enumerate}
+
+Algoritmus nakonec ani nepoužívá operace
+se~zásobníkem asercí.
+Odebírání asercí by totiž redukovalo
+informační hodnotu vstupu
+a takový postup by navíc nemusel konvergovat.
+Pokud ale návraty algoritmu přidávají konfliktní klauzule,
+spěje postup jednoznačně k~cíli.
+Tento postup se podobá algoritmu \acr{dpll}.
+
+Pokud je proveden návrat až k~počátečním podmínkám,
+znamená to, že vstup není splnitelný,
+protože se prozkoumaly všechny možnosti,
+díky jednoznačnému chování \acr{ode} řešiče
+a konfliktním klauzulím.
+
+Tímto je vyřešen návrh centrálního bodu,
+jehož zodpovědnost je provedení uvedeného algoritmu.
+\end{subsection} %%Řídící algoritmus
+
+%%%%%%%%%%%%%
+
+% Tue 10 Apr 2018 10:38:59 AM CEST
+\begin{subsection}{Návrh \acr{ode} řešiče}\label{ss:design:arch:ode}
+Problém s~dynamickými textovými specifikacemi diferenciálních rovnic
+a sestavení odpovídajících funkcí
+jsem se rozhodl řešit formou stromových struktur výrazů
+a jejich transformací na~funkce s~argumenty.
+Tyto struktury pak lze použít jako vstupní specifikace při~inicializaci
+a vytvořené funkce volat v~krocích integrace.
+
+Nejprve popíši návrh avizované struktury
+a poté návrh abstraktního řešiče.
+
+%%%%%%%
+
+% Tue 10 Apr 2018 10:40:12 AM CEST
+\begin{subsubsection}{Výrazy a jejich vyhodnocení}
+\label{sss:design:arch:ode:exprs}
+Tato datová struktura sestává
+z~\name{výrazů} a z~jejich i~několika \hl{vyhodnocení}.
+
+%%%
+
+% Tue 10 Apr 2018 11:57:34 AM CEST
+\begin{paragraph}{Výraz}\label{p:design:arch:ode:exprs:expr}
+je obecná stromová struktura
+sestavená z~prefixových textových výrazů.
+Každý výraz obsahuje pole potomků,
+z~nichž každý je buď další podvýraz,
+nebo element s~textovou hodnotou.
+Výraz prozatím nemá určen žádný datový typ
+a je používán pouze ve~znakové formě.
+Může být tedy použit pro~libovolné účely
+vyžadující vytvoření hierarchické struktury
+z~(ne zcela nutně) prefixového vstupu,
+např. i~pro~účely syntaktického rozboru
+textového vstupu, který ani není výrazem,
+ale používá prefixovou notaci.
+\end{paragraph} %%Výraz
+
+%%%
+
+% Tue 10 Apr 2018 11:57:26 AM CEST
+\begin{paragraph}{Vyhodnocení}\label{p:design:arch:ode:exprs:eval}
+se vždy vztahuje k~jedinému výrazu ve~vztahu n:1,
+tj.~výraz může mít přidružených i~několik vyhodnocení.
+Úloha vyhodnocení je vytvořit z~obecné textové struktury
+výrazu strom konkrétních funkcí s~přímými či nepřímými argumenty
+konkrétního datového typu,
+který lze v~inicializaci volit různě
+(nesmí jím ale být text).
+Tato struktura musí umožňovat volání jako funkce,
+případně i~s~parametry,
+pokud výraz obsahuje nepřímé argumenty.
+
+Když je výraz transformován na~vyhodnocení,
+musí být jeho první prvek element s~názvem nějaké funkce,
+typicky aritmetickým operátorem.
+Následující prvky nemají žádná omezení
+(kromě toho zmíněného pro~podvýrazy)
+a platí pro~ně následující:
+\begin{itemize}
+\item je-li prvek další podvýraz, vytváří se další vyhodnocení,
+\item je-li prvek element, provede se konverze na~datový typ;
+   pokud konverze selže, je element považován za~nepřímý argument.
+\end{itemize}
+Nepřímé argumenty se později dosadí
+jako parametry při~volání vyhodnocení
+a textové hodnoty elementů jsou uloženy jako klíče argumentů.
+Nepřímých argumentů se~stejným klíčem
+může být ve~výrazu obsaženo více.
+\end{paragraph} %%Vyhodnocení
+
+%%%
+
+\end{subsubsection} %%Výrazy a jejich vyhodnocení
+
+%%%%%%%
+
+% Tue 10 Apr 2018 11:57:53 AM CEST
+\begin{subsubsection}{Abstraktní řešič}\label{sss:design:arch:ode:solver}
+Řešič bude implementován abstraktní třídou tak,
+aby umožňoval snadné odvození na~konkrétní \acr{ode} řešiče
+s~implementacemi různých metod integrace funkcí.
+Odvozené třídy by měly řešit pouze implementační záležitosti,
+rozhraní by měla řešit abstraktní třída.
+
+Řešič bude umožňovat inicializaci
+specifikací diferenciálních rovnic
+primárně pomocí datových struktur výrazů uvedených
+v~sekci~\rf{p:design:arch:ode:exprs:expr}.
+K~těmto výrazům si řešič interně sestaví odpovídající
+vyhodnocení tak, jak jsou uvedeny
+v~sekci~\rf{p:design:arch:ode:exprs:eval}.
+Uživatel bude pracovat pouze s~výrazy,
+ale od~vyhodnocení bude odstíněn.
+Naopak implementace odvozených řešičů
+budou pracovat pouze se~sestavenými vyhodnoceními.
+Vyhodnocení budou vždy obsahovat i~nepřímé argumenty,
+implicitně alespoň argument integrované funkce
+a volitelně také argument nezávislé proměnné $t$
+(viz.~vztah~\rfeq{ode}).
+
+Specifikované diferenciální rovnice bude možné počítat opakovaně
+s~různými vstupními argumenty, podle aktuálních hodnot
+\acr{smt} konstant a kroku simulace.
+Při výpočtech budou v~implementaci
+interně volána sestavená vyhodnocení
+v~každém kroce integrace,
+což vyžaduje, aby bylo volání vyhodnocení
+přiměřeně efektivní,
+jelikož počet kroků integrace
+bude řádově stovky až statisíce
+(podle vzdálenosti mezi kroky simulace).
+
+Takový řešič bude možné používat jako filtr
+(s~výjimkou inicializace)~---~na~každý vstup
+odpoví výstupními hodnotami.
+\end{subsubsection} %%Abstraktní řešič
+
+%%%%%%%
+
+\end{subsection} %%Návrh \acr{ode} řešiče
+
+%%%%%%%%%%%%%
+
+% Mon 16 Apr 2018 01:40:55 PM CEST
+\begin{subsection}{Návrh zpracování vstupu}\label{ss:design:arch:parse}
+Úkolem komponenty pro~zpracování vstupu
+je nalézt příkazy \acr{ode} vstupního jazyka
+(viz.~\rf{sss:design:spec:ilang:ode}),
+zpracovat je a nahradit je za~konstrukce
+výhradně \acr{smt}-LIB standardu,
+nebo je zcela vyřadit.
+Postup je následující:
+\begin{enumerate}
+\item Nastavení \acr{smt} vstupu: zvolení logiky \id{QF\_UFNRA},
+   definice druhu \id{Dt}, ad.
+\item Zpracování definic diferenciálních rovnic:
+   načtení definic diferenciálních rovnic do~výrazů
+   a seznamů klíčů nepřímých argumentů pro~\acr{ode} řešič
+   z~příkazů \id{define\--dt} a jejich substituce
+   za~konstanty variant derivací druhu \id{Dt}.
+\item Substituce příkazů integrací \id{int\--ode}
+   za~pomocné konstanty nebo funkce druhu \id{Real};
+   spárování vstupních konstant příkazů s~jednotlivými kroky simulace.
+\item (Volitelné) nastavení počáteční délky kroku integrací
+   z~příkazu \id{define\--ode\--step} a jeho smazání.
+\end{enumerate}
+
+Ke~zpracování vstupu lze s~výhodou
+použít struktury výrazů
+ze~sekce~\rf{p:design:arch:ode:exprs:expr},
+jelikož vstupní jazyk používá prefixovou notaci.
+\end{subsection} %%Návrh zpracování vstupu
+
+%%%%%%%%%%%%%
+
+\end{section} %%Softwarová architektura
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Realizace}\label{ch:impl}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Testy a výsledky}\label{ch:test}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{conclusion}\label{ch:outro}
+\end{conclusion}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{csn690}
+\bibliography{dp_kolarto5}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\printglossary[type=\acronymtype, title=Seznam použitých symbolů a zkratek]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \chapter{Obsah přiloženého CD}
+
+% \begin{figure}
+%    \dirtree{%
+%    .1 readme.txt\DTcomment{stručný popis obsahu CD}.
+%    .1 exe\DTcomment{adresář se spustitelnou formou implementace}.
+%    .1 src.
+%       .2 impl\DTcomment{zdrojové kódy implementace}.
+%       .2 thesis\DTcomment{zdrojová forma práce ve formátu \LaTeX{}}.
+%    .1 text\DTcomment{text práce}.
+%       .2 thesis.pdf\DTcomment{text práce ve formátu \acr{pdf}}.
+%       .2 thesis.ps\DTcomment{text práce ve formátu PS}.
+%    }
+% \end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \chapter{Instalační příručka}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

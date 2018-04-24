@@ -1,0 +1,60 @@
+\ifglsentryexists{CVUT}{}%
+{%
+\gls@defglossaryentry{CVUT}%
+{%
+name={{\v C}VUT},%
+sort={{\v C}VUT},%
+type={acronym},%
+first={{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Praze\glsspace ({\v C}VUT)},%
+firstplural={{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Praze\acrpluralsuffix \glsspace ({\v C}VUT\acrpluralsuffix )},%
+text={{\v C}VUT},%
+plural={{\v C}VUT\acrpluralsuffix },%
+description={{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Praze},%
+descriptionplural={{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Praze\acrpluralsuffix },%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Praze},%
+longplural={{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v Prazes},%
+short={{\v C}VUT},%
+shortplural={{\v C}VUTs},%
+counter={page},%
+parent={},%
+%
+}%
+}%
+\ifglsentryexists{FIT}{}%
+{%
+\gls@defglossaryentry{FIT}%
+{%
+name={FIT},%
+sort={FIT},%
+type={acronym},%
+first={Fakulta informa{\v c}n{\' i}ch technologi{\' i}\glsspace (FIT)},%
+firstplural={Fakulta informa{\v c}n{\' i}ch technologi{\' i}\acrpluralsuffix \glsspace (FIT\acrpluralsuffix )},%
+text={FIT},%
+plural={FIT\acrpluralsuffix },%
+description={Fakulta informa{\v c}n{\' i}ch technologi{\' i}},%
+descriptionplural={Fakulta informa{\v c}n{\' i}ch technologi{\' i}\acrpluralsuffix },%
+symbol={\relax },%
+symbolplural={\relax },%
+user1={},%
+user2={},%
+user3={},%
+user4={},%
+user5={},%
+user6={},%
+long={Fakulta informa{\v c}n{\' i}ch technologi{\' i}},%
+longplural={Fakulta informa{\v c}n{\' i}ch technologi{\' i}s},%
+short={FIT},%
+shortplural={FITs},%
+counter={page},%
+parent={},%
+%
+}%
+}%

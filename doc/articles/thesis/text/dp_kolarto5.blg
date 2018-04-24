@@ -1,0 +1,50 @@
+This is BibTeX, Version 0.99d (TeX Live 2017/Arch Linux)
+Capacity: max_strings=100000, hash_size=100000, hash_prime=85009
+The top-level auxiliary file: dp_kolarto5.aux
+The style file: csn690.bst
+Database file #1: dp_kolarto5.bib
+Warning--I'm ignoring cvc4-art's extra "note" field
+--line 235 of file dp_kolarto5.bib
+Reallocated wiz_functions (elt_size=8) to 6000 items from 3000.
+You've used 33 entries,
+            3185 wiz_defined-function locations,
+            900 strings with 11866 characters,
+and the built_in function-call counts, 15690 in all, are:
+= -- 1156
+> -- 519
+< -- 23
++ -- 258
+- -- 150
+* -- 903
+:= -- 1776
+add.period$ -- 66
+call.type$ -- 33
+change.case$ -- 174
+chr.to.int$ -- 0
+cite$ -- 33
+duplicate$ -- 1502
+empty$ -- 1453
+format.name$ -- 173
+if$ -- 3416
+int.to.chr$ -- 0
+int.to.str$ -- 33
+missing$ -- 365
+newline$ -- 130
+num.names$ -- 70
+pop$ -- 755
+preamble$ -- 1
+purify$ -- 129
+quote$ -- 0
+skip$ -- 574
+stack$ -- 0
+substring$ -- 538
+swap$ -- 825
+text.length$ -- 23
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 128
+warning$ -- 0
+while$ -- 96
+width$ -- 35
+write$ -- 353
+(There was 1 warning)

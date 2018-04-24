@@ -91,6 +91,9 @@ namespace SOS {
     void Parser::parse_expr(Expr& expr)
     try {
         const Token& cmd = expr.get_token();
+        if (cmd == "set-logic") {
+            return parse_set_logic(expr);
+        }
         if (cmd == "define-dt") {
             return parse_define_dt(expr);
         }
@@ -107,6 +110,20 @@ namespace SOS {
     }
     catch (const Error& err) {
         throw "At expression\n"s + to_string(expr) + "\n" + err;
+    }
+
+    void Parser::parse_set_logic(Expr& expr)
+    {
+        expect(!_smt_logic_set,
+               "SMT logic has already been set.");
+        _smt_logic_set = true;
+        Token token = expr.get_token_check();
+        expect(!expr, "Additional arguments in 'set-logic': "s
+               + to_string(expr));
+        expect(token == "QF_UFLRA" || token == "QF_UFNRA" || token == "UFLRA",
+               "SMT logic is not supported: '"s
+               + to_string(token) + "'");
+        _smt_logic = move(token);
     }
 
     void Parser::declare_ode(const Ode_key& ode_key_, Expr& keys_expr)
@@ -408,7 +425,9 @@ namespace SOS {
 
     string Parser::csmt_input() const
     {
-        string str(smt_init_cmds);
+        string str("");
+        str += "(set-logic " + _smt_logic + ")\n";
+        str += smt_init_cmds;
         for (const Expr& expr : csmt_exprs()) {
             str += to_string(expr) + "\n";
         }

@@ -1,0 +1,183 @@
+\begin{thebibliography}{10}
+\providecommand{\biburl}[1]{\url{#1}}
+\providecommand{\urlprefix}{Dostupn{\' e} z: }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\selectlanguage}[1]{\relax}
+\providecommand{\eprint}[2][]{\biburl{#2}}
+
+\bibitem{smt}
+{Wikipedia}: {SAT Modulo Theories}. {[online]}, [cit. 2017-08-16].
+\urlprefix\biburl{{https://en.wikipedia.org/wiki/Satisfiability_modulo_theories}}
+
+\bibitem{smtlib}
+Barrett, C.; Fontaine, P.; Tinelli, C.: {The Satisfiability Modulo Theories
+  Library (SMT-LIB)}. {[online]}, 2016, [cit. 2017-08-17].
+\urlprefix\biburl{{http://www.SMT-LIB.org}}
+
+\bibitem{cook-art}
+Cook, S.~A.: The Complexity of Theorem-proving Procedures. In \emph{Proceedings
+  of the Third Annual ACM Symposium on Theory of Computing}, STOC '71, New
+  York, NY, USA: ACM, 1971, s. 151--158, \doi{10.1145/800157.805047}, [cit.
+  2018-03-20].
+\urlprefix\biburl{http://doi.acm.org/10.1145/800157.805047}
+
+\bibitem{bmc-art}
+Biere, A.: {Bounded Model Checking}. In \emph{{Handbook of Satisfiability}},
+  editace A.~Biere; M.~Heule; H.~van Maaren; T.~Walsh, kapitola~14, IOS Press,
+  2009, s. 457--481, \doi{10.3233/978-1-58603-929-5-457}, [cit. 2018-03-07].
+
+\bibitem{theories-book}
+Bradley, A.~R.; Manna, Z.: \emph{{The Calculus of Computation}}.
+  Springer-Verlag Berlin Heidelberg, 2007, ISBN 978-3-540-74112-1, 366 s.,
+  [cit. 2018-03-12].
+
+\bibitem{ode}
+{Wikipedia}: {Ordinary differential equation}. {[online]}, [cit. 2018-03-07].
+\urlprefix\biburl{{https://en.wikipedia.org/wiki/Ordinary_differential_equation}}
+
+\bibitem{odeint-art}
+Ahnert, K.; Mulansky, M.: Odeint~--~Solving Ordinary Differential Equations in
+  C++. \emph{{AIP} Conf. Proc. 1389}, 2011: s. 1586--1589,
+  \doi{10.1063/1.3637934}, [cit. 2017-08-17].
+
+\bibitem{ode-valid-runge_kutta-art}
+Alexandre~dit Sandretto, J.; Chapoutot, A.: {Validated Explicit and Implicit
+  Runge-Kutta Methods}. \emph{{Reliable Computing electronic edition}}, ro\v
+  cn\'\i{}k~22, \v Cervenec 2016, [cit. 2018-03-07].
+\urlprefix\biburl{https://hal.archives-ouvertes.fr/hal-01243053}
+
+\bibitem{ode-lec}
+{Peter Philip}: {Ordinary Differential Equations}. {[online]}, 2017, lecture
+  notes [cit. 2018-03-07].
+\urlprefix\biburl{{http://www.math.lmu.de/~philip/publications/lectureNotes/ODE.pdf}}
+
+\bibitem{smt-de_moura}
+de~Moura, L.; Bj{\o}rner, N.: Satisfiability modulo theories: introduction and
+  applications. \emph{Commun. ACM}, ro\v cn\'\i{}k~54, \v c.~9, 2011: s.
+  69--77, [cit. 2018-03-06].
+
+\bibitem{minisat}
+Eén, N.; Sörensson, N.: {MiniSAT}. {[online]}, 2008, [cit. 2017-08-23].
+\urlprefix\biburl{{http://minisat.se}}
+
+\bibitem{smt-stanford}
+Biere, A.; Heule, M.; van Maaren, H.; aj.: {Satisfiability Modulo Theories}. In
+  \emph{{Handbook of Satisfiability}}, editace C.~Barrett; R.~Sebastiani; S.~A.
+  Seshia; C.~Tinelli, kapitola~12, IOS Press, 2008, s. 737--797, [cit.
+  2017-11-21].
+
+\bibitem{smtlib-tutorial-art}
+Cok, D.~R.: {The SMT-LIBv2 Language and Tools: A Tutorial}. {[online]}, 2013,
+  [cit. 2017-11-21].
+\urlprefix\biburl{{http://www.grammatech.com/resource/smt/SMTLIBTutorial.pdf}}
+
+\bibitem{smtlib-reference-art}
+Barrett, C.; Fontaine, P.; Tinelli, C.: {The SMT-LIB Standard}, {Version 2.6}.
+  2017, [cit. 2017-11-21].
+
+\bibitem{opensmt}
+Sharygina, N.: {OpenSMT}. {[online]}, 2012, [cit. 2017-08-16].
+\urlprefix\biburl{{http://verify.inf.usi.ch/opensmt}}
+
+\bibitem{opensmt-art}
+Bruttomesso, R.; Pek, E.; Sharygina, N.; aj.: The OpenSMT Solver. In
+  \emph{International Conference on Tools and Algorithms for the Construction
+  and Analysis of Systems (TACAS)}, ro\v cn\'\i{}k 6015, Springer, Paphos,
+  Cyprus: Springer, 2010, s. 150--153, \doi{10.1007/978-3-642-12002-2_12},
+  [cit. 2018-03-07].
+
+\bibitem{cvc4}
+Kshitij~Bansal, F.~B., Clark~Barrett: {CVC4}. {[online]}, 2017, [cit.
+  2017-10-18].
+\urlprefix\biburl{{http://cvc4.cs.stanford.edu/web/}}
+
+\bibitem{cvc4-art}
+Barrett, C.; Conway, C.~L.; Deters, M.; aj.: {CVC4}. In \emph{Proceedings of
+  the 23rd International Conference on Computer Aided Verification (CAV '11)},
+  \emph{Lecture Notes in Computer Science}, ro\v cn\'\i{}k 6806, editace
+  G.~Gopalakrishnan; S.~Qadeer, Springer, \v Cervenec 2011, s. 171--177,
+  snowbird, Utah.
+\urlprefix\biburl{http://www.cs.stanford.edu/~barrett/pubs/BCD+11.pdf}
+
+\bibitem{ode-nsolve-intro}
+{Ernst Hairer and Christian Lubich}: {Numerical solution of ordinary
+  differential equations}. {[online]}, 2015, introductory text [cit.
+  2018-03-09].
+\urlprefix\biburl{{https://na.uni-tuebingen.de/~lubich/pcam-ode.pdf}}
+
+\bibitem{ode-nsolve}
+{Wikipedia}: {Numerical methods for ordinary differential equations}.
+  {[online]}, [cit. 2018-03-08].
+\urlprefix\biburl{{https://en.wikipedia.org/wiki/Numerical_methods_for_ordinary_differential_equations}}
+
+\bibitem{ode-nsolve-book}
+Atkinson, K.; Han, W.; Jay, L.; aj.: \emph{{Numerical Solution of Ordinary
+  Differential Equations}}. {John Wiley} \& {Sons}, {Inc.}, 2 2009, ISBN
+  978-0-470-04294-6, 272 s., [cit. 2018-03-09].
+
+\bibitem{ode-nsolve-lec}
+{Endre Süli}: {Numerical Solution of Ordinary Differential Equations}.
+  {[online]}, 2014, lecture notes [cit. 2018-03-09].
+\urlprefix\biburl{{https://people.maths.ox.ac.uk/suli/nsodes.pdf}}
+
+\bibitem{sundials}
+Woodward, C.~S.: {SUNDIALS: SUite of Nonlinear and DIfferential/ALgebraic
+  Equation Solvers}. {[online]}, 2005, [cit. 2017-08-16].
+\urlprefix\biburl{{https://computation.llnl.gov/projects/sundials}}
+
+\bibitem{sundials-art}
+Hindmarsh, A.~C.; Brown, P.~N.; Grant, K.~E.; aj.: {SUNDIALS}: Suite of
+  nonlinear and differential/algebraic equation solvers. \emph{ACM Transactions
+  on Mathematical Software (TOMS)}, ro\v cn\'\i{}k~31, \v c.~3, 2005: s.
+  363--396, [cit. 2017-08-17].
+
+\bibitem{odeint}
+Ahnert, K.; Mulansky, M.: {Odeint}. {[online]}, 2012, [cit. 2017-08-16].
+\urlprefix\biburl{{http://headmyshoulder.github.io/odeint-v2}}
+
+\bibitem{boost-libs}
+Dawes, B.; Abrahams, D.: {Boost Library Documentation}. {[online]}, [cit.
+  2017-08-26].
+\urlprefix\biburl{{http://www.boost.org/doc/libs}}
+
+\bibitem{hydlogic-art}
+Ishii, D.; Ueda, K.; Hosobe, H.: An interval-based {SAT} modulo {ODE} solver
+  for model checking nonlinear hybrid systems. \emph{International Journal on
+  Software Tools for Technology Transfer ({STTT})}, ro\v cn\'\i{}k~13, \v c.~5,
+  2011: s. 449--461, [cit. 2018-03-11].
+
+\bibitem{isat-ode}
+Niehaus, J.: {iSAT-ODE}. {[online]}, 2010, [cit. 2017-08-16].
+\urlprefix\biburl{{http://www.avacs.org/tools/isatode}}
+
+\bibitem{isat-ode-art}
+Eggers, A.; Ramdani, N.; Nedialkov, N.; aj.: Improving {SAT} modulo {ODE} for
+  hybrid systems analysis by combining different enclosure methods.
+  \emph{International Conference on Software Engineering and Formal Methods
+  ({SEFM})}, ro\v cn\'\i{}k~9, 2011, [cit. 2018-03-11].
+
+\bibitem{vnode-lp}
+Nedialkov, N.: {VNODE-LP}--a validated solver for initial value problems in
+  ordinary differential equations. {[online]}, 2006, [cit. 2017-08-20].
+\urlprefix\biburl{{http://www.cas.mcmaster.ca/~nedialk/vnodelp}}
+
+\bibitem{dreal}
+Jekyll; Bones, S.: {dReal}. {[online]}, 2016, [cit. 2017-08-16].
+\urlprefix\biburl{{http://dreal.github.io}}
+
+\bibitem{dreal-smt-format-art}
+Bae, K.; Kong, S.; Gao, S.: SMT Encoding of Hybrid Systems in dReal. In
+  \emph{ARCH14-15. 1st and 2nd International Workshop on Applied veRification
+  for Continuous and Hybrid Systems}, \emph{EPiC Series in Computing}, ro\v
+  cn\'\i{}k~34, editace G.~Frehse; M.~Althoff, EasyChair, 2015, ISSN 2398-7340,
+  s. 188--195, \doi{10.29007/s3b9}, [cit. 2018-03-06].
+\urlprefix\biburl{https://easychair.org/publications/paper/4Qr}
+
+\bibitem{dreal-smo-art}
+Gao, S.; Kong, S.; Clarke, E.: {Satisfiability Modulo ODEs}. \emph{Formal
+  Methods in Computer-Aided Design ({FMCAD})}, 2013, [cit. 2018-03-11].
+
+\end{thebibliography}

@@ -56,9 +56,8 @@ namespace SOS {
         static constexpr const char* smt_init_cmds =
             "(set-option :print-success false)\n"
             "(set-option :produce-models true)\n"
-            "(set-logic QF_UFNRA)\n"
-            //! "(set-logic QF_UFLRA)\n"
             "(define-sort Dt () Real)\n";
+        static constexpr const char* def_smt_logic = "QF_UFLRA";
 
         Odes& odes()                                         { return _odes; }
         const Ode& code(const Ode_key& ode_key_) const;
@@ -74,6 +73,8 @@ namespace SOS {
 
         void parse_top_expr();
         void parse_expr(Expr& expr);
+        void parse_set_logic(Expr& expr);
+        void add_set_logic_expr(Token token);
         void declare_ode(const Ode_key& ode_key_, Expr& keys_expr);
         void parse_define_dt(Expr& expr);
         void parse_define_ode_step(Expr& expr);
@@ -129,14 +130,14 @@ namespace SOS {
         Exprs& smt_exprs()                              { return _smt_exprs; }
         void add_smt_expr(Expr expr);
     private:
-        //! there may be some issue with move operations ?
-        //! I've experienced some ..
         Expr _expr;
 
         Odes _odes;
         Odes_map _odes_map;
         Dt_keys_map _dt_keys_map;
 
+        string _smt_logic{def_smt_logic};
+        bool _smt_logic_set{false};
         Exprs _smt_exprs;
 
         Time _ode_step;
