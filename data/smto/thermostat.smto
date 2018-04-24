@@ -11,7 +11,7 @@
 
 #define T 0.25
 
-#define STEPS 9
+#define STEPS 100
 #define STEPS-1 $d(- #STEPS 1)
 
 ;;; Declarations

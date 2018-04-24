@@ -30,7 +30,8 @@
 
 #define T 0.35
 
-#define STEPS 9
+;#define STEPS 10
+#define STEPS 1000
 #define STEPS-1 $d(- #STEPS 1)
 
 ;;; Constant invariants

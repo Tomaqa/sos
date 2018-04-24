@@ -345,6 +345,7 @@ namespace SOS {
     void Preprocess::parse_macro_endlet(Expr& expr, unsigned depth)
     {
         Let_key let_key_ = expr.extract_token_check();
+        check_is_not_macro_key(let_key_);
         check_has_let_key(let_key_);
         pop_let_body(let_key_);
     }

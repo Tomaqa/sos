@@ -47,15 +47,26 @@
 #endif
 #enddef
 
-#define FACT(n) (* #ASC(#n))
-
-#define A 5
-(#A)
+#define N 5
+;#define FACT(n) (* #ASC(#n))
+#def FACT(n)
+#if $(= #n 0)
+    *
+#else
+    #FACT( $d(- #n 1) ) #n
+#endif
+#enddef
 
 (#DESC(10))
 (#ASC(10))
+(#FACT(4))
+(assert (= $(#FACT(#N)) 120) )
 
-( $i(+ 10 #FACT(5)) )
+;( $i(+ 10 #FACT(5)) )
+( $i(+ 10 (#FACT(5))) )
+
+#define A 5
+(#A)
 
 (define-fun T (#XY) Real 1)
 
@@ -121,4 +132,27 @@
 
 ;#let #g
 ;#endlet #g
+
+( $f (+ 5 $d(- 6 $(- 2)) ) )
+( $d (- 3.5 1.9) )
+( $f(+ $f(- 3.5 1.9) ))
+( $d(+ $f(- 3.5 1.9) ))
+
+#define BIG 0
+#define HUGE 0
+#if $ (or #BIG #HUGE)  #define ST 1000
+#else                  #define ST 10
+#endif
+;...
+#def INT_ODE(f)
+#for (i 0 $(- #ST 1))
+#let j $d(+ #i 1)
+    (= #f##_#j (int-ode #f d#f##_#i (#f##_#i t_#i t_#j) ()) )
+#endlet j
+#endfor
+#enddef
+
+(assert (and #INT_ODE(x)
+             #INT_ODE(y)
+))
 
