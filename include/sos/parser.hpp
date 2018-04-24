@@ -34,7 +34,6 @@ namespace SOS {
         Parser& operator =(Parser&& rhs)                            = default;
         Parser(istream& is, bool preprocess_only = false);
         Parser(string input, bool preprocess_only = false);
-        Parser(Expr expr, bool preprocess_only = false);
 
         string preprocessed_input() const;
         const Odes& codes() const                            { return _odes; }
@@ -58,6 +57,8 @@ namespace SOS {
             "(set-option :produce-models true)\n"
             "(define-sort Dt () Real)\n";
         static constexpr const char* def_smt_logic = "QF_UFLRA";
+
+        Parser(Expr expr, bool preprocess_only = false);
 
         Odes& odes()                                         { return _odes; }
         const Ode& code(const Ode_key& ode_key_) const;

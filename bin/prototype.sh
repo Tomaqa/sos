@@ -22,8 +22,8 @@ UNIF=1
 
 ##############################
 
-# SMT_SOLVER=(cvc4 -L smt2 -i)
-SMT_SOLVER=(z3 -smt2 -in)
+SMT_SOLVER=(cvc4 -L smt2 -i)
+# SMT_SOLVER=(z3 -smt2 -in)
 # SMT_SOLVER=(~"/Data/Software/opensmt2/opensmt")
 
 APP_DIR=bin

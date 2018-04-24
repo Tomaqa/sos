@@ -1,23 +1,22 @@
 #include "parser.hpp"
-#include "preprocess.hpp"
+#include "expr/preprocess.hpp"
 
 #include <sstream>
 
 namespace SOS {
     Parser::Parser(istream& is, bool preprocess_only)
-        : Parser(Expr(Preprocess::parse_input(is)), preprocess_only)
+        : Parser(Expr::Preprocess(is).parse(), preprocess_only)
     { }
 
     Parser::Parser(string input, bool preprocess_only)
-        : Parser(Expr(Preprocess::parse_input(move(input))), preprocess_only)
+        : Parser(Expr::Preprocess(move(input)).parse(), preprocess_only)
     { }
 
     //! It requires to have whole input stored in memory,
     //! potentionally inefficient and dangerous
     Parser::Parser(Expr expr, bool preprocess_only)
+        : _expr(move(expr))
     {
-        Preprocess().parse_expr(expr);
-        _expr = move(expr);
         if (preprocess_only) return;
         parse_top_expr();
     }

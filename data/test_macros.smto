@@ -156,3 +156,17 @@
              #INT_ODE(y)
 ))
 
+( # )
+( ## )
+( ### )
+
+#define seq 1 2 3
+( #seq )
+( #seq# )
+( #seq## )
+( #seq### )
+( ##seq )
+( ###seq )
+( ####seq )
+( ##FACT(5) )
+( ###FACT(5) )

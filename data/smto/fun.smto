@@ -16,8 +16,8 @@
 #define T 1.0
 ;#define T 0.1
 
-;#define STEPS   10
-#define STEPS   400
+#define STEPS   10
+;#define STEPS   100
 ;#define STEPS   1000
 
 ;;; Constant invariants

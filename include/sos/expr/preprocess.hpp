@@ -1,7 +1,6 @@
 #pragma once
 
 #include "sos.hpp"
-#include "util.hpp"
 #include "expr.hpp"
 
 #include <stack>
@@ -9,17 +8,13 @@
 namespace SOS {
     using std::stack;
 
-    class Preprocess {
+    class Expr::Preprocess {
     public:
-        Preprocess();
+        Preprocess(string input);
+        Preprocess(istream& is);
 
-        static string parse_input(string&& input);
-        static string parse_input(istream& is);
-        void parse_expr(Expr& expr);
+        Expr parse();
     protected:
-        using Token = Expr::Token;
-        using Tokens = Expr::Tokens;
-
         using Macro_key = Token;
         using Macro_params = Tokens;
         using Macro_param = Macro_params::value_type;
@@ -35,9 +30,14 @@ namespace SOS {
         using Reserved_macro_f = function<void(Preprocess*, Expr&, unsigned)>;
         using Reserved_macro_fs_map = Const_map<Macro_key, Reserved_macro_f>;
 
-        using Exp_pos = Expr::iterator;
+        using Exp_pos = iterator;
 
         static const Reserved_macro_fs_map reserved_macro_fs_map;
+
+        Preprocess(Expr expr);
+
+        static string parse_lines(string&& input);
+        static string parse_lines(istream& is);
 
         static bool is_macro_key(const Token& token);
         static bool is_macro_key_char(char c);
@@ -134,6 +134,8 @@ namespace SOS {
         template <typename Arg>
             static Arg& eval_value(Eval_t_marked& val_m);
     private:
+        Expr _expr;
+
         Macros_map _macros_map;
         Lets_map _lets_map;
         unsigned _macro_depth{0};

@@ -7,3 +7,15 @@ test/
 *log
 data/smt2/benchmarks/
 doc/odeint
+
+*.ac*
+*.alg
+*.aux
+*.bbl
+*.blg
+*.gl*
+*.ist
+*.lof
+*.out
+*.toc
+*~

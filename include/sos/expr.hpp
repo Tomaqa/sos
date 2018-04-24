@@ -77,6 +77,8 @@ namespace SOS {
         using iterator = Places::iterator;
         using const_iterator = Places::const_iterator;
 
+        class Preprocess;
+
         Expr();
         virtual ~Expr()                                             = default;
         virtual Expr_place_ptr clone() const override;
