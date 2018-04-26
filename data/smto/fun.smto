@@ -3,11 +3,10 @@
 
 ;;; Constants
 
-#define T 1.0
-;#define T 0.1
+#define T 0.33
 
-#define T_MIN()    1
-#define T_MAX()   10
+#define T_MIN()    0
+#define T_MAX()   30
 
 #define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
 #define STEPS-1 $d(- #STEPS 1)
@@ -46,14 +45,14 @@
     (or #_INIT_INTERVAL(#var #min #max #step))
 #enddef
 
-#define INIT_HIGH() (= high_0 #T_MIN)
-#define INIT_LOW() (= low_0 0)
+#define INIT_HIGH() 1
+#define INIT_LOW() -1
 
-#define INIT_Y() #INIT_INTERVAL(y_0 0 #T_MIN 0.25)
+#define INIT_Y() #INIT_INTERVAL(y_0 #INIT_LOW #INIT_HIGH 0.25)
 
 (assert (and #INIT_T
-             #INIT_HIGH
-             #INIT_LOW
+             (= high_0 #INIT_HIGH)
+             (= low_0 #INIT_LOW)
              #INIT_Y
 ))
 
@@ -73,12 +72,11 @@
 
 (define-dt high dhigh () (- t (* high (sin high))))
 
-(define-dt low dlow () 1)
+#define COEF 2.5
+(define-dt low dlow () (- (/ t #COEF) (* low (sin (* low #COEF)))))
 
-(define-dt y dy_exp_inc () y)
-(define-dt y dy_exp_dec () (- (/ 2 t)))
-(define-dt y dy_lin_inc () 1)
-(define-dt y dy_lin_dec () -1)
+(define-dt y dy_inc () y)
+(define-dt y dy_dec () (- y))
 
 ;;; Invariants
 
@@ -87,9 +85,7 @@
                       ) Bool
     (and (<= low y high)
          (= dhigh_ dhigh) (= dlow_ dlow)
-         ;(or (= dy_ dy_exp_inc) (= dy_ dy_exp_dec))
-         (or (= dy_ dy_exp_inc) (= dy_ dy_exp_dec)
-             (= dy_ dy_lin_inc) (= dy_ dy_lin_dec))
+         (or (= dy_ dy_inc) (= dy_ dy_dec))
 ))
 
 #def INVARIANTS
