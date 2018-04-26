@@ -1,0 +1,161 @@
+;;;; Electronic oscillator from dReal in SMT+ODE format
+
+;;; Constants
+
+#define D 0.1
+#define K 0.95
+
+#define G 9.8
+
+#define T 0.05
+
+#define T_MIN()   0
+#define T_MAX()   6.5
+
+#define X_MIN() (- 1)
+#define X_MAX() 15
+
+#define V_MIN() (- 18)
+#define V_MAX()    18
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
+#define STEPS-1 $d(- #STEPS 1)
+
+;;; Declarations
+
+#def DECL_CONSTS(const type)
+#for (i 0 #STEPS)
+    (declare-fun #const##_#i () #type)
+#endfor
+#enddef
+
+#DECL_CONSTS(t      Real)
+#DECL_CONSTS(x_0    Real)
+#DECL_CONSTS(x_t    Real)
+#DECL_CONSTS(v_0    Real)
+#DECL_CONSTS(v_t    Real)
+
+#DECL_CONSTS(down   Bool)
+
+#DECL_CONSTS(dx    Dt)
+#DECL_CONSTS(dv    Dt)
+
+;;; Initializations
+
+#define INIT_T()   (= t_0 #T_MIN)
+
+#def _INIT_INTERVAL(var val max step)
+#if $(<= #val #max)
+    (= #var #val)
+    #_INIT_INTERVAL(#var $(+ #val #step) #max #step)
+#endif
+#enddef
+#def INIT_INTERVAL(var min max step)
+    (or #_INIT_INTERVAL(#var #min #max #step))
+#enddef
+
+#define INIT_X_MIN 5
+#define INIT_X_MAX #X_MAX
+#define INIT_X_STEP 0.25
+#define INIT_X()  #INIT_INTERVAL(x_0_0 #INIT_X_MIN #INIT_X_MAX #INIT_X_STEP)
+
+#define INIT_V() (= v_0_0 0)
+
+(assert (and #INIT_T
+             #INIT_X
+             #INIT_V
+             down_0
+))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
+
+;;; Derivatives definition
+
+(define-dt x dx      (v) v)
+
+(define-dt v dv_down () (+ (- #G) (* #D (^ v 2)) ))
+(define-dt v dv_up   () (- (- #G) (* #D (^ v 2)) ))
+
+;;; Invariants
+
+(define-fun invariant ( (x_0 Real) (v_0 Real)
+                        (x_t Real) (v_t Real)
+                        (t Real)
+                        (dx_ Dt) (dv_ Dt)
+                      ) Bool
+    (and (<= #X_MIN x_0 #X_MAX) (<= #X_MIN x_t #X_MAX)
+         (<= #V_MIN v_0 #V_MAX) (<= #V_MIN v_t #V_MAX)
+         (<= #T_MIN t #T_MAX)
+         (or (= dx_ dx))
+         (or (= dv_ dv_down) (= dv_ dv_up))
+))
+
+#def INVARIANTS
+#for (i 0 #STEPS)
+    (invariant  x_0_#i v_0_#i x_t_#i v_t_#i t_#i dx_#i dv_#i)
+#endfor
+#enddef
+
+(assert (and #INVARIANTS))
+
+;;; Derivatives connection
+
+(define-fun connect ((dx_ Dt) (dv_ Dt) (down Bool)) Bool
+    (and (=>      down  (= dv_ dv_down))
+         (=> (not down) (= dv_ dv_up  ))
+))
+
+#def CONNECTS
+#for (i 0 #STEPS)
+    (connect dx_#i dv_#i down_#i)
+#endfor
+#enddef
+
+(assert (and #CONNECTS))
+
+;;; Jump conditions
+
+(define-fun jump ( (down1 Bool) (down2 Bool)
+                   (x1_t Real) (v1_t Real)
+                   (x2_0 Real) (v2_0 Real)
+                 ) Bool
+    (and (=> (and      down1  (>  x1_t 0) ) (and      down2  (= x2_0 x1_t) (= v2_0 v1_t) ))
+         (=> (and      down1  (<= x1_t 0) ) (and (not down2) (= x2_0    0) (= v2_0 (* (- #K) v1_t )) ))
+         (=> (and (not down1) (>  v1_t 0) ) (and (not down2) (= x2_0 x1_t) (= v2_0 v1_t) ))
+         (=> (and (not down1) (<= v1_t 0) ) (and      down2  (= x2_0 x1_t) (= v2_0 v1_t) ))
+))
+
+#def JUMPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (jump down_#i down_#j x_t_#i v_t_#i x_0_#j v_0_#j)
+#endlet j
+#endfor
+#enddef
+
+(assert (and #JUMPS))
+
+;;; Integration
+
+#def INT_ODE(f ivar ovar params)
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= #ovar##_#i (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) #params) )
+#endlet j
+#endfor
+#enddef
+
+#define X_PARAMS() (v_0_#i)
+(assert (and #INT_ODE(x x_0 x_t &X_PARAMS)
+             #INT_ODE(v v_0 v_t ())
+))

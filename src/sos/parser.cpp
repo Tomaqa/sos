@@ -18,7 +18,7 @@ namespace SOS {
         : _expr(move(expr))
     {
         if (preprocess_only) return;
-        parse_top_expr();
+        parse();
     }
 
     const Parser::Ode& Parser::code(const Ode_key& ode_key_) const
@@ -75,7 +75,7 @@ namespace SOS {
         return get<4>(ode(ode_key_));
     }
 
-    void Parser::parse_top_expr()
+    void Parser::parse()
     {
         smt_exprs().reserve(_expr.size());
         for (auto& eptr : _expr) {
@@ -83,32 +83,77 @@ namespace SOS {
             expect(!e.empty() && e.cfront()->is_etoken(),
                    "Expected command expression, got: "s
                    + to_string(e));
-            parse_expr(e);
+            parse_top_expr(e);
         }
     }
 
-    void Parser::parse_expr(Expr& expr)
+    void Parser::parse_top_expr(Expr& expr)
     try {
-        const Token& cmd = expr.get_token();
+        const Token& cmd = expr.cpeek_token();
         if (cmd == "set-logic") {
+            expr.next();
             return parse_set_logic(expr);
         }
         if (cmd == "define-dt") {
+            expr.next();
             return parse_define_dt(expr);
         }
         if (cmd == "define-ode-step") {
+            expr.next();
             return parse_define_ode_step(expr);
-        }
-        if (cmd == "assert") {
-            parse_assert(expr);
         }
         expect(cmd != "int-ode",
                "Unexpected command '"s + cmd + "' "
                + "at top level.");
+        parse_expr(expr);
+        expr.reset_pos_to_valid();
         add_smt_expr(move(expr));
     }
     catch (const Error& err) {
         throw "At expression\n"s + to_string(expr) + "\n" + err;
+    }
+
+    void Parser::parse_expr(Expr& expr)
+    {
+        if (expr.empty()) return;
+        maybe_parse_first_token(expr);
+        while (expr) {
+            if (expr.cpeek()->is_etoken()) {
+                parse_token(expr);
+                continue;
+            }
+            Expr& subexpr = expr.get_expr();
+            parse_expr(subexpr);
+        }
+    }
+
+    void Parser::maybe_parse_first_token(Expr& expr)
+    {
+        if (!expr.cpeek()->is_etoken()) return;
+        const Token& token = expr.cpeek_token();
+        expect(token != "set-logic" && token != "define-dt"
+               && token != "define-ode-step",
+               "Command '"s + token + "' "
+               + "must be at top level.");
+        if (token == "int-ode") {
+            expr.next();
+            return parse_int_ode(expr);
+        }
+        parse_token(expr);
+    }
+
+    void Parser::parse_token(Expr& expr)
+    {
+        const Token& token = expr.cpeek_token();
+        if (token[0] == '-' && isdigit(token[1])) {
+            Expr_token num = expr.extract_etoken();
+            num.token().erase(0, 1);
+            Expr new_expr("-");
+            new_expr.add_new_etoken(move(num));
+            expr.add_new_expr_at_pos(move(new_expr));
+            return;
+        }
+        expr.next();
     }
 
     void Parser::parse_set_logic(Expr& expr)
@@ -180,17 +225,6 @@ namespace SOS {
         expect(!_ode_step_set, "ODE step size has already been set.");
         _ode_step = expr.get_etoken_check().get_value_check<Time>();
         _ode_step_set = true;
-    }
-
-    void Parser::parse_assert(Expr& expr)
-    {
-        expr.for_each_expr([this](Expr& e){
-            if (e.cfront()->is_etoken()
-                && e.get_token() == "int-ode") {
-                return parse_int_ode(e);
-            }
-            parse_assert(e);
-        });
     }
 
     void Parser::parse_int_ode(Expr& expr)

@@ -132,31 +132,33 @@ namespace SOS {
         return macros_map()[macro_key_];
     }
 
-    const Expr::Preprocess::Macro_params&
-        Expr::Preprocess::cmacro_params(const Macro_key& macro_key_) const
+    const Expr::Preprocess::Macro_param_keys&
+        Expr::Preprocess::cmacro_param_keys(const Macro_key& macro_key_) const
     {
         return std::get<0>(cmacro(macro_key_));
     }
 
-    Expr::Preprocess::Macro_params&
-        Expr::Preprocess::macro_params(const Macro_key& macro_key_)
+    Expr::Preprocess::Macro_param_keys&
+        Expr::Preprocess::macro_param_keys(const Macro_key& macro_key_)
     {
         return std::get<0>(macro(macro_key_));
     }
 
     bool Expr::Preprocess::
-        macro_params_has_param(const Macro_params& macro_params_,
-                               const Macro_param& macro_param_)
+        macro_param_keys_has_param_key(const Macro_param_keys&
+                                           macro_param_keys_,
+                                       const Macro_param_key&
+                                           macro_param_key_)
     {
-        return includes(macro_params_, macro_param_);
+        return includes(macro_param_keys_, macro_param_key_);
     }
 
     bool Expr::Preprocess::
-        macro_has_param(const Macro_key& macro_key_,
-                        const Macro_param& macro_param_) const
+        macro_has_param_key(const Macro_key& macro_key_,
+                            const Macro_param_key& macro_param_key_) const
     {
-        return macro_params_has_param(cmacro_params(macro_key_),
-                                      macro_param_);
+        return macro_param_keys_has_param_key(cmacro_param_keys(macro_key_),
+                                              macro_param_key_);
     }
 
     const Expr::Preprocess::Macro_body&
@@ -172,10 +174,10 @@ namespace SOS {
     }
 
     void Expr::Preprocess::add_macro(const Macro_key& macro_key_,
-                                     Macro_params macro_params_,
+                                     Macro_param_keys macro_param_keys_,
                                      Macro_body macro_body_)
     {
-        macro(macro_key_) = make_tuple(move(macro_params_),
+        macro(macro_key_) = make_tuple(move(macro_param_keys_),
                                        move(macro_body_));
     }
 
@@ -316,9 +318,11 @@ namespace SOS {
             params_expr = expr.extract_expr();
         }
         //! do not parse this expression
-        Macro_params macro_params_ = params_expr.transform_to_tokens();
+        Macro_param_keys macro_param_keys_ =
+            params_expr.transform_to_tokens();
         Macro_body macro_body_ = extract_macro_body(expr, "enddef");
-        add_macro(move(macro_key_), move(macro_params_), move(macro_body_));
+        add_macro(move(macro_key_), move(macro_param_keys_),
+                  move(macro_body_));
     }
 
     void Expr::Preprocess::parse_macro_let(Expr& expr, unsigned depth)
@@ -366,6 +370,8 @@ namespace SOS {
             parse_eval_arith_token(expr, depth+1)
         );
         bool del = !cond;
+        bool found = false;
+        int nested_del_cnt = 0;
         while (expr) {
             if (!expr.cpeek()->is_etoken()) {
                 if (del) {
@@ -379,6 +385,11 @@ namespace SOS {
             const Token& token = expr.cpeek_token();
             if (token == "#endif") {
                 expr.erase_at_pos();
+                if (nested_del_cnt) {
+                    --nested_del_cnt;
+                    continue;
+                }
+                found = true;
                 break;
             }
             if (token == "#else") {
@@ -387,11 +398,13 @@ namespace SOS {
                 continue;
             }
             if (del) {
+                if (token == "#if") ++nested_del_cnt;
                 expr.erase_at_pos();
                 continue;
             }
             parse_token(expr, depth);
         }
+        expect(found, "'#endif' not found.");
     }
 
     void Expr::Preprocess::parse_macro_for(Expr& expr, unsigned depth)
@@ -514,7 +527,7 @@ namespace SOS {
     }
 
     void Expr::Preprocess::parse_token_single(Expr& expr,
-                                              const Token& token,
+                                              Token& token,
                                               unsigned depth)
     {
         if (is_macro_key(token)) {
@@ -522,6 +535,10 @@ namespace SOS {
         }
         if (is_arith_expr(token)) {
             exp_arith_expr(expr, depth);
+        }
+        // !
+        else if (token[0] == '&') {
+            token[0] = '#';
         }
         check_token(expr, depth);
         expr.next();
@@ -540,7 +557,7 @@ namespace SOS {
         expr.set_pos(it);
         auto eit = parse_and_return(expr, [this, &expr, depth, size_](){
             for (int i = 0; i <= size_; i++) {
-                const Token& token = expr.cpeek_token();
+                Token& token = expr.peek_token();
                 parse_token_single(expr, token, depth);
             }
         });
@@ -576,8 +593,9 @@ namespace SOS {
                                      unsigned depth)
     {
         ++_macro_depth;
-        const Macro_params& macro_params_ = cmacro_params(macro_key_);
-        const int params_size = macro_params_.size();
+        const Macro_param_keys& macro_param_keys_ =
+            cmacro_param_keys(macro_key_);
+        const int params_size = macro_param_keys_.size();
         const bool empty = (params_size == 0);
         if (empty && !expr) return;
 
@@ -595,13 +613,12 @@ namespace SOS {
                    + to_string(pexpr_size) + " != "
                    + to_string(params_size));
         }
-        if (empty) return;
 
-        Macro_params ptokens = params_expr.transform_to_tokens();
-        Util::for_each(macro_params_,
-                       std::make_move_iterator(std::begin(ptokens)),
-                       [this](const Macro_param& mpar, Macro_param&& mval){
-                           push_let_body(mpar, move(mval));
+        Util::for_each(macro_param_keys_,
+                       std::make_move_iterator(std::begin(params_expr)),
+                       [this](const Macro_param_key& mparkey,
+                              Expr_place_ptr&& val){
+                           push_let_body(mparkey, move(val));
                        });
     }
 
@@ -610,8 +627,9 @@ namespace SOS {
                                     const Macro_key& macro_key_)
     {
         --_macro_depth;
-        const Macro_params& macro_params_ = cmacro_params(macro_key_);
-        for (auto& mpar : macro_params_) {
+        const Macro_param_keys& macro_param_keys_ =
+            cmacro_param_keys(macro_key_);
+        for (auto& mpar : macro_param_keys_) {
             pop_let_body(mpar);
         }
     }

@@ -80,6 +80,12 @@ namespace SOS {
         }
     }
 
+    Expr::Expr(Expr_place_ptr place)
+        : Expr()
+    {
+        add_place_ptr(move(place));
+    }
+
     Expr::Expr(string input)
         : Expr(istringstream(move(input)))
     { }

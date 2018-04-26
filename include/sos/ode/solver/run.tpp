@@ -22,7 +22,7 @@ namespace SOS {
             }
             cout << to_string(keys_expr) << endl;
 
-            cout << std::setprecision(8);
+            cout << std::setprecision(8) << std::fixed;
             while (getline(*_is_ptr, line)) {
                 if (line.empty()) continue;
                 State res = solver.solve(line);

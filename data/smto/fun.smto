@@ -1,24 +1,16 @@
 ;;;; Function choosing model in SMT+ODE format
 ;; `y' is continuous state
-;; `(inc)' is discrete state
 
 ;;; Constants
-
-(define-fun t0   () Real 1)
-
-(define-fun sqr0   () Real t0)
-(define-fun sqrt0  () Real t0)
-
-(define-fun y0   () Real t0)
-
-(define-fun inc0 () Bool true)
 
 #define T 1.0
 ;#define T 0.1
 
-#define STEPS   10
-;#define STEPS   100
-;#define STEPS   1000
+#define T_MIN()    1
+#define T_MAX()   10
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
+#define STEPS-1 $d(- #STEPS 1)
 
 ;;; Constant invariants
 
@@ -32,20 +24,37 @@
 #enddef
 
 #DECL_CONSTS(t     Real)
-#DECL_CONSTS(sqr   Real)
-#DECL_CONSTS(sqrt  Real)
+#DECL_CONSTS(high  Real)
+#DECL_CONSTS(low   Real)
 #DECL_CONSTS(y     Real)
-#DECL_CONSTS(inc   Bool)
-#DECL_CONSTS(dsqr  Dt)
-#DECL_CONSTS(dsqrt Dt)
+
+#DECL_CONSTS(dhigh Dt)
+#DECL_CONSTS(dlow  Dt)
 #DECL_CONSTS(dy    Dt)
 
 ;;; Initializations
 
-(assert (and (= t_0 t0)
-             (= sqr_0 sqr0) (= sqrt_0 sqrt0)
-             (= y_0 y0)
-             (= inc_0 inc0)
+#define INIT_T()   (= t_0 #T_MIN)
+
+#def _INIT_INTERVAL(var val max step)
+#if $(<= #val #max)
+    (= #var #val)
+    #_INIT_INTERVAL(#var $(+ #val #step) #max #step)
+#endif
+#enddef
+#def INIT_INTERVAL(var min max step)
+    (or #_INIT_INTERVAL(#var #min #max #step))
+#enddef
+
+#define INIT_HIGH() (= high_0 #T_MIN)
+#define INIT_LOW() (= low_0 0)
+
+#define INIT_Y() #INIT_INTERVAL(y_0 0 #T_MIN 0.25)
+
+(assert (and #INIT_T
+             #INIT_HIGH
+             #INIT_LOW
+             #INIT_Y
 ))
 
 ;;; Steps definition
@@ -62,12 +71,39 @@
 
 ;;; Derivatives definition
 
-(define-dt sqr dsqr () (* 2 t))
+(define-dt high dhigh () (- t (* high (sin high))))
 
-(define-dt sqrt dsqrt () (/ 1 (* 2 (sqrt t))))
+(define-dt low dlow () 1)
 
 (define-dt y dy_exp_inc () y)
-(define-dt y dy_exp_dec () (/ 1 t))
+(define-dt y dy_exp_dec () (- (/ 2 t)))
+(define-dt y dy_lin_inc () 1)
+(define-dt y dy_lin_dec () -1)
+
+;;; Invariants
+
+(define-fun invariant ( (t Real) (high Real) (low Real) (y Real)
+                        (dhigh_ Dt) (dlow_ Dt) (dy_ Dt)
+                      ) Bool
+    (and (<= low y high)
+         (= dhigh_ dhigh) (= dlow_ dlow)
+         ;(or (= dy_ dy_exp_inc) (= dy_ dy_exp_dec))
+         (or (= dy_ dy_exp_inc) (= dy_ dy_exp_dec)
+             (= dy_ dy_lin_inc) (= dy_ dy_lin_dec))
+))
+
+#def INVARIANTS
+#for (i 0 #STEPS)
+    (invariant t_#i high_#i low_#i y_#i
+               dhigh_#i dlow_#i dy_#i)
+#endfor
+#enddef
+
+(assert (and #INVARIANTS))
+
+;;; Derivatives connection
+
+;;; Jump conditions
 
 ;;; Integration
 
@@ -81,42 +117,6 @@
 ))
 #enddef
 
-#ASSERT_INT_ODE(sqr )
-#ASSERT_INT_ODE(sqrt)
+#ASSERT_INT_ODE(high)
+#ASSERT_INT_ODE(low )
 #ASSERT_INT_ODE(y   )
-
-;;; Derivatives connection
-
-(define-fun connect ( (dsqr_ Dt) (dsqrt_ Dt) (dy Dt)
-                      (inc Bool) ) Bool
-    (and (= dsqr_ dsqr) (= dsqrt_ dsqrt)
-         (or (and      inc  (= dy dy_exp_inc))
-             (and (not inc) (= dy dy_exp_dec))
-)))
-
-#def CONNECTS
-#for (i 0 #STEPS)
-    (connect dsqr_#i dsqrt_#i dy_#i inc_#i)
-#endfor
-#enddef
-
-(assert (and #CONNECTS))
-
-;;; States conditions
-
-;;; Jump conditions
-
-;;; Invariants
-
-(define-fun invariant ( (t Real) (sqr Real) (sqrt Real) (y Real) ) Bool
-    ;(and (<= y sqr) (>= y sqrt)
-    (and (<= y sqr) (>= y t)
-))
-
-#def INVARIANTS
-#for (i 0 #STEPS)
-    (invariant t_#i sqr_#i sqrt_#i y_#i)
-#endfor
-#enddef
-
-(assert (and #INVARIANTS))

@@ -87,6 +87,7 @@ namespace SOS {
         Expr(Expr&& rhs)                                            = default;
         Expr& operator =(Expr&& rhs)                                = default;
         Expr(initializer_list<Expr_place_ptr> list);
+        Expr(Expr_place_ptr place);
         Expr(string input);
         Expr(istream& is);
         Expr(istream&& is);

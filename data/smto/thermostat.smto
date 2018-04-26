@@ -52,17 +52,15 @@
 
 ;;; Integration
 
-#def INT_ODE(f ivar ovar param empty)
+#def INT_ODE(f ivar ovar)
 #for (i 0 #STEPS-1)
 #let j $d(+ #i 1)
-#let par #if $(not #empty) #param##_#i #endif
-    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) (#par)) )
-#endlet par
+    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) ()) )
 #endlet j
 #endfor
 #enddef
 
-(assert (and #INT_ODE(x x x ## 1)
+(assert (and #INT_ODE(x x x)
 ))
 
 ;;; Derivatives connection

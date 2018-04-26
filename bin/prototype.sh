@@ -22,8 +22,8 @@ UNIF=1
 
 ##############################
 
-SMT_SOLVER=(cvc4 -L smt2 -i)
-# SMT_SOLVER=(z3 -smt2 -in)
+# SMT_SOLVER=(cvc4 -L smt2 -i)
+SMT_SOLVER=(z3 -smt2 -in)
 # SMT_SOLVER=(~"/Data/Software/opensmt2/opensmt")
 
 APP_DIR=bin
@@ -385,20 +385,35 @@ function smt_assert_exprs {
 # 1 - step
 function add_asserts {
     local exprs
+
+#     for i in ${!F_KEYS[@]}; do
+#         exprs=
+#         fkey=${F_KEYS[$i]}
+#         smt_assert_exprs $1 $fkey exprs
+#         local oval=${ODE_VALUES[$i]}
+#         neg_to_expr oval
+#         append_smt "(assert (=> (and $exprs
+# ) (= (int-ode_${fkey} ${1}) $oval)
+# ))"
+#     done
+#     append_smt "(push 1)"
+#     for fkey in ${F_KEYS[@]}; do
+#         set_links $fkey
+#         # append_smt "(assert (= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]}))"
+#         smt_assert_exprs $1 $fkey exprs
+#         append_smt "(assert (and $exprs))"
+#     done
+
+    append_smt "(push 1)"
     for i in ${!F_KEYS[@]}; do
         exprs=
         fkey=${F_KEYS[$i]}
         smt_assert_exprs $1 $fkey exprs
         local oval=${ODE_VALUES[$i]}
         neg_to_expr oval
-        append_smt "(assert (=> (and $exprs
-) (= (int-ode_${fkey} ${1}) $oval)
+        append_smt "(assert (and $exprs
+(= (int-ode_${fkey} ${1}) $oval)
 ))"
-    done
-    append_smt "(push 1)"
-    for fkey in ${F_KEYS[@]}; do
-        set_links $fkey
-        append_smt "(assert (= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]}))"
     done
 }
 
@@ -409,7 +424,7 @@ function add_smt_conflict {
     for fkey in ${F_KEYS[@]}; do
         smt_assert_exprs $1 $fkey exprs
     done
-    append_smt "(assert (not (and ${exprs}
+    append_smt "(assert (not (and $exprs
 )))"
 }
 
@@ -451,6 +466,7 @@ mkfifo -m 600 "$SMT_OFIFO"
 "${SMT_SOLVER[@]}" <"$SMT_IFIFO" &>"$SMT_OFIFO" &
 exec 3> >(tee "$SMT_OUTPUT_F" >"$SMT_IFIFO")
 exec 4<"$SMT_OFIFO"
+# ! pokud se SMT ukonci, blokovane to ceka na vstup
 
 mkfifo -m 600 "$ODE_IFIFO"
 mkfifo -m 600 "$ODE_OFIFO"
@@ -474,7 +490,7 @@ for (( s=$MIN_STEP; $s <= $MAX_STEP; s++ )); do
     do_step $s
 done
 
-echo
+printf -- "\n"
 for fkey in ${F_KEYS[@]}; do
     set_links $fkey
     for var in lINIT_IDS lDT_IDS; do
@@ -484,11 +500,11 @@ for fkey in ${F_KEYS[@]}; do
             get_smt_value $id
             printf -- "%s = %.3f\n" ${id} ${VALUES[${id}]}
         done
-        echo
+        printf -- "\n"
     done
 done
 
-echo
+printf -- "\n"
 for i in ${!F_KEYS[@]}; do
     fkey=${F_KEYS[$i]}
     printf -- "%s = %.3f\n" $fkey ${ODE_VALUES[$i]}

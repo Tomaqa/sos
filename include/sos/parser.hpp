@@ -72,14 +72,17 @@ namespace SOS {
         const Const_ids_rows& cconst_ids(const Ode_key& ode_key_) const;
         Const_ids_rows& const_ids(const Ode_key& ode_key_);
 
-        void parse_top_expr();
+        void parse();
+        void parse_top_expr(Expr& expr);
         void parse_expr(Expr& expr);
+        void maybe_parse_first_token(Expr& expr);
+        void parse_token(Expr& expr);
+
         void parse_set_logic(Expr& expr);
         void add_set_logic_expr(Token token);
         void declare_ode(const Ode_key& ode_key_, Expr& keys_expr);
         void parse_define_dt(Expr& expr);
         void parse_define_ode_step(Expr& expr);
-        void parse_assert(Expr& expr);
         void parse_int_ode(Expr& expr);
 
         static Const_id int_ode_identifier(const Ode_key& ode_key_);

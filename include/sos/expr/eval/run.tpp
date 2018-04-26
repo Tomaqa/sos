@@ -3,6 +3,7 @@ namespace SOS {
     void Expr::Eval<Arg>::Run::do_stuff()
     {
         string line;
+        cout << std::setprecision(8) << std::fixed;
         while (getline(*_is_ptr, line)) {
             Expr expr(line);
             if (expr.empty()) continue;
@@ -11,7 +12,6 @@ namespace SOS {
                 continue;
             }
 
-            cout << std::setprecision(8);
             Expr::Eval<Arg> eval = expr.get_eval<Arg>();
             if (eval.size() == 0) {
                 cout << eval() << endl;

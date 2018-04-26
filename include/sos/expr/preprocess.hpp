@@ -16,10 +16,10 @@ namespace SOS {
         Expr parse();
     protected:
         using Macro_key = Token;
-        using Macro_params = Tokens;
-        using Macro_param = Macro_params::value_type;
+        using Macro_param_keys = Tokens;
+        using Macro_param_key = Macro_param_keys::value_type;
         using Macro_body = Expr;
-        using Macro = tuple<Macro_params, Macro_body>;
+        using Macro = tuple<Macro_param_keys, Macro_body>;
         using Macros_map = map<Macro_key, Macro>;
 
         using Let_key = Macro_key;
@@ -52,16 +52,21 @@ namespace SOS {
         void check_has_not_macro_key(const Macro_key& macro_key_) const;
         const Macro& cmacro(const Macro_key& macro_key_) const;
         Macro& macro(const Macro_key& macro_key_);
-        const Macro_params& cmacro_params(const Macro_key& macro_key_) const;
-        Macro_params& macro_params(const Macro_key& macro_key_);
-        static bool macro_params_has_param(const Macro_params& macro_params_,
-                                           const Macro_param& macro_param_);
-        bool macro_has_param(const Macro_key& macro_key_,
-                             const Macro_param& macro_param_) const;
+        const Macro_param_keys&
+            cmacro_param_keys(const Macro_key& macro_key_) const;
+        Macro_param_keys& macro_param_keys(const Macro_key& macro_key_);
+        static bool
+            macro_param_keys_has_param_key(const Macro_param_keys&
+                                               macro_param_keys_,
+                                           const Macro_param_key&
+                                               macro_param_key_);
+        bool macro_has_param_key(const Macro_key& macro_key_,
+                                 const Macro_param_key& macro_param_key_)
+                                 const;
         const Macro_body& cmacro_body(const Macro_key& macro_key_) const;
         Macro_body& macro_body(const Macro_key& macro_key_);
         void add_macro(const Macro_key& macro_key_,
-                       Macro_params macro_params_,
+                       Macro_param_keys macro_param_keys_,
                        Macro_body macro_body_);
 
         const Lets_map& clets_map() const                { return _lets_map; }
@@ -109,7 +114,7 @@ namespace SOS {
         void parse_arith_expr(Expr& expr, unsigned depth);
         Exp_pos exp_arith_expr(Expr& expr, unsigned depth);
 
-        void parse_token_single(Expr& expr, const Token& token,
+        void parse_token_single(Expr& expr, Token& token,
                                 unsigned depth);
         void parse_token_multi(Expr& expr, Tokens& tokens, unsigned depth);
         Macro_body extract_macro_body(Expr& expr, Token end_token);

@@ -76,7 +76,7 @@ namespace SOS {
             using Param_keys_ptrs = vector<Param_keys_ptr>;
 
             static constexpr Dt_id def_dt_id = 0;
-            static constexpr Time def_step_size = 1e-2;
+            static constexpr Time def_step_size = 5e-3;
 
             const Odes_spec& codes_spec() const         { return _odes_spec; }
             const Odes_eval& codes_eval() const         { return _odes_eval; }

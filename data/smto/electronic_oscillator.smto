@@ -1,0 +1,290 @@
+;;;; Electronic oscillator from dReal in SMT+ODE format
+
+;; From dReal:
+;; mode1: dx dy dz_a dom1_a dom2 dtau
+;;   => z_a, om1_a
+;; mode2: dx dy dz_b dom1_b dom2 dtau
+;;   => !z_a, !om1_a
+;; mode3: dx dy dz_c dom1_a dom2 dtau
+;;   => !z_a, om1_a
+;; missing: z_a, !om1_a
+
+;;; Constants
+
+#define PI 3.14159265
+
+#define AX 1
+#define AY 1.2
+#define AZ 0.8
+
+#define OM #PI
+
+#define T 0.5
+
+#define T_MIN   0
+#define T_MAX  17
+#define TAU_MIN #T_MIN
+#define TAU_MAX #T_MAX
+
+#define X_MIN -5
+#define X_MAX  5
+#define Y_MIN #X_MIN
+#define Y_MAX #X_MAX
+#define Z_MIN #X_MIN
+#define Z_MAX #X_MAX
+
+#define OM1_MIN -4
+#define OM1_MAX  4
+#define OM2_MIN #OM1_MIN
+#define OM2_MAX #OM1_MAX
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
+#define STEPS-1 $d(- #STEPS 1)
+
+;;; Declarations
+
+#def DECL_CONSTS(const type)
+#for (i 0 #STEPS)
+    (declare-fun #const##_#i () #type)
+#endfor
+#enddef
+
+#DECL_CONSTS(t      Real)
+#DECL_CONSTS(x_0    Real)
+#DECL_CONSTS(x_t    Real)
+#DECL_CONSTS(y_0    Real)
+#DECL_CONSTS(y_t    Real)
+#DECL_CONSTS(z_0    Real)
+#DECL_CONSTS(z_t    Real)
+#DECL_CONSTS(om1_0  Real)
+#DECL_CONSTS(om1_t  Real)
+#DECL_CONSTS(om2_0  Real)
+#DECL_CONSTS(om2_t  Real)
+#DECL_CONSTS(tau_0  Real)
+#DECL_CONSTS(tau_t  Real)
+
+#DECL_CONSTS(sin_om1_0  Real)
+#DECL_CONSTS(sin_om1_t  Real)
+
+#DECL_CONSTS(z_a    Bool)
+#DECL_CONSTS(om1_a  Bool)
+
+#DECL_CONSTS(dx    Dt)
+#DECL_CONSTS(dy    Dt)
+#DECL_CONSTS(dz    Dt)
+#DECL_CONSTS(dom1  Dt)
+#DECL_CONSTS(dom2  Dt)
+#DECL_CONSTS(dtau  Dt)
+
+;;; Initializations
+
+#def _INIT_INTERVAL(var val max step)
+#if $(<= #val #max)
+    (= #var #val)
+    #_INIT_INTERVAL(#var $(+ #val #step) #max #step)
+#endif
+#enddef
+#def INIT_INTERVAL(var min max step)
+    (or #_INIT_INTERVAL(#var #min #max #step))
+#enddef
+
+#define INIT_T  ()  (= t_0 #T_MIN)
+#define INIT_TAU()  (= tau_0_0 #T_MIN)
+
+#define INIT_X()  #INIT_INTERVAL(x_0_0 (- 0.2) 0.1 0.025)
+#define INIT_Y()  (= y_0_0 0)
+#define INIT_Z()  (= z_0_0 0)
+
+#define INIT_OM1()  (= om1_0_0 2  )
+#define INIT_OM2()  (= om2_0_0 2.5)
+
+(assert (and #INIT_T #INIT_TAU
+             #INIT_X #INIT_Y #INIT_Z
+             #INIT_OM1 #INIT_OM2
+             z_a_0 om1_a_0
+             (= sin_om1_0_0 0)
+))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
+
+;;; Derivatives definition
+
+(define-dt x dx    (tau) (* (- #AX) (sin (* #OM tau)) ) )
+
+(define-dt y dy    (om1 om2 tau) (* (- #AY) (sin(* tau (+ 1 om1)))
+                                         2  (sin om2) ))
+
+(define-dt z dz_a  (om1 om2 tau) (* (- #AZ) (sin(* tau (+ 1 om2)))
+                                         2  (cos om1) ))
+(define-dt z dz_b  (om1 om2 tau) (* (- #AZ) (sin(* tau (- 2 om2)))
+                                         2  (sin om1) ))
+(define-dt z dz_c  (om1 om2 tau) (* (- #AZ) (sin(* tau (+ 2 om2)))
+                                         2  (cos om1) ))
+
+(define-dt om1 dom1_a () (* (- om1) 0.5) )
+(define-dt om1 dom1_b ()    (- om1)      )
+
+(define-dt om2 dom2   ()    (- om2)      )
+
+(define-dt tau dtau   ()  1)
+
+(define-dt sin dsin (const) (cos const))
+
+;;; Invariants
+
+(define-fun invariant ( (x_0 Real) (y_0 Real) (z_0 Real) (om1_0 Real) (om2_0 Real) (tau_0 Real)
+                        (x_t Real) (y_t Real) (z_t Real) (om1_t Real) (om2_t Real) (tau_t Real)
+                        (t Real)
+                        (dx_ Dt) (dy_ Dt) (dz_ Dt) (dom1_ Dt) (dom2_ Dt) (dtau_ Dt)
+                        (z_a_ Bool) (om1_a_ Bool)
+                      ) Bool
+    (and (<= #X_MIN x_0 #X_MAX) (<= #X_MIN x_t #X_MAX)
+         (<= #Y_MIN y_0 #Y_MAX) (<= #Y_MIN y_t #Y_MAX)
+         (<= #Z_MIN z_0 #Z_MAX) (<= #Z_MIN z_t #Z_MAX)
+         (<= #OM1_MIN om1_0 #OM1_MAX) (<= #OM1_MIN om1_t #OM1_MAX)
+         (<= #OM2_MIN om2_0 #OM2_MAX) (<= #OM2_MIN om2_t #OM2_MAX)
+         (<= #TAU_MIN tau_0 #TAU_MAX) (<= #TAU_MIN tau_t #TAU_MAX)
+         (<= #T_MIN t #T_MAX)
+         (or (= dx_ dx))
+         (or (= dy_ dy))
+         (or (= dz_ dz_a) (= dz_ dz_b) (= dz_ dz_c))
+         (or (= dom1_ dom1_a) (= dom1_ dom1_b))
+         (or (= dom2_ dom2))
+         (or (= dtau_ dtau))
+         (not (and z_a_ (not om1_a_)))
+         (>= om1_0 (- #PI)) (>= om1_t (- #PI))
+         (>= om2_0 (- #PI)) (>= om2_t (- #PI))
+))
+
+#def INVARIANTS
+#for (i 0 #STEPS)
+    (invariant x_0_#i y_0_#i z_0_#i om1_0_#i om2_0_#i tau_0_#i
+               x_t_#i y_t_#i z_t_#i om1_t_#i om2_t_#i tau_t_#i
+               t_#i
+               dx_#i dy_#i dz_#i dom1_#i dom2_#i dtau_#i
+               z_a_#i om1_a_#i)
+#endfor
+#enddef
+
+(assert (and #INVARIANTS))
+
+;;; Derivatives connection
+
+(define-fun connect ( (dx_ Dt) (dy_ Dt) (dz_ Dt) (dom1_ Dt) (dom2_ Dt) (dtau_ Dt)
+                      (z_a_ Bool) (om1_a_ Bool)
+                    ) Bool
+    (and (= dx_ dx) (= dy_ dy) (= dom2_ dom2) (= dtau_ dtau)
+         (=>      om1_a_  (= dom1_ dom1_a))
+         (=> (not om1_a_) (= dom1_ dom1_b))
+         (=>           z_a_  (= dz_ dz_a))
+         (=> (and (not z_a_) (not om1_a_)) (= dz_ dz_b))
+         (=> (and (not z_a_)      om1_a_ ) (= dz_ dz_c))
+))
+
+#def CONNECTS
+#for (i 0 #STEPS)
+    (connect dx_#i dy_#i dz_#i dom1_#i dom2_#i dtau_#i
+             z_a_#i om1_a_#i)
+#endfor
+#enddef
+
+(assert (and #CONNECTS))
+
+;;; Jump conditions
+
+(define-fun jump ( (z_a_1 Bool) (om1_a_1 Bool)
+                   (z_a_2 Bool) (om1_a_2 Bool)
+                   (x_1t Real) (y_1t Real) (z_1t Real) (om1_1t Real) (om2_1t Real) (tau_1t Real)
+                   (x_20 Real) (y_20 Real) (z_20 Real) (om1_20 Real) (om2_20 Real) (tau_20 Real)
+                   (sin_om1_1t Real) (sin_om1_20 Real)
+                 ) Bool
+    (and (= z_20 z_1t) (= sin_om1_20 0)
+         ;; If no jump is being made:
+         (=> (and (= z_a_1 z_a_2) (= om1_a_1 om1_a_2))
+             (and (= x_20 x_1t) (= y_20 y_1t) (= om1_20 om1_1t) (= om2_20 om2_1t) (= tau_20 tau_1t) ))
+         ;; If any jump is being made:
+         (=> (or (not (= z_a_1 z_a_2)) (not (= om1_a_1 om1_a_2)))
+             (= tau_20 0) )
+         ;; Jumps from mode1
+         (=> (and      z_a_1       om1_a_1  (<  tau_1t 4) )
+             (and      z_a_2       om1_a_2  ))
+         (=> (and      z_a_1       om1_a_1  (>= tau_1t 4) )
+             (and (not z_a_2) (not om1_a_2)
+                  (= x_20 x_1t) (= y_20 (* 0.2 y_1t))
+                  (= om1_20 1.5) (= om2_20 1) ))
+        ;; Jumps from mode2
+         ;(=> (and (not z_a_1) (not om1_a_1) (<  tau_1t 8) )
+         (=> (and (not z_a_1) (not om1_a_1) (<  tau_1t 9) )
+             (and (not z_a_2) (not om1_a_2) ))
+         ;(=> (and (not z_a_1) (not om1_a_1) (>= tau_1t 8) )
+         (=> (and (not z_a_1) (not om1_a_1) (>= tau_1t 9) )
+             (and (not z_a_2)      om1_a_2
+                  (= x_20 (* 0.2 x_1t)) (= y_20 (* 0.5 y_1t))
+                  ;(= om1_20 sin_om1_1t) (= om2_20 (- om2_1t)) ))
+                  ;; Sin is computed for wrong amount of time (#T),
+                  ;; how to correct it?
+                  (= om1_20 0) (= om2_20 (- om2_1t)) ))
+        ;; Jumps from mode3
+         (=> (and (not z_a_1)      om1_a_1  (<  tau_1t 5) )
+             (and (not z_a_2)      om1_a_2  ))
+         (=> (and (not z_a_1)      om1_a_1  (>= tau_1t 5) )
+             (and      z_a_2       om1_a_2
+                  (= x_20 x_1t) (= y_20 y_1t)
+                  (= om1_20 1) (= om2_20 1) ))
+))
+
+#def JUMPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (jump z_a_#i om1_a_#i
+          z_a_#j om1_a_#j
+          x_t_#i y_t_#i z_t_#i om1_t_#i om2_t_#i tau_t_#i
+          x_0_#j y_0_#j z_0_#j om1_0_#j om2_0_#j tau_0_#j
+          sin_om1_t_#i sin_om1_0_#j)
+#endlet j
+#endfor
+#enddef
+
+(assert (and #JUMPS))
+
+;;; Integration
+
+#def INT_ODE(f ivar ovar params)
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= #ovar##_#i (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) #params) )
+#endlet j
+#endfor
+#enddef
+
+#define X_PARAMS() (tau_0_#i)
+#define Y_PARAMS() (om1_0_#i om2_0_#i tau_0_#i)
+#define Z_PARAMS() #Y_PARAMS
+(assert (and #INT_ODE(x x_0 x_t &X_PARAMS)
+             #INT_ODE(y y_0 y_t &Y_PARAMS)
+             #INT_ODE(z z_0 z_t &Z_PARAMS)
+             #INT_ODE(om1 om1_0 om1_t ())
+             #INT_ODE(om2 om2_0 om2_t ())
+             #INT_ODE(tau tau_0 tau_t ())
+))
+
+#def INT_SIN()
+(assert (and
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= sin_om1_t_#i (int-ode sin dsin (sin_om1_0_#i t_#i t_#j) (om1_0_#i)) )
+#endlet j
+#endfor
+))
+#enddef
+#INT_SIN
