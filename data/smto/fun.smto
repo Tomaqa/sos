@@ -56,18 +56,6 @@
              #INIT_Y
 ))
 
-;;; Steps definition
-
-#def T_STEPS
-#for (i 0 $(- #STEPS 1))
-#let j $d(+ #i 1)
-    (= t_#j  (+ t_#i  #T))
-#endlet j
-#endfor
-#enddef
-
-(assert (and #T_STEPS))
-
 ;;; Derivatives definition
 
 (define-dt high dhigh () (- t (* high (sin high))))
@@ -100,6 +88,18 @@
 ;;; Derivatives connection
 
 ;;; Jump conditions
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 $(- #STEPS 1))
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
 
 ;;; Integration
 

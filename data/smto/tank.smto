@@ -62,18 +62,6 @@
              (= on_0 on0) (= pump_0 pump0)
 ))
 
-;;; Steps definition
-
-#def T_STEPS
-#for (i 0 #STEPS-1)
-#let j $d(+ #i 1)
-    (= t_#j  (+ t_#i  #T))
-#endlet j
-#endfor
-#enddef
-
-(assert (and #T_STEPS))
-
 ;;; Derivatives definition
 
 (define-dt y dy_in  () (- #INFLOW #OUTFLOW))
@@ -81,20 +69,6 @@
 
 (define-dt tau dtau_wait () 1)
 (define-dt tau dtau_pump () 0)
-
-;;; Integration
-
-#def INT_ODE(f ivar ovar)
-#for (i 0 #STEPS-1)
-#let j $d(+ #i 1)
-    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) ()) )
-#endlet j
-#endfor
-#enddef
-
-(assert (and #INT_ODE(y y y)
-             #INT_ODE(tau tau_2 tau_1)
-))
 
 ;;; Derivatives connection
 
@@ -138,3 +112,29 @@
 #enddef
 
 (assert (and #JUMPS))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
+
+;;; Integration
+
+#def INT_ODE(f ivar ovar)
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) ()) )
+#endlet j
+#endfor
+#enddef
+
+(assert (and #INT_ODE(y y y)
+             #INT_ODE(tau tau_2 tau_1)
+))

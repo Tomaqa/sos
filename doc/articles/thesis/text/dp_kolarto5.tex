@@ -11,19 +11,23 @@
 \usepackage{mathtools}
 % \usepackage{amssymb} %additional math symbols
 
-\renewcommand{\arraystretch}{1.15}
-
 \usepackage{microtype}
+
+\usepackage{fancyvrb}
 
 % \usepackage{letltxmacro}
 
 %%%%%%%%%%%%%%%%%
+
+\renewcommand{\arraystretch}{1.15}
 
 \usepackage{enumitem}
 \setitemize{noitemsep,topsep=2pt,parsep=4pt}
 \setenumerate{noitemsep,topsep=2pt,parsep=4pt}
 \setenumerate[2]{label=\roman*.}
 \setdisplayed{topsep=4pt}
+
+% \clubpenalty=500
 
 %%%%%%%%%%%%%%%%%
 
@@ -635,7 +639,7 @@ a následující axiomy:
 \end{enumerate}
 Tyto axiomy definují sčítání, násobení a rovnost
 přirozených čísel a také \name{indukci}
-(axiom~\rf{i:theory:int:ind}).
+(axiom \rf{i:theory:int:ind}).
 Tato teorie bohužel není rozhodnutelná
 (ani bez~kvantifikatorů;
 na vině je operace násobení)
@@ -882,7 +886,7 @@ vycházejících z~fenoménu problému \acr{sat}.
 % Sat 24 Mar 2018 07:35:28 PM CET
 \chapter{Možnosti řešení problematiky}\label{ch:search}
 V~této kapitole rozebírám možnosti řešení problémů
-uvedených v~kapitole~\rf{ch:theory}
+uvedených v~kapitole \rf{ch:theory}
 a provádím rešerši existujících řešičů.
 Uvedené řešiče jsou jak izolované (jen \acr{smt} či \acr{ode}),
 tak hybridní (kombinují oba problémy),
@@ -951,7 +955,7 @@ o~nějakou formu formální verifikace.
 
 % Mon 09 Apr 2018 02:31:50 PM CEST
 \begin{section}{Řešení \acr{smt} problému}\label{s:search:smt}
-Jak už bylo zmíněno v~sekci~\rf{ss:theory:formulation:smt},
+Jak už bylo zmíněno v~sekci \rf{ss:theory:formulation:smt},
 zásadní vliv na~výpočet má teorie použitá ve~vstupní formuli.
 \acr{smt} řešiče typicky ovládají jen některé teorie
 a jejich fragmenty, nebo některé rozhodují jen s~omezenou efektivitou.
@@ -1457,9 +1461,9 @@ s~těmi rozdíly, že jsou \hl{implicitní},
 tj.~${\beta_k \neq 0}$,
 a ${q+1 = p = k+1}$
 s~výjimkou pro~${q = 0}$, kde ${k = 1}$
-(implicitní Eulerova metoda, vztah~\rfeq{ode:implicit}).
+(implicitní Eulerova metoda, vztah \rfeq{ode:implicit}).
 Spadá sem i~lichoběžníková metoda
-(${q = k = 1}, {p = 2}$, vztah~\rfeq{ode:lmm:trap}).
+(${q = k = 1}, {p = 2}$, vztah \rfeq{ode:lmm:trap}).
 
 Další příklady:
 \begin{alignat*}{99}
@@ -1489,9 +1493,9 @@ jsou zvoleny tak, aby ${q = p = k}$
 tentokrát ale pro~funkce $y$).
 Spadá sem opět implicitní Eulerova metoda
 (${q = k = p = 1}$~%
-\footnote{Pro~vztah~\rfeq{ode:implicit}
+\footnote{Pro~vztah \rfeq{ode:implicit}
 jakožto Adams--Moultonovy metody platilo ${q = 0}$,
-tentokrát se však jedná o~polynom na~levé straně rovnosti~\rfeq{ode:lmm},
+tentokrát se však jedná o~polynom na~levé straně rovnosti \rfeq{ode:lmm},
 tedy ${q = 1}$.}).
 
 Příklady:
@@ -1623,7 +1627,7 @@ Jejich Butcherovy tabulky:
 % Sat 24 Mar 2018 08:43:46 PM CET
 \begin{paragraph}{Lichoběžníková metoda}
 \label{sss:search:ode:classic:rk:trap}
-(vztah~\rfeq{ode:lmm:trap})~---~${s = p = 2}$, je implicitní.
+(vztah \rfeq{ode:lmm:trap})~---~${s = p = 2}$, je implicitní.
 
 Tabulka:
 \begin{equation*}
@@ -1761,7 +1765,7 @@ některé setrvávají u~názvu \acr{ivp}.
 Garance rozsahu řešení je klíčovým rozdílem
 těchto metod
 od klasických řešičů \acr{ode}
-ze~sekce~\rf{ss:search:ode:classic}.
+ze~sekce \rf{ss:search:ode:classic}.
 
 %%%
 
@@ -1813,7 +1817,7 @@ A~to proto, že používají řešiče pro~\acr{ode}
 s~intervalovou aritmetikou,
 která je zbytečně přesná a ve~výsledku pomalá,
 neboť je exaktní ve~smyslu zaručení rozsahu chyby aproximace
-(viz.~sekce~\rf{ss:search:ode:valid}).
+(viz.~sekce \rf{ss:search:ode:valid}).
 
 Našim cílem bylo sestrojit řešič,
 který nemusí být tolik přesný,
@@ -1822,7 +1826,7 @@ modely i~rozsáhlých systémů
 v~únosně krátké době,
 a tím by byl použitelný i~v~praxi,
 použitím klasických numerických metod
-(viz.~sekce~\rf{ss:search:ode:classic}).
+(viz.~sekce \rf{ss:search:ode:classic}).
 
 Zkoumané hybridní řešiče nám však posloužily
 jako zdroj cenných informací
@@ -1935,11 +1939,19 @@ Následně uvedu softwarový model celého řešiče.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Fri 27 Apr 2018 12:42:03 AM CEST
+% Fri 27 Apr 2018 12:12:07 PM CEST
 \begin{section}{Specifikace nástroje}\label{s:design:spec}
+Nástroj má fungovat jako řešič kombinace
+dvou problémů: problému \acr{smt}
+podle přístupů diskutovaných v~sekci \rf{s:search:smt},
+a problému numerického řešení diferenciálních rovnic
+s~použitím klasických numerických metod,
+jak bylo diskutováno v~sekci \rf{ss:search:ode:classic}.
+
 Nástroj má sloužit jako \hl{prototyp}
 odlišného přístupu ke~zkoumání hybridních modelů systémů
-než~dosavadní řešiče.
+než~dosavadní řešiče
+uvedené v~sekci \rf{s:search:hybrid}.
 Hlavním účelem práce je \hl{srovnání}
 s~některým stávajícím řešičem
 z~hlediska efektivity
@@ -1955,13 +1967,49 @@ a měl by být výpočetně výrazně méně náročný.
 
 Nástroj bude přijímat jako vstup textový soubor
 spadající do~námi specifikovaného vstupního jazyka.
-Výstupem bude zejména příznak úspěchu,
-a pro~experimentální účely navíc také
-volitelně výpis vypočtených hodnot
-v~jednotlivých fázích
-nebo i~celé trajektorie všech
-diferencovaných funkcí vykreslených do~společného grafu.
-Vstupy a výstupy jsou podrobněji popsány v~následujících podsekcích.
+Výstupem bude zejména příznak úspěchu
+a volitelně také nějaká forma výsledných dat.
+Vstupy a výstupy jsou podrobněji popsány ve~vlastních podsekcích.
+
+Jedním z~případů užití nástroje je \acr{bmc}
+(viz.~sekce \rf{p:theory:formulation:sat:bmc}),
+u~kterého se velikost vstupu a délka výpočtu
+odvíjí od~zvoleného počtu kroků ověřování modelu.
+Kroky jsou v~tomto případě odděleny
+skoky~---~změnami diskrétního stavu
+systému~---~ke~kterým dochází při~porušení
+nějakého \name{invariantu} vázaného k~aktuálnímu stavu.
+Jedná se o~systém \name{řízený událostmi}
+(angl. \name{event trigerred}).
+Nemusí tedy být předem zřejmé,
+ve~kterých časových okamžicích bude docházet k~integraci
+a ve~kterém výpočet skončí.
+Tento způsob používá např. nástroj dReal
+(viz.~sekce \rf{p:search:hybrid:dreal}).
+
+Náš řešič ale s~takovými kroky nepracuje
+(alespoň ne v~této verzi),
+nýbrž pracuje s~předem specifikovanými časovými okamžiky,
+mezi kterými dochází k~integraci po~předem danou dobu,
+a poté se mění stav systému závisle na~výstupech integrace
+pomocí ověření splnitelnosti \acr{smt} řešičem.
+Jedná se tedy o~systém \name{řízený časem}
+(angl. \name{time trigerred})%
+\footnote{V~našem případě však (pochopitelně) odpadá
+výhoda systémů řízených časem oproti těm řízených událostmi,
+že je porucha detekována na~straně přijímače,
+jelikož zde pracujeme s~\uv{bezporuchovým} řešičem.}.
+Tyto úseky výpočtu budu označovat jako \name{fáze}.
+Náš řešič kriticky závisí na~zvoleném rozložení fází,
+jak z~hlediska přesnosti, tak z~hlediska délky výpočtu.
+Pokud změny stavů modelu závisí na~invariantech
+integrovaných funkcí,
+je nutné zvolit délku fází co nejnižší,
+aby bylo porušení invariant detekováno co nejdříve.
+Invarianty totiž nejsou kontrolovány v~průběhu integrace.
+V~opačném případě, nebo pokud není porušení invariant kritické,
+postačují vyšší délky fází,
+čímž se urychluje výpočet.
 
 Nástroj není koncipován jako konečný produkt,
 není příliš uživatelsky přívetivý
@@ -2024,7 +2072,7 @@ Znaky \id{<>} nejsou součástí syntaxe a ohraničují či seskupují argumenty
 (nejsou-li již nějak ohraničeny);
 \id{*} značí, že dotčený řetězec
 se může opakovat vícekrát nebo být prázdný;
-\id{+} je jako\id{*}, ale zakazuje prázdný řetězec;
+\id{+} je jako \id{*}, ale zakazuje prázdný řetězec;
 \id{|} značí více možností pro~jednu pozici argumentu.
 \end{paragraph} %%Značení.
 
@@ -2096,8 +2144,12 @@ stejně jako v~\acr{smt}-LIB.
 
 \hll{Literály} jsou bezejmenné konstanty
 nějakého druhu.
-Numerické obsahují číslice a případně desetinnou tečku (\id{\hll{.}});
-na~začátku nejsou povoleny přídavné \id{0} ani znaménko;
+Numerické obsahují číslice a případně desetinnou tečku (\id{\hll{.}})
+nebo záporné znaménko (\id{-})%
+\footnote{Záporné literály v~\acr{smt}-LIB povoleny nejsou,
+proto je nutné provést transformaci na~výraz
+s~unární funkcí \id{-} a kladným literálem.};
+na~začátku nejsou povoleny přídavné \id{0} a kladné znaménko;
 desetinná čísla musí obsahovat číslici před i~po~desetinné tečce;
 není podporován semilogaritmický tvar.
 Booleovské literály jsou \id{true} a \id{false}.
@@ -2297,7 +2349,7 @@ Tyto skutečnosti nebudou nadále zmiňovány.
 Vstup může obsahovat vícero závislých či nezávislých
 diferenciálních rovnic, označovaných jako \id{ode}.
 Každá \id{ode} dále sestává z~jedné či více variant derivací,
-z~nichž v~každém kroce je pro~každou \id{ode} platná právě jedna varianta.
+z~nichž v~každé fázi je pro~každou \id{ode} platná právě jedna varianta.
 Varianty derivací budou označovány jako \id{dt}.
 \id{dt} umožňují volit různé předpisy pro~derivace neznámých funkcí
 závisle na~aktuálním stavu celého systému.
@@ -2383,7 +2435,7 @@ pro~účely propojení konstant druhu \id{Dt} se~stavem systému.
 
 Argumenty \id{<arg>} vstupují do~výrazu \id{<expr>}
 jako konstanty druhu \id{Real} jakožto počáteční podmínky integrace
-a také jako vstupní hodnoty v~každém kroku integrace.
+a také jako vstupní hodnoty v~každé fázi integrace.
 Pokud \id{<arg>} pochází z~konstanty, její hodnota se nemění;
 pokud se však jedná o~identifikátor některé \id{ode}
 (pocházející z~\id{<fun\_\-name>}),
@@ -2406,7 +2458,7 @@ vstupní konstanty pro~příkaz \id{int-ode} zůstávají stejné.}, př.:
 
 % Tue 24 Apr 2018 12:35:29 AM CEST
 \begin{paragraph}{\id{int-ode}}\label{p:design:spec:ilang:ode:int}
-obaluje výraz integrace neznámé funkce v~konkrétním kroce
+obaluje výraz integrace neznámé funkce v~konkrétní fázi
 a dosazuje do~\id{ode} hodnoty či konstanty.
 Návratová hodnota výrazu je druhu \id{Real} a lze jej používat
 uvnitř příkazů \id{assert}.
@@ -2470,11 +2522,11 @@ kde \id{<h>} je konstanta druhu \id{Real}.
 
 %%%%%%%
 
-% Tue 24 Apr 2018 12:53:51 PM CEST
+% Fri 27 Apr 2018 12:19:36 PM CEST
 \begin{subsubsection}{Struktura a použití jazyka}
 \label{sss:design:spec:ilang:struct}
-V~této podsekci je uvedena doporučená struktura vstupu,
-aby validně popisoval model hybridního systému
+V~této podsekci je uveden tvar doporučené struktury vstupu,
+který by validně popisoval model hybridního systému
 a umožňoval jeho analýzu našim nástrojem.
 
 Vzhledem k~tomu, že se v~jazyce nevyskytují žádné proměnné,
@@ -2485,33 +2537,24 @@ Jelikož je vstup statický,
 je pro~modelování průběhu nutné použít mnoho konstant
 o~předem známém počtu.
 
-Typickým případem užití je \acr{bmc}
-(viz.~sekce~\rf{p:theory:formulation:sat:bmc}),
-u~kterého se počet konstant odvíjí od~zvoleného počtu kroků
-ověřování modelu.
-Náš řešič určuje kroky obecně
+Rozložení fází je určeno obecně
 podle navazujících časových mezí příkazů \id{int-ode}
 (hodnoty konstant nezávislé proměnné \id{t}).
-To jsou ty okamžiky, ve~kterých dochází ke~střídání
-integrace \acr{ode} a aktuálního ověření splnitelnosti \acr{smt}.
 
 Následují jednotlivé sekce,
 které by se měly objevit ve~vstupech.
 Kromě těchto smí uživatel používat
 i~další \acr{smt} konstrukty tohoto jazyka.
 
-\cmt{Krok BMC ~ dReal, nas krok je neco jineho (~perioda).
-Krok => fáze}
-
 %%%
 
-% Tue 24 Apr 2018 01:21:10 PM CEST
+% Fri 27 Apr 2018 12:58:39 PM CEST
 \begin{paragraph}{Deklarace a inicializace konstant.}
 \label{p:design:spec:ilang:struct:const}
 Všechny konstanty musejí být deklarovány a konstanty
-počátečníxh podmínek
+počátečních podmínek
 musí být i~definovány.
-Každé konstantě se typicky dává jako přípona číslo kroku,
+Každé konstantě se typicky dává jako přípona číslo fáze,
 ale řešič na~to nebere žádný ohled.
 
 Je vhodné deklarovat konstanty
@@ -2522,32 +2565,26 @@ a konstant voleb variant derivací \id{dt}%
 s~identifikátory variant derivací
 z~příkazu \id{define\--dt}.}.
 
-\cmt{"Intervalová" inicializace}
+Intervalové počáteční podmínky lze aproximovat
+pomocí logického součtu několika rovností.
 
 Příklad:
-\begin{verbatim}
-(define-fun t0   () Real 0) (define-fun y0 () Real 1)
+\begin{Verbatim}[samepage=true]
+;; Literals
+(define-fun t0   () Real 0)
+(define-fun y0_0 () Real 1) (define-fun y0_1 () Real 2)
 (define-fun run0 () Bool false)
+;; Constants
 (declare-fun t_0    () Real) (declare-fun t_1    () Real)
 (declare-fun y_0    () Real) (declare-fun y_1    () Real)
 (declare-fun run_0  () Bool) (declare-fun run_1  () Bool)
 (declare-fun dy_0   () Dt)
-(assert (and (= t_0 t0) (= y_0 y0) (= run_0 run0) ))
-\end{verbatim}
+;; Initial conditions
+(assert (and (= t_0 t0) (= run_0 run0)
+             (or (= y_0 y0_0) (= y_0 y0_1))
+))
+\end{Verbatim}
 \end{paragraph} %%Deklarace a inicializace konstant.
-
-%%%
-
-% Sat 07 Apr 2018 08:01:34 PM CEST
-\begin{paragraph}{Nastavení kroků}\label{p:design:spec:ilang:struct:step}
-znamená definovat hodnoty konstant \id{t\_\-i}.
-Nejjednodušším způsobem je zavedení konstatní délky
-integrací \id{T}, např.:
-\begin{verbatim}
-(define-fun T () Real 1)
-(assert (and (= t_1 (+ t_0 T)) (= t_2 (+ t_1 T)) ))
-\end{verbatim}
-\end{paragraph} %%Nastavení kroků.
 
 %%%
 
@@ -2556,18 +2593,19 @@ integrací \id{T}, např.:
 \label{p:design:spec:ilang:struct:ode}
 se provádí pomocí příkazů \id{define\--dt}.
 Příklad:
-\begin{verbatim}
+\begin{Verbatim}[samepage=true]
 (define-dt y dy_run  ()    1 )
 (define-dt y dy_idle () (- 1))
-\end{verbatim}
+\end{Verbatim}
 
-Varianty derivací \id{dt} \hl{nesmí} kolidovat s~konstantami
-volených variant v~jednotlivých krocích, př.:
-\begin{verbatim}
+Identifikátory variant derivací \id{dt}
+\hl{nesmí} kolidovat s~konstantami
+volených variant v~jednotlivých fázích, př.:
+\begin{Verbatim}[samepage=true]
 (declare-fun dy_0   () Dt) (declare-fun dy_1   () Dt)
-...
+;; ...
 (define-dt y dy_1   () 1)  ;; conflict !!
-\end{verbatim}
+\end{Verbatim}
 \end{paragraph} %%Definice derivací funkcí
 
 %%%
@@ -2575,13 +2613,38 @@ volených variant v~jednotlivých krocích, př.:
 % Fri 27 Apr 2018 02:17:14 AM CEST
 \begin{paragraph}{Invarianty}
 \label{p:design:spec:ilang:struct:inv}
-\cmt{Dt konstanty se musí rovnat tem z define-dt}
+znamenají zavedení podmínek,
+které musí být splněny \hl{mezi} všemi fázemi,
+ale mohou být porušeny v~průběhu integrace.
+Mohou a nemusí být závislé na~konkrétním stavu systému.
+Pro~stanovení podmínek pro~konstanty závisle
+na~konkrétním diskrétním stavu systému
+doporučujeme použít až část definice skoků uvedenou dále.
+
+Pokud to implementace explicitně sama neprovádí,
+je nutné omezit všechny konstanty jednotlivých fází druhu \id{Dt}
+pouze na~výčet možných variant derivací z~příkazů \id{define\--dt}.
+
+Doporučujeme zkonstruovat pomocnou funkci \id{invariant}, př.:
+\begin{Verbatim}[samepage=true]
+(define-fun invariant ((dy Dt) (y Real)) Bool
+    (and (or (= dy dy_run) (= dy dy_idle))
+         (<= y ymax)
+))
+\end{Verbatim}
+
+Příklad s~použitím funkce \id{invariant}:
+\begin{Verbatim}[samepage=true]
+(assert (and (invariant dy_0 y_0)
+             (invariant dy_1 y_1)
+))
+\end{Verbatim}
 \end{paragraph} %%Invarianty
 
 %%%
 
 % Sat 07 Apr 2018 08:05:17 PM CEST
-\begin{paragraph}{Volba variant derivací}
+\begin{paragraph}{Nastavení voleb variant derivací}
 \label{p:design:spec:ilang:struct:connect}
 se provádí pomocí příkazu \id{assert},
 ve~kterém se kombinuje libovolný stav systému
@@ -2589,46 +2652,85 @@ a konstanty druhu \id{Dt}.
 Tím dochází k~propojení diskrétní a spojité domény modelu.
 
 Doporučujeme zkonstruovat pomocnou funkci \id{connect}, př.:
-\begin{verbatim}
+\begin{Verbatim}[samepage=true]
 (define-fun connect ((dy Dt) (run Bool)) Bool
     (and (=>      run  (= dy dy_run ))
          (=> (not run) (= dy dy_idle))
 ))
-\end{verbatim}
+\end{Verbatim}
 
 Příklad s~použitím funkce \id{connect}:
-\begin{verbatim}
+\begin{Verbatim}[samepage=true]
 (assert (and (connect dy_0 run_0)
              (connect dy_1 run_1)
 ))
-\end{verbatim}
-\end{paragraph} %%Volba variant derivací
+\end{Verbatim}
+\end{paragraph} %%Nastavení voleb variant derivací
 
 %%%
 
-% Sat 07 Apr 2018 08:22:32 PM CEST
+% Fri 27 Apr 2018 01:38:44 PM CEST
 \begin{paragraph}{Definice skoků.}\label{p:design:spec:ilang:struct:jump}
 Skoky, tj.~změny diskrétního stavu,
 lze definovat též pomocí asercí
-mezi sousedními stavy a dalšími proměnnými.
+mezi sousedními stavy a dalšími konstantami.
 
 Doporučujeme zkonstruovat pomocnou funkci \id{jump}, př.:
-\begin{verbatim}
+\begin{Verbatim}[samepage=true]
 (define-fun jump ((run1 Bool) (run2 Bool) (y2 Real)) Bool
     (and (=> (and      run1  (<  y2 bound_1) )      run2  )
          (=> (and      run1  (>= y2 bound_1) ) (not run2) )
          (=> (and (not run1) (>  y2 bound_2) ) (not run2) )
          (=> (and (not run1) (<= y2 bound_2) )      run2  )
 ))
-\end{verbatim}
+\end{Verbatim}
 
 Příklad s~použitím funkce \id{jump}:
-\begin{verbatim}
+\begin{Verbatim}[samepage=true]
 (assert (and (jump run_0 run_1 y_1)
              (jump run_1 run_2 y_2)
 ))
-\end{verbatim}
+\end{Verbatim}
+
+Pokud je požadavek na~libovolnou změnu
+spojitého stavu modelu při~některém skoku
+(např. reset časovače),
+je nutné tyto konstanty v~jednotlivých fázích zdvojit,
+kde první značí např. hodnotu na~začátku fáze
+a druhá na~konci fáze.
+Příklad:
+\begin{Verbatim}[samepage=true]
+(declare-fun tau_0_0  () Real) (declare-fun tau_0_1  () Real)
+(declare-fun tau_t_0  () Real) (declare-fun tau_t_1  () Real)
+;; ...
+(define-fun jump ( (run1 Bool)  (run2 Bool)
+                   (tau1t Real) (tau20 Real)
+                 ) Bool
+    (and (=> (and      run1  (<  tau1t 5) )
+             (and      run2  (=  tau20 tau1t) ))
+         (=> (and      run1  (>= tau1t 5) )
+             (and (not run2) (=  tau20 0) ))
+         ;; ...
+))
+(assert (and (jump run_0 run_1 tau_t_0 tau_0_1)
+             (jump run_1 run_2 tau_t_1 tau_0_2)
+))
+\end{Verbatim}
 \end{paragraph} %%Definice skoků.
+
+%%%
+
+% Fri 27 Apr 2018 01:06:37 PM CEST
+\begin{paragraph}{Nastavení fází}\label{p:design:spec:ilang:struct:step}
+znamená definovat časové okamžiky mezi integracemi,
+tj.~např. hodnotami konstant \id{t\_\-i}.
+Nejjednodušším způsobem je zavedení
+konstantní periody \id{T}, např.:
+\begin{Verbatim}[samepage=true]
+(define-fun T () Real 1)
+(assert (and (= t_1 (+ t_0 T)) (= t_2 (+ t_1 T)) ))
+\end{Verbatim}
+\end{paragraph} %%Nastavení fází.
 
 %%%
 
@@ -2637,15 +2739,23 @@ Příklad s~použitím funkce \id{jump}:
 se provádí příkazy \id{int\--ode}.
 Dochází tím k~propojení konkrétních vstupních a výstupních konstant
 druhu \id{Real} a konstant druhu \id{Dt}.
-Podle těchto příkazů je určen počet výpočtů \acr{ode}.
+Podle argumentů mezí nezávislé proměnné \id{t}
+těchto příkazů je určeno rozložení fází výpočtu.
 Všechna \acr{ode} ve~stejných časových mezích jsou
 integrována synchronně.
+
 Příklad:
-\begin{verbatim}
+\begin{Verbatim}[samepage=true]
 (assert (and (= y_1 (int-ode y dy_0 (y_0 t_0 t_1) ()))
              (= y_2 (int-ode y dy_1 (y_1 t_1 t_2) ()))
 ))
-\end{verbatim}
+\end{Verbatim}
+a pro~případ zdvojených konstant fází (viz.~definice skoků):
+\begin{Verbatim}[samepage=true]
+(assert (and (= y_t_0 (int-ode y dy_0 (y_0_0 t_0 t_1) ()))
+             (= y_t_1 (int-ode y dy_1 (y_0_1 t_1 t_2) ()))
+))
+\end{Verbatim}
 \end{paragraph} %%Integrace
 
 %%%
@@ -2654,16 +2764,17 @@ Příklad:
 
 %%%%%%%
 
-% Mon 23 Apr 2018 08:16:45 PM CEST
+% Fri 27 Apr 2018 03:30:07 PM CEST
 \begin{subsubsection}{Předzpracování vstupu}
 \label{sss:design:spec:ilang:macros}
 Předzpracování vstupu znamená jeho úpravu
-před samotným zpracováním
-na~úrovni substitucí textu bez~sémantické analýzy.
+na~úrovni substitucí textu,
+před samotným zpracováním,
+bez~sémantické analýzy.
 Základní funkcí předzpracování vstupu je odstranění komentářů.
 
-Protože vstupy zpravidla obsahují velké množství opakujícího se kódu,
-plynoucí z~kroků určených příkazy \id{int\--ide},
+Protože vstupy zpravidla obsahují velké množství opakujícího se kódu
+plynoucí z~rozdělení výpočtu do fází,
 byla do~možností předzpracování vstupního jazyka přidána \name{makra},
 která umožňují parametrizované generování textového kódu.
 Princip se podobá makrům jazyka C.
@@ -2677,7 +2788,10 @@ který začíná znakem \id{\#}.
 Pokud je makro parametrizováno,
 musí být token následován výrazem s~parametry.
 Pokud makro parametrizováno není,
-token může a nemusí být následován prázdným výrazem.
+token může a nemusí být následován prázdným výrazem \id{()},
+doporučujeme však prázdný výraz používat,
+čímž se zamezuje případné chybné interpretaci následujícího výrazu,
+který není (nemá být) seznamem parametrů.
 Parametry makra jsou v~jeho těle použita
 jako dočasná uživatelská makra. Pokud název parametru
 koliduje s~dříve definovaným uživatelským makrem,
@@ -2687,8 +2801,8 @@ Makra mohou obsahovat vnořená makra.
 Jsou-li makra expandována, vyhodnocení je provedeno rekurzivně
 a není kontrolováno, zda je rekurze konečná.
 
-Použití všech typů maker je souhrnně ukázáno
-v~příkladu na konci této sekce.
+Makra umí pracovat s~numerickými literály (včetně celočíselných),
+ale ne s~literály \id{true} a \id{false} druhu \id{Bool}.
 
 %%%
 
@@ -2706,9 +2820,9 @@ Mezi tato makra patří:
    \item \label{i:macro:if:else}
       \id{\#if <cond> <body1> \#else <body2> \#endif}
    \end{enumerate}
-   Podmíněně expanduje text \id{<body>},
+   Podmíněně \hl{expanduje} text \id{<body>},
    pokud je \hl{literál} \id{<cond>} vyhodnocen jako pravdivý.
-   Ve~variantě~\rf{i:macro:if:else}
+   Ve~variantě \rf{i:macro:if:else}
    je navíc při nesplnění podmínky \id{<cond>}
    expandována část \id{<body2>}.
    Výsledkem může být i~prázdný text.
@@ -2719,24 +2833,19 @@ Mezi tato makra patří:
    \item \label{i:macro:def:define}
       \id{\#define <name> <|(<arg>*)> <body>}
    \end{enumerate}
-   Zavádí \hl{globální uživatelské makro} s~názvem \id{<name>}
-   s~parametry, nebo bez nich%
-   \footnote{V~případě, že makro neobsahuje argumenty,
-   doporučujeme pro~argumenty použít prázdný výraz \id{()},
-   čímž se zamezí případné chybné interpretaci výrazu,
-   který je (má být) součástí \id{<body>}.
-   To samé platí i~pro~volání uživatelských maker.},
+   Zavádí \hl{globální uživatelské makro} s~názvem \id{<name>},
+   s~parametry, nebo bez nich,
    s~obsahem \id{<body>}.
-   Je povolena nejvýše jedna definice makra \id{<name>}.
-   Makro \id{<name>} je expandováno až v~místě volání,
-   text \id{<body>} není v~okamžiku definice nijak zpracován.
+   Je povolena nejvýše jedna definice globálního makra \id{<name>}.
+   Makro \id{<name>} \hl{není expandováno} v~místě definice,
+   ale až v~místě volání.
    \id{<body>} tedy může obsahovat i~libovolná vnořená makra
    včetně dalších definic; korektnost závisí až na~kontextu
    místa volání makra. Makro smí být definováno i~rekurzivně,
    ale je nutné ohlídat koncové podmínky.
 
-   Ve~variantě~\rf{i:macro:def:def} může být tělo i~víceřádkové;
-   varianta~\rf{i:macro:def:define} je zakončena koncem řádku.
+   Ve~variantě \rf{i:macro:def:def} může být tělo i~víceřádkové;
+   varianta \rf{i:macro:def:define} je zakončena koncem řádku.
 \item \id{\#let <name> <{}<body>|(<body>)> <scope> <|\#endlet <name>{}>} \\
    Zavádí \hl{lokální uživatelské makro}
    v~rámci \id{<scope>} s~názvem \id{<name>}
@@ -2760,16 +2869,32 @@ Mezi tato makra patří:
    Text je opakovaně expandován s~měnící se hodnotou \id{<var>}
    závisle na~uvedených podmínkách.
 
-   Varianta~\rf{i:macro:for:int} generuje \id{<var>}
+   Varianta \rf{i:macro:for:int} generuje \id{<var>}
    s~celočíselnými hodnotami od~\id{<init>} do~\id{<end>} včetně,
    s~jednotkovým krokem.
-   Varianta~\rf{i:macro:for:cond} generuje \id{<var>}
+   Varianta \rf{i:macro:for:cond} generuje \id{<var>}
    s~počáteční hodnotou \id{<init>} a následujícími hodnotami
    odpovídající vyhodnocení výrazu \id{(<step>)},
    dokud je výraz \id{(<cond>)} vyhodnocován jako pravdivý.
-   Varianta~\rf{i:macro:for:list} generuje \id{<var>}
+   Varianta \rf{i:macro:for:list} generuje \id{<var>}
    postupně se~všemi hodnotami uvedenými ve~výčtu \id{(<list>)}.
 \end{itemize}
+
+Příklady příkazových maker:
+\begin{Verbatim}
+#define TO_BOOL(cond) #if #cond true #else false
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+#define N() 5
+#def SUM_SQR() (+
+   #for (i 0 #N)  ;; equiv. to: #for (i 0 (<= #i #N) (+ #i 1))
+                  ;; equiv. to: #for (i (0 1 2 3 4 5))
+   #let j ((+ #i 1))
+       (* #i #j)
+   #endlet j
+   #endfor
+) #enddef
+\end{Verbatim}
 \end{paragraph} %%Příkazová makra
 
 %%%
@@ -2788,10 +2913,6 @@ nebude nadále rozlišováno.
 Názvy lokálních a globálních maker se mohou navzájem překrývat,
 přednost má vždy naposledy definované lokální makro.
 
-Syntaxe použití či nepoužití parametrů pro~makro
-se řídí stejnými pravidly
-jako u~jeho definice.
-
 V~každém místě volání jsou makra nahrazena za~definovaný text,
 který může být závislý na~parametrech
 nebo i~na~samotném makru~---~pak hovoříme o~\hll{rekurzi}.
@@ -2800,6 +2921,10 @@ jelikož lze používat vnořených podmíněných maker \id{\#if}.
 Pomocí těchto rekurzí lze např. zavést
 makra \id{\#for}.
 Průběh rekurzivních expanzí ale není nijak kontrolován.
+
+Vzhledem k~tomu, že veškerý obsah maker je expandován,
+není možné docílit toho, aby makro vygenerovalo znak \id{\#},
+tj.~jakékoli neexpandované makro.
 
 Expanze maker je prováděna i~uvnitř tokenů.
 Každý token je rozdělen na~části
@@ -2819,13 +2944,12 @@ Nejen pro~účely oddělení částí maker a textu v~rámci jednoho tokenu
 jsou zavedena dvě rezervovaná makra s~prázdným názvem
 a s~názvem \id{\#}
 (tj. volají se jako \id{\#} a \id{\#\#}).
-\id{\#} je z~textu smazán%
+\id{\#} je z~textu smazáno%
 \footnote{\id{\#} může být použito pouze na~konci tokenu,
 jinak je interpretováno jako makro s~názvem,
 který následuje za~\id{\#}.};
-\id{\#\#} je expandován na~prázdný token.
-Obě makra lze použít na~vynucení složení expanze makra do~jednoho tokenu
-(viz.~příklady na~konci sekce).
+\id{\#\#} je expandováno na~prázdný token.
+Obě makra lze použít na~vynucení složení expanze makra do~jednoho tokenu.
 
 % \cmt{* zahrnout '\&' do navrhu maker nebo uplne vypustit
 %   * pokud mozno nahradit '\textbackslash \#', coz je obecne
@@ -2847,8 +2971,6 @@ Výraz nesmí obsahovat nepřímé argumenty,
 jinak dojde k~chybě při vyhodnocení.
 (Ve~fázi předzpracování lze používat pouze literály a makra,
 ne konstanty a funkce.)
-Vyhodnocení výrazů je určeno pouze pro~numerické literály,
-literály \id{true} a \id{false} druhu \id{Bool} nelze použít.
 
 Expanze se provede předřazením tokenu \id{\$} před výraz (bez~\id{\#}).
 (Vnořené výrazy už před sebou mít token \id{\$} nemusí.)
@@ -2862,21 +2984,17 @@ přidáním znaku do~tokenu s~\id{\$}:
 \end{itemize}
 \end{paragraph} %%Aritmetická expanze
 
+
 %%%
 
-\bigskip
+\clearpage
 
-\cmt{Nastaveni kroku; Intervalova inicializace; kompozice}
-
-\cmt{Přesuň do příloh. Pridej do textu male priklady primo u maker.}
-Příklady použití maker:
-\begin{verbatim}
-#define BIG 0
-#define HUGE 0
-#if $d (or #BIG #HUGE) #define STEPS 1000
-#else                  #define STEPS 10
-#endif
-#define STEPS-1 $d (- #STEPS 1)
+% Fri 27 Apr 2018 05:18:55 PM CEST
+\begin{paragraph}{Příklady obecného použití maker:}
+\label{p:design:spec:ilang:macros:examples}
+\begin{Verbatim}[samepage=true]
+#define STEPS() 10
+#define STEPS-1() $d (- #STEPS 1)
 #def INT_ODE(f)
 #for (i 0 #STEPS-1)
 #let j $d(+ #i 1)
@@ -2885,26 +3003,87 @@ Příklady použití maker:
 #endfor
 #enddef
 (assert (and
-    #INT_ODE(x) ;; (= x_1 (int-ode x dx_0 (x_0 t_0 t_1) ())) ...
+    #INT_ODE(x) ;; (= x_1 (int-ode x dx_0 (x_0 t_0 t_1) ()))
+                ;; (= x_2 (int-ode x dx_1 (x_1 t_1 t_2) ())) ...
     #INT_ODE(y) ;; (= y_1 (int-ode y dy_0 (y_0 t_0 t_1) ())) ...
 ))
-
-#define N 5
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
 #def FACT(n)
 #if $(= #n 0)  *
 #else          #FACT( $d(- #n 1) ) #n
 #endif
 #enddef
-(assert (= $(#FACT(#N)) 120) ) ;; $(* 1 2 3 4 5) == 120  => true
-
-#define SEQ 1 2 3
+(assert (= $(#FACT(5)) 120) ) ;; $(* 1 2 3 4 5) == 120  => true
+#define SEQ() 1 2 3
 ( #SEQ )  ;; (1 2 3)
 ( #SEQ# ) ;; (123)
 ( #FACT#(3) )  ;; error: missing parameters for 'FACT' !
 ( #FACT(3)# )  ;; (* 1 2 3)
 ( ##FACT(3) )  ;; (FACT(3))
 ( ###FACT(3) ) ;; (*123)
-\end{verbatim}
+\end{Verbatim}
+\end{paragraph} %%Příklady použití maker:
+
+%%%
+
+\clearpage
+
+% Fri 27 Apr 2018 05:18:55 PM CEST
+\begin{paragraph}{Použití maker ve~vstupním jazyce:}
+\label{p:design:spec:ilang:macros:usage}
+\begin{itemize}
+\item Definice numerických literálů,
+   které lze použít i~v~příkazech \id{define\--dt}:
+   \begin{Verbatim}[samepage=true]
+   #define K() 5
+   (define-dt x dx () (* #K t))
+   \end{Verbatim}
+\item Nastavení fází výpočtu:
+   \begin{Verbatim}[samepage=true]
+   #define T()     0.5
+   #define T_MIN()   0
+   #define T_MAX()  10
+   #define STEPS() $d(+ $f(/ (- #T_MAX #T_MIN) #T) )
+   ;; ...
+   #def T_STEPS()
+   #for (j 1 #STEPS)
+   #let i $d(- #j 1)
+       (= t_#j  (+ t_#i  #T))
+   #endlet j
+   #endfor
+   #enddef
+   \end{Verbatim}
+\item Deklarace všech konstant fází:
+   \begin{Verbatim}[samepage=true]
+   #def DECL_CONSTS(const type)
+   #for (i 0 #STEPS)
+       (declare-fun #const##_#i () #type)
+   #endfor
+   #enddef
+   #DECL_CONSTS(t  Real)
+   ;; ...
+   \end{Verbatim}
+   Stejný způsob lze použít pro~invarianty,
+   volby variant derivací, skoky a integrace.
+\item Aproximace intervalových počátečních podmínek:
+   \begin{Verbatim}[samepage=true]
+   #def INIT_INTERVAL(var min max step) (or
+   #for (i #min (<= #i #max) (+ #i #step))
+      (= #var #i)
+   #endfor
+   ) #enddef
+   \end{Verbatim}
+\item Kaskádní kompozice systémů:
+   každý systém reprezentovat vlastní sadou konstant
+   s~nějakou číselnou příponou
+   a vstup generovat pomocí maker \id{\#for}
+   nebo rekurzivních maker.
+\end{itemize}
+\end{paragraph} %%Použití maker ve~vstupním jazyce:
+
+%%%
+
 \end{subsubsection} %%Předzpracování vstupu
 
 %%%%%%%
@@ -2913,19 +3092,22 @@ Příklady použití maker:
 
 %%%%%%%%%%%%%
 
-% Mon 16 Apr 2018 09:14:44 PM CEST
+% Fri 27 Apr 2018 09:30:50 PM CEST
 \begin{subsection}{Výstupy}\label{ss:design:spec:out}
-Jsou tři různé odpovědi na~vstupní specifikaci,
-stejně jako u~\acr{smt} řešičů
-(sekce~\rf{s:search:smt}):
-\id{unsat} s~důkazem, \id{sat} s~modelem,
-nebo \id{unknown}
-(u~nás nejčastěji z~důvodu neúplných
-počátečních podmínek pro~\acr{ode}).
+Výstupem řešiče je především příznak splnitelnosti.
+Je-li vstup splnitelný,
+pak volitelně také ohodnocení diferencovaných konstant
+v~jednotlivých fázích.
+Pokud je navíc zadán výstupní soubor,
+jsou do~něj zapsány celé trajektorie
+všech diferencovaných funkcí
+a z~těchto dat je vykreslen společný graf.
 
-\cmt{doplnit}
-\cmt{* vystup: SAT nebo UNKNOWN, bez UNSAT - mozna leda EPS-UNSAT:
-  * "Pokud máte chuť a čas, můžete ještě implementovat rozšířenou verzi, kde výsledek by mohl být něco jako "EPS-UNSAT". To by znamenalo, že existuje sjednocení oblasti velikosti epsilon, který pokrývají počáteční stavy tak, že každá z těchto oblastí obsahuje bod, pro který problém není splnitelné. Velikost epsilon by mohl být stanovená uživatelem."}
+Řešič se prozatím omezuje pouze na~výstupy
+\id{sat} a \id{unknown}.
+
+\cmt{Proč nemůže být unsat? Mělo by se to odvíjet od daného vstupu
+a pro ten to je sat/unsat. Nepřesnost aproximace je stejná pro sat i unsat ..}
 \end{subsection} %%Výstupy
 
 %%%%%%%%%%%%%
@@ -2952,7 +3134,7 @@ od~přijmutí vstupu ve~vstupním jazyce po výpis výsledků.
 
 Průběh výpočtu se řídí zejména \acr{smt} řešičem.
 První otázkou bylo, zda celý systém řídit
-z~\acr{smt} řešiče, nebo jej použít jako samostatnou komponentu
+z~\acr{smt} řešiče, nebo jej použít jako externí komponentu
 a centrální bod umístit mimo něj.
 Pokud by byl \acr{smt} řešič centrálním bodem,
 mohly by být maximálně využity všechny jeho funkce.
@@ -2975,7 +3157,7 @@ využívající tohoto postupu.
 
 %%%%%%%
 
-% Tue 9 Apr 2018 20:40:26 AM CEST
+% Fri 27 Apr 2018 09:59:25 PM CEST
 \begin{subsubsection}{\acr{smt} řešič jako nezávislá komponenta}
 \label{sss:design:arch:comp:smt}
 \acr{smt} řešič lze použít
@@ -2991,16 +3173,25 @@ a komunikovat s~ním výhradně prostřednictvím
 tj.~přes soubory nebo standardní vstup a výstup.
 
 Vzhledem k~tomu, že \acr{smt}-LIB
-obsahuje operace se~zásobníkem asercí,
+obsahuje operace se~zásobníkem asercí
+(viz.~sekce \rf{ss:search:smt:smtlib}),
 je možné dynamicky přidávat a odebírat
 klauzule, což lze použít
 pro~přijímání hodnot z~\acr{ode} řešiče.
-Tento postup je možný z~toho důvodu,
+Druhá možnost je přidávání
+podmíněných a konfliktních klauzulí
+s~vypočtenými hodnotami z~\acr{ode} řešiče.
+Tyto postupy jsou možné z~toho důvodu,
 že \acr{ode} řešič v~našem pojetí
 pracuje výhradně s~pevnými počátečními podmínkami
 a má tedy i~jednoznačný výstup.
 Hodnoty konstant jsou získávány postupně
 od~počátečních podmínek a přidávány jako nové aserce.
+Při~porušení některých invariant
+se provede návrat.
+Podrobnější algoritmus je popsán
+v~centrální komponentě.
+
 Svým způsobem lze tento postup použít
 i~jako opakovaně generované celistvé statické vstupy
 pro~neinkrementální \acr{smt} řešič,
@@ -3014,9 +3205,16 @@ podporuje většina řešičů.
 Jediné potenciální riziko
 je neefektivní počínání řešičů
 v~inkrementálním módu,
-tj.~pokud doba výpočtu
-významně neklesá s~přidáním jen malého množství
-nových asercí oproti počátečnímu stavu s~celým vstupem.
+tj. pokud by obecně operace ověření splnitelnosti
+byla výpočetně náročná,
+vzhledem k~tomu, že tato operace bude prováděna často.
+Předpokládá se však,
+že doba výpočtu by měla být výrazně nižší
+v~následujících fázích,
+které přidávají jen malé množství nových asercí,
+oproti první fázi,
+který řeší celý počáteční vstup.
+
 Používání textového rozhraní pomocí \acr{smt}-LIB
 by mělo mít zanedbatelný vliv na~výkon
 oproti použití programového rozhraní,
@@ -3026,7 +3224,7 @@ v~porovnání s~dobou samotných výpočtů
 
 %%%%%%%
 
-% Tue 17 Apr 2018 11:23:55 AM CEST
+% Fri 27 Apr 2018 10:09:24 PM CEST
 \begin{subsubsection}{\acr{ode} řešič}\label{sss:design:arch:comp:ode}
 \acr{ode} řešič postačuje použít jako samostatnou komponentu,
 jelikož má fungovat jako
@@ -3078,6 +3276,13 @@ implementován v~jazyce C++ nebo C,
 měla by být jeho implementace
 uvnitř odvozené třídy snadná,
 a navíc by takové řešení mělo být efektivní.
+
+Po~řešiči je (prozatím) vyžadována
+pouze integrace na~základě
+exaktních počátečních podmínek
+a koncových podmínek
+určených předem danou délkou integrace,
+bez~řešení jakýchkoli invariant.
 \end{subsubsection} %%\acr{ode} řešič
 
 %%%%%%%
@@ -3097,24 +3302,34 @@ a jejich argumentů.
 Přidanou hodnotou je umožnění použití maker,
 pomocí nichž lze vstupy parametrizovat
 a ke generování není zapotřebí dalšího nástroje.
-Předzpracování vstupu je zcela nezávislé
+Předzpracování vstupu, tak jak je navrženo,
+je zcela nezávislé
 na~sémantice vstupního jazyka
 a mělo by být implementováno jako samostatná komponenta.
 \end{subsubsection} %%Zpracování vstupu
 
 %%%%%%%
 
-% Tue 9 Apr 2018 20:40:26 AM CEST
+% Fri 27 Apr 2018 10:26:30 PM CEST
 \begin{subsubsection}{Centrální komponenta}
 \label{sss:design:arch:comp:center}
-Zodpovědností centrálního bodu je řídit
-průběh výpočtu a komunikaci mezi oběma řešiči.
+Zodpovědností centrálního bodu je
+na~základě zpracovaného vstupu
+nastavit diferenciální rovnice
+a ty související sjednotit,
+inicializovat oba řešiče
+a určit fáze výpočtu.
+Následně pak řídit
+průběh výpočtu
+a komunikaci mezi oběma řešiči.
+
 Díky několika možným rozhraním u~obou řešičů
 je návrh poměrně volný
 a důraz je kladen hlavně na~zvolený řídící algoritmus,
 který musí korektně ověřit všechny možnosti
 ohodnocení vstupních konstant a funkcí
-a být přiměřeně efektivní.
+a přiměřeně efektivně zacházet
+s~inkrementálním \acr{smt} řešičem, zejména s~návraty.
 Návrh algoritmu je uveden v~následující sekci.
 \end{subsubsection} %%Centrální komponenta
 
@@ -3131,7 +3346,7 @@ a sestavení odpovídajících funkcí
 jsem se rozhodl řešit formou stromových struktur výrazů
 a jejich transformací na~funkce s~argumenty.
 Tyto struktury pak lze použít jako vstupní specifikace při~inicializaci
-a vytvořené funkce volat v~krocích integrace.
+a vytvořené funkce volat ve~fázích integrace.
 
 Nejprve popíši návrh avizované struktury
 a poté návrh abstraktního řešiče.
@@ -3146,18 +3361,18 @@ z~\name{výrazů} a z~jejich i~několika \hl{vyhodnocení}.
 
 %%%
 
-% Tue 24 Apr 2018 02:01:27 PM CEST
+% Fri 27 Apr 2018 10:40:29 PM CEST
 \begin{paragraph}{Výraz}\label{p:design:arch:ode:exprs:expr}
 je obecná stromová struktura
 sestavená z~prefixových textových výrazů.
-Každý výraz obsahuje \hl{seznam} potomků,
+Každý výraz obsahuje spojový \hl{seznam} potomků,
 z~nichž každý je buď další podvýraz,
 nebo token s~textovou hodnotou.
 Seznam je použit proto,
 že se předpokládá sekvenční průchod jeho strukturou,
-a aby bylo efektivně možné odkudkoli odebírat či přidávat prvky.
+a aby bylo možné efektivně odkudkoli odebírat či přidávat prvky.
 
-Výraz prozatím nemá určen žádný datový typ
+Výraz nemá určen žádný datový typ
 a je používán pouze ve~znakové formě.
 Může být tedy použit pro~libovolné účely
 vyžadující vytvoření hierarchické struktury
@@ -3165,14 +3380,18 @@ z~(ne zcela nutně) prefixového vstupu,
 např. i~pro~účely syntaktického rozboru
 textového vstupu, který ani není výrazem,
 ale používá prefixovou notaci.
+
+Po~této struktuře je vyžadováno,
+aby co nejvíce zpřístupnila sekvenční čtení i~zápis,
+což budou velmi časté operace.
 \end{paragraph} %%Výraz
 
 %%%
 
 % Tue 24 Apr 2018 02:09:07 PM CEST
 \begin{paragraph}{Vyhodnocení}\label{p:design:arch:ode:exprs:eval}
-se vždy vztahuje k~jedinému výrazu ve~vztahu n:1,
-tj.~výraz může mít přidružených i~několik vyhodnocení.
+se vždy vztahuje k~jedinému výrazu,
+ale výraz může mít přidružených i~několik vyhodnocení.
 Úloha vyhodnocení je vytvořit z~obecné textové struktury
 výrazu strom konkrétních funkcí s~přímými či nepřímými argumenty
 konkrétního aritmetického typu,
@@ -3209,26 +3428,27 @@ může být ve~výrazu obsaženo více.
 % Tue 24 Apr 2018 02:11:09 PM CEST
 \begin{subsubsection}{Abstraktní řešič}\label{sss:design:arch:ode:solver}
 Řešič bude implementován abstraktní třídou tak,
-aby umožňoval snadné odvození na~konkrétní \acr{ode} řešiče
-s~implementacemi různých metod integrace funkcí.
-Odvozené třídy by měly řešit pouze implementační záležitosti,
-rozhraní by měla řešit abstraktní třída.
+aby umožňoval snadné odvození na~konkrétní \acr{ode} řešič
+s~implementací různých metod integrace funkcí.
+Odvozené třídy by měly řešit pouze implementaci konkrétních metod,
+ale veřejné i neveřejné rozhraní by měla řešit abstraktní třída,
+včetně stanovení použitých datových struktur.
 
 Řešič bude umožňovat inicializaci
 specifikací diferenciálních rovnic
 primárně pomocí datových struktur výrazů uvedených
-v~sekci~\rf{p:design:arch:ode:exprs:expr}.
+v~sekci \rf{p:design:arch:ode:exprs:expr}.
 K~těmto výrazům si řešič interně sestaví odpovídající
 vyhodnocení tak, jak jsou uvedeny
-v~sekci~\rf{p:design:arch:ode:exprs:eval}.
+v~sekci \rf{p:design:arch:ode:exprs:eval}.
 Uživatel bude pracovat pouze s~výrazy,
 od~vyhodnocení bude odstíněn.
 Naopak implementace odvozených řešičů
 budou pracovat pouze se~sestavenými vyhodnoceními.
 Vyhodnocení budou vždy obsahovat i~nepřímé argumenty,
 implicitně alespoň argument integrované funkce
-a volitelně také argument nezávislé proměnné $t$
-(viz.~vztah~\rfeq{ode}).
+a volitelně také argument nezávislé proměnné \id{t}
+(viz.~vztah \rfeq{ode}).
 
 Specifikované diferenciální rovnice bude možné počítat opakovaně
 s~různými vstupními argumenty podle konstant
@@ -3240,7 +3460,12 @@ což vyžaduje, aby bylo volání vyhodnocení
 přiměřeně efektivní,
 jelikož kroků integrace
 bude řádově stovky až statisíce
-(podle vzdáleností mezi kroky jednotlivých \id{int\--ode}).
+(podle délky fází výpočtu).
+
+Třída by se však měla pokud možno chovat
+jako obecný \acr{ode} řešič
+bez~užších vazeb na~problém \acr{smt}.
+Tuto zodpovědnost by měla řešit centrální komponenta.
 
 Řešič bude také podporovat ukládání průběhu
 integrací všech \acr{ode} a jejich výpis.
@@ -3256,7 +3481,7 @@ odpoví výstupními hodnotami.
 
 %%%%%%%%%%%%%
 
-% Tue 24 Apr 2018 02:13:06 PM CEST
+% Fri 27 Apr 2018 10:54:22 PM CEST
 \begin{subsection}{Návrh zpracování vstupu}\label{ss:design:arch:parse}
 Úkolem komponenty pro~zpracování vstupu
 je nalézt příkazy \acr{ode} vstupního jazyka
@@ -3276,16 +3501,19 @@ Postup je následující:
    s~názvy podle identifikátorů z~\id{define\--dt}.
 \item Substituce příkazů integrací \id{int\--ode}
    za~pomocné konstanty nebo funkce druhu \id{Real};
-   nastavení kroků mezi dílčími integracemi
+   nastavení fází integrací
    podle příkazů \id{int\--ode}
    a uložení identifikátorů konstant vstupujících do~příkazů.
 \item (Volitelné) nastavení počáteční délky kroku integrací
    z~příkazu \id{define\--ode\--step} a jeho smazání.
+\item Trasformace zbylých konstruktů nekompatibilních
+   s~\acr{smt}-LIB standardem, které jsou povoleny ve~vstupním jazyce
+   (např. záporné numerické literály).
 \end{enumerate}
 
 Ke~zpracování vstupu lze s~výhodou
 použít struktury výrazů
-ze~sekce~\rf{p:design:arch:ode:exprs:expr},
+ze~sekce \rf{p:design:arch:ode:exprs:expr},
 jelikož vstupní jazyk používá prefixovou notaci.
 \end{subsection} %%Návrh zpracování vstupu
 
@@ -3295,10 +3523,10 @@ jelikož vstupní jazyk používá prefixovou notaci.
 \begin{subsection}{Návrh předzpracování vstupu}
 \label{ss:design:arch:preprocess}
 Tato komponenta má fungovat samostatně pro~libovolný prefixový vstup,
-tak jak je definován v~sekci~\rf{ss:design:spec:ilang},
-ale bez ohledu na~sémantiku tokenů a výrazů
+tak jak je definována v~sekci \rf{ss:design:spec:ilang},
+ale bez ohledu na~sémantiku tokenů a výrazů,
 s~výjimkou komentářů a maker.
-Návrh maker je uveden v~podsekci~\rf{sss:design:spec:ilang:macros}.
+Návrh maker je uveden v~podsekci \rf{sss:design:spec:ilang:macros}.
 
 V~první řadě se provedou nejjednodušší substituce textu
 na~úrovni řádků, bez~ohledu na strukturu výrazů i~maker.
@@ -3309,8 +3537,8 @@ Poté je vstup nezávislý na~řádcích
 a je závislý výhradně na~struktuře výrazů a maker.
 
 Následné zpracování textu bude (opět) založeno na~třídách výrazů
-ze~sekce~\rf{p:design:arch:ode:exprs:expr}.
-Všechny výrazy budou procházeny rekurzivně
+ze~sekce \rf{p:design:arch:ode:exprs:expr}.
+Výrazy a makra budou procházeny rekurzivně
 a každý token obsahující makro bude náležitě zpracován,
 což bude vyžadovat operace vkládání a odstraňování potomků výrazů.
 \end{subsection} %%Návrh předzpracování vstupu
@@ -3351,19 +3579,19 @@ Postup je následující:
       \item Vrať se do~předchozího kroku simulace:
          \id{s-{}-}.
       \item Pokud \id{s~< 0}, vstup není splnitelný. Konec.
-      \item Jdi na~bod~\rf{i:design:alg:check-sat}.
+      \item Jdi na~bod \rf{i:design:alg:check-sat}.
       \end{enumerate}
    \end{itemize}
 \item Pokud je dosažen požadovaný počet kroků simulace,
-   jdi na~bod~\rf{i:design:alg:end}.
+   jdi na~bod \rf{i:design:alg:end}.
 \item Proveď výpočet všech diferenciálních rovnic
    v~rámci kroku simulace.
    Výstupem jsou jednoznačné hodnoty.
 \item Přidej získané hodnoty jako nové aserce
-   závisící na~hodnotách z~bodu~\rf{i:design:alg:check-sat}
+   závisící na~hodnotách z~bodu \rf{i:design:alg:check-sat}
    v~rámci kroku simulace.
 \item Přejdi do~dalšího kroku simulace: \id{s+{}+}.
-   Jdi na~bod~\rf{i:design:alg:check-sat}.
+   Jdi na~bod \rf{i:design:alg:check-sat}.
 \item \label{i:design:alg:end}
    Vypiš získaný model. Konec.
 \end{enumerate}
@@ -3436,7 +3664,7 @@ C++ zdrojové kódy jsou zapsány ve~stylu Stroustrup%
 \begin{section}{Implementace \acr{smt} řešiče}\label{s:impl:smt}
 \acr{smt} řešič je vhodné mít implementován flexibilně tak,
 aby byla snadná jeho výměna, jak bylo diskutováno
-v~sekci~\rf{sss:design:arch:comp:smt}.
+v~sekci \rf{sss:design:arch:comp:smt}.
 V~našem prototypu je řešič použit jako samostatná aplikace
 s~textovým rozhraním podle \acr{smt}-LIB standardu verze~2.
 Náš nástroj byl testován s~řešiči \acr{cvc}4 a z3.
@@ -3539,7 +3767,7 @@ Nové objekty vyhodnocení se vždy konstruují z~objektů třídy \id{Expr},
 které musí být v~binárním či unárním tvaru, či v~jejich kombinaci.
 Vytvoření objektu vyhodnocení s~přímými a nepřímými argumenty
 se děje podle návrhu uvedeném
-v~sekci~\rf{p:design:arch:ode:exprs:eval}.
+v~sekci \rf{p:design:arch:ode:exprs:eval}.
 
 Klíče nepřímých argumentů jsou ukládány dynamicky bez~duplikací
 v~pořadí prefixového průchodu výrazem.
@@ -3559,7 +3787,7 @@ ale hodnota jim při~volání přiřazena být musí (ač libovolná).
 
 V~unárních a binárních funkcích jsou přítomny všechny
 rezervované funkce specifikované ve~vstupním jazyce
-v~sekcích~\rf{sss:design:spec:ilang:smt} a~\rf{sss:design:spec:ilang:ode}.
+v~sekcích \rf{sss:design:spec:ilang:smt} a \rf{sss:design:spec:ilang:ode}.
 
 \id{Expr::\-Eval<Arg>} obsahuje stromovou strukturu
 objektů třídy \id{Eval::\-Oper}
@@ -3597,11 +3825,11 @@ které mohou obsahovat i~nepřímé argumenty.
 
 % Wed 18 Apr 2018 03:30:27 PM CEST
 \begin{section}{Implementace \acr{ode} řešiče}\label{s:impl:ode}
-V~sekci~\rf{sss:design:arch:comp:ode} jsem rozebral
+V~sekci \rf{sss:design:arch:comp:ode} jsem rozebral
 a oddůvodnil návrh adaptéru pro~\acr{ode} řešiče
 pomocí abstraktní třídy a odvozených tříd.
 Podrobnější návrh komponenty \acr{ode} řešiče
-jsem uvedl v~sekci~\rf{ss:design:arch:ode}.
+jsem uvedl v~sekci \rf{ss:design:arch:ode}.
 Jako primární řešiče jsem zvolil odeint a \acr{sundials},
 které je možné použít jako externí knihovny
 uvnitř odvozených tříd bez nutnosti dalších rozhraní,
@@ -3619,8 +3847,8 @@ Realizaci dynamických specifikací diferenciálních rovnic
 z~textových řetězců a jejich vyhodnocení
 jsem provedl prostřednictvím
 vlastních tříd pro~výrazy a jejich vyhodnocení
-podle avizovaného návrhu v~sekci~\rf{sss:design:arch:ode:exprs}.
-Realizace těchto tříd byla popsána v~samostatné sekci~\rf{s:impl:exprs}.
+podle avizovaného návrhu v~sekci \rf{sss:design:arch:ode:exprs}.
+Realizace těchto tříd byla popsána v~samostatné sekci \rf{s:impl:exprs}.
 
 Nejprve popíši abstraktní třídu \acr{ode} řešiče,
 a poté odvozené třídy s~konkrétními implementacemi řešení \acr{ode}.
@@ -3781,7 +4009,7 @@ je třída obalující počáteční a koncové podmínky
 Počátečními podmínkami
 jsou počáteční hodnoty všech parametrů \acr{ode}
 a nezávislé proměnné \id{t}
-(viz.~vztah~\rfeq{ode}).
+(viz.~vztah \rfeq{ode}).
 Jako koncové podmínky se (zatím)
 fixně považuje jen koncová hodnota
 nezávislé proměnné \id{t}.
@@ -3907,7 +4135,7 @@ mají-li sjednocené klíče.
 \label{p:impl:ode:derived:euler}
 poskytuje triviální implementaci integrace
 pomocí explicitní Eulerovy metody
-(viz.~vztah~\rfeq{ode:explicit}).
+(viz.~vztah \rfeq{ode:explicit}).
 Tato třída slouží zejména k~demonstračním a testovacím účelům,
 jelikož je Eulerova metoda nepřesná.
 Třída není závislá na~žádných knihovnách.
@@ -3921,7 +4149,7 @@ Spustitelná aplikace třídy je umístěna v~\id{bin/euler}.
 \begin{paragraph}{\id{Odeint}}
 \label{p:impl:ode:derived:odeint}
 využívá některých funkcí \acr{ode} řešiče odeint
-(viz.~sekce~\rf{p:search:ode:classic:solver:odeint}).
+(viz.~sekce \rf{p:search:ode:classic:solver:odeint}).
 Odeint je realizován výhradně uvnitř hlavičkových souborů
 v~rámci C++ knihoven Boost,
 které třída \id{Odeint} částečně zahrnuje.
@@ -3932,7 +4160,7 @@ v~každém kroce integrace poskytovány vypočtené
 hodnoty z~objektů typu \id{Dt\_\-eval}.
 Funkce používá metodu Dormand--Prince 5,
 což je explicitní adaptivní Runge--Kutta metoda
-(viz.~sekce~\rf{sss:search:ode:classic:rk}).
+(viz.~sekce \rf{sss:search:ode:classic:rk}).
 
 Implementace třídy \id{Odeint} je triviální,
 neboť řešič odeint nevyžaduje žádnou
@@ -3955,7 +4183,7 @@ Spustitelná aplikace třídy je umístěna v~\id{bin/odeint}.
 
 % Tue 24 Apr 2018 05:28:24 PM CEST
 \begin{section}{Implementace zpracování vstupu}\label{s:impl:parse}
-Návrh zpracování vstupu je uveden v~sekci~\rf{ss:design:arch:parse}.
+Návrh zpracování vstupu je uveden v~sekci \rf{ss:design:arch:parse}.
 Pro~tyto účely byla vytvořena třída \id{Parser}.
 V~první řadě je vstup předzpracován (viz. další sekce).
 Poté je ke~zpracování vstupu použit objekt třídy \id{Expr},
@@ -3977,7 +4205,7 @@ což je pole struktur \id{Ode}.
 \item \id{Ode\_\-key}~---~klíč (identifikátor) \acr{ode},
 \item \id{Dt\_\-keys}~---~pole klíčů (identifikátorů) variant derivací,
 \item \id{Ode\_\-spec}~---~pole specifikací rovnic derivací
-   (viz.~sekce~\rf{sss:impl:ode:solver:spec})
+   (viz.~sekce \rf{sss:impl:ode:solver:spec})
    ve~stejném pořadí, jako \id{Dt\_\-keys},
 \item \id{Param\_\-keys}~---~společné klíče nepřímých argumentů
    pro~všechny rovnice v~\id{Ode\_\-spec},
@@ -4037,13 +4265,13 @@ a výsledek vypsat na~standrardní výstup.
 % Tue 24 Apr 2018 09:41:43 PM CEST
 \begin{section}{Implementace předzpracování vstupu}\label{s:impl:preprocess}
 Realizace předzpracování vstupu navazuje na~návrh
-uvedený v~sekci~\rf{ss:design:arch:preprocess}.
+uvedený v~sekci \rf{ss:design:arch:preprocess}.
 Výsledkem je třída \id{Preprocess},
 která je implementována uvnitř třídy \id{Expr}
-(viz.~sekce~\rf{p:impl:exprs:expr}),
+(viz.~sekce \rf{p:impl:exprs:expr}),
 jelikož lze předzpracování použít pro~libovolný textový prefixový vstup
 obsahující komentáře a makra stejné se~vstupním jazykem
-(viz.~sekce~\rf{ss:design:spec:ilang}),
+(viz.~sekce \rf{ss:design:spec:ilang}),
 a protože je celé zpracování silně vázáno na~interní objekt třídy \id{Expr}.
 Samotná třída \id{Expr} je však nezávislá
 na~implementaci třídy \id{Preprocess}.
@@ -4056,7 +4284,7 @@ lokální jako zásobníky hodnot.
 Příkazové makro \id{\#for} je zatím implementováno
 jen ve~formě celočíselného vzestupného rozsahu
 řídící proměnné s~jednotkovým krokem
-(varianta~\rf{i:macro:for:int}).
+(varianta \rf{i:macro:for:int}).
 Pro~ostatní případy lze využít rekurzivních volání uživatelských maker.
 
 %%%
@@ -4065,7 +4293,7 @@ Pro~ostatní případy lze využít rekurzivních volání uživatelských maker
 \begin{paragraph}{Aritmetické expanze}
 \label{s:impl:preprocess:arith}
 výrazů jsou implementovány pomocí třídy \id{Expr::\-Eval}
-(viz.~sekce~\rf{p:impl:exprs:eval}).
+(viz.~sekce \rf{p:impl:exprs:eval}).
 Ve~skutečnosti se jedná o~expanzi tokenu,
 jelikož výrazy jsou předcházeny tokenem \id{\$}.
 Makra \id{\#if} a \id{\#for} používají
@@ -4116,7 +4344,7 @@ jsou implementována takto:
 
 Komponentu lze použít jako knihovnu
 nebo pomocí aplikace \id{bin/parser}
-(viz.~sekce~\rf{s:impl:parse}).
+(viz.~sekce \rf{s:impl:parse}).
 \end{section} %%Implementace předzpracování vstupu
 
 

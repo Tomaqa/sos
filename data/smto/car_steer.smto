@@ -77,18 +77,6 @@
              (= ahead_0 ahead0) (= canal_0 canal0)
 ))
 
-;;; Steps definition
-
-#def T_STEPS
-#for (i 0 #STEPS-1)
-#let j $d(+ #i 1)
-    (= t_#j  (+ t_#i  #T))
-#endlet j
-#endfor
-#enddef
-
-(assert (and #T_STEPS))
-
 ;;; Derivatives definition
 
 (define-dt p dp_move (gam) (* (- #R) (sin gam)))
@@ -101,23 +89,6 @@
 (define-dt c dc_inc  ()    1 )
 (define-dt c dc_dec  () (- 2))
 (define-dt c dc_idle ()    0 )
-
-;;; Integration
-
-#def ASSERT_INT_ODE(f ivar ovar params)
-(assert (and
-#for (i 0 #STEPS-1)
-#let j $d(+ #i 1)
-    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) #params) )
-#endlet j
-#endfor
-))
-#enddef
-
-#define P_PARAMS() (gam_#i)
-#ASSERT_INT_ODE(p p p &P_PARAMS)
-#ASSERT_INT_ODE(gam gam gam ())
-#ASSERT_INT_ODE(c c_2 c_1 ())
 
 ;;; Derivatives connection
 
@@ -238,3 +209,32 @@
 #enddef
 
 (assert (and #JUMPS))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
+
+;;; Integration
+
+#def ASSERT_INT_ODE(f ivar ovar params)
+(assert (and
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) #params) )
+#endlet j
+#endfor
+))
+#enddef
+
+#define P_PARAMS() (gam_#i)
+#ASSERT_INT_ODE(p p p &P_PARAMS)
+#ASSERT_INT_ODE(gam gam gam ())
+#ASSERT_INT_ODE(c c_2 c_1 ())

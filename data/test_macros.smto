@@ -170,3 +170,14 @@
 ( ####seq )
 ( ##FACT(5) )
 ( ###FACT(5) )
+
+#define M() 5
+#def SUM_SQR(M) (+
+  #for (i 0 #M)  ;; equivalent to: #for (i 0 (<= #i #M) (+ #i 1))
+                 ;; equivalent to: #for (i (0 1 2 3 4 5))
+  #let expr ((+ #i 1))
+      (* #i #expr)
+  #endlet expr
+  #endfor
+) #enddef
+#SUM_SQR(#M)

@@ -33,35 +33,10 @@
 
 (assert (and (= t_0 t0) (= x_0 x0) (= on_0 on0)))
 
-;;; Steps definition
-
-#def T_STEPS
-#for (i 0 #STEPS-1)
-#let j $d(+ #i 1)
-    (= t_#j  (+ t_#i  #T))
-#endlet j
-#endfor
-#enddef
-
-(assert (and #T_STEPS))
-
 ;;; Derivatives definition
 
 (define-dt x dx_on  () (- #XMAX x))
 (define-dt x dx_off () (- #XMIN x))
-
-;;; Integration
-
-#def INT_ODE(f ivar ovar)
-#for (i 0 #STEPS-1)
-#let j $d(+ #i 1)
-    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) ()) )
-#endlet j
-#endfor
-#enddef
-
-(assert (and #INT_ODE(x x x)
-))
 
 ;;; Derivatives connection
 
@@ -96,3 +71,28 @@
 #enddef
 
 (assert (and #JUMPS))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
+
+;;; Integration
+
+#def INT_ODE(f ivar ovar)
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) ()) )
+#endlet j
+#endfor
+#enddef
+
+(assert (and #INT_ODE(x x x)
+))

@@ -1,4 +1,8 @@
 ;;;; Electronic oscillator from dReal in SMT+ODE format
+;; `(x, v)' is continuous state
+;; `x' denotes vertical position
+;; `v' denotes either positive or negative velocity
+;; `(down)' is discrete state
 
 ;;; Constants
 
@@ -67,18 +71,6 @@
              down_0
 ))
 
-;;; Steps definition
-
-#def T_STEPS
-#for (i 0 #STEPS-1)
-#let j $d(+ #i 1)
-    (= t_#j  (+ t_#i  #T))
-#endlet j
-#endfor
-#enddef
-
-(assert (and #T_STEPS))
-
 ;;; Derivatives definition
 
 (define-dt x dx      (v) v)
@@ -144,6 +136,18 @@
 #enddef
 
 (assert (and #JUMPS))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
 
 ;;; Integration
 
