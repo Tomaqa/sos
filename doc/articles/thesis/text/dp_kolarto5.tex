@@ -3545,38 +3545,139 @@ což bude vyžadovat operace vkládání a odstraňování potomků výrazů.
 
 %%%%%%%%%%%%%
 
-% Mon 09 Apr 2018 07:32:09 PM CEST
+% Fri 27 Apr 2018 11:17:34 PM CEST
 \begin{subsection}{Řídící algoritmus}\label{ss:design:arch:alg}
-\cmt{Doplnit, upřesnit pojmy (ohodnocení konstant, kroky)}.
-\cmt{Ještě možná změním backtracking}.
-\cmt{co zpusob, kdy se v kazdem kroce spocitaji vsechny mozne kombinace variant ODE? Kroky jsou totiz izolovany diky check-sat, takze by to narostlo jen na soucin poctu variant vsech ode, a ODE resic je oproti SMT super rychly
-  * cilem je minimalizovat pocet check-sat
-  * timto zpusobem by mel byt pocet volani check-sat minimalni -> pocet kroku
-  * a vubec by nedochazelo k backtrackingu! (pokud unsat, uz to nemuze byt sat)
-  * musi se zahrnout vsechny mozne pocatecni stavy, ale jen v prvnim kroce?
-   Budou pak spocitane vsechny moznosti??}
+Úlohou algoritmu je dospět v~\acr{smt} řešiči
+k~ohodnocení všech konstant
+na~základě výsledků rovnic z~\acr{ode} řešiče.
+Hlavní výzvou je problém s~návraty,
+kdy v~průběhu výpočtu dojde k~tomu,
+že vstup v~aktuální podobě není splnitelný.
+Návraty má efektivně implementován \acr{smt} řešič,
+ale je otázkou, jakým způsobem je na~něj delegovat.
+
+Složitost roste s~počtem fází výpočtu
+a s~počtem všech možných voleb derivací.
+V~nejhorším případě se musí projít všechny možnosti,
+tomu se nelze vyhnout, kromě použití nějakých heuristik,
+které ale nebudou uvažovány.
+Rovněž nebudou uvažovány možnosti paralelizace.
+
+%%%
+
+\begin{paragraph}{Diskuze redukce ověření splnitelností.}
+\label{ss:design:arch:alg:discuss}
+Důležitým aspektem je poměr výpočetních náročností
+operací ověření splnitelnosti \acr{smt} řešičem
+a výpočtu diferenciálních rovnic \acr{ode} řešičem.
+Vzhledem k~tomu, že celý výpočet je rozdělen
+do~mnoha relativně málo vzdálených fází,
+je délka integrací poměrně malá
+oproti běžným případům užití.
+Navíc integrace počítá jen s~malým množstvím
+vstupních hodnot,
+oproti \acr{smt} řešiči,
+který musí v~každé fázi ověřit splnitelnost kompletně celého vstupu,
+ač v~inkrementálním módu.
+Dá se tedy očekávat,
+že \acr{ode} řešič bude rychlejší než \acr{smt} řešič,
+a efektivní algoritmus by měl redukovat
+počet operací ověření splnitelnosti
+a částečně do~nich delegovat návraty.
+
+Návraty na~\acr{smt} řešič bohužel není v~rozumné míře
+možné delegovat zcela,
+protože takový postup by vyžadoval
+spočítat úplně všechny možnosti průchodů.
+Důvod je ten, že každá dílčí integrace závisí
+na~konkrétních vstupních hodnotách,
+a tyto zase tranzitivně závisí
+na~všech předešlých.
+Tudíž není možné mít v~každé fázi
+pokryty všechny možnosti,
+např. pomocí podmíněných klauzulí,
+aniž by složitost rostla exponenciálně.
+
+Částečná redukce ověření splnitelnosti
+je možná pomocí způsobu,
+kdy se v~každé fázi vyřeší
+kromě \acr{smt} řešičem zvolené varianty derivací
+navíc také všechny ostatní kombinace voleb variant
+v~rámci aktuální fáze
+a přidají se jako podmíněné klauzule.
+Tím by se pokrylo lokální okolí aktuální fáze
+a počet nutných ověření splnitelnosti
+by se redukovalo o~jednu úroveň stromu prohledávaného prostoru,
+a pomocí podmíněných klauzulí by se částí návratů zabýval \acr{smt} řešič.
+
+Počet všech kombinací variant derivací
+závisí na~produktu počtu variant derivací každé \acr{ode},
+kterých je omezený počet a nezávisí na~velikosti vstupu (počtu fází),
+ale výhradně na~obecné specifikaci modelu.
+Tento počet by tedy neměl být velký
+a pokud by byl \acr{ode} řešič výrazně rychlejší
+než \acr{smt} řešič,
+měla by redukce počtu ověření splnitelnosti
+převážit nad~nadbytečným výpočtem diferenciálních rovnic.
+Takový algoritmus by si však v~případě návratů
+musel nějakým způsobem pamatovat,
+které vypočtené varianty už procházel a které ještě ne.
+
+Postup řešením více variant derivací
+lze dále modifikovat~---~řešit jich více či méně,
+o~více fází napřed, apod.
+Efektivita zvoleného řešení by závisela
+na~empirickém měření složitosti,
+analyticky lze těžko předpovědět.
+
+\end{paragraph} %Diskuze redukce ověření splnitelností.
+
+%%%
+
+\begin{paragraph}{Základní algoritmus.}
+\label{ss:design:arch:alg:discuss}
+Podrobněji uvedu pouze základní algoritmus,
+který postupuje jen po~jednotlivých
+cestách ve~stromu prohledávaného prostoru,
+výhradně na~základě aktuálního ohodnocení konstant,
+bez~předběžných výpočtů jiných variant.
+Takový postup je jednodušší implementovat,
+ale v~každé fázi vyžaduje ověření splnitelnosti,
+a tedy významně závisí na~její výkonnosti.
+
+\cmt{V této variantě nemají smysl podmíněné klauzule,
+stačí jen vkládat aserce do zásobníku.
+Řešič se musí donutit ke zvolení přesně tohoto ohodnocení,
+protože ostatní varianty nejsou spočítány.}
 
 Postup je následující:
 \begin{enumerate}
 \item Překlad vstupní formule:
    \begin{enumerate}
+   \item Uložení definic diferenciálních rovnic
+      ze~zpracovaného vstupu, určení rozložení fází výpočtu.
+   \item Sloučení všech \acr{ode}, které obsahují
+      společné klíče nepřímých argumentů,
+      do~soustav \acr{ode}.
    \item Inicializace \acr{smt} řešiče,
       tj.~zaslání modifikovaného vstupu
       bez~specifikací diferenciálních rovnic.
-      Tento vstup musí obsahovat jednoznačné počáteční podmínky.
    \item Inicializace \acr{ode} řešiče,
-      tj.~zaslání specifikací diferenciálních rovnic.
+      tj.~zaslání specifikací (soustav) diferenciálních rovnic.
    \end{enumerate}
-\item Nastav krok simulace na 0: \id{s~:= 0}.
+\item Nastav počáteční číslo fáze na~$0$: \id{s~:= 0}.
 \item \label{i:design:alg:check-sat}
    Ověření splnitelnosti \acr{smt} formule:
    \begin{itemize}
-   \item Je-li splnitelná, získej model~---~ohodnocení konstant.
+   \item Je-li splnitelná, získej model,
+      tj.~ohodnocení všech konstant,
+      a vyber ty, které vstupují do~další fáze jako vstupní argumenty.
    \item Není-li splnitelná, proveď návrat:
       \begin{enumerate}
       \item Přidej konfliktní klauzuli (aserci)
-         znemožňující aktuální ohodnocení konstant.
-      \item Vrať se do~předchozího kroku simulace:
+         znemožňující ohodnocení vstupních konstant
+         do~aktuální fáze.
+      \item Vrať se do~předchozí fáze:
          \id{s-{}-}.
       \item Pokud \id{s~< 0}, vstup není splnitelný. Konec.
       \item Jdi na~bod \rf{i:design:alg:check-sat}.
@@ -3610,6 +3711,12 @@ znamená to, že vstup není splnitelný,
 protože se prozkoumaly všechny možnosti,
 díky jednoznačnému chování \acr{ode} řešiče
 a konfliktním klauzulím.
+
+\end{paragraph} %%Základní algoritmus.
+
+%%%
+
+\bigskip
 
 Tímto je vyřešen návrh centrálního bodu,
 jehož zodpovědnost je provedení uvedeného algoritmu.
