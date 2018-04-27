@@ -1935,9 +1935,43 @@ Následně uvedu softwarový model celého řešiče.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Mon 16 Apr 2018 09:11:34 PM CEST
+% Fri 27 Apr 2018 12:42:03 AM CEST
 \begin{section}{Specifikace nástroje}\label{s:design:spec}
-\cmt{požadavky apod.}
+Nástroj má sloužit jako \hl{prototyp}
+odlišného přístupu ke~zkoumání hybridních modelů systémů
+než~dosavadní řešiče.
+Hlavním účelem práce je \hl{srovnání}
+s~některým stávajícím řešičem
+z~hlediska efektivity
+i~jiných vlastností.
+Neformálním požadavkem pak je,
+aby pro~alespoň některou podmnožinu
+úloh, s~nižšími požadavky na~přesnost, byl náš prototyp
+rychlejší než~stávající řešiče,
+a to i~přesto, že by nebyl příliš optimalizován,
+jelikož náš přístup
+klade menší požadavky na~přesnost
+a měl by být výpočetně výrazně méně náročný.
+
+Nástroj bude přijímat jako vstup textový soubor
+spadající do~námi specifikovaného vstupního jazyka.
+Výstupem bude zejména příznak úspěchu,
+a pro~experimentální účely navíc také
+volitelně výpis vypočtených hodnot
+v~jednotlivých fázích
+nebo i~celé trajektorie všech
+diferencovaných funkcí vykreslených do~společného grafu.
+Vstupy a výstupy jsou podrobněji popsány v~následujících podsekcích.
+
+Nástroj není koncipován jako konečný produkt,
+není příliš uživatelsky přívetivý
+a může obsahovat řadu chyb.
+Nástroj má sloužit pro~účely experimentování
+s~navrženým způsobem řešení úloh,
+a dále buď jako zdroj inspirace
+pro~vývojáře průmyslového nástroje,
+anebo přímo jako postupně se vyvíjející projekt
+na~bázi stávajících otevřených zdrojových kódů.
 
 %%%%%%%%%%%%%
 
@@ -2071,7 +2105,7 @@ Booleovské literály jsou \id{true} a \id{false}.
 
 %%%
 
-% Mon 23 Apr 2018 11:47:28 PM CEST
+% Fri 27 Apr 2018 01:17:21 AM CEST
 \begin{paragraph}{Výraz}\label{p:design:spec:ilang:struct:expr}
 je vždy uzavřen v~závorkách:
 \begin{center}
@@ -2079,8 +2113,13 @@ je vždy uzavřen v~závorkách:
 \end{center}
 kde \id{<expr>} je vnořený výraz
 a \id{<token>} token.
-První token výrazu odlišuje,
-zda a o~jaký se jedná příkaz nebo funkci.
+Pokud je výraz umístěn v~kořenové úrovni vstupu,
+pak se musí jednat o~příkaz.
+V~příkazu musí být prvním elementem výrazu
+token s~názvem příkazu.
+Obecné výrazy toto omezení nemají,
+ale pokud se jedná o~funkci,
+platí pro ni~totéž co pro~příkazy.
 Příkazy nemusí mít druh návratové hodnoty,
 funkce ano.
 
@@ -2116,20 +2155,37 @@ typicky pro~diskrétní stav systému, který je konečný.
 
 %%%
 
-% Mon 16 Apr 2018 11:26:16 AM CEST
+% Fri 27 Apr 2018 01:58:57 AM CEST
 \begin{paragraph}{Rezervované funkce.}\label{p:design:spec:ilang:smt:reserved}
 Zahrnuty jsou následující funkce (resp. operátory)
 se~standardní sémantikou:
-\begin{center}
-\id{+ \  - \  * \  / \  = \  < \  > \  <= \  >=
-   \  not \  and \  or  \  =>}
-\end{center}
-\cmt{asociativity, chainability, ite, distinct}
+\begin{itemize}
+\item Unární:  \quad \id{not}
+\item Binární: \quad \id{/}
+\item $n$-ární:
+   \begin{itemize}
+   \item levá asociativita:
+      \begin{itemize}
+      \item ${n \geq 1}$: \quad \id{- \ and \  or}
+      \item ${n \geq 2}$: \quad \id{+ \  *}
+      \end{itemize}
+   \item pravá asociativita, ${n \geq 2}$: \quad \id{=>}
+   \item se~zřetězením, ${n \geq 2}$:  \quad \id{= \  < \  > \  <= \  >=}
+   \end{itemize}
+\end{itemize}
+a dále tyto funkce:
+\begin{itemize}
+\item \id{distinct}~---~$n$-ární funkce s~${n \geq 2}$,
+   která vrací nerovnost všech dvojic prvků,
+\item \id{ite}~---~ternární funkce s~prvním argumentem druhu \id{Bool},
+   který když je pravdivý,
+   vrací se druhý argument, jinak třetí argument.
+\end{itemize}
 \end{paragraph} %%Rezervované funkce.
 
 %%%
 
-% Tue 24 Apr 2018 12:26:14 PM CEST
+% Fri 27 Apr 2018 02:03:56 AM CEST
 \begin{paragraph}{\id{set-logic}}\label{p:design:spec:ilang:smt:logic}
 nastavuje logiku použitou v~\acr{smt} řešiči:
 \begin{center}
@@ -2147,6 +2203,10 @@ podle \acr{smt}-LIB:
 Příkaz smí být volán nejvýše jednou
 a musí předcházet všem ostatním uvedeným příkazům.
 Není-li příkaz uveden, je jako výchozí logika zvolena \id{QF\_\-UFLRA}.
+
+Pokud to implementace umožňuje,
+smí být také podporovány zmíněné logiky
+bez~volných funkčních symbolů (názvy jsou bez~znaků \id{UF}).
 \end{paragraph} %%\id{set-logic}
 
 %%%
@@ -2253,17 +2313,21 @@ závisle na~aktuálním stavu celého systému.
 
 %%%
 
-% Mon 16 Apr 2018 01:24:27 PM CEST
-\begin{paragraph}{Nové rezervované funkce.}\label{p:design:spec:ilang:ode:reserved}
+% Fri 27 Apr 2018 02:09:56 AM CEST
+\begin{paragraph}{Nové rezervované funkce.}
+\label{p:design:spec:ilang:ode:reserved}
 \acr{smt} logiky neumějí dobře zacházet s~některými
 nelineárními reálnými funkcemi,
 k~nimž lze využít \acr{ode} řešič
 a namísto s~funkcemi pracovat s~konstantami,
 jimž jsou přiřazeny výsledky integrování.
-Přidány jsou následující funkce (resp. operátory):
+Přidány jsou následující unární funkce:
 \begin{center}
-\id{\^{} \  abs \  sqrt \  cbrt \  sin \  cos \  tan \  exp \  ln }
+\id{abs \  sqrt \  cbrt \  sin \  cos \  tan \  exp \  ln}
 \end{center}
+a binární funkce (resp. operátor): \quad \id{\^{}} \\
+Tyto však mohou být využity pouze uvnitř příkazu \id{define\--dt}
+(viz.~dále).
 \end{paragraph} %%Nové rezervované funkce.
 
 %%%
@@ -2436,6 +2500,9 @@ které by se měly objevit ve~vstupech.
 Kromě těchto smí uživatel používat
 i~další \acr{smt} konstrukty tohoto jazyka.
 
+\cmt{Krok BMC ~ dReal, nas krok je neco jineho (~perioda).
+Krok => fáze}
+
 %%%
 
 % Tue 24 Apr 2018 01:21:10 PM CEST
@@ -2454,6 +2521,8 @@ a konstant voleb variant derivací \id{dt}%
 \footnote{Pozor na~konflikt identifikátorů konstant \id{dt}
 s~identifikátory variant derivací
 z~příkazu \id{define\--dt}.}.
+
+\cmt{"Intervalová" inicializace}
 
 Příklad:
 \begin{verbatim}
@@ -2503,21 +2572,11 @@ volených variant v~jednotlivých krocích, př.:
 
 %%%
 
-% Sat 07 Apr 2018 08:05:17 PM CEST
-\begin{paragraph}{Integrace}\label{p:design:spec:ilang:struct:int}
-se provádí příkazy \id{int\--ode}.
-Dochází tím k~propojení konkrétních vstupních a výstupních konstant
-druhu \id{Real} a konstant druhu \id{Dt}.
-Podle těchto příkazů je určen počet výpočtů \acr{ode}.
-Všechna \acr{ode} ve~stejných časových mezích jsou
-integrována synchronně.
-Příklad:
-\begin{verbatim}
-(assert (and (= y_1 (int-ode y dy_0 (y_0 t_0 t_1) ()))
-             (= y_2 (int-ode y dy_1 (y_1 t_1 t_2) ()))
-))
-\end{verbatim}
-\end{paragraph} %%Integrace
+% Fri 27 Apr 2018 02:17:14 AM CEST
+\begin{paragraph}{Invarianty}
+\label{p:design:spec:ilang:struct:inv}
+\cmt{Dt konstanty se musí rovnat tem z define-dt}
+\end{paragraph} %%Invarianty
 
 %%%
 
@@ -2570,6 +2629,24 @@ Příklad s~použitím funkce \id{jump}:
 ))
 \end{verbatim}
 \end{paragraph} %%Definice skoků.
+
+%%%
+
+% Sat 07 Apr 2018 08:05:17 PM CEST
+\begin{paragraph}{Integrace}\label{p:design:spec:ilang:struct:int}
+se provádí příkazy \id{int\--ode}.
+Dochází tím k~propojení konkrétních vstupních a výstupních konstant
+druhu \id{Real} a konstant druhu \id{Dt}.
+Podle těchto příkazů je určen počet výpočtů \acr{ode}.
+Všechna \acr{ode} ve~stejných časových mezích jsou
+integrována synchronně.
+Příklad:
+\begin{verbatim}
+(assert (and (= y_1 (int-ode y dy_0 (y_0 t_0 t_1) ()))
+             (= y_2 (int-ode y dy_1 (y_1 t_1 t_2) ()))
+))
+\end{verbatim}
+\end{paragraph} %%Integrace
 
 %%%
 
@@ -2643,7 +2720,12 @@ Mezi tato makra patří:
       \id{\#define <name> <|(<arg>*)> <body>}
    \end{enumerate}
    Zavádí \hl{globální uživatelské makro} s~názvem \id{<name>}
-   s~parametry, nebo bez nich,
+   s~parametry, nebo bez nich%
+   \footnote{V~případě, že makro neobsahuje argumenty,
+   doporučujeme pro~argumenty použít prázdný výraz \id{()},
+   čímž se zamezí případné chybné interpretaci výrazu,
+   který je (má být) součástí \id{<body>}.
+   To samé platí i~pro~volání uživatelských maker.},
    s~obsahem \id{<body>}.
    Je povolena nejvýše jedna definice makra \id{<name>}.
    Makro \id{<name>} je expandováno až v~místě volání,
@@ -2704,7 +2786,11 @@ lokálních uživatelských maker
 a proto mezi nimi
 nebude nadále rozlišováno.
 Názvy lokálních a globálních maker se mohou navzájem překrývat,
-ale naposledy definované lokální makro má vždy přednost.
+přednost má vždy naposledy definované lokální makro.
+
+Syntaxe použití či nepoužití parametrů pro~makro
+se řídí stejnými pravidly
+jako u~jeho definice.
 
 V~každém místě volání jsou makra nahrazena za~definovaný text,
 který může být závislý na~parametrech
@@ -2741,6 +2827,10 @@ který následuje za~\id{\#}.};
 Obě makra lze použít na~vynucení složení expanze makra do~jednoho tokenu
 (viz.~příklady na~konci sekce).
 
+% \cmt{* zahrnout '\&' do navrhu maker nebo uplne vypustit
+%   * pokud mozno nahradit '\textbackslash \#', coz je obecne
+%   * pak by se mohly globalne zavest expanze '\#' vzdy, i v #def - byla by zodpov. uzivatele jejich escapovani}
+
 Doporučujeme používat tuto konvenci pro~názvy uživatelských maker:
 velká písmena pro globální makra (\id{MACRO})
 a malá písmena pro lokální makra (\id{macro}).
@@ -2748,7 +2838,7 @@ a malá písmena pro lokální makra (\id{macro}).
 
 %%%
 
-% Mon 23 Apr 2018 09:52:52 PM CEST
+% Fri 27 Apr 2018 02:22:15 AM CEST
 \begin{paragraph}{Aritmetická expanze}\label{p:design:spec:ilang:macros:arith}
 je dalším nástrojem v~rámci předzpracování vstupu,
 který slouží k~nahrazení vstupního výrazu rezervované funkce
@@ -2757,6 +2847,8 @@ Výraz nesmí obsahovat nepřímé argumenty,
 jinak dojde k~chybě při vyhodnocení.
 (Ve~fázi předzpracování lze používat pouze literály a makra,
 ne konstanty a funkce.)
+Vyhodnocení výrazů je určeno pouze pro~numerické literály,
+literály \id{true} a \id{false} druhu \id{Bool} nelze použít.
 
 Expanze se provede předřazením tokenu \id{\$} před výraz (bez~\id{\#}).
 (Vnořené výrazy už před sebou mít token \id{\$} nemusí.)
@@ -2774,7 +2866,9 @@ přidáním znaku do~tokenu s~\id{\$}:
 
 \bigskip
 
-\cmt{Přesuň do příloh.}
+\cmt{Nastaveni kroku; Intervalova inicializace; kompozice}
+
+\cmt{Přesuň do příloh. Pridej do textu male priklady primo u maker.}
 Příklady použití maker:
 \begin{verbatim}
 #define BIG 0
@@ -2830,6 +2924,8 @@ nebo \id{unknown}
 počátečních podmínek pro~\acr{ode}).
 
 \cmt{doplnit}
+\cmt{* vystup: SAT nebo UNKNOWN, bez UNSAT - mozna leda EPS-UNSAT:
+  * "Pokud máte chuť a čas, můžete ještě implementovat rozšířenou verzi, kde výsledek by mohl být něco jako "EPS-UNSAT". To by znamenalo, že existuje sjednocení oblasti velikosti epsilon, který pokrývají počáteční stavy tak, že každá z těchto oblastí obsahuje bod, pro který problém není splnitelné. Velikost epsilon by mohl být stanovená uživatelem."}
 \end{subsection} %%Výstupy
 
 %%%%%%%%%%%%%
@@ -3225,6 +3321,12 @@ což bude vyžadovat operace vkládání a odstraňování potomků výrazů.
 \begin{subsection}{Řídící algoritmus}\label{ss:design:arch:alg}
 \cmt{Doplnit, upřesnit pojmy (ohodnocení konstant, kroky)}.
 \cmt{Ještě možná změním backtracking}.
+\cmt{co zpusob, kdy se v kazdem kroce spocitaji vsechny mozne kombinace variant ODE? Kroky jsou totiz izolovany diky check-sat, takze by to narostlo jen na soucin poctu variant vsech ode, a ODE resic je oproti SMT super rychly
+  * cilem je minimalizovat pocet check-sat
+  * timto zpusobem by mel byt pocet volani check-sat minimalni -> pocet kroku
+  * a vubec by nedochazelo k backtrackingu! (pokud unsat, uz to nemuze byt sat)
+  * musi se zahrnout vsechny mozne pocatecni stavy, ale jen v prvnim kroce?
+   Budou pak spocitane vsechny moznosti??}
 
 Postup je následující:
 \begin{enumerate}
