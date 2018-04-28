@@ -250,6 +250,12 @@ namespace SOS {
                                        unsigned depth) const
     {
         const Token& token = expr.cpeek_token();
+        token_check_token(token, depth);
+    }
+
+    void Expr::Preprocess::token_check_token(const Token& token,
+                                             unsigned depth)
+    {
         expect(depth > 0,
                "Unexpected token at top level: '"s
                + token + "'");
@@ -438,6 +444,11 @@ namespace SOS {
                                             unsigned depth)
     {
         macro_key_.erase(0, 1);
+        if (is_macro_key(macro_key_)) {
+            token_check_token(macro_key_, depth);
+            expr.add_new_etoken_at_pos(move(macro_key_));
+            return;
+        }
         const bool has_let = has_let_key(macro_key_);
         const bool has_macro = !has_let && has_macro_key(macro_key_);
         expect(has_let || has_macro,
@@ -535,10 +546,6 @@ namespace SOS {
         }
         if (is_arith_expr(token)) {
             exp_arith_expr(expr, depth);
-        }
-        // !
-        else if (token[0] == '&') {
-            token[0] = '#';
         }
         check_token(expr, depth);
         expr.next();
@@ -641,17 +648,30 @@ namespace SOS {
             [](char c){ return is_macro_key_char(c); }
         );
         if (tokens.empty()) return tokens;
-        if (token == "#") {
-            tokens[0].erase(0, 1);
+        split_token_process_part(token, tokens[0]);
+        if (token.empty() && tokens.size() == 1) {
+            token = move(tokens[0]);
+            tokens.pop_back();
+            return tokens;
         }
         const int size_ = tokens.size();
-        for (int i = 0; i < size_; i++) {
-            if (tokens[i] != "#") continue;
-            if (i < size_-1) {
-                tokens[++i].erase(0, 1);
-            }
+        for (int i = 0; i < size_-1; i++) {
+            if (split_token_process_part(tokens[i], tokens[i+1])) i++;
         }
         return tokens;
+    }
+
+    bool Expr::Preprocess::split_token_process_part(Token& token, Token& succ)
+    {
+        if (token == "#") {
+            succ.erase(0, 1);
+            return true;
+        }
+        if (token.back() == '\\' && succ.front() == '#') {
+            token.pop_back();
+            succ = succ.front() + move(succ);
+        }
+        return false;
     }
 
     template <typename Arg>

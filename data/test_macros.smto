@@ -181,3 +181,22 @@
   #endfor
 ) #enddef
 #SUM_SQR(#M)
+
+#define PRINT(x) #x
+
+( #PRINT(x) )
+( #PRINT(M) )
+( #PRINT(#M) )
+( #PRINT(\#M) )
+
+;#M
+;\#M
+
+( #M )
+( \#M )
+
+#define M5() 1
+
+( #PRINT(\#M5) )
+( #PRINT(\#M#M) )
+( #PRINT(\#M\#M) )

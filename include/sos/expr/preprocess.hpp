@@ -93,6 +93,8 @@ namespace SOS {
         using Eval_t_marked = pair<Eval_t, bool>;
 
         void check_token(const Expr& expr, unsigned depth) const;
+        static void token_check_token(const Token& token,
+                                      unsigned depth);
 
         template <typename F> Exp_pos parse_and_return(Expr& expr, F f);
         void parse_token(Expr& expr, unsigned depth);
@@ -124,6 +126,7 @@ namespace SOS {
         void parse_user_macro_pop_params(Expr& expr,
                                          const Macro_key& macro_key_);
         static Tokens split_token(Token& token);
+        static bool split_token_process_part(Token& token, Token& succ);
 
         template <typename Arg>
             static Eval_t_marked

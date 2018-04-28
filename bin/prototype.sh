@@ -25,7 +25,7 @@ UNIF=1
 # SMT_SOLVER=(cvc4 -L smt2 -i)
 SMT_SOLVER=(z3 -smt2 -in)
 
-APP_DIR=bin
+APP_DIR=bin/applet
 TOOLS_DIR=tools
 
 ODE_SOLVER=("$APP_DIR/odeint" -o "$TRAJ_OUTPUT_F")

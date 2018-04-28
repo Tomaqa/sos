@@ -234,7 +234,6 @@
 ))
 #enddef
 
-#define P_PARAMS() (gam_#i)
-#ASSERT_INT_ODE(p p p &P_PARAMS)
+#ASSERT_INT_ODE(p p p (gam_\#i))
 #ASSERT_INT_ODE(gam gam gam ())
 #ASSERT_INT_ODE(c c_2 c_1 ())

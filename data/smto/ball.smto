@@ -159,7 +159,6 @@
 #endfor
 #enddef
 
-#define X_PARAMS() (v_0_#i)
-(assert (and #INT_ODE(x x_0 x_t &X_PARAMS)
+(assert (and #INT_ODE(x x_0 x_t (v_0_\#i))
              #INT_ODE(v v_0 v_t ())
 ))

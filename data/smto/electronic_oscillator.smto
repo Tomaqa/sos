@@ -267,12 +267,10 @@
 #endfor
 #enddef
 
-#define X_PARAMS() (tau_0_#i)
-#define Y_PARAMS() (om1_0_#i om2_0_#i tau_0_#i)
-#define Z_PARAMS() #Y_PARAMS
-(assert (and #INT_ODE(x x_0 x_t &X_PARAMS)
-             #INT_ODE(y y_0 y_t &Y_PARAMS)
-             #INT_ODE(z z_0 z_t &Z_PARAMS)
+#define YZ_PARAMS() (om1_0_#i om2_0_#i tau_0_#i)
+(assert (and #INT_ODE(x x_0 x_t (tau_0_\#i))
+             #INT_ODE(y y_0 y_t \#YZ_PARAMS)
+             #INT_ODE(z z_0 z_t \#YZ_PARAMS)
              #INT_ODE(om1 om1_0 om1_t ())
              #INT_ODE(om2 om2_0 om2_t ())
              #INT_ODE(tau tau_0 tau_t ())
