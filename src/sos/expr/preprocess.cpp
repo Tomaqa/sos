@@ -326,7 +326,7 @@ namespace SOS {
         //! do not parse this expression
         Macro_param_keys macro_param_keys_ =
             params_expr.transform_to_tokens();
-        Macro_body macro_body_ = extract_macro_body(expr, "enddef");
+        Macro_body macro_body_ = extract_macro_body(expr, "def");
         add_macro(move(macro_key_), move(macro_param_keys_),
                   move(macro_body_));
     }
@@ -427,7 +427,7 @@ namespace SOS {
                "Additional arguments of macro '#for': "s
                + to_string(params_expr));
 
-        Macro_body macro_body_ = extract_macro_body(expr, "endfor");
+        Macro_body macro_body_ = extract_macro_body(expr, "for");
 
         push_let_body(var, {});
         for (For_eval_t i = init; i <= end; ++i) {
@@ -576,17 +576,27 @@ namespace SOS {
     }
 
     Expr::Preprocess::Macro_body Expr::Preprocess::
-        extract_macro_body(Expr& expr, Token end_token)
+        extract_macro_body(Expr& expr, Macro_key macro_key_)
     {
-        end_token = "#"s + move(end_token);
+        Token end_token = "#end" + macro_key_;
+        macro_key_ = '#' + move(macro_key_);
         Macro_body macro_body_;
         bool found = false;
+        int nested_cnt = 0;
         while (expr) {
             Expr_place_ptr place = expr.extract();
-            if (place->is_etoken()
-                && cptr_to_token(place) == end_token) {
-                found = true;
-                break;
+            if (place->is_etoken()) {
+                const Token& token = cptr_to_token(place);
+                if (token == end_token) {
+                    if (nested_cnt == 0) {
+                        found = true;
+                        break;
+                    }
+                    --nested_cnt;
+                }
+                if (token == macro_key_) {
+                    ++nested_cnt;
+                }
             }
             macro_body_.add_place_ptr(move(place));
         }

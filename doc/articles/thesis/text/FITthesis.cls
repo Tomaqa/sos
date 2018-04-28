@@ -1,5 +1,5 @@
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{FITthesis}[2013/05/06 CTU FIT standard class for theses]
+\ProvidesClass{FITthesis}[2018/03/12 CTU FIT standard class for theses]
 
 % created by Ondrej Guth <ondrej.guth@fit.cvut.cz>
 
@@ -16,8 +16,8 @@
 	\def\@lang{1}
 }
 \DeclareOption{english}{
-	\AtBeginDocument{\selectlanguage{UKenglish}}
-	\PassOptionsToPackage{UKenglish}{babel}
+	\AtBeginDocument{\selectlanguage{english}}
+	\PassOptionsToPackage{english}{babel}
 	\def\@lang{0}
 }
 \DeclareOption{slovak}{
@@ -47,15 +47,7 @@
 \counterwithout*{footnote}{chapter}
 
 \RequirePackage{lmodern}
-\if\@lang1
-	\RequirePackage[T1]{fontenc}
-\else
-	\if\@lang2
-		\RequirePackage[T1]{fontenc}
-	\else
-		\AtBeginDocument{\selectlanguage{UKenglish}}
-	\fi
-\fi
+
 
 \setlrmargins{4cm}{*}{*}\checkandfixthelayout
 
@@ -173,8 +165,7 @@
 	\@authorFNdefinedtrue
 }
 
-\DeclareRobustCommand{\thesistype}{\if@thesistypedefined\if\@thesistype B\if\@lang1{Bakal{\' a}{\v r}sk{\' a} pr{\' a}ce}\else\if\@lang2{Bakal{\' a}rska pr{\' a}ca}\else{Bachelor's thesis}\fi\fi\else\if\@thesistype M
-\if\@lang1{Diplomov{\' a} pr{\' a}ce}\else\if\@lang2{Diplomov{\' a} pr{\' a}ca}\else{Master's thesis}\fi\fi\else\ClassError{FITthesis}{Thesis type not specified}{Add option thesis=B for bachelor's thesis or option thesis=M for master's thesis.}\fi\fi\else\ClassError{FITthesis}{Thesis type not specified}{Add option thesis=B for bachelor's thesis or option thesis=M for master's thesis.}\fi}
+\DeclareRobustCommand{\thesistype}{\if@thesistypedefined\if\@thesistype B\if\@lang1{Bakal{\' a}{\v r}sk{\' a} pr{\' a}ce}\else\if\@lang2{Bakal{\' a}rska pr{\' a}ca}\else{Bachelor's thesis}\fi\fi\else\if\@thesistype M\if\@lang1{Diplomov{\' a} pr{\' a}ce}\else\if\@lang2{Diplomov{\' a} pr{\' a}ca}\else{Master's thesis}\fi\fi\else\ClassError{FITthesis}{Thesis type not specified}{Add option thesis=B for bachelor's thesis or option thesis=M for master's thesis.}\fi\fi\else\ClassError{FITthesis}{Thesis type not specified}{Add option thesis=B for bachelor's thesis or option thesis=M for master's thesis.}\fi}
 
 \newif\if@declarationOptionSelected
 \DeclareRobustCommand{\declarationOfAuthenticityOption}[1]{
@@ -275,74 +266,142 @@ sp\^ osobom, ktor\'y nezni\v zuje hodnotu Diela (vr\'atane komer\v cn\'eho vyu\v
 	
 }
 
+% \DeclareRobustCommand{\titlepage}{
+% 	\begin{titlingpage}
+% 		\begin{center}
+% 			\noindent\begin{tabular*}{\textwidth}{m{.77\textwidth}m{.165\textwidth}}
+% 				{\large\scshape \if\@lang1{
+% 						{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v~Praze
+% 					}\else\if\@lang2{
+% 						{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v~Praze
+% 					}\else{
+% 						Czech Technical University in Prague
+% 					}\fi\fi
+% 					
+% 					\vspace{3mm}
+% 					
+% 					\if\@lang1{
+% 						Fakulta informa{\v c}n{\' i}ch technologi{\' i}
+% 					}\else\if\@lang2{
+% 						Fakulta informa{\v c}n{\' i}ch technologi{\' i}
+% 					}\else{
+% 						Faculty of Information Technology
+% 					}\fi\fi
+% 					
+% 					\vspace{4mm}
+% 					
+% 					\if@departmentdefined
+% 						\thedepartment
+% 					\else
+% 						\ClassError{FITthesis}{Department unspecified}{Specify the department using the \department command.}
+% 					\fi
+% 				} & \hfill\includegraphics[width=.16\textwidth]{cvut-logo-bw}
+% 			\end{tabular*}
+% 		\end{center}
+% 		
+% 
+% 		\vfill
+% 
+% 		{\Large
+% 			\noindent\thesistype
+% 		}
+% 		\vspace{1cm}
+% 
+% 		\if\thetitle\empty
+% 			\ClassError{FITthesis}{Thesis' title unspecified}{Specify title of this thesis using the \protect\title\space command.}
+% 		\else
+% 			\noindent\textbf{\LARGE \begin{flushleft}\thetitle\end{flushleft}}
+% 		\fi
+% 
+% 		\vspace{4mm}
+% 
+% 		\if@authorwithdegreesdefined
+% 			\noindent\textbf{\Large \textit{\theauthorwithdegrees}}
+% 		\else
+% 			\ClassError{FITthesis}{Thesis' author with degrees unspecified}{Specify author of this thesis (i.e. your name \& degrees) using the \protect\theauthorwithdegrees\space command.}
+% 		\fi
+% 
+% 		\vfill
+% 
+% 		\noindent\if\@lang1{Vedouc{\' i} pr{\' a}ce:}\else\if\@lang2{Ved\'uci pr{\' a}ce:}\else{Supervisor:}\fi\fi
+% 			\if@supervisordefined%
+% 				~\thesupervisor
+% 			\else
+% 				\ClassError{FITthesis}{Thesis' supervisor unspecified}{Specify the supervisor of this thesis using the \protect\thesupervisor\space command.}
+% 			\fi
+% 
+% 		\vspace{1cm}
+% 
+% 		\noindent\today
+% 	\end{titlingpage}
+% }
+
 \DeclareRobustCommand{\titlepage}{
-	\begin{titlingpage}
-		\begin{center}
-			\noindent\begin{tabular*}{\textwidth}{m{.77\textwidth}m{.165\textwidth}}
-				{\large\scshape \if\@lang1{
-						{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v~Praze
-					}\else\if\@lang2{
-						{\v C}esk{\' e} vysok{\' e} u{\v c}en{\' i} technick{\' e} v~Praze
-					}\else{
-						Czech Technical University in Prague
-					}\fi\fi
-					
-					\vspace{3mm}
-					
-					\if\@lang1{
-						Fakulta informa{\v c}n{\' i}ch technologi{\' i}
-					}\else\if\@lang2{
-						Fakulta informa{\v c}n{\' i}ch technologi{\' i}
-					}\else{
-						Faculty of Information Technology
-					}\fi\fi
-					
-					\vspace{4mm}
-					
-					\if@departmentdefined
-						\thedepartment
-					\else
-						\ClassError{FITthesis}{Department unspecified}{Specify the department using the \department command.}
-					\fi
-				} & \hfill\includegraphics[width=.16\textwidth]{cvut-logo-bw}
-			\end{tabular*}
-		\end{center}
+        \begin{titlingpage}
+        \noindent
+        \if\@lang1{\includegraphics[width=0.5\textwidth]{cvut-logo-bw}}\else\if\@lang2{\includegraphics[width=0.5\textwidth]{cvut-logo-bw}}\else{\includegraphics[width=0.5\textwidth]{cvut-logo-bw-en}}\fi\fi
+        
+        \vfill
 		
+		{\Large\noindent\thesistype}
 
-		\vfill
+               \vspace{1cm}
 
-		{\Large
-			\noindent\thesistype
-		}
-		\vspace{1cm}
+               \if\thetitle\empty
+                       \ClassError{FITthesis}{Thesis' title unspecified}{Specify title of this thesis using the \protect\title\space command.}
+               \else
+                       \noindent\textbf{\LARGE \begin{flushleft}\thetitle\end{flushleft}}
+               \fi
 
-		\if\thetitle\empty
-			\ClassError{FITthesis}{Thesis' title unspecified}{Specify title of this thesis using the \protect\title\space command.}
-		\else
-			\noindent\textbf{\LARGE \begin{flushleft}\thetitle\end{flushleft}}
-		\fi
+ 
 
-		\vspace{4mm}
+               \vspace{4mm}
 
-		\if@authorwithdegreesdefined
-			\noindent\textbf{\Large \textit{\theauthorwithdegrees}}
-		\else
-			\ClassError{FITthesis}{Thesis' author with degrees unspecified}{Specify author of this thesis (i.e. your name \& degrees) using the \protect\theauthorwithdegrees\space command.}
-		\fi
+               \if@authorwithdegreesdefined
 
-		\vfill
+                       \noindent\textbf{\Large \textit{\theauthorwithdegrees}}
 
-		\noindent\if\@lang1{Vedouc{\' i} pr{\' a}ce:}\else\if\@lang2{Ved\'uci pr{\' a}ce:}\else{Supervisor:}\fi\fi
-			\if@supervisordefined%
-				~\thesupervisor
-			\else
-				\ClassError{FITthesis}{Thesis' supervisor unspecified}{Specify the supervisor of this thesis using the \protect\thesupervisor\space command.}
-			\fi
+               \else
 
-		\vspace{1cm}
+                       \ClassError{FITthesis}{Thesis' author with degrees unspecified}{Specify author of this thesis (i.e. your name \& degrees) using the \protect\theauthorwithdegrees\space command.}
 
-		\noindent\today
-	\end{titlingpage}
+               \fi
+
+               \vfill
+
+\if@departmentdefined
+
+                                              \noindent \thedepartment
+
+                                      \else
+
+                                              \ClassError{FITthesis}{Department unspecified}{Specify the department using the \department command.}
+
+                                      \fi
+
+                              
+
+\vspace{0.1cm}
+
+               \noindent\if\@lang1{Vedouc{\' i} pr{\' a}ce:}\else\if\@lang2{Ved\'uci pr{\' a}ce:}\else{Supervisor:}\fi\fi
+                       \if@supervisordefined%
+                              ~\thesupervisor
+                       \else
+
+                               \ClassError{FITthesis}{Thesis' supervisor unspecified}{Specify the supervisor of this thesis using the \protect\thesupervisor\space command.}
+
+                       \fi           
+
+ 
+
+               \vspace{1cm}
+
+ 
+
+                \noindent\today
+
+        \end{titlingpage}
+
 }
 
 \DeclareRobustCommand{\acknowledgementspage}{

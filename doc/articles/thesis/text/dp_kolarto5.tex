@@ -1,4 +1,9 @@
 % options:
+% thesis=B bachelor's thesis
+% thesis=M master's thesis
+% czech thesis in Czech language
+% slovak thesis in Slovak language
+% english thesis in English language
 % hidelinks remove colour boxes around hyperlinks
 \documentclass[thesis=M,czech]{FITthesis}[2012/06/26]
 
@@ -45,6 +50,11 @@
 \newcommand{\newacr}[3]{\newacronym{\acrlabel{#1}}{#2}{#3}}
 
 \makeglossaries
+
+
+\newacr{cvut}{{\v C}VUT}{{\v C}esk{\' e} vysok{\' e}
+   u{\v c}en{\' i} technick{\' e} v Praze}
+\newacr{fit}{FIT}{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}
 
 \newacr{api}{API}{Application programming interface}
 \newacr{ansi}{ANSI}{American National Standards Institute}
@@ -196,7 +206,7 @@ za trpělivou a ochotnou asistenci s~touto prací.}
 analýza hybridních systémů}
 \keywordsEN{\acr{sat}, \acr{smt}, numerical methods for~\acr{ode}s,
 hybrid systems analysis}
-% \website{http://site.example/thesis} %volitelná URL práce,
+\website{https://github.com/Tomaqa/sos} %volitelná URL práce,
    % objeví se v tiráži~---~úplně odstraňte, nemáte-li URL práce
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1948,7 +1958,7 @@ Následně uvedu softwarový model celého řešiče.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Fri 27 Apr 2018 12:12:07 PM CEST
+% Sat 28 Apr 2018 10:53:16 PM CEST
 \begin{section}{Specifikace nástroje}\label{s:design:spec}
 Nástroj má fungovat jako řešič kombinace
 dvou problémů: problému \acr{smt}
@@ -1956,6 +1966,11 @@ podle přístupů diskutovaných v~sekci \rf{s:search:smt},
 a problému numerického řešení diferenciálních rovnic
 s~použitím klasických numerických metod,
 jak bylo diskutováno v~sekci \rf{ss:search:ode:classic}.
+Tvar počátečních podmínek není omezen,
+avšak není-li množina podmínek konečná
+(tj.~např. intervaly),
+doba výpočtu není definována a zpravidla neterminuje.
+Intervaly však lze aproximovat výčtem hodnot z~intervalu.
 
 Nástroj má sloužit jako \hl{prototyp}
 odlišného přístupu ke~zkoumání hybridních modelů systémů
@@ -2882,6 +2897,8 @@ Mezi tato makra patří:
    Text je opakovaně expandován s~měnící se hodnotou \id{<var>}
    závisle na~uvedených podmínkách.
 
+   V~těle smí být obsažena vnořená makra \id{\#for}.
+
    Varianta \rf{i:macro:for:int} generuje \id{<var>}
    s~celočíselnými hodnotami od~\id{<init>} do~\id{<end>} včetně,
    s~jednotkovým krokem.
@@ -3008,8 +3025,6 @@ přidáním znaku do~tokenu s~\id{\$}:
 
 %%%
 
-\clearpage
-
 % Fri 27 Apr 2018 05:18:55 PM CEST
 \begin{paragraph}{Příklady obecného použití maker:}
 \label{p:design:spec:ilang:macros:examples}
@@ -3100,6 +3115,10 @@ přidáním znaku do~tokenu s~\id{\$}:
    s~nějakou číselnou příponou
    a vstup generovat pomocí maker \id{\#for}
    nebo rekurzivních maker.
+   Krajní systémy generovat zvlášť,
+   nebo pomocí makra \id{\#if},
+   a ostatní propojit pomocí parametrických uživatelských maker,
+   např. s~parametrem \id{\#i} a \id{\#let j \$d(+ \#i 1)}.
 \end{itemize}
 \end{paragraph} %%Použití maker ve~vstupním jazyce:
 
@@ -3113,7 +3132,7 @@ přidáním znaku do~tokenu s~\id{\$}:
 
 %%%%%%%%%%%%%
 
-% Fri 27 Apr 2018 09:30:50 PM CEST
+% Sat 28 Apr 2018 11:04:53 PM CEST
 \begin{subsection}{Výstupy}\label{ss:design:spec:out}
 Výstupem řešiče je především příznak splnitelnosti.
 Je-li vstup splnitelný,
@@ -3124,11 +3143,22 @@ jsou do~něj zapsány celé trajektorie
 všech diferencovaných funkcí
 a z~těchto dat je vykreslen společný graf.
 
-Řešič se prozatím omezuje pouze na~výstupy
-\id{sat} a \id{unknown}.
+V~případě konečné množiny počátečních podmínek
+je výstupem \id{sat} nebo \id{unsat}
+v~případě splnitelného nebo nesplnitelného vstupu.
+S~výjimkou zanedbání aproximačních chyb \acr{ode} řešiče
+jsou tyto výstupy exaktní,
+jelikož řešič buď nalezne splňující ohodnocení,
+nebo prozkoumá všechny možnosti a ověří, že žádná není splnitelná.
 
-\cmt{Proč nemůže být unsat? Mělo by se to odvíjet od daného vstupu
-a pro ten to je sat/unsat. Nepřesnost aproximace je stejná pro sat i unsat ..}
+V~případě nekonečné množiny počátečních podmínek
+je možný výstup \id{sat},
+ale pokud je vstup nesplnitelný,
+výpočet pravděpodobně nikdy neskončí.
+
+Výstup \id{unknown} \hl{není} implementován,
+ač by byl v~některých případech vhodný,
+např. pro~nesplnitelné intervalové počáteční podmínky.
 \end{subsection} %%Výstupy
 
 %%%%%%%%%%%%%

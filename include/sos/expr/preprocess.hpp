@@ -119,7 +119,7 @@ namespace SOS {
         void parse_token_single(Expr& expr, Token& token,
                                 unsigned depth);
         void parse_token_multi(Expr& expr, Tokens& tokens, unsigned depth);
-        Macro_body extract_macro_body(Expr& expr, Token end_token);
+        Macro_body extract_macro_body(Expr& expr, Macro_key macro_key_);
         void parse_user_macro_push_params(Expr& expr,
                                           const Macro_key& macro_key_,
                                           unsigned depth);

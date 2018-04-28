@@ -200,3 +200,11 @@
 ( #PRINT(\#M5) )
 ( #PRINT(\#M#M) )
 ( #PRINT(\#M\#M) )
+
+
+#for (i 0 3)
+#for (j 0 3)
+  (a_#i##_#j)
+#endfor
+#endfor
+
