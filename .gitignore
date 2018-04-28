@@ -5,7 +5,8 @@ test/
 
 .backup/
 *log
-data/smt2/benchmarks/
+data/smt2
+data/ode
 doc/odeint
 
 *.ac*
