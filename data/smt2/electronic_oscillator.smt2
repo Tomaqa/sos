@@ -808,7 +808,6 @@
 ( declare-fun dtau_33 ( ) Dt )
 ( declare-fun dtau_34 ( ) Dt )
 ( assert ( and ( = t_0 0 ) ( = tau_0_0 0 ) ( or ( = x_0_0 ( - 0.2 ) ) ( = x_0_0 ( - 0.175000 ) ) ( = x_0_0 ( - 0.150000 ) ) ( = x_0_0 ( - 0.125000 ) ) ( = x_0_0 ( - 0.100000 ) ) ( = x_0_0 ( - 0.075000 ) ) ( = x_0_0 ( - 0.050000 ) ) ( = x_0_0 ( - 0.025000 ) ) ( = x_0_0 0.000000 ) ( = x_0_0 0.025000 ) ( = x_0_0 0.050000 ) ( = x_0_0 0.075000 ) ( = x_0_0 0.100000 ) ) ( = y_0_0 0 ) ( = z_0_0 0 ) ( = om1_0_0 2 ) ( = om2_0_0 2.5 ) z_a_0 om1_a_0 ( = sin_om1_0_0 0 ) ) )
-( assert ( and ( = t_1 ( + t_0 0.5 ) ) ( = t_2 ( + t_1 0.5 ) ) ( = t_3 ( + t_2 0.5 ) ) ( = t_4 ( + t_3 0.5 ) ) ( = t_5 ( + t_4 0.5 ) ) ( = t_6 ( + t_5 0.5 ) ) ( = t_7 ( + t_6 0.5 ) ) ( = t_8 ( + t_7 0.5 ) ) ( = t_9 ( + t_8 0.5 ) ) ( = t_10 ( + t_9 0.5 ) ) ( = t_11 ( + t_10 0.5 ) ) ( = t_12 ( + t_11 0.5 ) ) ( = t_13 ( + t_12 0.5 ) ) ( = t_14 ( + t_13 0.5 ) ) ( = t_15 ( + t_14 0.5 ) ) ( = t_16 ( + t_15 0.5 ) ) ( = t_17 ( + t_16 0.5 ) ) ( = t_18 ( + t_17 0.5 ) ) ( = t_19 ( + t_18 0.5 ) ) ( = t_20 ( + t_19 0.5 ) ) ( = t_21 ( + t_20 0.5 ) ) ( = t_22 ( + t_21 0.5 ) ) ( = t_23 ( + t_22 0.5 ) ) ( = t_24 ( + t_23 0.5 ) ) ( = t_25 ( + t_24 0.5 ) ) ( = t_26 ( + t_25 0.5 ) ) ( = t_27 ( + t_26 0.5 ) ) ( = t_28 ( + t_27 0.5 ) ) ( = t_29 ( + t_28 0.5 ) ) ( = t_30 ( + t_29 0.5 ) ) ( = t_31 ( + t_30 0.5 ) ) ( = t_32 ( + t_31 0.5 ) ) ( = t_33 ( + t_32 0.5 ) ) ( = t_34 ( + t_33 0.5 ) ) ) )
 ( declare-fun int-ode_x ( Real ) Real )
 ( define-fun dx ( ) Dt 0 )
 ( declare-fun int-ode_y ( Real ) Real )
@@ -832,6 +831,7 @@
 ( assert ( and ( connect dx_0 dy_0 dz_0 dom1_0 dom2_0 dtau_0 z_a_0 om1_a_0 ) ( connect dx_1 dy_1 dz_1 dom1_1 dom2_1 dtau_1 z_a_1 om1_a_1 ) ( connect dx_2 dy_2 dz_2 dom1_2 dom2_2 dtau_2 z_a_2 om1_a_2 ) ( connect dx_3 dy_3 dz_3 dom1_3 dom2_3 dtau_3 z_a_3 om1_a_3 ) ( connect dx_4 dy_4 dz_4 dom1_4 dom2_4 dtau_4 z_a_4 om1_a_4 ) ( connect dx_5 dy_5 dz_5 dom1_5 dom2_5 dtau_5 z_a_5 om1_a_5 ) ( connect dx_6 dy_6 dz_6 dom1_6 dom2_6 dtau_6 z_a_6 om1_a_6 ) ( connect dx_7 dy_7 dz_7 dom1_7 dom2_7 dtau_7 z_a_7 om1_a_7 ) ( connect dx_8 dy_8 dz_8 dom1_8 dom2_8 dtau_8 z_a_8 om1_a_8 ) ( connect dx_9 dy_9 dz_9 dom1_9 dom2_9 dtau_9 z_a_9 om1_a_9 ) ( connect dx_10 dy_10 dz_10 dom1_10 dom2_10 dtau_10 z_a_10 om1_a_10 ) ( connect dx_11 dy_11 dz_11 dom1_11 dom2_11 dtau_11 z_a_11 om1_a_11 ) ( connect dx_12 dy_12 dz_12 dom1_12 dom2_12 dtau_12 z_a_12 om1_a_12 ) ( connect dx_13 dy_13 dz_13 dom1_13 dom2_13 dtau_13 z_a_13 om1_a_13 ) ( connect dx_14 dy_14 dz_14 dom1_14 dom2_14 dtau_14 z_a_14 om1_a_14 ) ( connect dx_15 dy_15 dz_15 dom1_15 dom2_15 dtau_15 z_a_15 om1_a_15 ) ( connect dx_16 dy_16 dz_16 dom1_16 dom2_16 dtau_16 z_a_16 om1_a_16 ) ( connect dx_17 dy_17 dz_17 dom1_17 dom2_17 dtau_17 z_a_17 om1_a_17 ) ( connect dx_18 dy_18 dz_18 dom1_18 dom2_18 dtau_18 z_a_18 om1_a_18 ) ( connect dx_19 dy_19 dz_19 dom1_19 dom2_19 dtau_19 z_a_19 om1_a_19 ) ( connect dx_20 dy_20 dz_20 dom1_20 dom2_20 dtau_20 z_a_20 om1_a_20 ) ( connect dx_21 dy_21 dz_21 dom1_21 dom2_21 dtau_21 z_a_21 om1_a_21 ) ( connect dx_22 dy_22 dz_22 dom1_22 dom2_22 dtau_22 z_a_22 om1_a_22 ) ( connect dx_23 dy_23 dz_23 dom1_23 dom2_23 dtau_23 z_a_23 om1_a_23 ) ( connect dx_24 dy_24 dz_24 dom1_24 dom2_24 dtau_24 z_a_24 om1_a_24 ) ( connect dx_25 dy_25 dz_25 dom1_25 dom2_25 dtau_25 z_a_25 om1_a_25 ) ( connect dx_26 dy_26 dz_26 dom1_26 dom2_26 dtau_26 z_a_26 om1_a_26 ) ( connect dx_27 dy_27 dz_27 dom1_27 dom2_27 dtau_27 z_a_27 om1_a_27 ) ( connect dx_28 dy_28 dz_28 dom1_28 dom2_28 dtau_28 z_a_28 om1_a_28 ) ( connect dx_29 dy_29 dz_29 dom1_29 dom2_29 dtau_29 z_a_29 om1_a_29 ) ( connect dx_30 dy_30 dz_30 dom1_30 dom2_30 dtau_30 z_a_30 om1_a_30 ) ( connect dx_31 dy_31 dz_31 dom1_31 dom2_31 dtau_31 z_a_31 om1_a_31 ) ( connect dx_32 dy_32 dz_32 dom1_32 dom2_32 dtau_32 z_a_32 om1_a_32 ) ( connect dx_33 dy_33 dz_33 dom1_33 dom2_33 dtau_33 z_a_33 om1_a_33 ) ( connect dx_34 dy_34 dz_34 dom1_34 dom2_34 dtau_34 z_a_34 om1_a_34 ) ) )
 ( define-fun jump ( ( z_a_1 Bool ) ( om1_a_1 Bool ) ( z_a_2 Bool ) ( om1_a_2 Bool ) ( x_1t Real ) ( y_1t Real ) ( z_1t Real ) ( om1_1t Real ) ( om2_1t Real ) ( tau_1t Real ) ( x_20 Real ) ( y_20 Real ) ( z_20 Real ) ( om1_20 Real ) ( om2_20 Real ) ( tau_20 Real ) ( sin_om1_1t Real ) ( sin_om1_20 Real ) ) Bool ( and ( = z_20 z_1t ) ( = sin_om1_20 0 ) ( => ( and ( = z_a_1 z_a_2 ) ( = om1_a_1 om1_a_2 ) ) ( and ( = x_20 x_1t ) ( = y_20 y_1t ) ( = om1_20 om1_1t ) ( = om2_20 om2_1t ) ( = tau_20 tau_1t ) ) ) ( => ( or ( not ( = z_a_1 z_a_2 ) ) ( not ( = om1_a_1 om1_a_2 ) ) ) ( = tau_20 0 ) ) ( => ( and z_a_1 om1_a_1 ( < tau_1t 4 ) ) ( and z_a_2 om1_a_2 ) ) ( => ( and z_a_1 om1_a_1 ( >= tau_1t 4 ) ) ( and ( not z_a_2 ) ( not om1_a_2 ) ( = x_20 x_1t ) ( = y_20 ( * 0.2 y_1t ) ) ( = om1_20 1.5 ) ( = om2_20 1 ) ) ) ( => ( and ( not z_a_1 ) ( not om1_a_1 ) ( < tau_1t 9 ) ) ( and ( not z_a_2 ) ( not om1_a_2 ) ) ) ( => ( and ( not z_a_1 ) ( not om1_a_1 ) ( >= tau_1t 9 ) ) ( and ( not z_a_2 ) om1_a_2 ( = x_20 ( * 0.2 x_1t ) ) ( = y_20 ( * 0.5 y_1t ) ) ( = om1_20 0 ) ( = om2_20 ( - om2_1t ) ) ) ) ( => ( and ( not z_a_1 ) om1_a_1 ( < tau_1t 5 ) ) ( and ( not z_a_2 ) om1_a_2 ) ) ( => ( and ( not z_a_1 ) om1_a_1 ( >= tau_1t 5 ) ) ( and z_a_2 om1_a_2 ( = x_20 x_1t ) ( = y_20 y_1t ) ( = om1_20 1 ) ( = om2_20 1 ) ) ) ) )
 ( assert ( and ( jump z_a_0 om1_a_0 z_a_1 om1_a_1 x_t_0 y_t_0 z_t_0 om1_t_0 om2_t_0 tau_t_0 x_0_1 y_0_1 z_0_1 om1_0_1 om2_0_1 tau_0_1 sin_om1_t_0 sin_om1_0_1 ) ( jump z_a_1 om1_a_1 z_a_2 om1_a_2 x_t_1 y_t_1 z_t_1 om1_t_1 om2_t_1 tau_t_1 x_0_2 y_0_2 z_0_2 om1_0_2 om2_0_2 tau_0_2 sin_om1_t_1 sin_om1_0_2 ) ( jump z_a_2 om1_a_2 z_a_3 om1_a_3 x_t_2 y_t_2 z_t_2 om1_t_2 om2_t_2 tau_t_2 x_0_3 y_0_3 z_0_3 om1_0_3 om2_0_3 tau_0_3 sin_om1_t_2 sin_om1_0_3 ) ( jump z_a_3 om1_a_3 z_a_4 om1_a_4 x_t_3 y_t_3 z_t_3 om1_t_3 om2_t_3 tau_t_3 x_0_4 y_0_4 z_0_4 om1_0_4 om2_0_4 tau_0_4 sin_om1_t_3 sin_om1_0_4 ) ( jump z_a_4 om1_a_4 z_a_5 om1_a_5 x_t_4 y_t_4 z_t_4 om1_t_4 om2_t_4 tau_t_4 x_0_5 y_0_5 z_0_5 om1_0_5 om2_0_5 tau_0_5 sin_om1_t_4 sin_om1_0_5 ) ( jump z_a_5 om1_a_5 z_a_6 om1_a_6 x_t_5 y_t_5 z_t_5 om1_t_5 om2_t_5 tau_t_5 x_0_6 y_0_6 z_0_6 om1_0_6 om2_0_6 tau_0_6 sin_om1_t_5 sin_om1_0_6 ) ( jump z_a_6 om1_a_6 z_a_7 om1_a_7 x_t_6 y_t_6 z_t_6 om1_t_6 om2_t_6 tau_t_6 x_0_7 y_0_7 z_0_7 om1_0_7 om2_0_7 tau_0_7 sin_om1_t_6 sin_om1_0_7 ) ( jump z_a_7 om1_a_7 z_a_8 om1_a_8 x_t_7 y_t_7 z_t_7 om1_t_7 om2_t_7 tau_t_7 x_0_8 y_0_8 z_0_8 om1_0_8 om2_0_8 tau_0_8 sin_om1_t_7 sin_om1_0_8 ) ( jump z_a_8 om1_a_8 z_a_9 om1_a_9 x_t_8 y_t_8 z_t_8 om1_t_8 om2_t_8 tau_t_8 x_0_9 y_0_9 z_0_9 om1_0_9 om2_0_9 tau_0_9 sin_om1_t_8 sin_om1_0_9 ) ( jump z_a_9 om1_a_9 z_a_10 om1_a_10 x_t_9 y_t_9 z_t_9 om1_t_9 om2_t_9 tau_t_9 x_0_10 y_0_10 z_0_10 om1_0_10 om2_0_10 tau_0_10 sin_om1_t_9 sin_om1_0_10 ) ( jump z_a_10 om1_a_10 z_a_11 om1_a_11 x_t_10 y_t_10 z_t_10 om1_t_10 om2_t_10 tau_t_10 x_0_11 y_0_11 z_0_11 om1_0_11 om2_0_11 tau_0_11 sin_om1_t_10 sin_om1_0_11 ) ( jump z_a_11 om1_a_11 z_a_12 om1_a_12 x_t_11 y_t_11 z_t_11 om1_t_11 om2_t_11 tau_t_11 x_0_12 y_0_12 z_0_12 om1_0_12 om2_0_12 tau_0_12 sin_om1_t_11 sin_om1_0_12 ) ( jump z_a_12 om1_a_12 z_a_13 om1_a_13 x_t_12 y_t_12 z_t_12 om1_t_12 om2_t_12 tau_t_12 x_0_13 y_0_13 z_0_13 om1_0_13 om2_0_13 tau_0_13 sin_om1_t_12 sin_om1_0_13 ) ( jump z_a_13 om1_a_13 z_a_14 om1_a_14 x_t_13 y_t_13 z_t_13 om1_t_13 om2_t_13 tau_t_13 x_0_14 y_0_14 z_0_14 om1_0_14 om2_0_14 tau_0_14 sin_om1_t_13 sin_om1_0_14 ) ( jump z_a_14 om1_a_14 z_a_15 om1_a_15 x_t_14 y_t_14 z_t_14 om1_t_14 om2_t_14 tau_t_14 x_0_15 y_0_15 z_0_15 om1_0_15 om2_0_15 tau_0_15 sin_om1_t_14 sin_om1_0_15 ) ( jump z_a_15 om1_a_15 z_a_16 om1_a_16 x_t_15 y_t_15 z_t_15 om1_t_15 om2_t_15 tau_t_15 x_0_16 y_0_16 z_0_16 om1_0_16 om2_0_16 tau_0_16 sin_om1_t_15 sin_om1_0_16 ) ( jump z_a_16 om1_a_16 z_a_17 om1_a_17 x_t_16 y_t_16 z_t_16 om1_t_16 om2_t_16 tau_t_16 x_0_17 y_0_17 z_0_17 om1_0_17 om2_0_17 tau_0_17 sin_om1_t_16 sin_om1_0_17 ) ( jump z_a_17 om1_a_17 z_a_18 om1_a_18 x_t_17 y_t_17 z_t_17 om1_t_17 om2_t_17 tau_t_17 x_0_18 y_0_18 z_0_18 om1_0_18 om2_0_18 tau_0_18 sin_om1_t_17 sin_om1_0_18 ) ( jump z_a_18 om1_a_18 z_a_19 om1_a_19 x_t_18 y_t_18 z_t_18 om1_t_18 om2_t_18 tau_t_18 x_0_19 y_0_19 z_0_19 om1_0_19 om2_0_19 tau_0_19 sin_om1_t_18 sin_om1_0_19 ) ( jump z_a_19 om1_a_19 z_a_20 om1_a_20 x_t_19 y_t_19 z_t_19 om1_t_19 om2_t_19 tau_t_19 x_0_20 y_0_20 z_0_20 om1_0_20 om2_0_20 tau_0_20 sin_om1_t_19 sin_om1_0_20 ) ( jump z_a_20 om1_a_20 z_a_21 om1_a_21 x_t_20 y_t_20 z_t_20 om1_t_20 om2_t_20 tau_t_20 x_0_21 y_0_21 z_0_21 om1_0_21 om2_0_21 tau_0_21 sin_om1_t_20 sin_om1_0_21 ) ( jump z_a_21 om1_a_21 z_a_22 om1_a_22 x_t_21 y_t_21 z_t_21 om1_t_21 om2_t_21 tau_t_21 x_0_22 y_0_22 z_0_22 om1_0_22 om2_0_22 tau_0_22 sin_om1_t_21 sin_om1_0_22 ) ( jump z_a_22 om1_a_22 z_a_23 om1_a_23 x_t_22 y_t_22 z_t_22 om1_t_22 om2_t_22 tau_t_22 x_0_23 y_0_23 z_0_23 om1_0_23 om2_0_23 tau_0_23 sin_om1_t_22 sin_om1_0_23 ) ( jump z_a_23 om1_a_23 z_a_24 om1_a_24 x_t_23 y_t_23 z_t_23 om1_t_23 om2_t_23 tau_t_23 x_0_24 y_0_24 z_0_24 om1_0_24 om2_0_24 tau_0_24 sin_om1_t_23 sin_om1_0_24 ) ( jump z_a_24 om1_a_24 z_a_25 om1_a_25 x_t_24 y_t_24 z_t_24 om1_t_24 om2_t_24 tau_t_24 x_0_25 y_0_25 z_0_25 om1_0_25 om2_0_25 tau_0_25 sin_om1_t_24 sin_om1_0_25 ) ( jump z_a_25 om1_a_25 z_a_26 om1_a_26 x_t_25 y_t_25 z_t_25 om1_t_25 om2_t_25 tau_t_25 x_0_26 y_0_26 z_0_26 om1_0_26 om2_0_26 tau_0_26 sin_om1_t_25 sin_om1_0_26 ) ( jump z_a_26 om1_a_26 z_a_27 om1_a_27 x_t_26 y_t_26 z_t_26 om1_t_26 om2_t_26 tau_t_26 x_0_27 y_0_27 z_0_27 om1_0_27 om2_0_27 tau_0_27 sin_om1_t_26 sin_om1_0_27 ) ( jump z_a_27 om1_a_27 z_a_28 om1_a_28 x_t_27 y_t_27 z_t_27 om1_t_27 om2_t_27 tau_t_27 x_0_28 y_0_28 z_0_28 om1_0_28 om2_0_28 tau_0_28 sin_om1_t_27 sin_om1_0_28 ) ( jump z_a_28 om1_a_28 z_a_29 om1_a_29 x_t_28 y_t_28 z_t_28 om1_t_28 om2_t_28 tau_t_28 x_0_29 y_0_29 z_0_29 om1_0_29 om2_0_29 tau_0_29 sin_om1_t_28 sin_om1_0_29 ) ( jump z_a_29 om1_a_29 z_a_30 om1_a_30 x_t_29 y_t_29 z_t_29 om1_t_29 om2_t_29 tau_t_29 x_0_30 y_0_30 z_0_30 om1_0_30 om2_0_30 tau_0_30 sin_om1_t_29 sin_om1_0_30 ) ( jump z_a_30 om1_a_30 z_a_31 om1_a_31 x_t_30 y_t_30 z_t_30 om1_t_30 om2_t_30 tau_t_30 x_0_31 y_0_31 z_0_31 om1_0_31 om2_0_31 tau_0_31 sin_om1_t_30 sin_om1_0_31 ) ( jump z_a_31 om1_a_31 z_a_32 om1_a_32 x_t_31 y_t_31 z_t_31 om1_t_31 om2_t_31 tau_t_31 x_0_32 y_0_32 z_0_32 om1_0_32 om2_0_32 tau_0_32 sin_om1_t_31 sin_om1_0_32 ) ( jump z_a_32 om1_a_32 z_a_33 om1_a_33 x_t_32 y_t_32 z_t_32 om1_t_32 om2_t_32 tau_t_32 x_0_33 y_0_33 z_0_33 om1_0_33 om2_0_33 tau_0_33 sin_om1_t_32 sin_om1_0_33 ) ( jump z_a_33 om1_a_33 z_a_34 om1_a_34 x_t_33 y_t_33 z_t_33 om1_t_33 om2_t_33 tau_t_33 x_0_34 y_0_34 z_0_34 om1_0_34 om2_0_34 tau_0_34 sin_om1_t_33 sin_om1_0_34 ) ) )
+( assert ( and ( = t_1 ( + t_0 0.5 ) ) ( = t_2 ( + t_1 0.5 ) ) ( = t_3 ( + t_2 0.5 ) ) ( = t_4 ( + t_3 0.5 ) ) ( = t_5 ( + t_4 0.5 ) ) ( = t_6 ( + t_5 0.5 ) ) ( = t_7 ( + t_6 0.5 ) ) ( = t_8 ( + t_7 0.5 ) ) ( = t_9 ( + t_8 0.5 ) ) ( = t_10 ( + t_9 0.5 ) ) ( = t_11 ( + t_10 0.5 ) ) ( = t_12 ( + t_11 0.5 ) ) ( = t_13 ( + t_12 0.5 ) ) ( = t_14 ( + t_13 0.5 ) ) ( = t_15 ( + t_14 0.5 ) ) ( = t_16 ( + t_15 0.5 ) ) ( = t_17 ( + t_16 0.5 ) ) ( = t_18 ( + t_17 0.5 ) ) ( = t_19 ( + t_18 0.5 ) ) ( = t_20 ( + t_19 0.5 ) ) ( = t_21 ( + t_20 0.5 ) ) ( = t_22 ( + t_21 0.5 ) ) ( = t_23 ( + t_22 0.5 ) ) ( = t_24 ( + t_23 0.5 ) ) ( = t_25 ( + t_24 0.5 ) ) ( = t_26 ( + t_25 0.5 ) ) ( = t_27 ( + t_26 0.5 ) ) ( = t_28 ( + t_27 0.5 ) ) ( = t_29 ( + t_28 0.5 ) ) ( = t_30 ( + t_29 0.5 ) ) ( = t_31 ( + t_30 0.5 ) ) ( = t_32 ( + t_31 0.5 ) ) ( = t_33 ( + t_32 0.5 ) ) ( = t_34 ( + t_33 0.5 ) ) ) )
 ( assert ( and ( = x_t_0 ( int-ode_x 0 ) ) ( = x_t_1 ( int-ode_x 1 ) ) ( = x_t_2 ( int-ode_x 2 ) ) ( = x_t_3 ( int-ode_x 3 ) ) ( = x_t_4 ( int-ode_x 4 ) ) ( = x_t_5 ( int-ode_x 5 ) ) ( = x_t_6 ( int-ode_x 6 ) ) ( = x_t_7 ( int-ode_x 7 ) ) ( = x_t_8 ( int-ode_x 8 ) ) ( = x_t_9 ( int-ode_x 9 ) ) ( = x_t_10 ( int-ode_x 10 ) ) ( = x_t_11 ( int-ode_x 11 ) ) ( = x_t_12 ( int-ode_x 12 ) ) ( = x_t_13 ( int-ode_x 13 ) ) ( = x_t_14 ( int-ode_x 14 ) ) ( = x_t_15 ( int-ode_x 15 ) ) ( = x_t_16 ( int-ode_x 16 ) ) ( = x_t_17 ( int-ode_x 17 ) ) ( = x_t_18 ( int-ode_x 18 ) ) ( = x_t_19 ( int-ode_x 19 ) ) ( = x_t_20 ( int-ode_x 20 ) ) ( = x_t_21 ( int-ode_x 21 ) ) ( = x_t_22 ( int-ode_x 22 ) ) ( = x_t_23 ( int-ode_x 23 ) ) ( = x_t_24 ( int-ode_x 24 ) ) ( = x_t_25 ( int-ode_x 25 ) ) ( = x_t_26 ( int-ode_x 26 ) ) ( = x_t_27 ( int-ode_x 27 ) ) ( = x_t_28 ( int-ode_x 28 ) ) ( = x_t_29 ( int-ode_x 29 ) ) ( = x_t_30 ( int-ode_x 30 ) ) ( = x_t_31 ( int-ode_x 31 ) ) ( = x_t_32 ( int-ode_x 32 ) ) ( = x_t_33 ( int-ode_x 33 ) ) ( = y_t_0 ( int-ode_y 0 ) ) ( = y_t_1 ( int-ode_y 1 ) ) ( = y_t_2 ( int-ode_y 2 ) ) ( = y_t_3 ( int-ode_y 3 ) ) ( = y_t_4 ( int-ode_y 4 ) ) ( = y_t_5 ( int-ode_y 5 ) ) ( = y_t_6 ( int-ode_y 6 ) ) ( = y_t_7 ( int-ode_y 7 ) ) ( = y_t_8 ( int-ode_y 8 ) ) ( = y_t_9 ( int-ode_y 9 ) ) ( = y_t_10 ( int-ode_y 10 ) ) ( = y_t_11 ( int-ode_y 11 ) ) ( = y_t_12 ( int-ode_y 12 ) ) ( = y_t_13 ( int-ode_y 13 ) ) ( = y_t_14 ( int-ode_y 14 ) ) ( = y_t_15 ( int-ode_y 15 ) ) ( = y_t_16 ( int-ode_y 16 ) ) ( = y_t_17 ( int-ode_y 17 ) ) ( = y_t_18 ( int-ode_y 18 ) ) ( = y_t_19 ( int-ode_y 19 ) ) ( = y_t_20 ( int-ode_y 20 ) ) ( = y_t_21 ( int-ode_y 21 ) ) ( = y_t_22 ( int-ode_y 22 ) ) ( = y_t_23 ( int-ode_y 23 ) ) ( = y_t_24 ( int-ode_y 24 ) ) ( = y_t_25 ( int-ode_y 25 ) ) ( = y_t_26 ( int-ode_y 26 ) ) ( = y_t_27 ( int-ode_y 27 ) ) ( = y_t_28 ( int-ode_y 28 ) ) ( = y_t_29 ( int-ode_y 29 ) ) ( = y_t_30 ( int-ode_y 30 ) ) ( = y_t_31 ( int-ode_y 31 ) ) ( = y_t_32 ( int-ode_y 32 ) ) ( = y_t_33 ( int-ode_y 33 ) ) ( = z_t_0 ( int-ode_z 0 ) ) ( = z_t_1 ( int-ode_z 1 ) ) ( = z_t_2 ( int-ode_z 2 ) ) ( = z_t_3 ( int-ode_z 3 ) ) ( = z_t_4 ( int-ode_z 4 ) ) ( = z_t_5 ( int-ode_z 5 ) ) ( = z_t_6 ( int-ode_z 6 ) ) ( = z_t_7 ( int-ode_z 7 ) ) ( = z_t_8 ( int-ode_z 8 ) ) ( = z_t_9 ( int-ode_z 9 ) ) ( = z_t_10 ( int-ode_z 10 ) ) ( = z_t_11 ( int-ode_z 11 ) ) ( = z_t_12 ( int-ode_z 12 ) ) ( = z_t_13 ( int-ode_z 13 ) ) ( = z_t_14 ( int-ode_z 14 ) ) ( = z_t_15 ( int-ode_z 15 ) ) ( = z_t_16 ( int-ode_z 16 ) ) ( = z_t_17 ( int-ode_z 17 ) ) ( = z_t_18 ( int-ode_z 18 ) ) ( = z_t_19 ( int-ode_z 19 ) ) ( = z_t_20 ( int-ode_z 20 ) ) ( = z_t_21 ( int-ode_z 21 ) ) ( = z_t_22 ( int-ode_z 22 ) ) ( = z_t_23 ( int-ode_z 23 ) ) ( = z_t_24 ( int-ode_z 24 ) ) ( = z_t_25 ( int-ode_z 25 ) ) ( = z_t_26 ( int-ode_z 26 ) ) ( = z_t_27 ( int-ode_z 27 ) ) ( = z_t_28 ( int-ode_z 28 ) ) ( = z_t_29 ( int-ode_z 29 ) ) ( = z_t_30 ( int-ode_z 30 ) ) ( = z_t_31 ( int-ode_z 31 ) ) ( = z_t_32 ( int-ode_z 32 ) ) ( = z_t_33 ( int-ode_z 33 ) ) ( = om1_t_0 ( int-ode_om1 0 ) ) ( = om1_t_1 ( int-ode_om1 1 ) ) ( = om1_t_2 ( int-ode_om1 2 ) ) ( = om1_t_3 ( int-ode_om1 3 ) ) ( = om1_t_4 ( int-ode_om1 4 ) ) ( = om1_t_5 ( int-ode_om1 5 ) ) ( = om1_t_6 ( int-ode_om1 6 ) ) ( = om1_t_7 ( int-ode_om1 7 ) ) ( = om1_t_8 ( int-ode_om1 8 ) ) ( = om1_t_9 ( int-ode_om1 9 ) ) ( = om1_t_10 ( int-ode_om1 10 ) ) ( = om1_t_11 ( int-ode_om1 11 ) ) ( = om1_t_12 ( int-ode_om1 12 ) ) ( = om1_t_13 ( int-ode_om1 13 ) ) ( = om1_t_14 ( int-ode_om1 14 ) ) ( = om1_t_15 ( int-ode_om1 15 ) ) ( = om1_t_16 ( int-ode_om1 16 ) ) ( = om1_t_17 ( int-ode_om1 17 ) ) ( = om1_t_18 ( int-ode_om1 18 ) ) ( = om1_t_19 ( int-ode_om1 19 ) ) ( = om1_t_20 ( int-ode_om1 20 ) ) ( = om1_t_21 ( int-ode_om1 21 ) ) ( = om1_t_22 ( int-ode_om1 22 ) ) ( = om1_t_23 ( int-ode_om1 23 ) ) ( = om1_t_24 ( int-ode_om1 24 ) ) ( = om1_t_25 ( int-ode_om1 25 ) ) ( = om1_t_26 ( int-ode_om1 26 ) ) ( = om1_t_27 ( int-ode_om1 27 ) ) ( = om1_t_28 ( int-ode_om1 28 ) ) ( = om1_t_29 ( int-ode_om1 29 ) ) ( = om1_t_30 ( int-ode_om1 30 ) ) ( = om1_t_31 ( int-ode_om1 31 ) ) ( = om1_t_32 ( int-ode_om1 32 ) ) ( = om1_t_33 ( int-ode_om1 33 ) ) ( = om2_t_0 ( int-ode_om2 0 ) ) ( = om2_t_1 ( int-ode_om2 1 ) ) ( = om2_t_2 ( int-ode_om2 2 ) ) ( = om2_t_3 ( int-ode_om2 3 ) ) ( = om2_t_4 ( int-ode_om2 4 ) ) ( = om2_t_5 ( int-ode_om2 5 ) ) ( = om2_t_6 ( int-ode_om2 6 ) ) ( = om2_t_7 ( int-ode_om2 7 ) ) ( = om2_t_8 ( int-ode_om2 8 ) ) ( = om2_t_9 ( int-ode_om2 9 ) ) ( = om2_t_10 ( int-ode_om2 10 ) ) ( = om2_t_11 ( int-ode_om2 11 ) ) ( = om2_t_12 ( int-ode_om2 12 ) ) ( = om2_t_13 ( int-ode_om2 13 ) ) ( = om2_t_14 ( int-ode_om2 14 ) ) ( = om2_t_15 ( int-ode_om2 15 ) ) ( = om2_t_16 ( int-ode_om2 16 ) ) ( = om2_t_17 ( int-ode_om2 17 ) ) ( = om2_t_18 ( int-ode_om2 18 ) ) ( = om2_t_19 ( int-ode_om2 19 ) ) ( = om2_t_20 ( int-ode_om2 20 ) ) ( = om2_t_21 ( int-ode_om2 21 ) ) ( = om2_t_22 ( int-ode_om2 22 ) ) ( = om2_t_23 ( int-ode_om2 23 ) ) ( = om2_t_24 ( int-ode_om2 24 ) ) ( = om2_t_25 ( int-ode_om2 25 ) ) ( = om2_t_26 ( int-ode_om2 26 ) ) ( = om2_t_27 ( int-ode_om2 27 ) ) ( = om2_t_28 ( int-ode_om2 28 ) ) ( = om2_t_29 ( int-ode_om2 29 ) ) ( = om2_t_30 ( int-ode_om2 30 ) ) ( = om2_t_31 ( int-ode_om2 31 ) ) ( = om2_t_32 ( int-ode_om2 32 ) ) ( = om2_t_33 ( int-ode_om2 33 ) ) ( = tau_t_0 ( int-ode_tau 0 ) ) ( = tau_t_1 ( int-ode_tau 1 ) ) ( = tau_t_2 ( int-ode_tau 2 ) ) ( = tau_t_3 ( int-ode_tau 3 ) ) ( = tau_t_4 ( int-ode_tau 4 ) ) ( = tau_t_5 ( int-ode_tau 5 ) ) ( = tau_t_6 ( int-ode_tau 6 ) ) ( = tau_t_7 ( int-ode_tau 7 ) ) ( = tau_t_8 ( int-ode_tau 8 ) ) ( = tau_t_9 ( int-ode_tau 9 ) ) ( = tau_t_10 ( int-ode_tau 10 ) ) ( = tau_t_11 ( int-ode_tau 11 ) ) ( = tau_t_12 ( int-ode_tau 12 ) ) ( = tau_t_13 ( int-ode_tau 13 ) ) ( = tau_t_14 ( int-ode_tau 14 ) ) ( = tau_t_15 ( int-ode_tau 15 ) ) ( = tau_t_16 ( int-ode_tau 16 ) ) ( = tau_t_17 ( int-ode_tau 17 ) ) ( = tau_t_18 ( int-ode_tau 18 ) ) ( = tau_t_19 ( int-ode_tau 19 ) ) ( = tau_t_20 ( int-ode_tau 20 ) ) ( = tau_t_21 ( int-ode_tau 21 ) ) ( = tau_t_22 ( int-ode_tau 22 ) ) ( = tau_t_23 ( int-ode_tau 23 ) ) ( = tau_t_24 ( int-ode_tau 24 ) ) ( = tau_t_25 ( int-ode_tau 25 ) ) ( = tau_t_26 ( int-ode_tau 26 ) ) ( = tau_t_27 ( int-ode_tau 27 ) ) ( = tau_t_28 ( int-ode_tau 28 ) ) ( = tau_t_29 ( int-ode_tau 29 ) ) ( = tau_t_30 ( int-ode_tau 30 ) ) ( = tau_t_31 ( int-ode_tau 31 ) ) ( = tau_t_32 ( int-ode_tau 32 ) ) ( = tau_t_33 ( int-ode_tau 33 ) ) ) )
 ( assert ( and ( = sin_om1_t_0 ( int-ode_sin 0 ) ) ( = sin_om1_t_1 ( int-ode_sin 1 ) ) ( = sin_om1_t_2 ( int-ode_sin 2 ) ) ( = sin_om1_t_3 ( int-ode_sin 3 ) ) ( = sin_om1_t_4 ( int-ode_sin 4 ) ) ( = sin_om1_t_5 ( int-ode_sin 5 ) ) ( = sin_om1_t_6 ( int-ode_sin 6 ) ) ( = sin_om1_t_7 ( int-ode_sin 7 ) ) ( = sin_om1_t_8 ( int-ode_sin 8 ) ) ( = sin_om1_t_9 ( int-ode_sin 9 ) ) ( = sin_om1_t_10 ( int-ode_sin 10 ) ) ( = sin_om1_t_11 ( int-ode_sin 11 ) ) ( = sin_om1_t_12 ( int-ode_sin 12 ) ) ( = sin_om1_t_13 ( int-ode_sin 13 ) ) ( = sin_om1_t_14 ( int-ode_sin 14 ) ) ( = sin_om1_t_15 ( int-ode_sin 15 ) ) ( = sin_om1_t_16 ( int-ode_sin 16 ) ) ( = sin_om1_t_17 ( int-ode_sin 17 ) ) ( = sin_om1_t_18 ( int-ode_sin 18 ) ) ( = sin_om1_t_19 ( int-ode_sin 19 ) ) ( = sin_om1_t_20 ( int-ode_sin 20 ) ) ( = sin_om1_t_21 ( int-ode_sin 21 ) ) ( = sin_om1_t_22 ( int-ode_sin 22 ) ) ( = sin_om1_t_23 ( int-ode_sin 23 ) ) ( = sin_om1_t_24 ( int-ode_sin 24 ) ) ( = sin_om1_t_25 ( int-ode_sin 25 ) ) ( = sin_om1_t_26 ( int-ode_sin 26 ) ) ( = sin_om1_t_27 ( int-ode_sin 27 ) ) ( = sin_om1_t_28 ( int-ode_sin 28 ) ) ( = sin_om1_t_29 ( int-ode_sin 29 ) ) ( = sin_om1_t_30 ( int-ode_sin 30 ) ) ( = sin_om1_t_31 ( int-ode_sin 31 ) ) ( = sin_om1_t_32 ( int-ode_sin 32 ) ) ( = sin_om1_t_33 ( int-ode_sin 33 ) ) ) )
 
@@ -875,10 +875,10 @@
 (push 1)
 (assert (and 
 (= dx_0 0.0)
-(= x_0_0 (- 0.05000000))
+(= x_0_0 0.07500000)
 (= t_0 0.0)
 (= t_1 0.50000000)
-(= (int-ode_x 0) (- 0.368310))
+(= (int-ode_x 0) (- 0.243310))
 ))
 (assert (and 
 (= dy_0 0.0)
@@ -962,10 +962,10 @@
 (push 1)
 (assert (and 
 (= dx_1 0.0)
-(= x_0_1 (- 0.36831000))
+(= x_0_1 (- 0.24331000))
 (= t_1 0.50000000)
 (= t_2 1.0)
-(= (int-ode_x 1) (- 0.686620))
+(= (int-ode_x 1) (- 0.561620))
 ))
 (assert (and 
 (= dy_1 0.0)
@@ -1049,10 +1049,10 @@
 (push 1)
 (assert (and 
 (= dx_2 0.0)
-(= x_0_2 (- 0.68662000))
+(= x_0_2 (- 0.56162000))
 (= t_2 1.0)
 (= t_3 1.50000000)
-(= (int-ode_x 2) (- 0.368310))
+(= (int-ode_x 2) (- 0.243310))
 ))
 (assert (and 
 (= dy_2 0.0)
@@ -1136,10 +1136,10 @@
 (push 1)
 (assert (and 
 (= dx_3 0.0)
-(= x_0_3 (- 0.36831000))
+(= x_0_3 (- 0.24331000))
 (= t_3 1.50000000)
 (= t_4 2.0)
-(= (int-ode_x 3) (- 0.050000))
+(= (int-ode_x 3) 0.075000)
 ))
 (assert (and 
 (= dy_3 0.0)
@@ -1223,10 +1223,10 @@
 (push 1)
 (assert (and 
 (= dx_4 0.0)
-(= x_0_4 (- 0.05000000))
+(= x_0_4 0.07500000)
 (= t_4 2.0)
 (= t_5 2.50000000)
-(= (int-ode_x 4) (- 0.368310))
+(= (int-ode_x 4) (- 0.243310))
 ))
 (assert (and 
 (= dy_4 0.0)
@@ -1310,10 +1310,10 @@
 (push 1)
 (assert (and 
 (= dx_5 0.0)
-(= x_0_5 (- 0.36831000))
+(= x_0_5 (- 0.24331000))
 (= t_5 2.50000000)
 (= t_6 3.0)
-(= (int-ode_x 5) (- 0.686620))
+(= (int-ode_x 5) (- 0.561620))
 ))
 (assert (and 
 (= dy_5 0.0)
@@ -1397,10 +1397,10 @@
 (push 1)
 (assert (and 
 (= dx_6 0.0)
-(= x_0_6 (- 0.68662000))
+(= x_0_6 (- 0.56162000))
 (= t_6 3.0)
 (= t_7 3.50000000)
-(= (int-ode_x 6) (- 0.368310))
+(= (int-ode_x 6) (- 0.243310))
 ))
 (assert (and 
 (= dy_6 0.0)
@@ -1484,10 +1484,10 @@
 (push 1)
 (assert (and 
 (= dx_7 0.0)
-(= x_0_7 (- 0.36831000))
+(= x_0_7 (- 0.24331000))
 (= t_7 3.50000000)
 (= t_8 4.0)
-(= (int-ode_x 7) (- 0.050000))
+(= (int-ode_x 7) 0.075000)
 ))
 (assert (and 
 (= dy_7 0.0)
@@ -1571,10 +1571,10 @@
 (push 1)
 (assert (and 
 (= dx_8 0.0)
-(= x_0_8 (- 0.05000000))
+(= x_0_8 0.07500000)
 (= t_8 4.0)
 (= t_9 4.50000000)
-(= (int-ode_x 8) (- 0.368310))
+(= (int-ode_x 8) (- 0.243310))
 ))
 (assert (and 
 (= dy_8 0.0)
@@ -1658,10 +1658,10 @@
 (push 1)
 (assert (and 
 (= dx_9 0.0)
-(= x_0_9 (- 0.36831000))
+(= x_0_9 (- 0.24331000))
 (= t_9 4.50000000)
 (= t_10 5.0)
-(= (int-ode_x 9) (- 0.686620))
+(= (int-ode_x 9) (- 0.561620))
 ))
 (assert (and 
 (= dy_9 0.0)
@@ -1745,10 +1745,10 @@
 (push 1)
 (assert (and 
 (= dx_10 0.0)
-(= x_0_10 (- 0.68662000))
+(= x_0_10 (- 0.56162000))
 (= t_10 5.0)
 (= t_11 5.50000000)
-(= (int-ode_x 10) (- 0.368310))
+(= (int-ode_x 10) (- 0.243310))
 ))
 (assert (and 
 (= dy_10 0.0)
@@ -1832,10 +1832,10 @@
 (push 1)
 (assert (and 
 (= dx_11 0.0)
-(= x_0_11 (- 0.36831000))
+(= x_0_11 (- 0.24331000))
 (= t_11 5.50000000)
 (= t_12 6.0)
-(= (int-ode_x 11) (- 0.050000))
+(= (int-ode_x 11) 0.075000)
 ))
 (assert (and 
 (= dy_11 0.0)
@@ -1919,10 +1919,10 @@
 (push 1)
 (assert (and 
 (= dx_12 0.0)
-(= x_0_12 (- 0.05000000))
+(= x_0_12 0.07500000)
 (= t_12 6.0)
 (= t_13 6.50000000)
-(= (int-ode_x 12) (- 0.368310))
+(= (int-ode_x 12) (- 0.243310))
 ))
 (assert (and 
 (= dy_12 0.0)
@@ -2006,10 +2006,10 @@
 (push 1)
 (assert (and 
 (= dx_13 0.0)
-(= x_0_13 (- 0.36831000))
+(= x_0_13 (- 0.24331000))
 (= t_13 6.50000000)
 (= t_14 7.0)
-(= (int-ode_x 13) (- 0.686620))
+(= (int-ode_x 13) (- 0.561620))
 ))
 (assert (and 
 (= dy_13 0.0)
@@ -2093,10 +2093,10 @@
 (push 1)
 (assert (and 
 (= dx_14 0.0)
-(= x_0_14 (- 0.68662000))
+(= x_0_14 (- 0.56162000))
 (= t_14 7.0)
 (= t_15 7.50000000)
-(= (int-ode_x 14) (- 0.368310))
+(= (int-ode_x 14) (- 0.243310))
 ))
 (assert (and 
 (= dy_14 0.0)
@@ -2180,10 +2180,10 @@
 (push 1)
 (assert (and 
 (= dx_15 0.0)
-(= x_0_15 (- 0.36831000))
+(= x_0_15 (- 0.24331000))
 (= t_15 7.50000000)
 (= t_16 8.0)
-(= (int-ode_x 15) (- 0.050000))
+(= (int-ode_x 15) 0.075000)
 ))
 (assert (and 
 (= dy_15 0.0)
@@ -2267,10 +2267,10 @@
 (push 1)
 (assert (and 
 (= dx_16 0.0)
-(= x_0_16 (- 0.05000000))
+(= x_0_16 0.07500000)
 (= t_16 8.0)
 (= t_17 8.50000000)
-(= (int-ode_x 16) (- 0.368310))
+(= (int-ode_x 16) (- 0.243310))
 ))
 (assert (and 
 (= dy_16 0.0)
@@ -2354,10 +2354,10 @@
 (push 1)
 (assert (and 
 (= dx_17 0.0)
-(= x_0_17 (- 0.36831000))
+(= x_0_17 (- 0.24331000))
 (= t_17 8.50000000)
 (= t_18 9.0)
-(= (int-ode_x 17) (- 0.686620))
+(= (int-ode_x 17) (- 0.561620))
 ))
 (assert (and 
 (= dy_17 0.0)
@@ -2441,10 +2441,10 @@
 (push 1)
 (assert (and 
 (= dx_18 0.0)
-(= x_0_18 (- 0.68662000))
+(= x_0_18 (- 0.56162000))
 (= t_18 9.0)
 (= t_19 9.50000000)
-(= (int-ode_x 18) (- 0.368310))
+(= (int-ode_x 18) (- 0.243310))
 ))
 (assert (and 
 (= dy_18 0.0)
@@ -2528,10 +2528,10 @@
 (push 1)
 (assert (and 
 (= dx_19 0.0)
-(= x_0_19 (- 0.36831000))
+(= x_0_19 (- 0.24331000))
 (= t_19 9.50000000)
 (= t_20 10.0)
-(= (int-ode_x 19) (- 0.050000))
+(= (int-ode_x 19) 0.075000)
 ))
 (assert (and 
 (= dy_19 0.0)
@@ -2615,10 +2615,10 @@
 (push 1)
 (assert (and 
 (= dx_20 0.0)
-(= x_0_20 (- 0.05000000))
+(= x_0_20 0.07500000)
 (= t_20 10.0)
 (= t_21 10.50000000)
-(= (int-ode_x 20) (- 0.368310))
+(= (int-ode_x 20) (- 0.243310))
 ))
 (assert (and 
 (= dy_20 0.0)
@@ -2702,10 +2702,10 @@
 (push 1)
 (assert (and 
 (= dx_21 0.0)
-(= x_0_21 (- 0.36831000))
+(= x_0_21 (- 0.24331000))
 (= t_21 10.50000000)
 (= t_22 11.0)
-(= (int-ode_x 21) (- 0.686620))
+(= (int-ode_x 21) (- 0.561620))
 ))
 (assert (and 
 (= dy_21 0.0)
@@ -2789,10 +2789,10 @@
 (push 1)
 (assert (and 
 (= dx_22 0.0)
-(= x_0_22 (- 0.68662000))
+(= x_0_22 (- 0.56162000))
 (= t_22 11.0)
 (= t_23 11.50000000)
-(= (int-ode_x 22) (- 0.368310))
+(= (int-ode_x 22) (- 0.243310))
 ))
 (assert (and 
 (= dy_22 0.0)
@@ -2876,10 +2876,10 @@
 (push 1)
 (assert (and 
 (= dx_23 0.0)
-(= x_0_23 (- 0.36831000))
+(= x_0_23 (- 0.24331000))
 (= t_23 11.50000000)
 (= t_24 12.0)
-(= (int-ode_x 23) (- 0.050000))
+(= (int-ode_x 23) 0.075000)
 ))
 (assert (and 
 (= dy_23 0.0)
@@ -2963,10 +2963,10 @@
 (push 1)
 (assert (and 
 (= dx_24 0.0)
-(= x_0_24 (- 0.05000000))
+(= x_0_24 0.07500000)
 (= t_24 12.0)
 (= t_25 12.50000000)
-(= (int-ode_x 24) (- 0.368310))
+(= (int-ode_x 24) (- 0.243310))
 ))
 (assert (and 
 (= dy_24 0.0)
@@ -3050,10 +3050,10 @@
 (push 1)
 (assert (and 
 (= dx_25 0.0)
-(= x_0_25 (- 0.36831000))
+(= x_0_25 (- 0.24331000))
 (= t_25 12.50000000)
 (= t_26 13.0)
-(= (int-ode_x 25) (- 0.686620))
+(= (int-ode_x 25) (- 0.561620))
 ))
 (assert (and 
 (= dy_25 0.0)
@@ -3137,10 +3137,10 @@
 (push 1)
 (assert (and 
 (= dx_26 0.0)
-(= x_0_26 (- 0.13732400))
+(= x_0_26 (- 0.11232400))
 (= t_26 13.0)
 (= t_27 13.50000000)
-(= (int-ode_x 26) (- 0.455634))
+(= (int-ode_x 26) (- 0.430634))
 ))
 (assert (and 
 (= dy_26 0.0)
@@ -3224,10 +3224,10 @@
 (push 1)
 (assert (and 
 (= dx_27 0.0)
-(= x_0_27 (- 0.45563400))
+(= x_0_27 (- 0.43063400))
 (= t_27 13.50000000)
 (= t_28 14.0)
-(= (int-ode_x 27) (- 0.773944))
+(= (int-ode_x 27) (- 0.748944))
 ))
 (assert (and 
 (= dy_27 0.0)
@@ -3311,10 +3311,10 @@
 (push 1)
 (assert (and 
 (= dx_28 0.0)
-(= x_0_28 (- 0.77394400))
+(= x_0_28 (- 0.74894400))
 (= t_28 14.0)
 (= t_29 14.50000000)
-(= (int-ode_x 28) (- 0.455634))
+(= (int-ode_x 28) (- 0.430634))
 ))
 (assert (and 
 (= dy_28 0.0)
@@ -3398,10 +3398,10 @@
 (push 1)
 (assert (and 
 (= dx_29 0.0)
-(= x_0_29 (- 0.45563400))
+(= x_0_29 (- 0.43063400))
 (= t_29 14.50000000)
 (= t_30 15.0)
-(= (int-ode_x 29) (- 0.137324))
+(= (int-ode_x 29) (- 0.112324))
 ))
 (assert (and 
 (= dy_29 0.0)
@@ -3485,10 +3485,10 @@
 (push 1)
 (assert (and 
 (= dx_30 0.0)
-(= x_0_30 (- 0.13732400))
+(= x_0_30 (- 0.11232400))
 (= t_30 15.0)
 (= t_31 15.50000000)
-(= (int-ode_x 30) (- 0.455634))
+(= (int-ode_x 30) (- 0.430634))
 ))
 (assert (and 
 (= dy_30 0.0)
@@ -3572,10 +3572,10 @@
 (push 1)
 (assert (and 
 (= dx_31 0.0)
-(= x_0_31 (- 0.45563400))
+(= x_0_31 (- 0.43063400))
 (= t_31 15.50000000)
 (= t_32 16.0)
-(= (int-ode_x 31) (- 0.773944))
+(= (int-ode_x 31) (- 0.748944))
 ))
 (assert (and 
 (= dy_31 0.0)
@@ -3659,10 +3659,10 @@
 (push 1)
 (assert (and 
 (= dx_32 0.0)
-(= x_0_32 (- 0.77394400))
+(= x_0_32 (- 0.74894400))
 (= t_32 16.0)
 (= t_33 16.50000000)
-(= (int-ode_x 32) (- 0.455634))
+(= (int-ode_x 32) (- 0.430634))
 ))
 (assert (and 
 (= dy_32 0.0)
@@ -3746,10 +3746,10 @@
 (push 1)
 (assert (and 
 (= dx_33 0.0)
-(= x_0_33 (- 0.45563400))
+(= x_0_33 (- 0.43063400))
 (= t_33 16.50000000)
 (= t_34 17.0)
-(= (int-ode_x 33) (- 0.137324))
+(= (int-ode_x 33) (- 0.112324))
 ))
 (assert (and 
 (= dy_33 0.0)

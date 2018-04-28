@@ -24,12 +24,10 @@ UNIF=1
 
 # SMT_SOLVER=(cvc4 -L smt2 -i)
 SMT_SOLVER=(z3 -smt2 -in)
-# SMT_SOLVER=(~"/Data/Software/opensmt2/opensmt")
 
 APP_DIR=bin
 TOOLS_DIR=tools
 
-# ODE_SOLVER=("$APP_DIR/euler"  -o "$TRAJ_OUTPUT_F")
 ODE_SOLVER=("$APP_DIR/odeint" -o "$TRAJ_OUTPUT_F")
 
 EVAL_CMD=("$APP_DIR/eval")
@@ -384,29 +382,9 @@ function smt_assert_exprs {
 
 # 1 - step
 function add_asserts {
-    local exprs
-
-#     for i in ${!F_KEYS[@]}; do
-#         exprs=
-#         fkey=${F_KEYS[$i]}
-#         smt_assert_exprs $1 $fkey exprs
-#         local oval=${ODE_VALUES[$i]}
-#         neg_to_expr oval
-#         append_smt "(assert (=> (and $exprs
-# ) (= (int-ode_${fkey} ${1}) $oval)
-# ))"
-#     done
-#     append_smt "(push 1)"
-#     for fkey in ${F_KEYS[@]}; do
-#         set_links $fkey
-#         # append_smt "(assert (= ${lDT_IDS[$1]} ${VALUES[${lDT_IDS[$1]}]}))"
-#         smt_assert_exprs $1 $fkey exprs
-#         append_smt "(assert (and $exprs))"
-#     done
-
     append_smt "(push 1)"
     for i in ${!F_KEYS[@]}; do
-        exprs=
+        local exprs=
         fkey=${F_KEYS[$i]}
         smt_assert_exprs $1 $fkey exprs
         local oval=${ODE_VALUES[$i]}

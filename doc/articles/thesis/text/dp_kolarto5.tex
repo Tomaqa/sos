@@ -3545,13 +3545,13 @@ což bude vyžadovat operace vkládání a odstraňování potomků výrazů.
 
 %%%%%%%%%%%%%
 
-% Fri 27 Apr 2018 11:17:34 PM CEST
+% Sat 28 Apr 2018 01:56:13 PM CEST
 \begin{subsection}{Řídící algoritmus}\label{ss:design:arch:alg}
 Úlohou algoritmu je dospět v~\acr{smt} řešiči
 k~ohodnocení všech konstant
 na~základě výsledků rovnic z~\acr{ode} řešiče.
 Hlavní výzvou je problém s~návraty,
-kdy v~průběhu výpočtu dojde k~tomu,
+kdy v~průběhu výpočtu dochází k~tomu,
 že vstup v~aktuální podobě není splnitelný.
 Návraty má efektivně implementován \acr{smt} řešič,
 ale je otázkou, jakým způsobem je na~něj delegovat.
@@ -3565,6 +3565,7 @@ Rovněž nebudou uvažovány možnosti paralelizace.
 
 %%%
 
+% Sat 28 Apr 2018 01:56:20 PM CEST
 \begin{paragraph}{Diskuze redukce ověření splnitelností.}
 \label{ss:design:arch:alg:discuss}
 Důležitým aspektem je poměr výpočetních náročností
@@ -3629,14 +3630,14 @@ o~více fází napřed, apod.
 Efektivita zvoleného řešení by závisela
 na~empirickém měření složitosti,
 analyticky lze těžko předpovědět.
-
 \end{paragraph} %Diskuze redukce ověření splnitelností.
 
 %%%
 
+% Sat 28 Apr 2018 01:56:07 PM CEST
 \begin{paragraph}{Základní algoritmus.}
 \label{ss:design:arch:alg:discuss}
-Podrobněji uvedu pouze základní algoritmus,
+Pro~účely prototypu navrhnu zatím alespoň základní algoritmus,
 který postupuje jen po~jednotlivých
 cestách ve~stromu prohledávaného prostoru,
 výhradně na~základě aktuálního ohodnocení konstant,
@@ -3645,10 +3646,33 @@ Takový postup je jednodušší implementovat,
 ale v~každé fázi vyžaduje ověření splnitelnosti,
 a tedy významně závisí na~její výkonnosti.
 
-\cmt{V této variantě nemají smysl podmíněné klauzule,
-stačí jen vkládat aserce do zásobníku.
-Řešič se musí donutit ke zvolení přesně tohoto ohodnocení,
-protože ostatní varianty nejsou spočítány.}
+V této variantě ztrácí smysl přidávat
+nové hodnoty jako podmíněné klauzule,
+namísto toho stačí aserce jen vkládat do~zásobníku asercí.
+Důvod, proč samotné podmíněné klauzule nefungují,
+je ten, že nově vypočtené hodnoty
+jsou podmíněny jejich vstupními podmínkami,
+ale \acr{smt} řešič nic nenutí tyto vstupní podmínky zvolit
+a smí si zvolit i~jiné varianty derivací,
+které ale ještě nejsou spočtené,
+a tudíž si za~výsledek integrace smí dosadit libovolnou hodnotu.
+Tudíž by bylo nutné kromě podmíněné klauzule
+navíc explicitně přidat klauzule,
+které vyžadují vstupní hodnoty v~předpokladech.
+Tím ale podmíněné klauzule ztrácí smysl
+a stačí jen rovnou přidat předpoklady
+i~výsledky do~asercí bez~podmínek.
+
+Bez~použití podmíněných klauzulí
+je však nutné při~návratu
+přidané aserce odebrat,
+což umožňují operace se zásobníkem asercí.
+Je nutné přidávat konfliktní klauzule,
+tím se definitivně uzavírají větve
+ve~stromu prohledávaného prostoru
+a algoritmus tak konverguje k~výsledku.
+Se~vzrůstajícím množstvím konfliktních klauzulí
+však roste složitost dílčích operací ověření splnitelnosti.
 
 Postup je následující:
 \begin{enumerate}
@@ -3670,56 +3694,37 @@ Postup je následující:
    Ověření splnitelnosti \acr{smt} formule:
    \begin{itemize}
    \item Je-li splnitelná, získej model,
-      tj.~ohodnocení všech konstant,
-      a vyber ty, které vstupují do~další fáze jako vstupní argumenty.
+      tj.~ohodnocení všech konstant.
    \item Není-li splnitelná, proveď návrat:
       \begin{enumerate}
+      \item Pokud \id{s = 0}, vstup není splnitelný. Konec.
+      \item Odeber vrchní úroveň zásobníku asercí: \id{(pop~1)}.
       \item Přidej konfliktní klauzuli (aserci)
-         znemožňující ohodnocení vstupních konstant
-         do~aktuální fáze.
+         znemožňující vstupní ohodnocení předchozí fáze.
       \item Vrať se do~předchozí fáze:
-         \id{s-{}-}.
-      \item Pokud \id{s~< 0}, vstup není splnitelný. Konec.
-      \item Jdi na~bod \rf{i:design:alg:check-sat}.
+         \id{s-{}-}, jdi na~bod \rf{i:design:alg:check-sat}.
       \end{enumerate}
    \end{itemize}
-\item Pokud je dosažen požadovaný počet kroků simulace,
+\item Pokud je dosaženo celkového počtu fází,
    jdi na~bod \rf{i:design:alg:end}.
+\item Vyber ohodnocené konstanty,
+   které do~fáze vstupují jako vstupní argumenty.
 \item Proveď výpočet všech diferenciálních rovnic
-   v~rámci kroku simulace.
-   Výstupem jsou jednoznačné hodnoty.
-\item Přidej získané hodnoty jako nové aserce
-   závisící na~hodnotách z~bodu \rf{i:design:alg:check-sat}
-   v~rámci kroku simulace.
-\item Přejdi do~dalšího kroku simulace: \id{s+{}+}.
-   Jdi na~bod \rf{i:design:alg:check-sat}.
+   v~rámci aktuální fáze a ulož výstupy.
+\item Přidej výstupní i~vstupní hodnoty této fáze
+   jako aserce do~nové úrovně zásobníku asercí: \id{(push~1)}.
+\item Přejdi do~další fáze: \id{s+{}+},
+   jdi na~bod \rf{i:design:alg:check-sat}.
 \item \label{i:design:alg:end}
    Vypiš získaný model. Konec.
 \end{enumerate}
 
-Algoritmus nakonec ani nepoužívá operace
-se~zásobníkem asercí.
-Odebírání asercí by totiž redukovalo
-informační hodnotu vstupu
-a takový postup by navíc nemusel konvergovat.
-Pokud ale návraty algoritmu přidávají konfliktní klauzule,
-spěje postup jednoznačně k~cíli.
-Tento postup se podobá algoritmu \acr{dpll}.
-
-Pokud je proveden návrat až k~počátečním podmínkám,
-znamená to, že vstup není splnitelný,
-protože se prozkoumaly všechny možnosti,
-díky jednoznačnému chování \acr{ode} řešiče
-a konfliktním klauzulím.
-
+Tento postup se díky konfliktním klauzulím
+podobá algoritmu \acr{dpll}.
 \end{paragraph} %%Základní algoritmus.
 
 %%%
 
-\bigskip
-
-Tímto je vyřešen návrh centrálního bodu,
-jehož zodpovědnost je provedení uvedeného algoritmu.
 \end{subsection} %%Řídící algoritmus
 
 %%%%%%%%%%%%%

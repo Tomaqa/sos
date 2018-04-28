@@ -3,7 +3,8 @@
 
 ;;; Constants
 
-#define T 0.33
+#define T 0.2
+;#define T 0.4
 
 #define T_MIN()    0
 #define T_MAX()   30
