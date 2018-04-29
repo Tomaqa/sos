@@ -1,0 +1,228 @@
+;;;; Composition of multiple cars in line in SMT+ODE format
+;; Cars move from left to right only
+;; `(x.i, v.i, a.i)' is continuous state of i-th car
+;; `x.i' denotes horizontal positive position of car back (left edge)
+;; `v.i' denotes positive velocity
+;; `a.i' denotes either positive or negative acceleration
+;; Used units are metres and seconds
+;; `(accel.i, brake.i)' is discrete state of i-th car
+
+;;; Constants
+
+#define T 0.5
+
+#define T_MIN()   0
+#define T_MAX()  10
+
+#define X_MIN()    0
+#define X_MAX() 1000
+
+#define V_MIN()     0
+#define V_MAX()    50
+
+#define A_MIN()   -20
+#define A_MAX()    10
+
+#define ACCEL_COEF  1
+#define BRAKE_COEF -2
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
+#define STEPS-1 $d(- #STEPS 1)
+
+#define SYSTEMS() 2
+#define IN_SYSTEMS() $d (- #SYSTEMS 2)
+
+#define CAR_LEN() 3
+#define MIN_DST() 2
+#define MIN_BACK_DST() $(+ #CAR_LEN #MIN_DST)
+
+;;; Declarations
+
+#def DECL_CONSTS(const type)
+#for (i 0 #STEPS)
+    (declare-fun #const##_#i () #type)
+#endfor
+#enddef
+
+#def DECL_SYS_CONSTS(const type)
+#for (k 1 #SYSTEMS)
+    #DECL_CONSTS(#const##.#k  #type)
+#endfor
+#enddef
+
+#DECL_CONSTS(t  Real)
+
+#DECL_SYS_CONSTS(x_0    Real)
+#DECL_SYS_CONSTS(x_t    Real)
+#DECL_SYS_CONSTS(v_0    Real)
+#DECL_SYS_CONSTS(v_t    Real)
+#DECL_SYS_CONSTS(a_0    Real)
+#DECL_SYS_CONSTS(a_t    Real)
+
+#DECL_SYS_CONSTS(accel  Bool)
+#DECL_SYS_CONSTS(brake  Bool)
+
+#DECL_SYS_CONSTS(da    Dt)
+
+;;; Initializations
+
+#define INIT_T()   (= t_0 #T_MIN)
+
+#def _INIT_INTERVAL(var val max step)
+#if $(<= #val #max)
+    (= #var #val)
+    #_INIT_INTERVAL(#var $(+ #val #step) #max #step)
+#endif
+#enddef
+#def INIT_INTERVAL(var min max step)
+    (or #_INIT_INTERVAL(#var #min #max #step))
+#enddef
+
+#define INIT_X_RANGE() 2
+#define INIT_X_STEP() 0.5
+#def INIT_X()
+#for (k 1 #SYSTEMS)
+#let k_prev $d(- #k 1)
+#let min $(+ #X_MIN (* #k_prev (+ #MIN_BACK_DST #INIT_X_RANGE)))
+#let max $(+ #min #INIT_X_RANGE)
+    #INIT_INTERVAL(x_0.#k##_0 #min #max #INIT_X_STEP)
+#endlet max
+#endlet min
+#endlet k_prev
+#endfor
+#enddef
+
+#def INIT_V()
+#for (k 1 #SYSTEMS)
+    (= v_0.#k##_0 0)
+#endfor
+#enddef
+
+#def INIT_A()
+#for (k 1 #SYSTEMS)
+    (= a_0.#k##_0 0)
+#endfor
+#enddef
+
+#def INIT_STATES()
+#for (k 1 #SYSTEMS)
+    (and (not accel.#k) (not brake.#k))
+#endfor
+#enddef
+
+(assert (and #INIT_T
+             #INIT_X
+             #INIT_V
+             #INIT_A
+             #INIT_STATES
+))
+
+;;; Derivatives definition
+
+(define-dt x dx      (v) v)
+
+(define-dt v dv      (a) a)
+
+(define-dt a didle   ( )           0)
+(define-dt a daccel  ( ) #ACCEL_COEF)
+(define-dt a dbrake  ( ) #BRAKE_COEF)
+
+;;; Invariants
+
+(define-fun invariant ( (x_0 Real) (v_0 Real) (a_0 Real)
+                        (x_t Real) (v_t Real) (a_t Real)
+                        (t Real)
+                        (da_ Dt)
+                      ) Bool
+    (and (<= #X_MIN x_0 #X_MAX) (<= #X_MIN x_t #X_MAX)
+         (<= #V_MIN v_0 #V_MAX) (<= #V_MIN v_t #V_MAX)
+         (<= #A_MIN a_0 #A_MAX) (<= #A_MIN a_t #A_MAX)
+         (<= #T_MIN t #T_MAX)
+         (or (= da_ didle) (= da_ daccel) (= da_ dbrake))
+))
+
+#def INVARIANTS
+#for (k 1 #SYSTEMS)
+#for (i 0 #STEPS)
+    (invariant  x_0.#k##_#i v_0.#k##_#i a_0.#k##_#i
+                x_t.#k##_#i v_t.#k##_#i a_t.#k##_#i
+                t_#i da.#k##_#i)
+#endfor
+#endfor
+#enddef
+
+(assert (and #INVARIANTS))
+
+;;; Derivatives connection
+
+(define-fun connect ((da_ Dt) (accel Bool) (brake Bool)) Bool
+    (and (not (and accel brake))
+         (=> (and (not accel) (not brake))  (= da_ didle) )
+         (=> (and      accel             )  (= da_ daccel))
+         (=> (and                  brake )  (= da_ dbrake))
+))
+
+#def CONNECTS
+#for (k 1 #SYSTEMS)
+#for (i 0 #STEPS)
+    (connect da.#k##_#i accel.#k##_#i brake.#k##_#i)
+#endfor
+#endfor
+#enddef
+
+(assert (and #CONNECTS))
+
+;;; Jump conditions
+
+;(define-fun jump ( (down1 Bool) (down2 Bool)
+;                   (x1_t Real) (v1_t Real)
+;                   (x2_0 Real) (v2_0 Real)
+;                 ) Bool
+;    (and (=> (and      down1  (>  x1_t 0) ) (and      down2  (= x2_0 x1_t) (= v2_0 v1_t) ))
+;         (=> (and      down1  (<= x1_t 0) ) (and (not down2) (= x2_0    0) (= v2_0 (* (- #K) v1_t )) ))
+;         (=> (and (not down1) (>  v1_t 0) ) (and (not down2) (= x2_0 x1_t) (= v2_0 v1_t) ))
+;         (=> (and (not down1) (<= v1_t 0) ) (and      down2  (= x2_0 x1_t) (= v2_0 v1_t) ))
+;))
+
+#def JUMPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (jump down_#i down_#j x_t_#i v_t_#i x_0_#j v_0_#j)
+#endlet j
+#endfor
+#enddef
+
+;(assert (and #JUMPS))
+
+;;; Steps definition
+
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+
+(assert (and #T_STEPS))
+
+;;; Integration
+
+#def INT_ODE(f dt ivar ovar params)
+#for (k 1 #SYSTEMS)
+#let ivar #ivar##.#k
+#let ovar #ovar##.#k
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= #ovar##_#i (int-ode #f #dt (#ivar##_#i t_#i t_#j) #params) )
+#endlet j
+#endfor
+#endlet ovar
+#endlet ivar
+#endfor
+#enddef
+
+(assert (and #INT_ODE(x dx x_0 x_t (v_0.\#k\##_\#i))
+             #INT_ODE(v dv v_0 v_t (a_0.\#k\##_\#i))
+             #INT_ODE(a da.\#k\##_\#i a_0 a_t ())
+))

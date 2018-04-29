@@ -126,7 +126,7 @@ namespace SOS {
         void parse_user_macro_pop_params(Expr& expr,
                                          const Macro_key& macro_key_);
         static Tokens split_token(Token& token);
-        static bool split_token_process_part(Token& token, Token& succ);
+        static void split_token_process_part(Token& token, Token& succ);
 
         template <typename Arg>
             static Eval_t_marked

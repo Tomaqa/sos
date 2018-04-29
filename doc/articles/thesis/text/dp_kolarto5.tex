@@ -2952,10 +2952,6 @@ Pomocí těchto rekurzí lze např. zavést
 makra \id{\#for}.
 Průběh rekurzivních expanzí ale není nijak kontrolován.
 
-Vzhledem k~tomu, že veškerý obsah maker je expandován,
-není možné docílit toho, aby makro vygenerovalo znak \id{\#},
-tj.~jakékoli neexpandované makro.
-
 Expanze maker je prováděna i~uvnitř tokenů.
 Každý token je rozdělen na~části
 podle znaků \id{\#}
@@ -2992,6 +2988,9 @@ pokud je žádoucí, aby bylo lokální makro expandováno až uvnitř těla
 na~základě lokální definice.
 (Příkazová makra \id{\#def}* svá těla neexpandují,
 proto v~nich není potřeba escape sekvence používat.)
+Bez použití escape sekvencí
+není možné docílit toho, aby makro vygenerovalo znak \id{\#},
+tj.~jakékoli neexpandované makro.
 
 Doporučujeme používat tuto konvenci pro~názvy uživatelských maker:
 velká písmena pro globální makra (\id{MACRO})

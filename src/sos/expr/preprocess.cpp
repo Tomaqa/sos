@@ -1,6 +1,8 @@
 #include "expr/preprocess.hpp"
 #include "expr/eval.hpp"
 
+#include <iostream>
+
 namespace SOS {
     const Expr::Preprocess::Reserved_macro_fs_map
         Expr::Preprocess::reserved_macro_fs_map{
@@ -445,6 +447,9 @@ namespace SOS {
     {
         macro_key_.erase(0, 1);
         if (is_macro_key(macro_key_)) {
+            if (macro_key_.size() == 1) {
+                macro_key_.push_back(macro_key_.front());
+            }
             token_check_token(macro_key_, depth);
             expr.add_new_etoken_at_pos(move(macro_key_));
             return;
@@ -666,22 +671,21 @@ namespace SOS {
         }
         const int size_ = tokens.size();
         for (int i = 0; i < size_-1; i++) {
-            if (split_token_process_part(tokens[i], tokens[i+1])) i++;
+            split_token_process_part(tokens[i], tokens[i+1]);
         }
         return tokens;
     }
 
-    bool Expr::Preprocess::split_token_process_part(Token& token, Token& succ)
+    void Expr::Preprocess::split_token_process_part(Token& token, Token& succ)
     {
-        if (token == "#") {
+        if (token == "#" || token == "##") {
             succ.erase(0, 1);
-            return true;
+            return;
         }
         if (token.back() == '\\' && succ.front() == '#') {
             token.pop_back();
             succ = succ.front() + move(succ);
         }
-        return false;
     }
 
     template <typename Arg>

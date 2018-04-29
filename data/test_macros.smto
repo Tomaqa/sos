@@ -182,7 +182,13 @@
 ) #enddef
 #SUM_SQR(#M)
 
-#define PRINT(x) #x
+#def PRINT(x)
+#let i 1
+#let j 2
+#x
+#endlet i
+#endlet j
+#enddef
 
 ( #PRINT(x) )
 ( #PRINT(M) )
@@ -200,6 +206,12 @@
 ( #PRINT(\#M5) )
 ( #PRINT(\#M#M) )
 ( #PRINT(\#M\#M) )
+( #PRINT(a.\#i) )
+( #PRINT(a.\#i\##_\#j) )
+( #PRINT(##) )
+( #PRINT(\#) )
+( #PRINT(\##) )
+( #PRINT(\#\#) )
 
 
 #for (i 0 3)
