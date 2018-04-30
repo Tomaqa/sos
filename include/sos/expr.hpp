@@ -124,8 +124,8 @@ namespace SOS {
         void reset_pos();
         void reset_pos_to_valid();
         void maybe_set_pos();
-        void next();
-        void prev();
+        Expr& next();
+        Expr& prev();
 
         const Expr_place_ptr& cpeek() const;
         Expr_place_ptr& peek();
@@ -194,6 +194,22 @@ namespace SOS {
         Expr_token extract_etoken_check();
         Token extract_token_check();
         Expr extract_expr_check();
+
+        template <typename Arg>
+            static Arg cptr_to_value(const Expr_place_ptr& place_ptr);
+        template <typename Arg>
+            static Arg ptr_to_value(Expr_place_ptr& place_ptr);
+        template <typename Arg> Arg cpeek_value() const;
+        template <typename Arg> Arg get_value();
+        template <typename Arg> Arg extract_value();
+
+        template <typename Arg>
+            static Arg cptr_to_value_check(const Expr_place_ptr& place_ptr);
+        template <typename Arg>
+            static Arg ptr_to_value_check(Expr_place_ptr& place_ptr);
+        template <typename Arg> Arg cpeek_value_check() const;
+        template <typename Arg> Arg get_value_check();
+        template <typename Arg> Arg extract_value_check();
 
         template <typename T> void push_back(T&& place_ptr_);
         template <typename... Args> void emplace_back(Args&&... args);

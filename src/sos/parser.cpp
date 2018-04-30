@@ -33,58 +33,139 @@ namespace SOS {
         return odes()[idx];
     }
 
+    const Parser::Ode_key& Parser::code_ode_key(const Ode& ode_)
+    {
+        return get<0>(ode_);
+    }
+
+    Parser::Ode_key& Parser::ode_ode_key(Ode& ode_)
+    {
+        return get<0>(ode_);
+    }
+
+    const Parser::Dt_keys& Parser::code_dt_keys(const Ode& ode_)
+    {
+        return get<1>(ode_);
+    }
+
+    Parser::Dt_keys& Parser::ode_dt_keys(Ode& ode_)
+    {
+        return get<1>(ode_);
+    }
+
+    const Parser::Ode_spec& Parser::code_ode_spec(const Ode& ode_)
+    {
+        return get<2>(ode_);
+    }
+
+    Parser::Ode_spec& Parser::ode_ode_spec(Ode& ode_)
+    {
+        return get<2>(ode_);
+    }
+
+    const Parser::Param_keys& Parser::code_param_keys(const Ode& ode_)
+    {
+        return get<3>(ode_);
+    }
+
+    Parser::Param_keys& Parser::ode_param_keys(Ode& ode_)
+    {
+        return get<3>(ode_);
+    }
+
+    const Parser::Const_ids_rows& Parser::code_const_ids_rows(const Ode& ode_)
+    {
+        return get<4>(ode_);
+    }
+
+    Parser::Const_ids_rows& Parser::ode_const_ids_rows(Ode& ode_)
+    {
+        return get<4>(ode_);
+    }
+
     const Parser::Dt_keys& Parser::cdt_keys(const Ode_key& ode_key_) const
     {
-        return get<1>(code(ode_key_));
+        return code_dt_keys(code(ode_key_));
     }
 
     Parser::Dt_keys& Parser::dt_keys(const Ode_key& ode_key_)
     {
-        return get<1>(ode(ode_key_));
+        return ode_dt_keys(ode(ode_key_));
     }
 
-    const ODE::Ode_spec& Parser::code_spec(const Ode_key& ode_key_) const
+    const Parser::Ode_spec& Parser::code_spec(const Ode_key& ode_key_) const
     {
-        return get<2>(code(ode_key_));
+        return code_ode_spec(code(ode_key_));
     }
 
-    ODE::Ode_spec& Parser::ode_spec(const Ode_key& ode_key_)
+    Parser::Ode_spec& Parser::ode_spec(const Ode_key& ode_key_)
     {
-        return get<2>(ode(ode_key_));
+        return ode_ode_spec(ode(ode_key_));
     }
 
-    const ODE::Param_keys&
+    const Parser::Param_keys&
         Parser::cparam_keys(const Ode_key& ode_key_) const
     {
         return get<1>(codes_map_value(ode_key_));
     }
 
-    ODE::Param_keys& Parser::param_keys(const Ode_key& ode_key_)
+    Parser::Param_keys& Parser::param_keys(const Ode_key& ode_key_)
     {
-        return get<3>(ode(ode_key_));
+        return ode_param_keys(ode(ode_key_));
     }
 
     const Parser::Const_ids_rows&
-        Parser::cconst_ids(const Ode_key& ode_key_) const
+        Parser::cconst_ids_rows(const Ode_key& ode_key_) const
     {
-        return get<2>(codes_map_value(ode_key_));
+        return code_const_ids_rows(code(ode_key_));
     }
 
-    Parser::Const_ids_rows& Parser::const_ids(const Ode_key& ode_key_)
+    Parser::Const_ids_rows& Parser::const_ids_rows(const Ode_key& ode_key_)
     {
-        return get<4>(ode(ode_key_));
+        return ode_const_ids_rows(ode(ode_key_));
+    }
+
+    const Parser::Const_ids_row&
+        Parser::cconst_ids_row(const Ode_key& ode_key_,
+                               const Time_const_ids& time_consts) const
+    {
+        const int idx = ctime_consts_idx(ode_key_, time_consts);
+        return cconst_ids_rows(ode_key_)[idx];
+    }
+
+    Parser::Const_ids_row&
+        Parser::const_ids_row(const Ode_key& ode_key_,
+                              const Time_const_ids& time_consts)
+    {
+        const int idx = ctime_consts_idx(ode_key_, time_consts);
+        return const_ids_rows(ode_key_)[idx];
+    }
+
+    const Parser::Const_ids_entries&
+        Parser::cconst_ids_entries(const Ode_key& ode_key_,
+                                   const Time_const_ids& time_consts) const
+    {
+        return cconst_ids_map_entries(ode_key_, time_consts);
+    }
+
+    Parser::Const_ids_entries&
+        Parser::const_ids_entries(const Ode_key& ode_key_,
+                                  const Time_const_ids& time_consts)
+    {
+        return const_ids_row(ode_key_, time_consts).second;
     }
 
     void Parser::parse()
     {
         smt_exprs().reserve(_expr.size());
-        for (auto& eptr : _expr) {
-            Expr& e = Expr::ptr_to_expr(eptr);
+        while (_expr) {
+            Expr& e = _expr.get_expr();
             expect(!e.empty() && e.cfront()->is_etoken(),
                    "Expected command expression, got: "s
                    + to_string(e));
             parse_top_expr(e);
         }
+        _expr.reset_pos_to_valid();
     }
 
     void Parser::parse_top_expr(Expr& expr)
@@ -144,16 +225,17 @@ namespace SOS {
 
     void Parser::parse_token(Expr& expr)
     {
-        const Token& token = expr.cpeek_token();
-        if (token[0] == '-' && isdigit(token[1])) {
-            Expr_token num = expr.extract_etoken();
-            num.token().erase(0, 1);
-            Expr new_expr("-");
-            new_expr.add_new_etoken(move(num));
-            expr.add_new_expr_at_pos(move(new_expr));
-            return;
-        }
-        expr.next();
+        // const Token& token = expr.cpeek_token();
+        // if (token[0] == '-' && isdigit(token[1])) {
+        //     Expr_token num = expr.extract_etoken();
+        //     num.token().erase(0, 1);
+        //     Expr new_expr("-");
+        //     new_expr.add_new_etoken(move(num));
+        //     expr.add_new_expr_at_pos(move(new_expr));
+        //     return;
+        // }
+        // expr.next();
+        SMT::neg_literal_to_expr(expr.get());
     }
 
     void Parser::parse_set_logic(Expr& expr)
@@ -183,7 +265,8 @@ namespace SOS {
 
         add_smt_expr({"(declare-fun "s
                       + int_ode_identifier(ode_key_)
-                      + " (Real) Real)"});
+                      // + " (Real) Real)"});
+                      + " (Real Real) Real)"});
     }
 
     void Parser::parse_define_dt(Expr& expr)
@@ -211,7 +294,7 @@ namespace SOS {
 
         add_dt_spec(ode_key_, dt_key_, move(dt_spec_));
 
-        int dkey_idx = cdt_key_idx(dt_key_);
+        const int dkey_idx = cdt_key_idx(dt_key_);
         add_smt_expr({"(define-fun "s + dt_key_
                       + " () Dt "
                       + to_string(dkey_idx) +")"});
@@ -236,19 +319,19 @@ namespace SOS {
                + "and parameter values, got: "
                + to_string(expr));
 
-        Ode_key& ode_key_ = expr.get_token_check();
+        Ode_key ode_key_ = expr.get_token_check();
         check_has_ode_key(ode_key_);
 
-        Const_id& dt_const = expr.get_token_check();
+        Const_id dt_const = expr.get_token_check();
 
         Expr& init_expr = expr.get_expr_check();
         expect(init_expr.size() == 3 && init_expr.is_flat(),
                "Expected initial values of ODE, got: "s
                + to_string(init_expr));
-        Const_id& init_const = init_expr.get_token();
-        auto t_init_ = move(init_expr.get_token());
-        auto t_end_ = move(init_expr.get_token());
-        auto init_t_consts = make_pair(move(t_init_), move(t_end_));
+        Init_const_id init_const = move(init_expr.get_token());
+        Time_const_id t_init_ = move(init_expr.get_token());
+        Time_const_id t_end_ = move(init_expr.get_token());
+        Time_const_ids init_t_consts = make_pair(move(t_init_), move(t_end_));
 
         Expr& param_expr = expr.get_expr_check();
         expect(param_expr.is_flat(),
@@ -256,14 +339,16 @@ namespace SOS {
                + to_string(param_expr));
         Const_ids param_consts = param_expr.transform_to_tokens();
 
-        add_const_ids_row(ode_key_,
-                          move(dt_const), move(init_const),
-                          move(init_t_consts), move(param_consts));
+        add_const_ids_row(ode_key_, move(init_t_consts),
+                          move(dt_const), init_const,
+                          move(param_consts));
 
-        expr.to_token(expr.begin()) += "_" + ode_key_;
-        const int steps_ = csteps(ode_key_);
-        expr.resize(1);
-        expr.add_new_etoken(to_string(steps_-1));
+        expr.reset_pos();
+        expr.get_token() += "_" + move(ode_key_);
+        expr.erase_at_pos();
+        expr.next();
+        expr.erase_from_pos();
+        expr.add_new_etoken(move(init_const));
     }
 
     Parser::Const_id Parser::int_ode_identifier(const Ode_key& ode_key_)
@@ -403,7 +488,7 @@ namespace SOS {
         ode_spec(ode_key_).emplace_back(move(dt_spec_));
     }
 
-    ODE::Param_keys& Parser::param_keys_map(const Ode_key& ode_key_)
+    Parser::Param_keys& Parser::param_keys_map(const Ode_key& ode_key_)
     {
         return get<1>(odes_map_value(ode_key_));
     }
@@ -419,27 +504,94 @@ namespace SOS {
         param_keys(ode_key_) = cparam_keys(ode_key_);
     }
 
-    Parser::Const_ids_rows& Parser::const_ids_map(const Ode_key& ode_key_)
+    const Parser::Const_ids_map&
+        Parser::cconst_ids_map(const Ode_key& ode_key_) const
+    {
+        return get<2>(codes_map_value(ode_key_));
+    }
+
+    Parser::Const_ids_map& Parser::const_ids_map(const Ode_key& ode_key_)
     {
         return get<2>(odes_map_value(ode_key_));
     }
 
+    bool Parser::has_time_consts(const Ode_key& ode_key_,
+                                 const Time_const_ids& time_consts) const
+    {
+        return cconst_ids_map(ode_key_).count(time_consts) == 1;
+    }
+
+    const Parser::Const_ids_map::mapped_type&
+        Parser::cconst_ids_map_item(const Ode_key& ode_key_,
+                                    const Time_const_ids& time_consts) const
+    {
+        return cconst_ids_map(ode_key_).at(time_consts);
+    }
+
+    Parser::Const_ids_map::mapped_type&
+        Parser::const_ids_map_item(const Ode_key& ode_key_,
+                                   const Time_const_ids& time_consts)
+    {
+        return const_ids_map(ode_key_)[time_consts];
+    }
+
+    const Parser::Const_ids_entries&
+        Parser::cconst_ids_map_entries(const Ode_key& ode_key_,
+                                       const Time_const_ids& time_consts)
+                                       const
+    {
+        return cconst_ids_map_item(ode_key_, time_consts).first;
+    }
+
+    Parser::Const_ids_entries&
+        Parser::const_ids_map_entries(const Ode_key& ode_key_,
+                                      const Time_const_ids& time_consts)
+    {
+        return const_ids_map_item(ode_key_, time_consts).first;
+    }
+
+    int Parser::ctime_consts_idx(const Ode_key& ode_key_,
+                                 const Time_const_ids& time_consts) const
+    {
+        return cconst_ids_map_item(ode_key_, time_consts).second;
+    }
+
+    int& Parser::time_consts_idx(const Ode_key& ode_key_,
+                                 const Time_const_ids& time_consts)
+    {
+        return const_ids_map_item(ode_key_, time_consts).second;
+    }
+
     int Parser::csteps(const Ode_key& ode_key_) const
     {
-        return cconst_ids(ode_key_).size();
+        return cconst_ids_rows(ode_key_).size();
+    }
+
+    void Parser::add_time_consts(const Ode_key& ode_key_,
+                                 Time_const_ids time_consts)
+    {
+        const int size_ = csteps(ode_key_);
+        time_consts_idx(ode_key_, time_consts) = size_;
+        const_ids_rows(ode_key_).emplace_back(
+            SMT::make_const_ids_row(move(time_consts), Const_ids_entries())
+        );
     }
 
     void Parser::add_const_ids_row(const Ode_key& ode_key_,
-                                   Const_id dt_const, Const_id init_const,
-                                   pair<Const_id, Const_id> init_t_consts,
+                                   Time_const_ids time_consts,
+                                   Dt_const_id dt_const,
+                                   Init_const_id init_const,
                                    Const_ids param_consts)
     {
-        auto ids_tup = make_tuple(move(dt_const),
-                                  move(init_const),
-                                  move(init_t_consts),
-                                  move(param_consts) );
-        const_ids_map(ode_key_).emplace_back(ids_tup);
-        const_ids(ode_key_).emplace_back(move(ids_tup));
+        if (!has_time_consts(ode_key_, time_consts)) {
+            add_time_consts(ode_key_, time_consts);
+        }
+        Const_ids_entry ids =
+            SMT::make_const_ids_entry(move(dt_const),
+                                      move(init_const),
+                                      move(param_consts));
+        const_ids_map_entries(ode_key_, time_consts).emplace_back(ids);
+        const_ids_entries(ode_key_, time_consts).emplace_back(move(ids));
     }
 
     void Parser::add_smt_expr(Expr expr)

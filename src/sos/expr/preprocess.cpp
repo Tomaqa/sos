@@ -1,8 +1,6 @@
 #include "expr/preprocess.hpp"
 #include "expr/eval.hpp"
 
-#include <iostream>
-
 namespace SOS {
     const Expr::Preprocess::Reserved_macro_fs_map
         Expr::Preprocess::reserved_macro_fs_map{

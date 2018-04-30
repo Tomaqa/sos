@@ -67,6 +67,78 @@ namespace SOS {
         return new_place(Expr(forward<Args>(args)...));
     }
 
+    template <typename Arg>
+    Arg Expr::cptr_to_value(const Expr_place_ptr& place_ptr)
+    {
+        if (place_ptr->is_etoken()) {
+            return cptr_to_etoken(place_ptr).get_value<Arg>();
+        }
+        return cptr_to_expr(place_ptr).get_eval<Arg>()();
+    }
+
+    template <typename Arg>
+    Arg Expr::ptr_to_value(Expr_place_ptr& place_ptr)
+    {
+        if (place_ptr->is_etoken()) {
+            return ptr_to_etoken(place_ptr).get_value<Arg>();
+        }
+        return ptr_to_expr(place_ptr).get_eval<Arg>()();
+    }
+
+    template <typename Arg>
+    Arg Expr::cpeek_value() const
+    {
+        return cptr_to_value<Arg>(cpeek());
+    }
+
+    template <typename Arg>
+    Arg Expr::get_value()
+    {
+        return ptr_to_value<Arg>(get());
+    }
+
+    template <typename Arg>
+    Arg Expr::extract_value()
+    {
+        return ptr_to_value<Arg>(extract());
+    }
+
+    template <typename Arg>
+    Arg Expr::cptr_to_value_check(const Expr_place_ptr& place_ptr)
+    {
+        if (place_ptr->is_etoken()) {
+            return cptr_to_etoken(place_ptr).get_value_check<Arg>();
+        }
+        return cptr_to_expr(place_ptr).get_eval<Arg>()();
+    }
+
+    template <typename Arg>
+    Arg Expr::ptr_to_value_check(Expr_place_ptr& place_ptr)
+    {
+        if (place_ptr->is_etoken()) {
+            return ptr_to_etoken(place_ptr).get_value_check<Arg>();
+        }
+        return ptr_to_expr(place_ptr).get_eval<Arg>()();
+    }
+
+    template <typename Arg>
+    Arg Expr::cpeek_value_check() const
+    {
+        return cptr_to_value_check<Arg>(cpeek());
+    }
+
+    template <typename Arg>
+    Arg Expr::get_value_check()
+    {
+        return ptr_to_value_check<Arg>(get());
+    }
+
+    template <typename Arg>
+    Arg Expr::extract_value_check()
+    {
+        return ptr_to_value_check<Arg>(extract());
+    }
+
     template <typename T>
     void Expr::push_back(T&& place_ptr_)
     {

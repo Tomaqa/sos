@@ -268,14 +268,16 @@ namespace SOS {
         _valid_pos = false;
     }
 
-    void Expr::next()
+    Expr& Expr::next()
     {
         ++rpos();
+        return *this;
     }
 
-    void Expr::prev()
+    Expr& Expr::prev()
     {
         --rpos();
+        return *this;
     }
 
     const Expr_place::Expr_place_ptr& Expr::cpeek() const

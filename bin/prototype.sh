@@ -119,16 +119,33 @@ function parse_input {
         lODE_SPEC="($ospec)"
         read keys
         lODE_KEYS+=($keys)
-        read MAX_STEP
+        # read MAX_STEP
+        local counts
+        local entries
+        read counts
+        counts=($counts)
+        MAX_STEP=${counts[0]}
+        entries=${counts[1]}
         local s
         for (( s=$MIN_STEP; $s < $MAX_STEP; s++ )); do
+            local const_ids
             read const_ids
             const_ids=($const_ids)
-            lDT_IDS+=(${const_ids[0]})
-            lINIT_IDS+=(${const_ids[1]})
-            lT_INIT_IDS+=(${const_ids[2]})
-            lT_END_IDS+=(${const_ids[3]})
-            lPARAM_IDS+=("${const_ids[*]:4}")
+            # lDT_IDS+=(${const_ids[0]})
+            # lINIT_IDS+=(${const_ids[1]})
+            # lT_INIT_IDS+=(${const_ids[2]})
+            # lT_END_IDS+=(${const_ids[3]})
+            # lPARAM_IDS+=("${const_ids[*]:4}")
+            lT_INIT_IDS+=(${const_ids[0]})
+            lT_END_IDS+=(${const_ids[1]})
+            # !! here it is step-oriented, this breaks it
+            for (( j=0; $j < $entries; j++ )); do
+                read const_ids
+                const_ids=($const_ids)
+                lDT_IDS+=(${const_ids[0]})
+                lINIT_IDS+=(${const_ids[1]})
+                lPARAM_IDS+=("${const_ids[*]:2}")
+            done
         done
     done <"$tmp_2_f"
 
@@ -390,8 +407,9 @@ function add_asserts {
         local oval=${ODE_VALUES[$i]}
         neg_to_expr oval
         append_smt "(assert (and $exprs
-(= (int-ode_${fkey} ${1}) $oval)
+(= (int-ode_${fkey} ${lDT_IDS[$1]} ${lINIT_IDS[$1]}) $oval)
 ))"
+# (= (int-ode_${fkey} ${1}) $oval)
     done
 }
 

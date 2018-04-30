@@ -11,20 +11,26 @@ namespace SOS {
         }
 
         const Parser::Odes& odes_ = parser.codes();
-        for (auto& odes_tup : odes_) {
-            const Ode_key& ode_key_ = get<0>(odes_tup);
-            const Dt_keys& dt_keys_ = get<1>(odes_tup);
-            const Ode_spec& ode_spec_ = get<2>(odes_tup);
-            const Param_keys& param_keys_ = get<3>(odes_tup);
-            const Const_ids_rows& const_ids_ = get<4>(odes_tup);
-            const int consts_size = const_ids_.size();
+        for (auto& ode_ : odes_) {
+            const Ode_key& ode_key_ = code_ode_key(ode_);
+            const Dt_keys& dt_keys_ = code_dt_keys(ode_);
+            const Ode_spec& ode_spec_ = code_ode_spec(ode_);
+            const Param_keys& param_keys_ = code_param_keys(ode_);
+            const Const_ids_rows& const_ids_rows_ = code_const_ids_rows(ode_);
+            const int steps_ = const_ids_rows_.size();
+            const int entries = SMT::cconst_ids_row_entries(
+                const_ids_rows_.front()
+            ).size();
             cerr << ode_key_ << endl;
             cerr << dt_keys_ << endl;
             cerr << ode_spec_ << endl;
             cerr << param_keys_ << endl;
-            cerr << consts_size << endl;
-            for (auto& tup : const_ids_) {
-                cerr << tup << endl;
+            cerr << steps_ << " " << entries << endl;
+            for (auto& row : const_ids_rows_) {
+                cerr << SMT::cconst_ids_row_time_consts(row) << endl;
+                for (auto& entry : SMT::cconst_ids_row_entries(row)) {
+                    cerr << entry << endl;
+                }
             }
             cerr << endl;
         }
