@@ -24,7 +24,7 @@ namespace SOS {
     template <typename Arg>
     bool Expr_token::get_value_valid(Arg& arg) const
     {
-        istringstream iss(_token);
+        istringstream iss(ctoken());
         return (bool)(iss >> arg);
     }
 
@@ -61,16 +61,70 @@ namespace SOS {
 
     ///////////////////////////////////////////////////////////////
 
+    // template <typename Arg>
+    // Expr_value<Arg>::Expr_value(Arg arg)
+    // {
+    //     set_value(arg);
+    // }
+    template <typename Arg>
+    Expr_value<Arg>::Expr_value(Arg arg)
+        : _value(move(arg))
+    { }
+
+    // template <typename Arg>
+    // Expr_value<Arg>::Expr_value(Token token)
+    //     : Expr_token(move(token))
+    // {
+    //     value() = get_value_check<Arg>();
+    // }
+
+    template <typename Arg>
+    Expr_place::Expr_place_ptr Expr_value<Arg>::clone() const
+    {
+        return new_evalue(*this);
+    }
+
+    template <typename Arg>
+    template <typename... Args>
+    Expr_place::Expr_ptr_t<Expr_value<Arg>>
+        Expr_value<Arg>::new_evalue(Args&&... args)
+    {
+        return new_place(Expr_value<Arg>(forward<Args>(args)...));
+    }
+
+    // template <typename Arg>
+    // void Expr_value<Arg>::set_value(Arg arg)
+    // {
+    //     value() = arg;
+    //     Expr_token::set_value<Arg>(arg);
+    // }
+
+    ///////////////////////////////////////////////////////////////
+
     template <typename... Args>
     Expr_place::Expr_ptr_t<Expr> Expr::new_expr(Args&&... args)
     {
         return new_place(Expr(forward<Args>(args)...));
     }
 
+    // template <typename Arg>
+    // const Expr_value<Arg>&
+    //     Expr::cptr_to_evalue(const Expr_place_ptr& place_ptr)
+    // {
+    //     return static_cast<Expr_value<Arg>&>(*place_ptr);
+    // }
+
+    // template <typename Arg>
+    // Expr_value<Arg>& Expr::ptr_to_evalue(Expr_place_ptr& place_ptr)
+    // {
+    //     return static_cast<Expr_value<Arg>&>(*place_ptr);
+    // }
+
     template <typename Arg>
     Arg Expr::cptr_to_value(const Expr_place_ptr& place_ptr)
     {
-        if (place_ptr->is_etoken()) {
+        // if (place_ptr->is_etoken()) {
+        if (!place_ptr->is_expr()) {
             return cptr_to_etoken(place_ptr).get_value<Arg>();
         }
         return cptr_to_expr(place_ptr).get_eval<Arg>()();
@@ -79,7 +133,8 @@ namespace SOS {
     template <typename Arg>
     Arg Expr::ptr_to_value(Expr_place_ptr& place_ptr)
     {
-        if (place_ptr->is_etoken()) {
+        // if (place_ptr->is_etoken()) {
+        if (!place_ptr->is_expr()) {
             return ptr_to_etoken(place_ptr).get_value<Arg>();
         }
         return ptr_to_expr(place_ptr).get_eval<Arg>()();
@@ -106,7 +161,8 @@ namespace SOS {
     template <typename Arg>
     Arg Expr::cptr_to_value_check(const Expr_place_ptr& place_ptr)
     {
-        if (place_ptr->is_etoken()) {
+        // if (place_ptr->is_etoken()) {
+        if (!place_ptr->is_expr()) {
             return cptr_to_etoken(place_ptr).get_value_check<Arg>();
         }
         return cptr_to_expr(place_ptr).get_eval<Arg>()();
@@ -115,7 +171,8 @@ namespace SOS {
     template <typename Arg>
     Arg Expr::ptr_to_value_check(Expr_place_ptr& place_ptr)
     {
-        if (place_ptr->is_etoken()) {
+        // if (place_ptr->is_etoken()) {
+        if (!place_ptr->is_expr()) {
             return ptr_to_etoken(place_ptr).get_value_check<Arg>();
         }
         return ptr_to_expr(place_ptr).get_eval<Arg>()();
@@ -208,7 +265,8 @@ namespace SOS {
     void Expr::for_each_expr(Un_f f)
     {
         for (auto& eptr : *this) {
-            if (eptr->is_etoken()) continue;
+            // if (eptr->is_etoken()) continue;
+            if (!eptr->is_expr()) continue;
             Expr& subexpr = ptr_to_expr(eptr);
             f(subexpr);
         }

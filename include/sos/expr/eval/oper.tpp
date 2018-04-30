@@ -47,7 +47,8 @@ namespace SOS {
     typename Expr::Eval<Arg>::Oper::Arg_lazy
         Expr::Eval<Arg>::Oper::get_arg_lazy(Expr_place_ptr& place)
     {
-        if (!place->is_etoken()) {
+        // if (!place->is_etoken()) {
+        if (place->is_expr()) {
             auto&& subexpr = move(ptr_to_expr(place));
             Oper_ptr& oper_ptr_ = std::get<idx>(_oper_ptrs);
             oper_ptr_ = new_oper(Oper(_param_keys_l, _param_values_l,

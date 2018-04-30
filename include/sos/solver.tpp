@@ -72,7 +72,7 @@ namespace SOS {
             return true;
         }
         smt_get_values(step);
-        solve_odes(step);
+        solve_odes();
         smt_add_asserts(step);
         return do_step(step+1);
     }
@@ -100,6 +100,7 @@ namespace SOS {
             Parser::code_const_ids_rows(codes().front())[step]
         );
         _time_values = smt_solver().get_step_time_values(time_consts);
+        _entriess_values.clear();
         for (auto& ode : codes()) {
             const Const_ids_rows& rows =
                 Parser::code_const_ids_rows(ode);
@@ -112,18 +113,18 @@ namespace SOS {
     }
 
     template <typename OSolver>
-    void Solver<OSolver>::solve_odes(int step)
+    void Solver<OSolver>::solve_odes()
     {
-        const Unif_param_keyss_ids& pkeyss_ids = cunif_param_keyss_ids();
+        _ode_results.clear();
         const int odes_count = codes().size();
         const int entries_count = cconst_entries_count();
 
         for (int e = 0; e < entries_count; e++) {
             auto& entries = _entriess_values[e];
             ODE::Dt_ids dt_ids;
-            ODE::States states;
+            typename OSolver::Contexts ctxs;
             dt_ids.reserve(odes_count);
-            states.reserve(odes_count);
+            ctxs.reserve(odes_count);
             for (int o = 0; o < odes_count; o++) {
                 auto& entry = entries[o];
                 ODE::State state;
@@ -137,11 +138,10 @@ namespace SOS {
                     SMT::cconst_values_entry_init_value(entry)
                 );
                 copy(param_values, std::back_inserter(state));
-                states.emplace_back(move(state));
+                ctxs.emplace_back(_time_values, move(state));
             }
-            typename OSolver::Context context(_time_values, move(states[0]));
-            Ode_result res = code_solver().solve_unif_odes(move(dt_ids),
-                                                           move(context));
+            Ode_result res = code_solver().solve_odes(move(dt_ids),
+                                                      move(ctxs));
             _ode_results.emplace_back(move(res));
         }
     }

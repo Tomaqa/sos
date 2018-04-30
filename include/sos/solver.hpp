@@ -53,7 +53,6 @@ namespace SOS {
 
         using Const_values_entriess = vector<Const_values_entries>;
 
-        using Unif_param_keyss_ids = typename OSolver::Unif_param_keyss_ids;
         using Ode_result = ODE::State;
         using Ode_results = vector<Ode_result>;
 
@@ -69,14 +68,12 @@ namespace SOS {
 
         const OSolver& code_solver() const             { return _ode_solver; }
         OSolver& ode_solver()                          { return _ode_solver; }
-        const Unif_param_keyss_ids& cunif_param_keyss_ids()
-                             { return code_solver().cunif_param_keyss_ids(); }
 
         bool do_step(int step);
         Sat smt_check_sat();
         bool backtrack(int step);
         void smt_get_values(int step);
-        void solve_odes(int step);
+        void solve_odes();
         void smt_add_asserts(int step);
         void smt_add_conflict(int step);
     private:
@@ -85,11 +82,8 @@ namespace SOS {
         OSolver _ode_solver;
 
         Time_const_values _time_values;
-        // Const_values_entries _entries_values;
         Const_values_entriess _entriess_values;
-        // Ode_result _ode_result;
         Ode_results _ode_results;
-
     };
 
 }

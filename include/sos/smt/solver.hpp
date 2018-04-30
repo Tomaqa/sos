@@ -39,6 +39,8 @@ namespace SOS {
             Const_values_entries
                 get_step_entries_values(const Const_ids_entries&
                                             const_ids_entries);
+
+            // void assert()
         protected:
             void fork_solver();
 

@@ -23,9 +23,14 @@ namespace SOS {
 
     ///////////////////////////////////////////////////////////////
 
+    Expr_token::Expr_token()
+        : Expr_token("")
+    { }
+
     template <>
     Expr_token::Expr_token(Token token)
-        : _token(move(token))
+        // : _token(move(token))
+        : Expr_value<Token>(move(token))
     { }
 
     Expr_place::Expr_place_ptr Expr_token::clone() const
@@ -451,14 +456,16 @@ namespace SOS {
 
     void Expr::check_is_etoken(const Expr_place_ptr& place_ptr)
     {
-        expect(place_ptr->is_etoken(),
+        // expect(place_ptr->is_etoken(),
+        expect(!place_ptr->is_expr(),
                "Expected token, got: "s
                + to_string(*place_ptr));
     }
 
     void Expr::check_is_expr(const Expr_place_ptr& place_ptr)
     {
-        expect(!place_ptr->is_etoken(),
+        // expect(!place_ptr->is_etoken(),
+        expect(place_ptr->is_expr(),
                "Expected expression, got: "s
                + to_string(*place_ptr));
     }
@@ -648,7 +655,8 @@ namespace SOS {
 
     Expr& Expr::simplify_top() noexcept
     {
-        if (size() == 1 && !cfront()->is_etoken()) {
+        // if (size() == 1 && !cfront()->is_etoken()) {
+        if (size() == 1 && cfront()->is_expr()) {
             Expr expr = move(to_expr(begin()));
             if (expr.empty()) {
                 clear();
@@ -665,7 +673,8 @@ namespace SOS {
     {
         if (empty()) return *this;
         for (auto& eptr : *this) {
-            if (eptr->is_etoken()) continue;
+            // if (eptr->is_etoken()) continue;
+            if (!eptr->is_expr()) continue;
             Expr& expr = ptr_to_expr(eptr);
             if (expr.simplify_rec().size() == 1) {
                 eptr = move(expr.front());
@@ -678,7 +687,8 @@ namespace SOS {
     {
         if (_is_binary) return *this;
         expect(size() > 1, "Expression has not at least 2 arguments.");
-        expect(cfront()->is_etoken(),
+        // expect(cfront()->is_etoken(),
+        expect(!cfront()->is_expr(),
                "First argument of each expression should be single token.");
         _is_binary = true;
         if (size() > 3) {
@@ -695,14 +705,18 @@ namespace SOS {
 
     bool Expr::is_flat() const
     {
-        return std::all_of(cbegin(), cend(),
-                           bind(&Expr_place::is_etoken, _1));
+        // return std::all_of(cbegin(), cend(),
+                           // bind(&Expr_place::is_etoken, _1));
+        return std::none_of(cbegin(), cend(),
+                            bind(&Expr_place::is_expr, _1));
     }
 
     bool Expr::is_deep() const
     {
-        return std::none_of(cbegin(), cend(),
-                            bind(&Expr_place::is_etoken, _1));
+        // return std::none_of(cbegin(), cend(),
+                            // bind(&Expr_place::is_etoken, _1));
+        return std::all_of(cbegin(), cend(),
+                           bind(&Expr_place::is_expr, _1));
     }
 
     Expr& Expr::flatten()
@@ -711,7 +725,8 @@ namespace SOS {
         _is_flatten = true;
         Places places_;
         for (auto& e : places()) {
-            if (e->is_etoken()) {
+            // if (e->is_etoken()) {
+            if (!e->is_expr()) {
                 places_.emplace_back(move(e));
                 continue;
             }

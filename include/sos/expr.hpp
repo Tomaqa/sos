@@ -25,7 +25,8 @@ namespace SOS {
         virtual ~Expr_place()                                       = default;
         virtual Expr_place_ptr clone() const                              = 0;
 
-        virtual bool is_etoken() const noexcept                           = 0;
+        // virtual bool is_etoken() const noexcept                           = 0;
+        virtual bool is_expr() const noexcept                             = 0;
         virtual explicit operator string () const noexcept                = 0;
         friend string to_string(const Expr_place& rhs);
         friend ostream& operator <<(ostream& os, const Expr_place& rhs);
@@ -36,33 +37,110 @@ namespace SOS {
         template <typename T> static Expr_ptr_t<T> new_place(T&& place);
     };
 
-    class Expr_token : public Expr_place {
+    template <typename Arg>
+    // class Expr_token;
+    class Expr_value;
+
+    // using Expr_token = Expr_value<Expr_place::Token>;
+
+    // template <>
+    // // class Expr_token : public Expr_place {
+    // // class Expr_token<Expr_place::Token> : public Expr_place {
+    // class Expr_value<Expr_place::Token> : public Expr_place {
+    // public:
+    //     Expr_token()                                                 = delete;
+    //     virtual ~Expr_token()                                       = default;
+    //     template <typename Arg> Expr_token(Arg arg);
+
+    //     virtual Expr_place_ptr clone() const override;
+    //     template <typename... Args>
+    //         static Expr_ptr_t<Expr_token> new_etoken(Args&&... args);
+
+    //     const Token& ctoken() const                         { return _token; }
+    //     Token& token()                                      { return _token; }
+    //     static const Token& check_token(const Token& token);
+    //     static bool valid_token(const Token& token);
+
+    //     template <typename Arg> bool get_value_valid(Arg& arg) const;
+    //     template <typename Arg> Arg get_value() const;
+    //     template <typename Arg> Arg get_value_check() const;
+    //     template <typename Arg> bool is_valid_value() const;
+    //     template <typename Arg> void set_value(Arg arg);
+
+    //     virtual bool is_etoken() const noexcept override
+    //                                                           { return true; }
+    //     virtual explicit operator string () const noexcept override
+    //                                                       { return ctoken(); }
+    // private:
+    //     Token _token;
+    // };
+
+    // template <typename Arg>
+    // class Expr_value : public Expr_token {
+    // public:
+    //     Expr_value()                                                 = delete;
+    //     virtual ~Expr_value()                                       = default;
+    //     Expr_value(Arg arg);
+    //     Expr_value(Token token);
+
+    //     virtual Expr_place_ptr clone() const override;
+    //     template <typename... Args>
+    //         static Expr_ptr_t<Expr_value> new_evalue(Args&&... args);
+
+    //     Arg get_value() const            { return cvalue(); }
+    //     void set_value(Arg arg);
+    // protected:
+    //     Arg cvalue() const                                  { return _value; }
+    //     Arg& value()                                        { return _value; }
+    // private:
+    //     Arg _value;
+    // };
+
+    template <typename Arg>
+    class Expr_value : public Expr_place {
     public:
-        Expr_token()                                                 = delete;
+        virtual ~Expr_value()                                       = default;
+        Expr_value(Arg arg);
+
+        virtual Expr_place_ptr clone() const override;
+        template <typename... Args>
+            static Expr_ptr_t<Expr_value> new_evalue(Args&&... args);
+
+        const Arg& cvalue() const                           { return _value; }
+        Arg& value()                                        { return _value; }
+
+        virtual bool is_expr() const noexcept override       { return false; }
+        virtual bool is_evalue() const noexcept               { return true; }
+        virtual explicit operator string () const noexcept override
+                                               { return to_string(cvalue()); }
+    protected:
+        Expr_value() { }
+    private:
+        Arg _value;
+    };
+
+    class Expr_token : public Expr_value<Expr_place::Token> {
+    public:
+        Expr_token();
         virtual ~Expr_token()                                       = default;
-        virtual Expr_place_ptr clone() const override final;
         template <typename Arg> Expr_token(Arg arg);
 
+        virtual Expr_place_ptr clone() const override;
         template <typename... Args>
             static Expr_ptr_t<Expr_token> new_etoken(Args&&... args);
 
-        const Token& ctoken() const                         { return _token; }
-        Token& token()                                      { return _token; }
+        const Token& ctoken() const                       { return cvalue(); }
+        Token& token()                                     { return value(); }
         static const Token& check_token(const Token& token);
         static bool valid_token(const Token& token);
+
+        virtual bool is_evalue() const noexcept override     { return false; }
 
         template <typename Arg> bool get_value_valid(Arg& arg) const;
         template <typename Arg> Arg get_value() const;
         template <typename Arg> Arg get_value_check() const;
         template <typename Arg> bool is_valid_value() const;
         template <typename Arg> void set_value(Arg arg);
-
-        virtual bool is_etoken() const noexcept override final
-                                                              { return true; }
-        virtual explicit operator string () const noexcept override final
-                                                          { return ctoken(); }
-    private:
-        Token _token;
     };
 
     class Expr : public Expr_place {
@@ -81,7 +159,6 @@ namespace SOS {
 
         Expr();
         virtual ~Expr()                                             = default;
-        virtual Expr_place_ptr clone() const override;
         Expr(const Expr& rhs);
         Expr& operator =(const Expr& rhs);
         Expr(Expr&& rhs)                                            = default;
@@ -92,10 +169,12 @@ namespace SOS {
         Expr(istream& is);
         Expr(istream&& is);
 
+        virtual Expr_place_ptr clone() const override;
         template <typename... Args>
             static Expr_ptr_t<Expr> new_expr(Args&&... args);
 
-        virtual bool is_etoken() const noexcept override     { return false; }
+        // virtual bool is_etoken() const noexcept override     { return false; }
+        virtual bool is_expr() const noexcept override        { return true; }
         virtual explicit operator string () const noexcept override;
 
         const Places& cplaces() const                      { return _places; }
@@ -139,11 +218,16 @@ namespace SOS {
 
         static const Expr_token&
             cptr_to_etoken(const Expr_place_ptr& place_ptr);
+        // template <typename Arg>
+            // static const Expr_value<Arg>&
+                // cptr_to_evalue(const Expr_place_ptr& place_ptr);
         static const Token&
             cptr_to_token(const Expr_place_ptr& place_ptr);
         static const Expr&
             cptr_to_expr(const Expr_place_ptr& place_ptr);
         static Expr_token& ptr_to_etoken(Expr_place_ptr& place_ptr);
+        // template <typename Arg>
+            // static Expr_value<Arg>& ptr_to_evalue(Expr_place_ptr& place_ptr);
         static Token& ptr_to_token(Expr_place_ptr& place_ptr);
         static Expr& ptr_to_expr(Expr_place_ptr& place_ptr);
         const Expr_token& cto_etoken(iterator it) const;

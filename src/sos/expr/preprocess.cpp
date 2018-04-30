@@ -231,7 +231,8 @@ namespace SOS {
     void Expr::Preprocess::parse_nested_expr(Expr& expr, unsigned depth)
     try {
         while (expr) {
-            if (expr.cpeek()->is_etoken()) {
+            // if (expr.cpeek()->is_etoken()) {
+            if (!expr.cpeek()->is_expr()) {
                 parse_token(expr, depth);
                 continue;
             }
@@ -320,7 +321,8 @@ namespace SOS {
         check_is_not_macro_key(macro_key_);
         check_has_not_macro_key(macro_key_);
         Expr params_expr;
-        if (expr && !expr.cpeek()->is_etoken()) {
+        // if (expr && !expr.cpeek()->is_etoken()) {
+        if (expr && expr.cpeek()->is_expr()) {
             params_expr = expr.extract_expr();
         }
         //! do not parse this expression
@@ -341,14 +343,16 @@ namespace SOS {
 
         Let_body let_body_;
 
-        if (expr.cpeek()->is_etoken()) {
+        // if (expr.cpeek()->is_etoken()) {
+        if (!expr.cpeek()->is_expr()) {
             auto it = exp_token(expr, depth+1);
             if (it == expr.cpos()) {
-                expr.add_new_etoken_at_pos("");
+                expr.add_new_etoken_at_pos();
                 expr.prev();
             }
         }
-        if (expr.cpeek()->is_etoken()) {
+        // if (expr.cpeek()->is_etoken()) {
+        if (!expr.cpeek()->is_expr()) {
             Token token = expr.extract_token();
             let_body_.add_new_etoken(move(token));
         }
@@ -379,7 +383,8 @@ namespace SOS {
         bool found = false;
         int nested_del_cnt = 0;
         while (expr) {
-            if (!expr.cpeek()->is_etoken()) {
+            // if (!expr.cpeek()->is_etoken()) {
+            if (expr.cpeek()->is_expr()) {
                 if (del) {
                     expr.erase_at_pos();
                     continue;
@@ -588,7 +593,8 @@ namespace SOS {
         int nested_cnt = 0;
         while (expr) {
             Expr_place_ptr place = expr.extract();
-            if (place->is_etoken()) {
+            // if (place->is_etoken()) {
+            if (!place->is_expr()) {
                 const Token& token = cptr_to_token(place);
                 if (token == end_token) {
                     if (nested_cnt == 0) {
@@ -621,7 +627,8 @@ namespace SOS {
 
         Expr params_expr;
         if (!empty) {
-            expect(expr && !expr.cpeek()->is_etoken(),
+            // expect(expr && !expr.cpeek()->is_etoken(),
+            expect(expr && expr.cpeek()->is_expr(),
                    "Missing parameters of user macro '"s
                    + macro_key_ + "'");
             params_expr = expr.extract_expr();
