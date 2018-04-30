@@ -33,10 +33,19 @@ namespace SOS {
             param_keyss.emplace_back(Parser::code_param_keys(ode));
         }
         _ode_solver = OSolver(move(odes_spec), move(param_keyss), true);
+
+        _entriess_values.reserve(codes().size());
+        _ode_results.reserve(cconst_entries_count());
     }
 
     template <typename OSolver>
     int Solver<OSolver>::csteps() const
+    {
+        return Parser::code_const_ids_rows(codes().front()).size();
+    }
+
+    template <typename OSolver>
+    int Solver<OSolver>::cconst_entries_count() const
     {
         return SMT::cconst_ids_row_entries(
             Parser::code_const_ids_rows(codes().front()).front()
@@ -105,16 +114,36 @@ namespace SOS {
     template <typename OSolver>
     void Solver<OSolver>::solve_odes(int step)
     {
-        ODE::Dt_ids dt_ids;
-        typename OSolver::Context context;
-        const Unif_param_keyss_ids& pkeys_ids = cunif_param_keyss_ids();
-        for (auto& entries : _entriess_values) {
-            auto& entry = entries.front();
-            // ! poradi musi odpovidat unif_keys
-            dt_ids.push_back(SMT::cconst_values_entry_dt_value(entry));
+        const Unif_param_keyss_ids& pkeyss_ids = cunif_param_keyss_ids();
+        const int odes_count = codes().size();
+        const int entries_count = cconst_entries_count();
+
+        for (int e = 0; e < entries_count; e++) {
+            auto& entries = _entriess_values[e];
+            ODE::Dt_ids dt_ids;
+            ODE::States states;
+            dt_ids.reserve(odes_count);
+            states.reserve(odes_count);
+            for (int o = 0; o < odes_count; o++) {
+                auto& entry = entries[o];
+                ODE::State state;
+                auto& param_values =
+                    SMT::cconst_values_entry_param_values(entry);
+                state.reserve(param_values.size()+1);
+                dt_ids.push_back(
+                    SMT::cconst_values_entry_dt_value(entry)
+                );
+                state.push_back(
+                    SMT::cconst_values_entry_init_value(entry)
+                );
+                copy(param_values, std::back_inserter(state));
+                states.emplace_back(move(state));
+            }
+            typename OSolver::Context context(_time_values, move(states[0]));
+            Ode_result res = code_solver().solve_unif_odes(move(dt_ids),
+                                                           move(context));
+            _ode_results.emplace_back(move(res));
         }
-        _ode_result = code_solver().solve_unif_odes(move(dt_ids),
-                                                    move(context));
     }
 
     template <typename OSolver>

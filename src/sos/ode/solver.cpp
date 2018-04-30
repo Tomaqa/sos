@@ -2,6 +2,8 @@
 
 #include <set>
 
+#include <iostream>
+
 namespace SOS {
     using std::set;
 
@@ -398,6 +400,48 @@ namespace SOS {
             return {move(param_keys_), move(param_keyss_ids)};
         }
 
+        Solver::Context Solver::unify_contexts(Contexts&& contexts_) const
+        {
+            const int ctxs_size = contexts_.size();
+            if (ctxs_size == 1 || all_equal(contexts_)) {
+                return move(contexts_.front());
+            }
+            Interval<Time> t_bounds_ = contexts_.front().ct_bounds();
+            const int odes_size = size();
+            expect(ctxs_size == odes_size,
+                   "Number of contexts to unify mismatch: "s
+                   + "expected: " + to_string(odes_size)
+                   + ", got: " + to_string(ctxs_size));
+
+            auto& pkeyss_ids = cunif_param_keyss_ids();
+            int pkeys_size = cunif_param_keys().size();
+            if (has_unif_param_t()) --pkeys_size;
+            State state(pkeys_size);
+            for (int o = 0; o < odes_size; o++) {
+                Context& ctx = contexts_[o];
+                expect(ctx.ct_bounds() == t_bounds_,
+                       "Time bounds of context ["s
+                       + to_string(o) + "] mismatch: "
+                       + "expected: " + to_string(t_bounds_)
+                       + ", got: " + to_string(ctx.ct_bounds()));
+                const State& ctx_state = ctx.cx_init();
+                const int ctx_size = ctx_state.size();
+                Ode_ids ids = pkeyss_ids[o];
+                int ids_size = ids.size();
+                if (ode_has_param_t(o)) --ids_size;
+                expect(ctx_size == ids_size,
+                       "Number of values in context ["s
+                       + to_string(o) + "] mismatch: "
+                       + "expected: " + to_string(ids_size)
+                       + ", got: " + to_string(ctx_size));
+                for (int i = 0; i < ctx_size; i++) {
+                    const int idx = ids[i];
+                    state[idx] = ctx_state[i];
+                }
+            }
+            return Context(move(t_bounds_), move(state));
+        }
+
         Real Solver::solve_ode(Dt_id dt_id_, Context context_,
                                Ode_id ode_id_) const
         {
@@ -408,15 +452,20 @@ namespace SOS {
 
         State Solver::solve_odes(Dt_ids dt_ids_, Contexts contexts_) const
         {
+            const int ctxs_size = contexts_.size();
             check_dt_ids(dt_ids_);
             reset_trajects(contexts_);
-            const bool unified = is_unified()
-                                 && (contexts_.size() == 1
-                                     || all_equal(contexts_));
+            const bool unified = is_unified();
             if (unified) {
+                Context unif_context = unify_contexts(move(contexts_));
                 return solve_unif_odes_wo_check(move(dt_ids_),
-                                                move(contexts_.front()));
+                                                move(unif_context));
             }
+            const int odes_size = size();
+            expect(ctxs_size == odes_size,
+                   "Number of non-unified contexts mismatch: "s
+                   + "expected: " + to_string(odes_size)
+                   + ", got: " + to_string(ctxs_size));
             for_each(contexts_, std::begin(codes_eval()),
                     [this](Context& ctx, const Ode_eval& oeval){
                         const bool has_t = ode_has_param_t(oeval);

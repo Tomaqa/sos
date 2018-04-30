@@ -184,6 +184,7 @@ namespace SOS {
                              { return code_param_key(ode_id_, is_unified()); }
             static Unif_param_keys
                 unify_param_keys(Param_keyss&& param_keyss_);
+            Context unify_contexts(Contexts&& contexts_) const;
 
             State_fs& state_fs() const                   { return _state_fs; }
             State_f& state_f(Ode_id ode_id_ = def_ode_id) const;

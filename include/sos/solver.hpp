@@ -55,12 +55,14 @@ namespace SOS {
 
         using Unif_param_keyss_ids = typename OSolver::Unif_param_keyss_ids;
         using Ode_result = ODE::State;
+        using Ode_results = vector<Ode_result>;
 
         void init();
 
         const Parser& cparser() const                      { return _parser; }
         const Odes& codes() const                { return cparser().codes(); }
         int csteps() const;
+        int cconst_entries_count() const;
 
         const SMT::Solver& csmt_solver() const         { return _smt_solver; }
         SMT::Solver& smt_solver()                      { return _smt_solver; }
@@ -85,7 +87,8 @@ namespace SOS {
         Time_const_values _time_values;
         // Const_values_entries _entries_values;
         Const_values_entriess _entriess_values;
-        Ode_result _ode_result;
+        // Ode_result _ode_result;
+        Ode_results _ode_results;
 
     };
 
