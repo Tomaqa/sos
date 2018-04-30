@@ -225,16 +225,6 @@ namespace SOS {
 
     void Parser::parse_token(Expr& expr)
     {
-        // const Token& token = expr.cpeek_token();
-        // if (token[0] == '-' && isdigit(token[1])) {
-        //     Expr_token num = expr.extract_etoken();
-        //     num.token().erase(0, 1);
-        //     Expr new_expr("-");
-        //     new_expr.add_new_etoken(move(num));
-        //     expr.add_new_expr_at_pos(move(new_expr));
-        //     return;
-        // }
-        // expr.next();
         SMT::neg_literal_to_expr(expr.get());
     }
 

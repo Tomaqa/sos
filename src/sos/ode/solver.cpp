@@ -76,8 +76,10 @@ namespace SOS {
             check_empty(param_keyss_);
             bool unified = check_param_keyss(param_keyss_);
             if (!unified && unify) {
-                param_keyss_ =
-                    Param_keyss{move(unify_param_keys(move(param_keyss_)))};
+                Unif_param_keys unif_param_keys =
+                    unify_param_keys(move(param_keyss_));
+                param_keyss_ = Param_keyss{move(unif_param_keys.first)};
+                unif_param_keyss_ids() = move(unif_param_keys.second);
                 unified = true;
             }
             odes_eval().reserve(size());
@@ -340,15 +342,18 @@ namespace SOS {
                                                     : def_ode_id];
         }
 
-        Param_keys Solver::unify_param_keys(Param_keyss&& param_keyss_)
+        Solver::Unif_param_keys
+            Solver::unify_param_keys(Param_keyss&& param_keyss_)
         {
-            const int pkeys_size = param_keyss_.size();
-            if (pkeys_size == 1 || all_equal(param_keyss_)) {
-                return {move(param_keyss_.front())};
+            const int pkeyss_size = param_keyss_.size();
+            if (pkeyss_size == 1 || all_equal(param_keyss_)) {
+                return {move(param_keyss_.front()), {}};
             }
 
             Param_keys param_keys_;
-            param_keys_.reserve(pkeys_size*2);
+            param_keys_.reserve(pkeyss_size*2);
+            Unif_param_keyss_ids param_keyss_ids;
+            param_keyss_ids.reserve(param_keyss_.size());
             set<Param_key> pkeys_set;
             transform(param_keyss_, std::back_inserter(param_keys_),
                       [&pkeys_set](auto& pkeys){
@@ -360,23 +365,37 @@ namespace SOS {
                           return pdt_key;
                       });
             bool has_t = false;
-            for (auto&& pkeys : move(param_keyss_)) {
-                std::for_each(std::make_move_iterator(std::begin(pkeys)+1),
-                              std::make_move_iterator(std::end(pkeys)),
-                              [&param_keys_, &pkeys_set, &has_t]
-                              (auto&& pkey){
-                                  if (pkey == "t") {
-                                      has_t = true;
-                                      return;
-                                  }
-                                  if (pkeys_set.emplace(pkey).second) {
-                                      param_keys_.emplace_back(move(pkey));
-                                  }
-                              });
+            vector<bool> has_ts(pkeyss_size);
+            for (int i = 0; i < pkeyss_size; i++) {
+                auto&& pkeys = move(param_keyss_[i]);
+                const int pkeys_size = pkeys.size();
+                param_keyss_ids.emplace_back(Ode_ids{i});
+                param_keyss_ids[i].reserve(pkeys_size);
+                for (int j = 1; j < pkeys_size; j++) {
+                    auto&& pkey = move(pkeys[j]);
+                    if (pkey == "t") {
+                        has_t = true;
+                        has_ts[i] = true;
+                        continue;
+                    }
+                    if (pkeys_set.emplace(pkey).second) {
+                        param_keys_.emplace_back(pkey);
+                    }
+                    auto it = find(param_keys_, pkey);
+                    const int idx = it - std::begin(param_keys_);
+                    param_keyss_ids[i].push_back(idx);
+                }
             }
-            if (has_t) param_keys_.emplace_back("t");
+            if (has_t) {
+                const int idx = param_keys_.size();
+                param_keys_.emplace_back("t");
+                for (int i = 0; i < pkeyss_size; i++) {
+                    if (!has_ts[i]) continue;
+                    param_keyss_ids[i].push_back(idx);
+                }
+            }
 
-            return param_keys_;
+            return {move(param_keys_), move(param_keyss_ids)};
         }
 
         Real Solver::solve_ode(Dt_id dt_id_, Context context_,

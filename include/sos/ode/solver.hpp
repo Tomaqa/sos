@@ -10,6 +10,8 @@ namespace SOS {
 
         class Solver {
         public:
+            using Unif_param_keyss_ids = vector<Ode_ids>;
+
             class Context;
             using Contexts = vector<Context>;
 
@@ -51,6 +53,8 @@ namespace SOS {
 
             Param_keyss cparam_keyss() const;
             const Param_keys& cunif_param_keys() const;
+            const Unif_param_keyss_ids& cunif_param_keyss_ids() const
+                                             { return _unif_param_keyss_ids; }
 
             Real solve_ode(Dt_id dt_id_, Context context_,
                            Ode_id ode_id_ = def_ode_id) const;
@@ -105,6 +109,9 @@ namespace SOS {
             static bool valid_keys(const Param_keys& param_keys_);
             void check_dt_ids(const Dt_ids& dt_ids_) const;
 
+            Unif_param_keyss_ids& unif_param_keyss_ids()
+                                             { return _unif_param_keyss_ids; }
+
             static Param_keys_ptr new_param_keys(Param_keys&& param_keys_);
             void add_odes_eval(Param_keyss param_keyss_);
             void add_unif_odes_eval(Param_keys param_keys_);
@@ -156,6 +163,8 @@ namespace SOS {
             using State_f = function<const State&(const State&, Time)>;
             using State_fs = vector<State_f>;
 
+            using Unif_param_keys = pair<Param_keys, Unif_param_keyss_ids>;
+
             void set_odes_eval(Param_keyss param_keyss_, bool unify);
             void parse_odes_spec(Expr& expr);
             static Param_keyss parse_param_keyss(Expr& expr);
@@ -173,7 +182,8 @@ namespace SOS {
                                             bool unified) const;
             const Param_key& code_param_key(Ode_id ode_id_) const
                              { return code_param_key(ode_id_, is_unified()); }
-            static Param_keys unify_param_keys(Param_keyss&& param_keyss_);
+            static Unif_param_keys
+                unify_param_keys(Param_keyss&& param_keyss_);
 
             State_fs& state_fs() const                   { return _state_fs; }
             State_f& state_f(Ode_id ode_id_ = def_ode_id) const;
@@ -195,6 +205,7 @@ namespace SOS {
             mutable Flag _has_param_t;
             mutable State_fs _state_fs;
             mutable Trajects _trajects;
+            Unif_param_keyss_ids _unif_param_keyss_ids;
         };
     }
 }

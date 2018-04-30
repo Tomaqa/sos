@@ -20,6 +20,7 @@ namespace SOS {
         using Dt_id = int;
         using Ode_id = int;
         using Dt_ids = vector<Dt_id>;
+        using Ode_ids = vector<Ode_id>;
         using Param_key = Dt_eval::Param_key;
         using Param_keys = Dt_eval::Param_keys;
         using Param_keyss = vector<Param_keys>;

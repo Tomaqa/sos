@@ -53,6 +53,7 @@ namespace SOS {
 
         using Const_values_entriess = vector<Const_values_entries>;
 
+        using Unif_param_keyss_ids = typename OSolver::Unif_param_keyss_ids;
         using Ode_result = ODE::State;
 
         void init();
@@ -66,6 +67,8 @@ namespace SOS {
 
         const OSolver& code_solver() const             { return _ode_solver; }
         OSolver& ode_solver()                          { return _ode_solver; }
+        const Unif_param_keyss_ids& cunif_param_keyss_ids()
+                             { return code_solver().cunif_param_keyss_ids(); }
 
         bool do_step(int step);
         Sat smt_check_sat();

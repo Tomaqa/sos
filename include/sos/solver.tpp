@@ -107,6 +107,7 @@ namespace SOS {
     {
         ODE::Dt_ids dt_ids;
         typename OSolver::Context context;
+        const Unif_param_keyss_ids& pkeys_ids = cunif_param_keyss_ids();
         for (auto& entries : _entriess_values) {
             auto& entry = entries.front();
             // ! poradi musi odpovidat unif_keys

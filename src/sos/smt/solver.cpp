@@ -1,6 +1,8 @@
 #include "smt/solver.hpp"
 #include "expr/eval.hpp"
 
+#include <iomanip>
+
 #include <sys/wait.h>
 
 namespace SOS {
@@ -22,6 +24,7 @@ namespace SOS {
             // _thread = thread(&Solver::receiver, this);
             // _thread.detach();
 
+            _ofs << std::setprecision(8) << std::fixed;
             _ofs << move(input) << endl;
         }
 
