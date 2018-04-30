@@ -160,7 +160,6 @@ namespace SOS {
         smt_exprs().reserve(_expr.size());
         while (_expr) {
             Expr& e = _expr.get_expr();
-            // expect(!e.empty() && e.cfront()->is_etoken(),
             expect(!e.empty() && !e.cfront()->is_expr(),
                    "Expected command expression, got: "s
                    + to_string(e));
@@ -200,7 +199,6 @@ namespace SOS {
         if (expr.empty()) return;
         maybe_parse_first_token(expr);
         while (expr) {
-            // if (expr.cpeek()->is_etoken()) {
             if (!expr.cpeek()->is_expr()) {
                 parse_token(expr);
                 continue;
@@ -212,7 +210,6 @@ namespace SOS {
 
     void Parser::maybe_parse_first_token(Expr& expr)
     {
-        // if (!expr.cpeek()->is_etoken()) return;
         if (expr.cpeek()->is_expr()) return;
         const Token& token = expr.cpeek_token();
         expect(token != "set-logic" && token != "define-dt"
@@ -274,9 +271,6 @@ namespace SOS {
         Ode_key ode_key_ = move(expr.get_token_check());
         Dt_key dt_key_ = move(expr.get_token_check());
         Expr keys_expr = move(expr.get_expr_check());
-        // Dt_spec dt_spec_ = expr.cpeek()->is_etoken()
-                         // ? Dt_spec("+ "s + move(expr.get_token()))
-                         // : move(expr.get_expr());
         Dt_spec dt_spec_ = expr.cpeek()->is_expr()
                          ? move(expr.get_expr())
                          : Dt_spec("+ "s + move(expr.get_token()));

@@ -50,11 +50,8 @@ namespace SOS {
         try {
             bool parse_unify = (
                  expr.size() == 3
-                 // && !expr.get()->is_etoken()
-                 // && expr.cpeek()->is_etoken() && expr.get_token() == "*"
-                 // && !expr.get()->is_etoken()
                  && expr.get()->is_expr()
-                 && !expr.cpeek()->is_expr() && expr.get_token() == "*"
+                 && Expr::is_etoken(expr.cpeek()) && expr.get_token() == "*"
                  && expr.get()->is_expr()
             );
             expr.reset_pos();
