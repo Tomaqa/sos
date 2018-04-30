@@ -78,6 +78,26 @@ namespace SOS {
             return make_tuple(dt_value, init_value, move(param_values));
         }
 
+        const Time_const_values&
+            cconst_values_row_time_values(const Const_values_row&
+                                           const_values_row_)
+        {
+            return const_values_row_.first;
+        }
+
+        const Const_values_entries&
+            cconst_values_row_entries(const Const_values_row&
+                                          const_values_row_)
+        {
+            return const_values_row_.second;
+        }
+
+        Const_values_row make_const_values_row(Time_const_values time_values,
+                                               Const_values_entries entries)
+        {
+            return make_pair(move(time_values), move(entries));
+        }
+
         void neg_literal_to_expr(Expr::Expr_place_ptr& place_ptr)
         {
             Expr_token& etoken = Expr::ptr_to_etoken(place_ptr);

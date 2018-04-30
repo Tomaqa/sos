@@ -31,10 +31,12 @@ namespace SOS {
         using Odes_spec = ODE::Odes_spec;
         using Param_keys = ODE::Param_keys;
         using Param_keyss = ODE::Param_keyss;
+        using Ode = Parser::Ode;
         using Odes = Parser::Odes;
 
         using Const_id = SMT::Const_id;
         using Const_ids = SMT::Const_ids;
+        using Time_const_id = SMT::Time_const_id;
         using Time_const_ids = SMT::Time_const_ids;
         using Dt_const_id = SMT::Dt_const_id;
         using Init_const_id = SMT::Init_const_id;
@@ -45,13 +47,14 @@ namespace SOS {
 
         using Const_value = SMT::Const_value;
         using Const_values = SMT::Const_values;
+        using Time_const_value = SMT::Time_const_value;
         using Time_const_values = SMT::Time_const_values;
         using Dt_const_value = SMT::Dt_const_value;
         using Init_const_value = SMT::Init_const_value;
         using Const_values_entry = SMT::Const_values_entry;
         using Const_values_entries = SMT::Const_values_entries;
-
-        using Const_values_entriess = vector<Const_values_entries>;
+        using Const_values_row = SMT::Const_values_row;
+        using Const_values_rows = SMT::Const_values_rows;
 
         using Ode_result = ODE::State;
         using Ode_results = vector<Ode_result>;
@@ -69,6 +72,11 @@ namespace SOS {
         const OSolver& code_solver() const             { return _ode_solver; }
         OSolver& ode_solver()                          { return _ode_solver; }
 
+        static const Const_ids_rows& cconst_ids_rows(const Ode& ode);
+        const Const_ids_rows& cconst_ids_rows(int ode_id) const;
+        static const Const_ids_row& cconst_ids_row(const Ode& ode, int step);
+        const Const_ids_row& cconst_ids_row(int ode_id, int step) const;
+
         bool do_step(int step);
         Sat smt_check_sat();
         bool backtrack(int step);
@@ -81,8 +89,7 @@ namespace SOS {
         SMT::Solver _smt_solver;
         OSolver _ode_solver;
 
-        Time_const_values _time_values;
-        Const_values_entriess _entriess_values;
+        Const_values_rows _odes_row_values;
         Ode_results _ode_results;
     };
 

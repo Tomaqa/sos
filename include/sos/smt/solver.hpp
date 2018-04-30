@@ -39,9 +39,19 @@ namespace SOS {
             Const_values_entries
                 get_step_entries_values(const Const_ids_entries&
                                             const_ids_entries);
+            Const_values_row
+                get_step_row_values(const Const_ids_row& const_ids_row);
 
-            // void assert()
+            void assert(Expr& expr);
+            void assert_step_row_values(const Const_ids_row& const_ids_row,
+                                        const Const_values_row&
+                                            const_values_row,
+                                        bool conflict = false);
         protected:
+            void check_assert_expr(Expr& expr);
+            Expr const_to_assert_expr(Const_id const_id,
+                                      Const_value const_value);
+
             void fork_solver();
 
             // void receiver();

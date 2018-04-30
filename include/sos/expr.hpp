@@ -252,9 +252,13 @@ namespace SOS {
         void clear();
 
         template <typename T> void add_place_ptr(T&& place_ptr_);
+        template <typename Arg, typename... Args>
+            void add_new_evalue(Args&&... args);
         template <typename... Args> void add_new_etoken(Args&&... args);
         template <typename... Args> void add_new_expr(Args&&... args);
         template <typename T> iterator add_place_ptr_at_pos(T&& place_ptr_);
+        template <typename Arg, typename... Args>
+            iterator add_new_evalue_at_pos(Args&&... args);
         template <typename... Args>
             iterator add_new_etoken_at_pos(Args&&... args);
         template <typename... Args>

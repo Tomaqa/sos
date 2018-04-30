@@ -216,6 +216,12 @@ namespace SOS {
         emplace_back(forward<T>(place_ptr_));
     }
 
+    template <typename Arg, typename... Args>
+    void Expr::add_new_evalue(Args&&... args)
+    {
+        add_place_ptr(Expr_value<Arg>::new_evalue(forward<Args>(args)...));
+    }
+
     template <typename... Args>
     void Expr::add_new_etoken(Args&&... args)
     {
@@ -232,6 +238,14 @@ namespace SOS {
     Expr::iterator Expr::add_place_ptr_at_pos(T&& place_ptr_)
     {
         return emplace(cpos(), forward<T>(place_ptr_));
+    }
+
+    template <typename Arg, typename... Args>
+    Expr::iterator Expr::add_new_evalue_at_pos(Args&&... args)
+    {
+        return add_place_ptr_at_pos(
+            Expr_value<Arg>::new_evalue(forward<Args>(args)...)
+        );
     }
 
     template <typename... Args>

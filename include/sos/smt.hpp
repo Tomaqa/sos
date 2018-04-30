@@ -30,6 +30,9 @@ namespace SOS {
         using Const_values_entry = tuple<Dt_const_value, Init_const_value,
                                          Const_values>;
         using Const_values_entries = vector<Const_values_entry>;
+        using Const_values_row = pair<Time_const_values,
+                                      Const_values_entries>;
+        using Const_values_rows = vector<Const_values_row>;
 
         const Dt_const_id&
             cconst_ids_entry_dt_const(const Const_ids_entry&
@@ -64,6 +67,15 @@ namespace SOS {
             make_const_values_entry(Dt_const_value dt_value,
                                     Init_const_value init_value,
                                     Const_values param_values);
+
+        const Time_const_values&
+            cconst_values_row_time_values(const Const_values_row&
+                                           const_values_row_);
+        const Const_values_entries&
+            cconst_values_row_entries(const Const_values_row&
+                                          const_values_row_);
+        Const_values_row make_const_values_row(Time_const_values time_values,
+                                               Const_values_entries entries);
 
         void neg_literal_to_expr(Expr::Expr_place_ptr& place_ptr);
     }
