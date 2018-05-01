@@ -79,6 +79,12 @@ namespace SOS {
     }
 
     template <typename OSolver>
+    void Solver<OSolver>::set_traject_ofile(string ofile)
+    {
+        _traj_ofs = ofstream(move(ofile));
+    }
+
+    template <typename OSolver>
     typename Solver<OSolver>::Sat Solver<OSolver>::solve()
     {
         const bool sat = do_step(0);
@@ -174,6 +180,10 @@ namespace SOS {
             for (int e = 0; e < entries_count; e++) {
                 _ode_results[o].push_back(trans_ode_results[e][o]);
             }
+        }
+
+        if (_traj_ofs) {
+            _traj_ofs << code_solver().cunif_traject() << endl;
         }
     }
 

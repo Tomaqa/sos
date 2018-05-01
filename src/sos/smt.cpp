@@ -109,4 +109,20 @@ namespace SOS {
             place_ptr = Expr::new_expr(move(new_expr));
         }
     }
+
+    namespace Util {
+        string to_string(const SMT::Sat& sat)
+        {
+            switch (sat) {
+            case SMT::Sat::sat: return "sat";
+            case SMT::Sat::unsat: return "unsat";
+            default: return "unknown";
+            }
+        }
+
+        ostream& operator <<(ostream& os, const SMT::Sat& sat)
+        {
+            return (os << to_string(sat));
+        }
+    }
 }

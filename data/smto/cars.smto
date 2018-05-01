@@ -106,7 +106,7 @@
 
 #def INIT_STATES()
 #for (k 1 #SYSTEMS)
-    (and (not accel.#k) (not brake.#k))
+    (and (not accel.#k##_0) (not brake.#k##_0))
 #endfor
 #enddef
 

@@ -79,4 +79,9 @@ namespace SOS {
 
         void neg_literal_to_expr(Expr::Expr_place_ptr& place_ptr);
     }
+
+    namespace Util {
+        string to_string(const SMT::Sat& sat);
+        ostream& operator <<(ostream& os, const SMT::Sat& sat);
+    }
 }

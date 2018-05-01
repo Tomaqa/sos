@@ -25,6 +25,8 @@ namespace SOS {
         Solver(istream& is);
         Solver(string input);
 
+        void set_traject_ofile(string ofile);
+
         Sat solve();
     protected:
         using Ode_spec = ODE::Ode_spec;
@@ -91,6 +93,8 @@ namespace SOS {
 
         Const_values_rows _odes_row_values;
         Ode_results _ode_results;
+
+        ofstream _traj_ofs;
     };
 
 }

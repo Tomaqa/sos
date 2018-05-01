@@ -45,7 +45,6 @@ namespace SOS {
             Const_values_row
                 get_step_row_values(const Const_ids_row& const_ids_row);
 
-            // void assert(Expr expr);
             void assert(Expr_place&& place);
             void assert_step_row(const Const_ids_row& const_ids_row,
                                  const Const_values_row& const_values_row,
@@ -54,7 +53,6 @@ namespace SOS {
                                           const Const_values_row&
                                               const_values_row);
         protected:
-            // void check_assert_expr(Expr& expr);
             Expr const_to_assert_expr(Const_id const_id,
                                       Const_value const_value);
             Expr expr_to_assert_expr(Expr expr,
