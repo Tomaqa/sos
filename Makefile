@@ -125,6 +125,7 @@ $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_BUILD_DIR)/%.o
 # rm -fr $(BUILD_DIR)/* $(BIN_DIR)/*
 
 #####################################
+
 build/test/expr_test.o: src/test/expr_test.cpp include/test/test.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp include/sos/expr.hpp include/sos/expr.tpp \
@@ -159,6 +160,11 @@ build/main/applet/parser.o: src/main/applet/parser.cpp \
  include/sos/expr.tpp include/sos/ode.hpp include/sos/expr/eval.hpp \
  include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
  include/sos/expr/eval/oper.tpp
+build/main/applet/smt_solver.o: src/main/applet/smt_solver.cpp \
+ include/sos/smt/solver/run.hpp include/sos/sos.hpp include/sos/sos.tpp \
+ include/sos/util/run.hpp include/sos/util.hpp include/sos/util.tpp \
+ include/sos/smt/solver.hpp include/sos/smt.hpp include/sos/expr.hpp \
+ include/sos/expr.tpp
 build/main/applet/odeint.o: src/main/applet/odeint.cpp \
  include/sos/ode/solver/run.hpp include/sos/sos.hpp include/sos/sos.tpp \
  include/sos/util/run.hpp include/sos/util.hpp include/sos/util.tpp \
@@ -251,10 +257,16 @@ build/sos/parser.o: src/sos/parser.cpp include/sos/parser.hpp \
  include/sos/expr.tpp include/sos/ode.hpp include/sos/expr/eval.hpp \
  include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
  include/sos/expr/eval/oper.tpp include/sos/expr/preprocess.hpp
+build/sos/smt/solver/run.o: src/sos/smt/solver/run.cpp \
+ include/sos/smt/solver/run.hpp include/sos/sos.hpp include/sos/sos.tpp \
+ include/sos/util/run.hpp include/sos/util.hpp include/sos/util.tpp \
+ include/sos/smt/solver.hpp include/sos/smt.hpp include/sos/expr.hpp \
+ include/sos/expr.tpp
 build/sos/smt/solver.o: src/sos/smt/solver.cpp include/sos/smt/solver.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp include/sos/smt.hpp include/sos/expr.hpp \
- include/sos/expr.tpp
+ include/sos/expr.tpp include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp
 build/sos/util/run.o: src/sos/util/run.cpp include/sos/util/run.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp

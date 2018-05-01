@@ -30,6 +30,9 @@ namespace SOS {
             Solver(string input);
             void swap(Solver& rhs);
 
+            void command(string str);
+            void command(Expr expr);
+
             Sat check_sat();
 
             Time_const_values
@@ -42,7 +45,7 @@ namespace SOS {
             Const_values_row
                 get_step_row_values(const Const_ids_row& const_ids_row);
 
-            void assert(Expr& expr);
+            void assert(Expr expr);
             void assert_step_row_values(const Const_ids_row& const_ids_row,
                                         const Const_values_row&
                                             const_values_row,
@@ -56,10 +59,13 @@ namespace SOS {
 
             void write_str(string str);
             void write_expr(Expr expr);
-            string read_line();
-            Expr read_expr();
+            string read_response();
         private:
             template <typename Arg> Arg get_value(Expr& expr);
+
+            string read_line(string begin);
+            string read_expr();
+            char read_char();
 
             pid_t _pid{-1};
             int _in_fd{-1};

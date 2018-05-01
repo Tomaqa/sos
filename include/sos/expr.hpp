@@ -271,6 +271,7 @@ namespace SOS {
         template <typename Un_f> void for_each_expr(Un_f f);
 
         Expr& simplify() noexcept;
+        Expr& simplify_top() noexcept;
         Expr& to_binary();
         bool is_flat() const;
         bool is_deep() const;
@@ -298,7 +299,6 @@ namespace SOS {
         iterator to_iterator(const_iterator it);
         void invalidate_pos() const;
     private:
-        Expr& simplify_top() noexcept;
         Expr& simplify_rec() noexcept;
 
         Places _places;
