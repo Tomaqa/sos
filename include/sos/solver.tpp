@@ -34,7 +34,6 @@ namespace SOS {
         }
         _ode_solver = OSolver(move(odes_spec), move(param_keyss), true);
 
-        // _entriess_values.reserve(codes().size());
         _odes_row_values.reserve(codes().size());
         _ode_results.reserve(cconst_entries_count());
     }
@@ -123,24 +122,8 @@ namespace SOS {
     template <typename OSolver>
     void Solver<OSolver>::smt_get_values(int step)
     {
-        // Time_const_ids time_consts = SMT::cconst_ids_row_time_consts(
-        //     Parser::code_const_ids_rows(codes().front())[step]
-        // );
-        // _time_values = smt_solver().get_step_time_values(time_consts);
-        // _entriess_values.clear();
-        // for (auto& ode : codes()) {
-        //     const Const_ids_rows& rows =
-        //         Parser::code_const_ids_rows(ode);
-        //     const Const_ids_row& row = rows[step];
-        //     Const_ids_entries entries = SMT::cconst_ids_row_entries(row);
-        //     _entriess_values.emplace_back(
-        //         smt_solver().get_step_entries_values(entries)
-        //     );
-        // }
         _odes_row_values.clear();
         for (auto& ode : codes()) {
-            // const Const_ids_rows& rows_ids = Parser::code_const_ids_rows(ode);
-            // const Const_ids_row& row_ids = rows_ids[step];
             const Const_ids_row& row_ids = cconst_ids_row(ode, step);
             Const_values_row row_vals =
                 smt_solver().get_step_row_values(row_ids);
@@ -151,40 +134,9 @@ namespace SOS {
     template <typename OSolver>
     void Solver<OSolver>::solve_odes()
     {
-        // _ode_results.clear();
-        // const int odes_count = codes().size();
-        // const int entries_count = cconst_entries_count();
-
-        // for (int e = 0; e < entries_count; e++) {
-        //     auto& entries = _entriess_values[e];
-        //     ODE::Dt_ids dt_ids;
-        //     typename OSolver::Contexts ctxs;
-        //     dt_ids.reserve(odes_count);
-        //     ctxs.reserve(odes_count);
-        //     for (int o = 0; o < odes_count; o++) {
-        //         auto& entry = entries[o];
-        //         ODE::State state;
-        //         auto& param_values =
-        //             SMT::cconst_values_entry_param_values(entry);
-        //         state.reserve(param_values.size()+1);
-        //         dt_ids.push_back(
-        //             SMT::cconst_values_entry_dt_value(entry)
-        //         );
-        //         state.push_back(
-        //             SMT::cconst_values_entry_init_value(entry)
-        //         );
-        //         copy(param_values, std::back_inserter(state));
-        //         ctxs.emplace_back(_time_values, move(state));
-        //     }
-        //     Ode_result res = code_solver().solve_odes(move(dt_ids),
-        //                                               move(ctxs));
-        //     _ode_results.emplace_back(move(res));
-        // }
-
         _ode_results.clear();
         const int odes_count = codes().size();
         const int entries_count = cconst_entries_count();
-
         for (int e = 0; e < entries_count; e++) {
             ODE::Dt_ids dt_ids;
             typename OSolver::Contexts ctxs;
@@ -225,6 +177,7 @@ namespace SOS {
             const Const_values_row& row_vals = _odes_row_values[o];
             smt_solver().assert_step_row_values(row_ids, row_vals);
         }
+        // ! _ode_results
     }
 
     template <typename OSolver>

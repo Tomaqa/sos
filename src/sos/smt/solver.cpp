@@ -5,33 +5,49 @@
 
 #include <sys/wait.h>
 
+#include <iostream>
+
 namespace SOS {
     namespace SMT {
         Solver::~Solver()
         {
-            close(_fd);
-            waitpid(_pid, NULL, 0);
-            // _thread.join();
+            if (_in_fd >= 0) close(_in_fd);
+            if (_out_fd >= 0) close(_out_fd);
+            if (_pid >= 0) waitpid(_pid, NULL, 0);
+        }
+
+        Solver::Solver(Solver&& rhs)
+            : _pid(rhs._pid),
+              _in_fd(rhs._in_fd),
+              _out_fd(rhs._out_fd)
+        {
+            rhs._pid = rhs._in_fd = rhs._out_fd = -1;
+        }
+
+        Solver& Solver::operator =(Solver&& rhs)
+        {
+            Solver tmp(move(rhs));
+            swap(tmp);
+            return *this;
+        }
+
+        void Solver::swap(Solver& rhs)
+        {
+            std::swap(_pid, rhs._pid);
+            std::swap(_in_fd, rhs._in_fd);
+            std::swap(_out_fd, rhs._out_fd);
         }
 
         Solver::Solver(string input)
         {
-            _ofname = "/tmp/sos_smt_in.tmp";
-            _ofs = ofstream(_ofname);
-
             fork_solver();
-
-            // _thread = thread(&Solver::receiver, this);
-            // _thread.detach();
-
-            _ofs << std::setprecision(8) << std::fixed;
-            _ofs << move(input) << endl;
+            write_str(move(input));
         }
 
         Sat Solver::check_sat()
         {
-            _ofs << "(check-sat)" << endl;
-            string res = get_line();
+            write_str("(check-sat)");
+            string res = read_line();
             if (res == "sat") return Sat::sat;
             if (res == "unsat") return Sat::unsat;
             expect(res == "unknown",
@@ -42,11 +58,12 @@ namespace SOS {
         Time_const_values
             Solver::get_step_time_values(const Time_const_ids& time_consts)
         {
-            _ofs << "(get-value ("
-                 << time_consts.first << " "
-                 << time_consts.second
-                 << "))" << endl;
-            Expr values(get_line());
+            write_str("(get-value ("s
+                       + to_string(time_consts.first)
+                       + " "
+                       + to_string(time_consts.second)
+                       + "))");
+            Expr values(read_expr());
             Time_const_value t_init = get_value<Time_const_value>(values);
             Time_const_value t_end = get_value<Time_const_value>(values);
             return {t_init, t_end};
@@ -56,12 +73,16 @@ namespace SOS {
             Solver::get_step_entry_values(const Const_ids_entry&
                                               const_ids_entry)
         {
-            _ofs << "(get-value ("
-                 << cconst_ids_entry_dt_const(const_ids_entry) << " "
-                 << cconst_ids_entry_init_const(const_ids_entry) << " "
-                 << cconst_ids_entry_param_consts(const_ids_entry)
-                 << "))" << endl;
-            Expr values(get_line());
+            write_str(
+                "get-value ("s
+                + to_string(cconst_ids_entry_dt_const(const_ids_entry))
+                + " "
+                + to_string(cconst_ids_entry_init_const(const_ids_entry))
+                + " "
+                + to_string(cconst_ids_entry_param_consts(const_ids_entry))
+                + "))"
+            );
+            Expr values(read_expr());
             Dt_const_value dt_ = get_value<Dt_const_value>(values);
             Init_const_value init_ = get_value<Init_const_value>(values);
             Const_values param_values;
@@ -99,7 +120,7 @@ namespace SOS {
             Const_values_entries entries_values =
                 get_step_entries_values(entries_ids);
             return make_const_values_row(move(time_values),
-                                      move(entries_values));
+                                         move(entries_values));
         }
 
         template <typename Arg>
@@ -111,7 +132,7 @@ namespace SOS {
         void Solver::assert(Expr& expr)
         {
             check_assert_expr(expr);
-            _ofs << "(assert " << expr << ")" << endl;
+            write_str("(assert "s + to_string(expr) + ")");
         }
 
         void Solver::assert_step_row_values(const Const_ids_row&
@@ -178,12 +199,12 @@ namespace SOS {
 
             expr = Expr(Expr::new_expr(move(expr)));
             if (conflict) {
-                _ofs << "(pop 1)" << endl;
+                write_str("(pop 1)");
                 expr.add_new_etoken_at_pos("not");
                 expr = Expr(Expr::new_expr(move(expr)));
             }
             else {
-                _ofs << "(push 1)" << endl;
+                write_str("(push 1)");
                 // add int-ode
             }
             assert(expr);
@@ -206,53 +227,114 @@ namespace SOS {
 
         void Solver::fork_solver()
         {
-            int fds[2];
-            expect(pipe(fds) != -1,
-                   "Opening of pipe failed.");
+            int in_fds[2];
+            expect(pipe(in_fds) == 0,
+                   "Opening of input pipe failed.");
+            int out_fds[2];
+            expect(pipe(out_fds) == 0,
+                   "Opening of output pipe failed.");
 
             pid_t pid = fork();
             expect(pid != -1,
                    "Forking of SMT solver failed.");
 
+            /// Parent process?
             if (pid != 0) {
                 _pid = pid;
-                _fd = fds[0];
-                close(fds[1]);
+                _in_fd = in_fds[0];
+                _out_fd = out_fds[1];
+                close(in_fds[1]);
+                close(out_fds[0]);
+                system("sleep 2");
                 return;
             }
 
-            dup2(fds[1], STDOUT_FILENO);
-            close(fds[1]);
-            close(fds[0]);
-            expect(execlp("z3", "z3", "-smt2", _ofname.c_str(),
-                   (char*)NULL) != -1,
-                   "Execution of SMT solver failed.");
+            /// Child process
+            expect(dup2(in_fds[1], STDOUT_FILENO) != -1,
+                   "Child process: redirection of stdout "s
+                   + "to pipe input failed.");
+            expect(dup2(in_fds[1], STDERR_FILENO) != -1,
+                   "Child process: redirection of stderr "s
+                   + "to pipe input failed.");
+            expect(dup2(out_fds[0], STDIN_FILENO) != -1,
+                   "Child process: redirection of stdin "s
+                   + "to pipe output failed.");
+            close(in_fds[0]);
+            close(in_fds[1]);
+            close(out_fds[0]);
+            close(out_fds[1]);
+            // expect(execlp("z3", "z3", "-smt2", "-in", (char*)NULL) != -1,
+                   // "Child process: execution of SMT solver failed.");
+            // expect(execlp("cvc4", "cvc4", "-L", "smt2", "-i",
+            //               (char*)NULL) != -1,
+            //        "Child process: execution of SMT solver failed.");
+            system("z3 -smt2 -in");
+            throw Error("SMT solver terminated unexpectedly.");
         }
 
-        // void Solver::receiver()
-        // {
-        //     char buffer[4096];
-        //     while (1) {
-        //         ssize_t count = read(_fd, buffer, sizeof(buffer));
-        //         if (count == 0) break;
-        //         expect(count != -1,
-        //                "Reading from fd failed.");
-        //         // cout << buffer << endl;
-        //     }
-        // }
+        void Solver::write_str(string str)
+        {
+            const int size_ = str.size();
+            ssize_t count = write(_out_fd, str.c_str(), size_);
+            expect(count == size_,
+                   "Writing to fd failed.");
+            std::cerr << "<< " << str << " >>" << endl;
+        }
 
-        string Solver::get_line()
+        void Solver::write_expr(Expr expr)
+        {
+            write_str(to_string(move(expr)));
+        }
+
+        string Solver::read_line()
+        {
+            string line;
+            line.reserve(32);
+            char c;
+            while (1) {
+                ssize_t count = read(_in_fd, &c, 1);
+                expect(count == 1,
+                       "Reading from fd failed.");
+                if (c == '\n') break;
+                std::cerr << c;
+                line += c;
+            }
+            // std::cerr << ">> " << line << endl;
+            std::cerr << endl;
+            return line;
+        }
+
+        Expr Solver::read_expr()
         {
             string str;
             str.reserve(32);
             char c;
-            while (1) {
-                ssize_t count = read(_fd, &c, 1);
+            int cnt = 0;
+            bool loop = true;
+            while (loop) {
+                ssize_t count = read(_in_fd, &c, 1);
                 expect(count == 1,
                        "Reading from fd failed.");
-                if (c == '\n') return str;
+                std::cerr << c;
+                switch (c) {
+                default:
+                    break;
+                case '(':
+                    ++cnt;
+                    break;
+                case ')':
+                    expect(cnt > 0,
+                           "Unexpected closing brace after '"s
+                           + str + "'");
+                    // std::cerr << str << endl;
+                    if (--cnt == 0) loop = false;
+                    break;
+                }
                 str += c;
             }
+            // std::cerr << ">> " << str << " <<" << endl;
+            std::cerr << endl;
+            return {move(str)};
         }
     }
 }

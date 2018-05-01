@@ -82,8 +82,8 @@ namespace SOS {
         template <typename Arg> void set_value(Arg arg);
     };
 
-    // ! Most libraries use only 'Expr_token',
-    // ! usage of 'Expr_value' is not properly tested !
+    //! Most libraries use only 'Expr_token',
+    //! usage of 'Expr_value' is not properly tested !
     class Expr : public Expr_place {
     public:
         template <typename Arg> class Eval;
@@ -106,6 +106,7 @@ namespace SOS {
         Expr& operator =(Expr&& rhs)                                = default;
         Expr(initializer_list<Expr_place_ptr> list);
         Expr(Expr_place_ptr place);
+        Expr(const char* input)                      : Expr(string(input)) { }
         Expr(string input);
         Expr(istream& is);
         Expr(istream&& is);

@@ -6,7 +6,6 @@
 #include "expr.hpp"
 
 #include <fstream>
-// #include <thread>
 
 #include <unistd.h>
 
@@ -16,19 +15,20 @@ namespace SOS {
 
         using std::endl;
 
-        // using std::thread;
-
         class Solver {
         public:
+            using Token = Expr::Token;
+
             class Run;
 
             Solver()                                                = default;
             ~Solver();
-            Solver(const Solver& rhs)                               = default;
-            Solver& operator =(const Solver& rhs)                   = default;
-            Solver(Solver&& rhs)                                    = default;
-            Solver& operator =(Solver&& rhs)                        = default;
+            Solver(const Solver& rhs)                                = delete;
+            Solver& operator =(const Solver& rhs)                    = delete;
+            Solver(Solver&& rhs);
+            Solver& operator =(Solver&& rhs);
             Solver(string input);
+            void swap(Solver& rhs);
 
             Sat check_sat();
 
@@ -54,19 +54,16 @@ namespace SOS {
 
             void fork_solver();
 
-            // void receiver();
-
-            string get_line();
+            void write_str(string str);
+            void write_expr(Expr expr);
+            string read_line();
+            Expr read_expr();
         private:
             template <typename Arg> Arg get_value(Expr& expr);
 
-            ofstream _ofs;
-            string _ofname;
-
-            pid_t _pid;
-            int _fd;
-
-            // thread _thread;
+            pid_t _pid{-1};
+            int _in_fd{-1};
+            int _out_fd{-1};
         };
     }
 }
