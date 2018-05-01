@@ -27,8 +27,8 @@ namespace SOS {
             Solver& operator =(const Solver& rhs)                    = delete;
             Solver(Solver&& rhs);
             Solver& operator =(Solver&& rhs);
-            Solver(string input);
             void swap(Solver& rhs);
+            Solver(string input);
 
             void command(string str);
             void command(Expr expr);
@@ -45,15 +45,33 @@ namespace SOS {
             Const_values_row
                 get_step_row_values(const Const_ids_row& const_ids_row);
 
-            void assert(Expr expr);
-            void assert_step_row_values(const Const_ids_row& const_ids_row,
-                                        const Const_values_row&
-                                            const_values_row,
-                                        bool conflict = false);
+            // void assert(Expr expr);
+            void assert(Expr_place&& place);
+            void assert_step_row(const Const_ids_row& const_ids_row,
+                                 const Const_values_row& const_values_row,
+                                 const Const_values& ode_result);
+            void assert_step_row_conflict(const Const_ids_row& const_ids_row,
+                                          const Const_values_row&
+                                              const_values_row);
         protected:
-            void check_assert_expr(Expr& expr);
+            // void check_assert_expr(Expr& expr);
             Expr const_to_assert_expr(Const_id const_id,
                                       Const_value const_value);
+            Expr expr_to_assert_expr(Expr expr,
+                                     Const_value const_value);
+
+            Expr make_assert_step_row_expr(const Const_ids_row& const_ids_row,
+                                           const Const_values_row&
+                                               const_values_row);
+            void add_step_entry_asserts(const Const_ids_entry&
+                                            const_ids_entry,
+                                        const Const_values_entry&
+                                            const_values_entry,
+                                        Expr& expr);
+            void add_step_ode_result_asserts(const Const_ids_row&
+                                                 const_ids_row,
+                                             const Const_values& ode_result,
+                                             Expr& expr);
 
             void fork_solver();
 
@@ -63,6 +81,9 @@ namespace SOS {
         private:
             template <typename Arg> Arg get_value(Expr& expr);
 
+            Expr eplace_to_assert_expr(Expr::Expr_place_ptr place_ptr,
+                                       Const_value const_value);
+
             string read_line(string begin);
             string read_expr();
             char read_char();
@@ -70,6 +91,8 @@ namespace SOS {
             pid_t _pid{-1};
             int _in_fd{-1};
             int _out_fd{-1};
+
+            ofstream _log_ofs;
         };
     }
 }

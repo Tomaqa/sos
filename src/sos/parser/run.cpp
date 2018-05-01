@@ -18,9 +18,10 @@ namespace SOS {
             const Param_keys& param_keys_ = code_param_keys(ode_);
             const Const_ids_rows& const_ids_rows_ = code_const_ids_rows(ode_);
             const int steps_ = const_ids_rows_.size();
-            const int entries = SMT::cconst_ids_row_entries(
-                const_ids_rows_.front()
-            ).size();
+            const int entries = (steps_ == 0) ? 0
+                              : SMT::cconst_ids_row_entries(
+                                    const_ids_rows_.front()
+                                ).size();
             cerr << ode_key_ << endl;
             cerr << dt_keys_ << endl;
             cerr << ode_spec_ << endl;

@@ -1,10 +1,8 @@
 #include "smt/solver.hpp"
 #include "expr/eval.hpp"
-
-#include <iomanip>
+#include "parser.hpp"
 
 #include <sys/wait.h>
-#include <fcntl.h>
 
 #include <iostream>
 
@@ -12,8 +10,6 @@ namespace SOS {
     namespace SMT {
         Solver::~Solver()
         {
-            std::cerr << "Closing " << _pid
-                      << "(" << _in_fd << "," << _out_fd << ")" << endl;
             if (_in_fd >= 0) close(_in_fd);
             if (_out_fd >= 0) close(_out_fd);
             if (_pid >= 0) waitpid(_pid, NULL, 0);
@@ -22,7 +18,8 @@ namespace SOS {
         Solver::Solver(Solver&& rhs)
             : _pid(rhs._pid),
               _in_fd(rhs._in_fd),
-              _out_fd(rhs._out_fd)
+              _out_fd(rhs._out_fd),
+              _log_ofs(move(rhs._log_ofs))
         {
             rhs._pid = rhs._in_fd = rhs._out_fd = -1;
         }
@@ -39,9 +36,11 @@ namespace SOS {
             std::swap(_pid, rhs._pid);
             std::swap(_in_fd, rhs._in_fd);
             std::swap(_out_fd, rhs._out_fd);
+            std::swap(_log_ofs, rhs._log_ofs);
         }
 
         Solver::Solver(string input)
+            : _log_ofs("local/log.smt2")
         {
             fork_solver();
             write_str(move(input));
@@ -142,20 +141,44 @@ namespace SOS {
             return expr.get_expr().next().get_value<Arg>();
         }
 
-        void Solver::assert(Expr expr)
+        void Solver::assert(Expr_place&& place)
         {
-            check_assert_expr(expr);
-            expr.simplify_top();
             Expr cmd_expr{Expr_token::new_etoken("assert"),
-                          Expr::new_expr(move(expr))};
+                          place.move_to_ptr()};
             command(move(cmd_expr));
         }
 
-        void Solver::assert_step_row_values(const Const_ids_row&
-                                                const_ids_row,
-                                            const Const_values_row&
-                                                const_values_row,
-                                            bool conflict)
+        void Solver::assert_step_row(const Const_ids_row& const_ids_row,
+                                     const Const_values_row& const_values_row,
+                                     const Const_values& ode_result)
+        {
+            write_str("(push 1)");
+            Expr expr = make_assert_step_row_expr(const_ids_row,
+                                                  const_values_row);
+
+            add_step_ode_result_asserts(const_ids_row, ode_result, expr);
+
+            assert(move(expr));
+        }
+
+        void Solver::assert_step_row_conflict(const Const_ids_row&
+                                                  const_ids_row,
+                                              const Const_values_row&
+                                                  const_values_row)
+        {
+            write_str("(pop 1)");
+            Expr expr(Expr::new_expr(move(
+                make_assert_step_row_expr(const_ids_row, const_values_row)
+            )));
+            expr.add_new_etoken_at_pos("not");
+            expr = Expr(Expr::new_expr(move(expr)));
+            assert(move(expr));
+        }
+
+        Expr Solver::make_assert_step_row_expr(const Const_ids_row&
+                                                   const_ids_row,
+                                               const Const_values_row&
+                                                   const_values_row)
         {
             const Time_const_ids& time_consts =
                 cconst_ids_row_time_consts(const_ids_row);
@@ -176,69 +199,99 @@ namespace SOS {
                                                    time_values.first));
             expr.add_new_expr(const_to_assert_expr(move(time_consts.second),
                                                    time_values.second));
-            for (int e = 0; e < eids_size; e++) {
-                auto& entry_ids = entries_ids[e];
-                auto& entry_values = entries_values[e];
-                const Dt_const_id& dt_const =
-                    cconst_ids_entry_dt_const(entry_ids);
-                Dt_const_value dt_value =
-                    cconst_values_entry_dt_value(entry_values);
-                expr.add_new_expr(
-                    const_to_assert_expr(move(dt_const), dt_value)
-                );
-                const Init_const_id& init_const =
-                    cconst_ids_entry_init_const(entry_ids);
-                Init_const_value init_value =
-                    cconst_values_entry_init_value(entry_values);
-                expr.add_new_expr(
-                    const_to_assert_expr(move(init_const), init_value)
-                );
-                const Const_ids& param_consts =
-                    cconst_ids_entry_param_consts(entry_ids);
-                const Const_values& param_values =
-                    cconst_values_entry_param_values(entry_values);
-                const int pids_size = param_consts.size();
-                const int pvals_size = param_values.size();
-                expect(pids_size == pvals_size,
-                       "Size of parameter const. identifiers "s
-                       + "and their values at [" + to_string(e) + "] entry"
-                       + "mismatch: "s
-                       + to_string(pids_size) + " != "
-                       + to_string(pvals_size));
-                for (int i = 0; i < pids_size; i++) {
-                    expr.add_new_expr(
-                        const_to_assert_expr(move(param_consts[i]),
-                                             param_values[i])
-                    );
-                }
-            }
-
-            expr = Expr(Expr::new_expr(move(expr)));
-            if (conflict) {
-                write_str("(pop 1)");
-                expr.add_new_etoken_at_pos("not");
-                expr = Expr(Expr::new_expr(move(expr)));
-            }
-            else {
-                write_str("(push 1)");
-                // add int-ode
-            }
-            assert(move(expr));
+            for_each(entries_ids, std::begin(entries_values),
+                     [this, &expr](auto& entry_ids, auto& entry_vals){
+                         add_step_entry_asserts(entry_ids, entry_vals, expr);
+                     });
+            return expr;
         }
 
-        void Solver::check_assert_expr(Expr& expr)
+        void Solver::add_step_entry_asserts(const Const_ids_entry&
+                                                const_ids_entry,
+                                            const Const_values_entry&
+                                                const_values_entry,
+                                            Expr& expr)
         {
-            expect(expr.size() == 1,
-                   "Expected one assertion element, got: "s
-                   + to_string(expr));
+            const Dt_const_id& dt_const =
+                cconst_ids_entry_dt_const(const_ids_entry);
+            Dt_const_value dt_value =
+                cconst_values_entry_dt_value(const_values_entry);
+            expr.add_new_expr(
+                const_to_assert_expr(move(dt_const), dt_value)
+            );
+            const Init_const_id& init_const =
+                cconst_ids_entry_init_const(const_ids_entry);
+            Init_const_value init_value =
+                cconst_values_entry_init_value(const_values_entry);
+            expr.add_new_expr(
+                const_to_assert_expr(move(init_const), init_value)
+            );
+            const Const_ids& param_consts =
+                cconst_ids_entry_param_consts(const_ids_entry);
+            const Const_values& param_values =
+                cconst_values_entry_param_values(const_values_entry);
+            const int pids_size = param_consts.size();
+            const int pvals_size = param_values.size();
+            expect(pids_size == pvals_size,
+                   "Size of parameter const. identifiers "s
+                   + "and their values of '"
+                   + to_string(const_ids_entry) + "' entry"
+                   + "mismatch: "s
+                   + to_string(pids_size) + " != "
+                   + to_string(pvals_size));
+            for (int i = 0; i < pids_size; i++) {
+                expr.add_new_expr(
+                    const_to_assert_expr(move(param_consts[i]),
+                                         param_values[i])
+                );
+            }
+        }
+
+        void Solver::add_step_ode_result_asserts(const Const_ids_row&
+                                                     const_ids_row,
+                                                 const Const_values&
+                                                     ode_result,
+                                                 Expr& expr)
+        {
+            const Const_ids_entries& entries_ids =
+                cconst_ids_row_entries(const_ids_row);
+            const int esize = entries_ids.size();
+            for (int e = 0; e < esize; e++) {
+                const Const_ids_entry& entry_ids = entries_ids[e];
+                const Init_const_id& init_const =
+                    cconst_ids_entry_init_const(entry_ids);
+                Const_value value = ode_result[e];
+                Const_id int_ode_id = Parser::mod_int_ode_id(init_const);
+                Expr assert_expr =
+                    const_to_assert_expr(move(int_ode_id), value);
+                expr.add_new_expr(move(assert_expr));
+            }
         }
 
         Expr Solver::const_to_assert_expr(Const_id const_id,
                                           Const_value const_value)
         {
+            return eplace_to_assert_expr(
+                Expr_token::new_etoken(move(const_id)),
+                const_value
+            );
+        }
+
+        Expr Solver::expr_to_assert_expr(Expr expr,
+                                         Const_value const_value)
+        {
+            return eplace_to_assert_expr(
+                expr.move_to_ptr(),
+                const_value
+            );
+        }
+
+        Expr Solver::eplace_to_assert_expr(Expr::Expr_place_ptr place_ptr,
+                                           Const_value const_value)
+        {
             return {Expr_token::new_etoken("="),
-                    Expr_token::new_etoken(move(const_id)),
-                    Expr_value<Const_value>::new_evalue(move(const_value))};
+                    move(place_ptr),
+                    Expr_value<Const_value>::new_evalue(const_value)};
         }
 
         void Solver::fork_solver()
@@ -293,8 +346,7 @@ namespace SOS {
             ssize_t count = write(_out_fd, str.c_str(), size_);
             expect(count == size_,
                    "Writing to fd failed.");
-            str.pop_back();
-            std::cerr << "<<" << str << ">>" << endl;
+            _log_ofs << str;
         }
 
         void Solver::write_expr(Expr expr)
@@ -309,7 +361,6 @@ namespace SOS {
             while (true) {
                 char c = read_char();
                 if (c == '\n') {
-                    std::cerr << ">>" << line << "<<" << endl;
                     return line;
                 }
                 line += c;
@@ -331,7 +382,6 @@ namespace SOS {
                     break;
                 case ')':
                     if (--cnt == 0) {
-                        std::cerr << ">>" << str << "<<" << endl;
                         return str;
                     }
                     break;

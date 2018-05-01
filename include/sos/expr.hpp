@@ -24,6 +24,7 @@ namespace SOS {
 
         virtual ~Expr_place()                                       = default;
         virtual Expr_place_ptr clone() const                              = 0;
+        virtual Expr_place_ptr move_to_ptr()                              = 0;
 
         virtual bool is_expr() const noexcept                             = 0;
         virtual explicit operator string () const noexcept                = 0;
@@ -44,6 +45,7 @@ namespace SOS {
         Expr_value(Arg arg);
 
         virtual Expr_place_ptr clone() const override;
+        virtual Expr_place_ptr move_to_ptr() override;
         template <typename... Args>
             static Expr_ptr_t<Expr_value> new_evalue(Args&&... args);
 
@@ -65,6 +67,7 @@ namespace SOS {
         template <typename Arg> Expr_token(Arg arg);
 
         virtual Expr_place_ptr clone() const override;
+        virtual Expr_place_ptr move_to_ptr() override;
         template <typename... Args>
             static Expr_ptr_t<Expr_token> new_etoken(Args&&... args);
 
@@ -98,12 +101,12 @@ namespace SOS {
 
         class Preprocess;
 
-        Expr();
+        Expr()                                                      = default;
         virtual ~Expr()                                             = default;
         Expr(const Expr& rhs);
-        Expr& operator =(const Expr& rhs);
         Expr(Expr&& rhs)                                            = default;
-        Expr& operator =(Expr&& rhs)                                = default;
+        Expr& operator =(Expr rhs);
+        void swap(Expr& rhs);
         Expr(initializer_list<Expr_place_ptr> list);
         Expr(Expr_place_ptr place);
         Expr(const char* input)                      : Expr(string(input)) { }
@@ -112,6 +115,7 @@ namespace SOS {
         Expr(istream&& is);
 
         virtual Expr_place_ptr clone() const override;
+        virtual Expr_place_ptr move_to_ptr() override;
         template <typename... Args>
             static Expr_ptr_t<Expr> new_expr(Args&&... args);
 
@@ -143,7 +147,7 @@ namespace SOS {
         void check_pos() const;
         void reset_pos();
         void reset_pos_to_valid();
-        void maybe_set_pos();
+        void invalidate_pos() const;
         Expr& next();
         Expr& prev();
 
@@ -296,8 +300,8 @@ namespace SOS {
         Places& places()                                   { return _places; }
 
         iterator& rpos();
+        void maybe_reset_pos();
         iterator to_iterator(const_iterator it);
-        void invalidate_pos() const;
     private:
         Expr& simplify_rec() noexcept;
 

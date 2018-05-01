@@ -2,6 +2,7 @@ build/
 lib/
 bin/
 test/
+local/
 
 .backup/
 *log

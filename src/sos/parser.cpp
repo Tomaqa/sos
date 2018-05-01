@@ -3,6 +3,8 @@
 
 #include <sstream>
 
+#include <iostream>
+
 namespace SOS {
     Parser::Parser(istream& is, bool preprocess_only)
         : Parser(Expr::Preprocess(is).parse(), preprocess_only)
@@ -159,34 +161,36 @@ namespace SOS {
     {
         smt_exprs().reserve(_expr.size());
         while (_expr) {
-            Expr& e = _expr.get_expr();
+            Expr& e = _expr.peek_expr();
             expect(!e.empty() && !e.cfront()->is_expr(),
                    "Expected command expression, got: "s
                    + to_string(e));
             parse_top_expr(e);
         }
-        _expr.reset_pos_to_valid();
     }
 
     void Parser::parse_top_expr(Expr& expr)
     try {
         const Token& cmd = expr.cpeek_token();
         if (cmd == "set-logic") {
-            expr.next();
-            return parse_set_logic(expr);
+            parse_set_logic(expr.next());
+            _expr.next();
+            return;
         }
         if (cmd == "define-dt") {
-            expr.next();
-            return parse_define_dt(expr);
+            parse_define_dt(expr.next());
+            _expr.next();
+            return;
         }
         if (cmd == "define-ode-step") {
-            expr.next();
-            return parse_define_ode_step(expr);
+            parse_define_ode_step(expr.next());
+            _expr.next();
+            return;
         }
-        expect(cmd != "int-ode",
+        expect(cmd != cint_ode_id(),
                "Unexpected command '"s + cmd + "' "
                + "at top level.");
-        parse_expr(expr);
+        parse_expr(_expr);
         expr.reset_pos_to_valid();
         add_smt_expr(move(expr));
     }
@@ -194,33 +198,35 @@ namespace SOS {
         throw "At expression\n"s + to_string(expr) + "\n" + err;
     }
 
-    void Parser::parse_expr(Expr& expr)
+    void Parser::parse_expr(Expr& par_expr)
     {
+        Expr& expr = par_expr.get_expr();
         if (expr.empty()) return;
-        maybe_parse_first_token(expr);
+        if (maybe_parse_first_token(par_expr, expr)) return;
         while (expr) {
             if (!expr.cpeek()->is_expr()) {
                 parse_token(expr);
                 continue;
             }
-            Expr& subexpr = expr.get_expr();
-            parse_expr(subexpr);
+            parse_expr(expr);
         }
     }
 
-    void Parser::maybe_parse_first_token(Expr& expr)
+    bool Parser::maybe_parse_first_token(Expr& par_expr, Expr& expr)
     {
-        if (expr.cpeek()->is_expr()) return;
+        if (expr.cpeek()->is_expr()) return false;
         const Token& token = expr.cpeek_token();
         expect(token != "set-logic" && token != "define-dt"
                && token != "define-ode-step",
                "Command '"s + token + "' "
                + "must be at top level.");
-        if (token == "int-ode") {
-            expr.next();
-            return parse_int_ode(expr);
+        if (token == cint_ode_id()) {
+            Const_id int_ode_id = parse_int_ode(move(expr.next()));
+            par_expr.prev().erase_at_pos();
+            par_expr.add_new_etoken_at_pos(move(int_ode_id));
+            return true;
         }
-        parse_token(expr);
+        return false;
     }
 
     void Parser::parse_token(Expr& expr)
@@ -252,11 +258,6 @@ namespace SOS {
                "Expected expression with parameter keys identifiers, got: "s
                + to_string(keys_expr));
         add_param_keys(ode_key_, keys_expr);
-
-        add_smt_expr({"(declare-fun "s
-                      + int_ode_identifier(ode_key_)
-                      // + " (Real) Real)"});
-                      + " (Real Real) Real)"});
     }
 
     void Parser::parse_define_dt(Expr& expr)
@@ -300,7 +301,7 @@ namespace SOS {
         _ode_step_set = true;
     }
 
-    void Parser::parse_int_ode(Expr& expr)
+    Parser::Const_id Parser::parse_int_ode(Expr&& expr)
     {
         expect(expr.size() == 5,
                "Expected ODE function name, "s
@@ -333,17 +334,14 @@ namespace SOS {
                           move(dt_const), init_const,
                           move(param_consts));
 
-        expr.reset_pos();
-        expr.get_token() += "_" + move(ode_key_);
-        expr.erase_at_pos();
-        expr.next();
-        expr.erase_from_pos();
-        expr.add_new_etoken(move(init_const));
+        Const_id int_ode_id = mod_int_ode_id(init_const);
+        add_smt_expr({"(declare-fun " + int_ode_id + " () Real)"});
+        return int_ode_id;
     }
 
-    Parser::Const_id Parser::int_ode_identifier(const Ode_key& ode_key_)
+    Parser::Const_id Parser::mod_int_ode_id(const Const_id& ode_const)
     {
-        return {"int-ode_" + ode_key_};
+        return cint_ode_id() + "_" + ode_const;
     }
 
     bool Parser::has_ode_key(const Ode_key& ode_key_) const

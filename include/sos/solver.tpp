@@ -35,7 +35,7 @@ namespace SOS {
         _ode_solver = OSolver(move(odes_spec), move(param_keyss), true);
 
         _odes_row_values.reserve(codes().size());
-        _ode_results.reserve(cconst_entries_count());
+        _ode_results.resize(codes().size());
     }
 
     template <typename OSolver>
@@ -134,9 +134,10 @@ namespace SOS {
     template <typename OSolver>
     void Solver<OSolver>::solve_odes()
     {
-        _ode_results.clear();
         const int odes_count = codes().size();
         const int entries_count = cconst_entries_count();
+        Ode_results trans_ode_results;
+        trans_ode_results.reserve(entries_count);
         for (int e = 0; e < entries_count; e++) {
             ODE::Dt_ids dt_ids;
             typename OSolver::Contexts ctxs;
@@ -164,7 +165,15 @@ namespace SOS {
             }
             Ode_result res = code_solver().solve_odes(move(dt_ids),
                                                       move(ctxs));
-            _ode_results.emplace_back(move(res));
+            trans_ode_results.emplace_back(move(res));
+        }
+
+        for (int o = 0; o < odes_count; o++) {
+            _ode_results[o].clear();
+            _ode_results[o].reserve(entries_count);
+            for (int e = 0; e < entries_count; e++) {
+                _ode_results[o].push_back(trans_ode_results[e][o]);
+            }
         }
     }
 
@@ -175,14 +184,19 @@ namespace SOS {
         for (int o = 0; o < odes_size; o++) {
             const Const_ids_row& row_ids = cconst_ids_row(o, step);
             const Const_values_row& row_vals = _odes_row_values[o];
-            smt_solver().assert_step_row_values(row_ids, row_vals);
+            const Ode_result& ode_res = _ode_results[o];
+            smt_solver().assert_step_row(row_ids, row_vals, ode_res);
         }
-        // ! _ode_results
     }
 
     template <typename OSolver>
     void Solver<OSolver>::smt_add_conflict(int step)
     {
-
+        const int odes_size = codes().size();
+        for (int o = 0; o < odes_size; o++) {
+            const Const_ids_row& row_ids = cconst_ids_row(o, step);
+            const Const_values_row& row_vals = _odes_row_values[o];
+            smt_solver().assert_step_row_conflict(row_ids, row_vals);
+        }
     }
 }

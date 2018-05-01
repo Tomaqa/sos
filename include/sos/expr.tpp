@@ -21,6 +21,12 @@ namespace SOS {
     }
 
     template <typename Arg>
+    Expr_place::Expr_place_ptr Expr_value<Arg>::move_to_ptr()
+    {
+        return new_evalue(move(*this));
+    }
+
+    template <typename Arg>
     template <typename... Args>
     Expr_place::Expr_ptr_t<Expr_value<Arg>>
         Expr_value<Arg>::new_evalue(Args&&... args)
@@ -195,7 +201,7 @@ namespace SOS {
     void Expr::emplace_back(Args&&... args)
     {
         places().emplace_back(forward<Args>(args)...);
-        maybe_set_pos();
+        maybe_reset_pos();
     }
 
     template <typename T>

@@ -56,6 +56,9 @@ namespace SOS {
         static const Ode_spec& code_ode_spec(const Ode& ode_);
         static const Param_keys& code_param_keys(const Ode& ode_);
         static const Const_ids_rows& code_const_ids_rows(const Ode& ode_);
+
+        static Const_id cint_ode_id()                    { return "int-ode"; }
+        static Const_id mod_int_ode_id(const Const_id& ode_const);
     protected:
         using Token = Expr::Token;
 
@@ -113,8 +116,8 @@ namespace SOS {
 
         void parse();
         void parse_top_expr(Expr& expr);
-        void parse_expr(Expr& expr);
-        void maybe_parse_first_token(Expr& expr);
+        void parse_expr(Expr& par_expr);
+        bool maybe_parse_first_token(Expr& par_expr, Expr& expr);
         void parse_token(Expr& expr);
 
         void parse_set_logic(Expr& expr);
@@ -122,9 +125,7 @@ namespace SOS {
         void declare_ode(const Ode_key& ode_key_, Expr& keys_expr);
         void parse_define_dt(Expr& expr);
         void parse_define_ode_step(Expr& expr);
-        void parse_int_ode(Expr& expr);
-
-        static Const_id int_ode_identifier(const Ode_key& ode_key_);
+        Const_id parse_int_ode(Expr&& expr);
 
         const Odes_map& codes_map() const                { return _odes_map; }
         Odes_map& odes_map()                             { return _odes_map; }

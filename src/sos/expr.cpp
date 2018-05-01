@@ -37,6 +37,11 @@ namespace SOS {
         return new_etoken(*this);
     }
 
+    Expr_place::Expr_place_ptr Expr_token::move_to_ptr()
+    {
+        return new_etoken(move(*this));
+    }
+
     const Expr_place::Token& Expr_token::check_token(const Token& token)
     {
         expect(valid_token(token),
@@ -51,12 +56,14 @@ namespace SOS {
 
     ///////////////////////////////////////////////////////////////
 
-    Expr::Expr()
-    { }
-
     Expr_place::Expr_place_ptr Expr::clone() const
     {
         return new_expr(*this);
+    }
+
+    Expr_place::Expr_place_ptr Expr::move_to_ptr()
+    {
+        return new_expr(move(*this));
     }
 
     Expr::Expr(const Expr& rhs)
@@ -69,11 +76,20 @@ namespace SOS {
         }
     }
 
-    Expr& Expr::operator =(const Expr& rhs)
+    Expr& Expr::operator =(Expr rhs)
     {
-        Expr tmp(rhs);
-        std::swap(*this, tmp);
+        swap(rhs);
         return *this;
+    }
+
+    void Expr::swap(Expr& rhs)
+    {
+        std::swap(_places, rhs._places);
+        std::swap(_is_simplified, rhs._is_simplified);
+        std::swap(_is_binary, rhs._is_binary);
+        std::swap(_is_flatten, rhs._is_flatten);
+        std::swap(_pos, rhs._pos);
+        std::swap(_valid_pos, rhs._valid_pos);
     }
 
     Expr::Expr(initializer_list<Expr_place_ptr> list)
@@ -260,7 +276,7 @@ namespace SOS {
         valid_pos();
     }
 
-    void Expr::maybe_set_pos()
+    void Expr::maybe_reset_pos()
     {
         if (!valid_pos()) {
             reset_pos();
