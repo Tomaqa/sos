@@ -15,11 +15,8 @@ namespace SOS {
         if (sat == Sat::unsat) return;
 
         if (store_traj) {
-            cout << endl << "Generating plot ..." << endl;
-            system(("gnuplot -e \"ifname='"s
-                   + _ofile + "'; ofname='"
-                   + _ofile + "_plot.svg'\" "
-                   + "tools/traject.gp").c_str());
+            cout << endl;
+            system(("tools/plot_traject.sh "s + _ofile).c_str());
         }
     }
 }

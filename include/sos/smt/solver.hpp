@@ -90,7 +90,13 @@ namespace SOS {
             int _in_fd{-1};
             int _out_fd{-1};
 
-            ofstream _log_ofs;
+            ofstream _in_log_ofs;
+            #ifdef DEBUG
+            ofstream _out_log_ofs;
+            #endif /// DEBUG
+
+            int _assert_step_cnt{0};
+            int _conflict_step_cnt{0};
         };
     }
 }

@@ -19,7 +19,10 @@ namespace SOS {
             : _pid(rhs._pid),
               _in_fd(rhs._in_fd),
               _out_fd(rhs._out_fd),
-              _log_ofs(move(rhs._log_ofs))
+              _in_log_ofs(move(rhs._in_log_ofs))
+              #ifdef DEBUG
+              ,_out_log_ofs(move(rhs._out_log_ofs))
+              #endif /// DEBUG
         {
             rhs._pid = rhs._in_fd = rhs._out_fd = -1;
         }
@@ -36,11 +39,17 @@ namespace SOS {
             std::swap(_pid, rhs._pid);
             std::swap(_in_fd, rhs._in_fd);
             std::swap(_out_fd, rhs._out_fd);
-            std::swap(_log_ofs, rhs._log_ofs);
+            std::swap(_in_log_ofs, rhs._in_log_ofs);
+            #ifdef DEBUG
+            std::swap(_out_log_ofs, rhs._out_log_ofs);
+            #endif /// DEBUG
         }
 
         Solver::Solver(string input)
-            : _log_ofs("local/log.smt2")
+            : _in_log_ofs("local/log_in.smt2")
+              #ifdef DEBUG
+              ,_out_log_ofs("local/log_out.smt2")
+              #endif /// DEBUG
         {
             fork_solver();
             write_str(move(input));
@@ -58,6 +67,8 @@ namespace SOS {
 
         Sat Solver::check_sat()
         {
+            _assert_step_cnt = 0;
+            _conflict_step_cnt = 0;
             write_str("(check-sat)");
             string res = read_response();
             if (res == "sat") return Sat::sat;
@@ -152,7 +163,9 @@ namespace SOS {
                                      const Const_values_row& const_values_row,
                                      const Const_values& ode_result)
         {
-            write_str("(push 1)");
+            if (_assert_step_cnt++ == 0) {
+                write_str("(push 1)");
+            }
             Expr expr = make_assert_step_row_expr(const_ids_row,
                                                   const_values_row);
 
@@ -166,12 +179,13 @@ namespace SOS {
                                               const Const_values_row&
                                                   const_values_row)
         {
-            write_str("(pop 1)");
-            Expr expr(Expr::new_expr(move(
-                make_assert_step_row_expr(const_ids_row, const_values_row)
-            )));
-            expr.add_new_etoken_at_pos("not");
-            expr = Expr(Expr::new_expr(move(expr)));
+            if (_conflict_step_cnt++ == 0) {
+                write_str("(pop 1)");
+            }
+            Expr expr = make_assert_step_row_expr(const_ids_row,
+                                                  const_values_row);
+            expr = {Expr_token::new_etoken("not"),
+                    expr.move_to_ptr()};
             assert(move(expr));
         }
 
@@ -346,7 +360,7 @@ namespace SOS {
             ssize_t count = write(_out_fd, str.c_str(), size_);
             expect(count == size_,
                    "Writing to fd failed.");
-            _log_ofs << str;
+            _in_log_ofs << str;
         }
 
         void Solver::write_expr(Expr expr)
@@ -393,10 +407,16 @@ namespace SOS {
         string Solver::read_response()
         {
             char c;
+            string str;
             do { c = read_char(); }
             while (isspace(c));
-            if (c == '(') return read_expr();
-            return read_line(""s + c);
+            str = (c == '(')
+                ? read_expr()
+                : read_line(""s + c);
+            #ifdef DEBUG
+            _out_log_ofs << str;
+            #endif /// DEBUG
+            return str;
         }
 
         char Solver::read_char()

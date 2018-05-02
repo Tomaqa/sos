@@ -73,7 +73,9 @@ CMDS := $(patsubst $(SRC_MAIN_DIR)/%, $(BIN_DIR)/%, $(MAIN_SOURCES:.cpp=))
 
 ## Compiles and links all algorithms' source files
 # all: init ${OBJECTS} ${MAIN_OBJECTS} ${TEST_OBJECTS} ${CMDS}
-all: main
+default: main
+
+all: main test
 
 main: init ${OBJECTS} ${MAIN_OBJECTS} ${CMDS}
 
