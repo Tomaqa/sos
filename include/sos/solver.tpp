@@ -121,7 +121,7 @@ namespace SOS {
         if (step == 0) return false;
         cout << "Backtrack ..." << endl;
         --step;
-        smt_add_conflict(step);
+        smt_add_conflict();
         return do_step(step);
     }
 
@@ -200,13 +200,8 @@ namespace SOS {
     }
 
     template <typename OSolver>
-    void Solver<OSolver>::smt_add_conflict(int step)
+    void Solver<OSolver>::smt_add_conflict()
     {
-        const int odes_size = codes().size();
-        for (int o = 0; o < odes_size; o++) {
-            const Const_ids_row& row_ids = cconst_ids_row(o, step);
-            const Const_values_row& row_vals = _odes_row_values[o];
-            smt_solver().assert_step_row_conflict(row_ids, row_vals);
-        }
+        smt_solver().assert_last_step_row_conflict();
     }
 }

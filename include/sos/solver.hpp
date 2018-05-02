@@ -85,7 +85,7 @@ namespace SOS {
         void smt_get_values(int step);
         void solve_odes();
         void smt_add_asserts(int step);
-        void smt_add_conflict(int step);
+        void smt_add_conflict();
     private:
         Parser _parser;
         SMT::Solver _smt_solver;

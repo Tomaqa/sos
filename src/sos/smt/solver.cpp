@@ -19,10 +19,7 @@ namespace SOS {
             : _pid(rhs._pid),
               _in_fd(rhs._in_fd),
               _out_fd(rhs._out_fd),
-              _in_log_ofs(move(rhs._in_log_ofs))
-              #ifdef DEBUG
-              ,_out_log_ofs(move(rhs._out_log_ofs))
-              #endif /// DEBUG
+              _log_ofs(move(rhs._log_ofs))
         {
             rhs._pid = rhs._in_fd = rhs._out_fd = -1;
         }
@@ -39,17 +36,11 @@ namespace SOS {
             std::swap(_pid, rhs._pid);
             std::swap(_in_fd, rhs._in_fd);
             std::swap(_out_fd, rhs._out_fd);
-            std::swap(_in_log_ofs, rhs._in_log_ofs);
-            #ifdef DEBUG
-            std::swap(_out_log_ofs, rhs._out_log_ofs);
-            #endif /// DEBUG
+            std::swap(_log_ofs, rhs._log_ofs);
         }
 
         Solver::Solver(string input)
-            : _in_log_ofs("local/log_in.smt2")
-              #ifdef DEBUG
-              ,_out_log_ofs("local/log_out.smt2")
-              #endif /// DEBUG
+            : _log_ofs("local/log.smt2")
         {
             fork_solver();
             write_str(move(input));
@@ -68,7 +59,6 @@ namespace SOS {
         Sat Solver::check_sat()
         {
             _assert_step_cnt = 0;
-            _conflict_step_cnt = 0;
             write_str("(check-sat)");
             string res = read_response();
             if (res == "sat") return Sat::sat;
@@ -165,28 +155,60 @@ namespace SOS {
         {
             if (_assert_step_cnt++ == 0) {
                 write_str("(push 1)");
+                push_asserts();
             }
+
             Expr expr = make_assert_step_row_expr(const_ids_row,
                                                   const_values_row);
 
+            last_asserts().emplace_back(expr);
             add_step_ode_result_asserts(const_ids_row, ode_result, expr);
 
             assert(move(expr));
         }
 
-        void Solver::assert_step_row_conflict(const Const_ids_row&
-                                                  const_ids_row,
-                                              const Const_values_row&
-                                                  const_values_row)
+        void Solver::assert_last_step_row_conflict()
         {
-            if (_conflict_step_cnt++ == 0) {
-                write_str("(pop 1)");
-            }
-            Expr expr = make_assert_step_row_expr(const_ids_row,
-                                                  const_values_row);
-            expr = {Expr_token::new_etoken("not"),
-                    expr.move_to_ptr()};
+            expect(!asserts_empty() && last_asserts().size() > 0,
+                   "No asserts in assertion stack, cannot add conflict.");
+            expect(last_asserts() != _prev_last_asserts,
+                   "The same conflict has already been asserted! "s
+                   + "(The might be an infinite loop.)");
+
+            write_str("(pop 1)");
+            _prev_last_asserts = move(last_asserts());
+            pop_asserts();
+
+            Expr expr{Expr_token::new_etoken("not"),
+                      Expr::new_expr(Expr_token::new_etoken("and"))};
+            transform(_prev_last_asserts,
+                      std::back_inserter(expr.next().peek_expr()),
+                      [](const Expr& e){
+                          return e.clone();
+                      });
+            expr.reset_pos();
+
             assert(move(expr));
+        }
+
+        bool Solver::asserts_empty()
+        {
+            return asserts_stack().empty();
+        }
+
+        void Solver::push_asserts(Asserts asserts)
+        {
+            asserts_stack().push(move(asserts));
+        }
+
+        void Solver::pop_asserts()
+        {
+            asserts_stack().pop();
+        }
+
+        Solver::Asserts& Solver::last_asserts()
+        {
+            return asserts_stack().top();
         }
 
         Expr Solver::make_assert_step_row_expr(const Const_ids_row&
@@ -313,7 +335,7 @@ namespace SOS {
 
         Const_value Solver::round_ode_result(Const_value value)
         {
-            return std::floor(value*ode_result_fact)/ode_result_fact;
+            return std::floor(value*ode_result_fact+0.5)/ode_result_fact;
         }
 
         void Solver::fork_solver()
@@ -368,7 +390,7 @@ namespace SOS {
             ssize_t count = write(_out_fd, str.c_str(), size_);
             expect(count == size_,
                    "Writing to fd failed.");
-            _in_log_ofs << str;
+            _log_ofs << str;
         }
 
         void Solver::write_expr(Expr expr)
@@ -418,13 +440,8 @@ namespace SOS {
             string str;
             do { c = read_char(); }
             while (isspace(c));
-            str = (c == '(')
-                ? read_expr()
-                : read_line(""s + c);
-            #ifdef DEBUG
-            _out_log_ofs << str << endl;
-            #endif /// DEBUG
-            return str;
+            if (c == '(') return read_expr();
+            return read_line(""s + c);
         }
 
         char Solver::read_char()
