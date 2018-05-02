@@ -7,6 +7,7 @@
 
 #include <fstream>
 
+#include <cmath>
 #include <unistd.h>
 
 namespace SOS {
@@ -77,10 +78,18 @@ namespace SOS {
             void write_expr(Expr expr);
             string read_response();
         private:
+            static constexpr const int ode_result_precision_dec = 4;
+            static constexpr const int ode_result_precision =
+                double_precision - ode_result_precision_dec;
+            static constexpr const double ode_result_fact =
+                pow(10, ode_result_precision);
+
             template <typename Arg> Arg get_value(Expr& expr);
 
             Expr eplace_to_assert_expr(Expr::Expr_place_ptr place_ptr,
                                        Const_value const_value);
+
+            static Const_value round_ode_result(Const_value value);
 
             string read_line(string begin);
             string read_expr();

@@ -349,8 +349,7 @@ namespace SOS {
             }
         }
         if (!is_expr(expr.cpeek())) {
-            Token token = expr.extract_token();
-            let_body_.add_new_etoken(move(token));
+            let_body_.add_place_ptr(expr.extract());
         }
         else {
             Expr body_expr = expr.extract_expr();
@@ -480,7 +479,7 @@ namespace SOS {
         if (!is_arith_expr(literal.ctoken())) {
             const Eval_float_t ret = literal.get_value_check<Eval_float_t>();
             expr.erase_at_pos();
-            return new_eval_marked_float(ret);
+            return make_eval_marked_float(ret);
         }
         return parse_eval_arith_expr(expr, depth);
     }
@@ -518,10 +517,10 @@ namespace SOS {
         parse_nested_expr(arith_expr, depth+1);
 
         if (is_float)
-            return new_eval_marked_float(
+            return make_eval_marked_float(
                 arith_expr.get_eval<Eval_float_t>()()
             );
-        return new_eval_marked_int(arith_expr.get_eval<Eval_int_t>()());
+        return make_eval_marked_int(arith_expr.get_eval<Eval_int_t>()());
     }
 
     void Expr::Preprocess::parse_arith_expr(Expr& expr, unsigned depth)
@@ -688,7 +687,7 @@ namespace SOS {
 
     template <typename Arg>
     Expr::Preprocess::Eval_t_marked
-        Expr::Preprocess::new_eval_marked_helper(Arg val, bool is_float)
+        Expr::Preprocess::make_eval_marked_helper(Arg val, bool is_float)
     {
         Eval_t_marked val_m;
         eval_value<Arg>(val_m) = val;
@@ -697,15 +696,15 @@ namespace SOS {
     }
 
     Expr::Preprocess::Eval_t_marked
-        Expr::Preprocess::new_eval_marked_float(Eval_float_t val)
+        Expr::Preprocess::make_eval_marked_float(Eval_float_t val)
     {
-        return new_eval_marked_helper(val, true);
+        return make_eval_marked_helper(val, true);
     }
 
     Expr::Preprocess::Eval_t_marked
-        Expr::Preprocess::new_eval_marked_int(Eval_int_t val)
+        Expr::Preprocess::make_eval_marked_int(Eval_int_t val)
     {
-        return new_eval_marked_helper(val, false);
+        return make_eval_marked_helper(val, false);
     }
 
     Expr::Preprocess::Eval_t

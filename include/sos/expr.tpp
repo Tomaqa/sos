@@ -1,5 +1,8 @@
 #include <sstream>
 
+#include <iostream>
+#include <iomanip>
+
 namespace SOS {
     template <typename T>
     Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place)
@@ -34,13 +37,13 @@ namespace SOS {
         return new_place(Expr_value<Arg>(forward<Args>(args)...));
     }
 
-    ///////////////////////////////////////////////////////////////
-
     template <typename Arg>
-    Expr_token::Expr_token(Arg arg)
+    Expr_value<Arg>::operator string () const noexcept
     {
-        set_value<Arg>(arg);
+        return to_string(cvalue());
     }
+
+    ///////////////////////////////////////////////////////////////
 
     template <typename... Args>
     Expr_place::Expr_ptr_t<Expr_token> Expr_token::new_etoken(Args&&... args)
@@ -83,7 +86,7 @@ namespace SOS {
     template <typename Arg>
     void Expr_token::set_value(Arg arg)
     {
-        token() = to_string(arg);
+        token() = move(to_string(move(arg)));
     }
 
     ///////////////////////////////////////////////////////////////

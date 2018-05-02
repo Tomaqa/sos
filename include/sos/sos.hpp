@@ -20,7 +20,6 @@ namespace SOS {
     using std::streampos;
 
     using std::string;
-    using std::to_string;
     using namespace std::string_literals;
 
     using std::vector;
@@ -35,8 +34,18 @@ namespace SOS {
 
     class Error;
 
+    constexpr const int float_precision = 6;
+    constexpr const int double_precision = 10;
+
     #define expect(condition, msg) if (!(condition)) throw Error(msg);
 
+    string to_string(char arg);
+    string to_string(int arg);
+    string to_string(long arg);
+    string to_string(unsigned arg);
+    string to_string(unsigned long arg);
+    string to_string(float arg);
+    string to_string(double arg);
     template <typename T>
         string to_string(const vector<T>& rhs);
     template <typename Key, typename Value>

@@ -30,7 +30,8 @@ LIBS := -lm -pthread
 INCL := -I $(INCL_DIR)
 LDFLAGS := -Wl,--no-undefined
 FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
-# FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow -Wfatal-errors
+# FLAGS += -Wfatal-errors
+FLAGS += -DDEBUG
 CPPFLAGS := $(FLAGS) -std=c++14
 CFLAGS   := $(FLAGS) -std=gnu99
 TEST_FLAGS := -I $(TEST_INCL_DIR)

@@ -1,6 +1,7 @@
 #include "sos.hpp"
 
 #include <istream>
+#include <iomanip>
 
 namespace SOS {
     ostream& operator <<(ostream& os, const Error& rhs)
@@ -28,6 +29,48 @@ namespace SOS {
         return *this;
     }
 
+    string to_string(char arg)
+    {
+        string str;
+        str += arg;
+        return str;
+    }
+
+    string to_string(int arg)
+    {
+        return std::to_string(arg);
+    }
+
+    string to_string(long arg)
+    {
+        return std::to_string(arg);
+    }
+
+    string to_string(unsigned arg)
+    {
+        return std::to_string(arg);
+    }
+
+    string to_string(unsigned long arg)
+    {
+        return std::to_string(arg);
+    }
+
+    string to_string(float arg)
+    {
+        ostringstream oss;
+        oss << std::setprecision(float_precision) << std::fixed << arg;
+        return oss.str();
+    }
+
+    string to_string(double arg)
+    {
+        ostringstream oss;
+        oss << std::setprecision(double_precision) << std::fixed << arg;
+        return oss.str();
+    }
+
+    //! This is clumsy and not properly tested
     string to_string(istream& rhs)
     {
         string str;

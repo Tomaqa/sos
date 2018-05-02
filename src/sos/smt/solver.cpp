@@ -274,7 +274,7 @@ namespace SOS {
                 const Const_ids_entry& entry_ids = entries_ids[e];
                 const Init_const_id& init_const =
                     cconst_ids_entry_init_const(entry_ids);
-                Const_value value = ode_result[e];
+                Const_value value = round_ode_result(ode_result[e]);
                 Const_id int_ode_id = Parser::mod_int_ode_id(init_const);
                 Expr assert_expr =
                     const_to_assert_expr(move(int_ode_id), value);
@@ -303,9 +303,17 @@ namespace SOS {
         Expr Solver::eplace_to_assert_expr(Expr::Expr_place_ptr place_ptr,
                                            Const_value const_value)
         {
+            Expr::Expr_place_ptr value_place =
+                Expr_value<Const_value>::new_evalue(const_value);
+            neg_literal_to_expr(value_place);
             return {Expr_token::new_etoken("="),
                     move(place_ptr),
-                    Expr_value<Const_value>::new_evalue(const_value)};
+                    move(value_place)};
+        }
+
+        Const_value Solver::round_ode_result(Const_value value)
+        {
+            return std::floor(value*ode_result_fact)/ode_result_fact;
         }
 
         void Solver::fork_solver()
@@ -414,7 +422,7 @@ namespace SOS {
                 ? read_expr()
                 : read_line(""s + c);
             #ifdef DEBUG
-            _out_log_ofs << str;
+            _out_log_ofs << str << endl;
             #endif /// DEBUG
             return str;
         }

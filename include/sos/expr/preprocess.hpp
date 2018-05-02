@@ -130,9 +130,9 @@ namespace SOS {
 
         template <typename Arg>
             static Eval_t_marked
-                new_eval_marked_helper(Arg val, bool is_float);
-        static Eval_t_marked new_eval_marked_float(Eval_float_t val);
-        static Eval_t_marked new_eval_marked_int(Eval_int_t val);
+                make_eval_marked_helper(Arg val, bool is_float);
+        static Eval_t_marked make_eval_marked_float(Eval_float_t val);
+        static Eval_t_marked make_eval_marked_int(Eval_int_t val);
         static Eval_t ceval_union(const Eval_t_marked& val_m);
         static Eval_t& eval_union(Eval_t_marked& val_m);
         static bool ceval_is_float(const Eval_t_marked& val_m);

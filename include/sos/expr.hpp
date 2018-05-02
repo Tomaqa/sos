@@ -54,8 +54,7 @@ namespace SOS {
 
         virtual bool is_expr() const noexcept override       { return false; }
         virtual bool is_evalue() const noexcept               { return true; }
-        virtual explicit operator string () const noexcept override
-                                               { return to_string(cvalue()); }
+        virtual explicit operator string () const noexcept override;
     private:
         Arg _value;
     };
@@ -64,7 +63,12 @@ namespace SOS {
     public:
         Expr_token();
         virtual ~Expr_token()                                       = default;
-        template <typename Arg> Expr_token(Arg arg);
+        Expr_token(const Expr_token& rhs)                           = default;
+        Expr_token(Expr_token&& rhs)                                = default;
+        Expr_token(Token token);
+        Expr_token(char arg);
+        Expr_token(int arg);
+        Expr_token(double arg);
 
         virtual Expr_place_ptr clone() const override;
         virtual Expr_place_ptr move_to_ptr() override;
@@ -77,6 +81,8 @@ namespace SOS {
         static bool valid_token(const Token& token);
 
         virtual bool is_evalue() const noexcept override     { return false; }
+        virtual explicit operator string () const noexcept override
+                                                          { return ctoken(); }
 
         template <typename Arg> bool get_value_valid(Arg& arg) const;
         template <typename Arg> Arg get_value() const;

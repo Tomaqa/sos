@@ -35,7 +35,7 @@ namespace SOS {
             }
             cout << endl;
 
-            cout << std::setprecision(8) << std::fixed;
+            cout << std::setprecision(double_precision) << std::fixed;
             while (getline(*_is_ptr, line)) {
                 if (line.empty()) continue;
                 State res = solver.solve(line);

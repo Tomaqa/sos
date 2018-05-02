@@ -100,29 +100,36 @@ namespace SOS {
 
         void neg_literal_to_expr(Expr::Expr_place_ptr& place_ptr)
         {
-            Expr_token& etoken = Expr::ptr_to_etoken(place_ptr);
-            Token& token = etoken.token();
-            if (!(token[0] == '-' && isdigit(token[1]))) return;
-            token.erase(0, 1);
+            if (Expr::is_etoken(place_ptr)) {
+                Expr_token& etoken = Expr::ptr_to_etoken(place_ptr);
+                Token& token = etoken.token();
+                if (!(token[0] == '-' && isdigit(token[1]))) return;
+                token.erase(0, 1);
+            }
+            else {
+                Expr_value<Const_value>& evalue =
+                    Expr::ptr_to_evalue<Const_value>(place_ptr);
+                Const_value& value = evalue.value();
+                if (value >= 0) return;
+                value = -value;
+            }
             Expr new_expr("-");
-            new_expr.add_new_etoken(move(etoken));
-            place_ptr = Expr::new_expr(move(new_expr));
+            new_expr.add_place_ptr(move(place_ptr));
+            place_ptr = new_expr.move_to_ptr();
         }
     }
 
-    namespace Util {
-        string to_string(const SMT::Sat& sat)
-        {
-            switch (sat) {
-            case SMT::Sat::sat: return "sat";
-            case SMT::Sat::unsat: return "unsat";
-            default: return "unknown";
-            }
+    string to_string(const SMT::Sat& sat)
+    {
+        switch (sat) {
+        case SMT::Sat::sat: return "sat";
+        case SMT::Sat::unsat: return "unsat";
+        default: return "unknown";
         }
+    }
 
-        ostream& operator <<(ostream& os, const SMT::Sat& sat)
-        {
-            return (os << to_string(sat));
-        }
+    ostream& operator <<(ostream& os, const SMT::Sat& sat)
+    {
+        return (os << to_string(sat));
     }
 }

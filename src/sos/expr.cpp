@@ -27,10 +27,24 @@ namespace SOS {
         : Expr_token("")
     { }
 
-    template <>
     Expr_token::Expr_token(Token token)
         : Expr_value<Token>(move(token))
     { }
+
+    Expr_token::Expr_token(char arg)
+    {
+        set_value<char>(arg);
+    }
+
+    Expr_token::Expr_token(int arg)
+    {
+        set_value<int>(arg);
+    }
+
+    Expr_token::Expr_token(double arg)
+    {
+        set_value<double>(arg);
+    }
 
     Expr_place::Expr_place_ptr Expr_token::clone() const
     {
@@ -729,7 +743,7 @@ namespace SOS {
             std::advance(it, 2);
             std::move(it, end(), std::back_inserter(subexpr));
             resize(3);
-            *it = new_expr(move(subexpr.to_binary()));
+            *it = subexpr.to_binary().move_to_ptr();
         }
         for_each_expr([](Expr& e){ e.to_binary(); });
         return *this;

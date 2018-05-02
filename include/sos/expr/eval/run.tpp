@@ -3,7 +3,7 @@ namespace SOS {
     void Expr::Eval<Arg>::Run::do_stuff()
     {
         string line;
-        cout << std::setprecision(8) << std::fixed;
+        cout << std::setprecision(double_precision) << std::fixed;
         while (getline(*_is_ptr, line)) {
             Expr expr(line);
             if (expr.empty()) continue;
