@@ -78,7 +78,7 @@ namespace SOS {
             "(set-option :print-success false)\n"
             "(set-option :produce-models true)\n"
             "(define-sort Dt () Real)\n";
-        static constexpr const char* def_smt_logic = "QF_UFLRA";
+        static constexpr const char* def_smt_logic = "QF_LRA";
 
         Parser(Expr expr, bool preprocess_only = false);
 

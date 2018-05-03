@@ -242,7 +242,9 @@ namespace SOS {
         Token token = expr.get_token_check();
         expect(!expr, "Additional arguments in 'set-logic': "s
                + to_string(expr));
-        expect(token == "QF_UFLRA" || token == "QF_UFNRA" || token == "UFLRA",
+        expect(token == "QF_LRA" || token == "QF_NRA"
+               || token == "QF_UFLRA" || token == "QF_UFNRA"
+               || token == "LRA" || token == "UFLRA",
                "SMT logic is not supported: '"s
                + to_string(token) + "'");
         _smt_logic = move(token);

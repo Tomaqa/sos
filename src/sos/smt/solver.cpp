@@ -173,7 +173,7 @@ namespace SOS {
                    "No asserts in assertion stack, cannot add conflict.");
             expect(last_asserts() != _prev_last_asserts,
                    "The same conflict has already been asserted! "s
-                   + "(The might be an infinite loop.)");
+                   + "(There might be an infinite loop.)");
 
             write_str("(pop 1)");
             _prev_last_asserts = move(last_asserts());

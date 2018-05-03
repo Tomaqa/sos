@@ -59,10 +59,12 @@
 \newacr{api}{API}{Application programming interface}
 \newacr{ansi}{ANSI}{American National Standards Institute}
 \newacr{ascii}{ASCII}{American Standard Code for~Information Interchange}
+\newacr{pdf}{PDF}{Portable Document Format}
+
 \newacr{gpl}{GPL}{General Public License}
 \newacr{gnu}{GNU}{GNU's Not Unix!}
 \newacr{os}{OS}{Operační systém}
-\newacr{pdf}{PDF}{Portable Document Format}
+\newacr{posix}{POSIX}{Portable Operating System Interface}
 
 \newacr{simd}{SIMD}{Single instruction multiple data}
 \newacr{omp}{OpenMP}{Open Multi-Processing}
@@ -2598,11 +2600,11 @@ pomocí logického součtu několika rovností.
 
 Příklad:
 \begin{Verbatim}[samepage=true]
-;; Literals
+;; Literals definition
 (define-fun t0   () Real 0)
 (define-fun y0_0 () Real 1) (define-fun y0_1 () Real 2)
 (define-fun run0 () Bool false)
-;; Constants
+;; Constants declaration
 (declare-fun t_0    () Real) (declare-fun t_1    () Real)
 (declare-fun y_0    () Real) (declare-fun y_1    () Real)
 (declare-fun run_0  () Bool) (declare-fun run_1  () Bool)
@@ -2644,12 +2646,12 @@ volených variant v~jednotlivých fázích, př.:
 znamenají zavedení podmínek,
 které musí být splněny \hl{mezi} všemi fázemi,
 ale mohou být porušeny v~průběhu integrace.
-Mohou a nemusí být závislé na~konkrétním stavu systému.
+Mohou a nemusí být závislé na~aktuálním stavu systému.
 Pro~stanovení podmínek pro~konstanty závisle
 na~konkrétním diskrétním stavu systému
 doporučujeme použít až část definice skoků uvedenou dále.
 
-Pokud to implementace explicitně sama neprovádí,
+Pokud to implementace \hl{explicitně} sama neprovádí,
 je nutné omezit všechny konstanty jednotlivých fází druhu \id{Dt}
 pouze na~výčet možných variant derivací z~příkazů \id{define\--dt}.
 
@@ -3024,6 +3026,8 @@ přidáním znaku do~tokenu s~\id{\$}:
 
 %%%
 
+\clearpage
+
 % Fri 27 Apr 2018 05:18:55 PM CEST
 \begin{paragraph}{Příklady obecného použití maker:}
 \label{p:design:spec:ilang:macros:examples}
@@ -3155,7 +3159,7 @@ je možný výstup \id{sat},
 ale pokud je vstup nesplnitelný,
 výpočet pravděpodobně nikdy neskončí.
 
-Výstup \id{unknown} \hl{není} implementován,
+Výstup \id{unknown} \hl{není} navržen,
 ač by byl v~některých případech vhodný,
 např. pro~nesplnitelné intervalové počáteční podmínky.
 \end{subsection} %%Výstupy
@@ -3207,7 +3211,7 @@ využívající tohoto postupu.
 
 %%%%%%%
 
-% Fri 27 Apr 2018 09:59:25 PM CEST
+% Wed 02 May 2018 07:57:32 PM CEST
 \begin{subsubsection}{\acr{smt} řešič jako nezávislá komponenta}
 \label{sss:design:arch:comp:smt}
 \acr{smt} řešič lze použít
@@ -3270,6 +3274,10 @@ by mělo mít zanedbatelný vliv na~výkon
 oproti použití programového rozhraní,
 v~porovnání s~dobou samotných výpočtů
 \acr{smt} a \acr{ode} řešičů.
+Implementace si však musí poradit
+s~korektními konverzemi čísel s~plovoucí řádovou čárkou
+z~textu či do~textu,
+protože \acr{smt} řešič pracuje s~exaktními hodnotami.
 \end{subsubsection} %%\acr{smt} řešič jako nezávislá komponenta
 
 %%%%%%%
@@ -3337,10 +3345,8 @@ bez~řešení jakýchkoli invariant.
 
 %%%%%%%
 
-% Tue 24 Apr 2018 01:43:21 PM CEST
+% Wed 02 May 2018 07:57:55 PM CEST
 \begin{subsubsection}{Zpracování vstupu}\label{sss:design:arch:comp:parse}
-\cmt{Pracuje jen s indentifikátory konstant, ne s jejich hodnotami.}
-
 Vstupní jazyk je navržen podobně
 jako jazyk \acr{smt}-LIB standardu,
 což značně usnadňuje zpracování vstupu,
@@ -3358,6 +3364,12 @@ Předzpracování vstupu, tak jak je navrženo,
 je zcela nezávislé
 na~sémantice vstupního jazyka
 a mělo by být implementováno jako samostatná komponenta.
+
+Komponenta zpracování vstupu bude s~konstantami a funkcemi
+pracovat výhradně na~úrovni jejich identifikátorů
+a nebude řešit jejich možné hodnoty;
+to bude zodpovědnost centrální komponenty
+a \acr{smt} řešiče.
 \end{subsubsection} %%Zpracování vstupu
 
 %%%%%%%
@@ -3382,7 +3394,7 @@ který musí korektně ověřit všechny možnosti
 ohodnocení vstupních konstant a funkcí
 a přiměřeně efektivně zacházet
 s~inkrementálním \acr{smt} řešičem, zejména s~návraty.
-Návrh algoritmu je uveden v~následující sekci.
+Návrh algoritmu je uveden v~samostatné sekci.
 \end{subsubsection} %%Centrální komponenta
 
 %%%%%%%
@@ -3424,8 +3436,8 @@ Seznam je použit proto,
 že se předpokládá sekvenční průchod jeho strukturou,
 a aby bylo možné efektivně odkudkoli odebírat či přidávat prvky.
 
-Výraz nemá určen žádný datový typ
-a je používán pouze ve~znakové formě.
+Výraz ve~výchozí formě nemá určen žádný datový typ
+a používá pouze znaky.
 Může být tedy použit pro~libovolné účely
 vyžadující vytvoření hierarchické struktury
 z~(ne zcela nutně) prefixového vstupu,
@@ -3533,7 +3545,7 @@ odpoví výstupními hodnotami.
 
 %%%%%%%%%%%%%
 
-% Fri 27 Apr 2018 10:54:22 PM CEST
+% Wed 02 May 2018 08:09:07 PM CEST
 \begin{subsection}{Návrh zpracování vstupu}\label{ss:design:arch:parse}
 Úkolem komponenty pro~zpracování vstupu
 je nalézt příkazy \acr{ode} vstupního jazyka
@@ -3553,12 +3565,13 @@ Postup je následující:
    s~názvy podle identifikátorů z~\id{define\--dt}.
 \item Substituce příkazů integrací \id{int\--ode}
    za~pomocné konstanty nebo funkce druhu \id{Real};
-   nastavení fází integrací
-   podle příkazů \id{int\--ode}
-   a uložení identifikátorů konstant vstupujících do~příkazů.
+   sekvenční uložení identifikátorů argumentů příkazů \id{int\--ode}
+   a roztřízení podle jednotlivých \acr{ode}
+   a podle unikátních párů identifikátorů nezávislých proměnných \id{t}.
+   (Nastavení fází je zodpovědnost centrální komponenty.)
 \item (Volitelné) nastavení počáteční délky kroku integrací
    z~příkazu \id{define\--ode\--step} a jeho smazání.
-\item Trasformace zbylých konstruktů nekompatibilních
+\item Transformace zbylých konstruktů nekompatibilních
    s~\acr{smt}-LIB standardem, které jsou povoleny ve~vstupním jazyce
    (např. záporné numerické literály).
 \end{enumerate}
@@ -3681,7 +3694,7 @@ lze dále modifikovat~---~řešit jich více či méně,
 o~více fází napřed, apod.
 Efektivita zvoleného řešení by závisela
 na~empirickém měření složitosti,
-analyticky lze těžko předpovědět.
+analyticky ji lze těžko předpovědět.
 \end{paragraph} %Diskuze redukce ověření splnitelností.
 
 %%%
@@ -3731,7 +3744,10 @@ Postup je následující:
 \item Překlad vstupní formule:
    \begin{enumerate}
    \item Uložení definic diferenciálních rovnic
-      ze~zpracovaného vstupu, určení rozložení fází výpočtu.
+      ze~zpracovaného vstupu, určení rozložení fází výpočtu%
+      \footnote{Tato operace není diskutována,
+      nicméně ve~zcela obecném případě se může jednat
+      o~poměrně náročnou úlohu.}.
    \item Sloučení všech \acr{ode}, které obsahují
       společné klíče nepřímých argumentů,
       do~soustav \acr{ode}.
@@ -3752,7 +3768,11 @@ Postup je následující:
       \item Pokud \id{s = 0}, vstup není splnitelný. Konec.
       \item Odeber vrchní úroveň zásobníku asercí: \id{(pop~1)}.
       \item Přidej konfliktní klauzuli (aserci)
-         znemožňující vstupní ohodnocení předchozí fáze.
+         znemožňující vstupní (nikoli výstupní%
+         \footnote{Přidání výstupních hodnot do~konfliktní
+         klauzule by umožnilo řešiči za~ně dosadit jiné hodnoty
+         a tím zneplatnit celou klauzuli.})
+         ohodnocení předchozí fáze.
       \item Vrať se do~předchozí fáze:
          \id{s-{}-}, jdi na~bod \rf{i:design:alg:check-sat}.
       \end{enumerate}
@@ -3787,7 +3807,7 @@ podobá algoritmu \acr{dpll}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Sat 28 Apr 2018 04:01:46 PM CEST
+% Wed 02 May 2018 09:31:27 PM CEST
 \chapter{Realizace}\label{ch:impl}
 V~implementaci řešiče jsem postupoval
 po~jednotlivých softwarových komponentách
@@ -3798,15 +3818,20 @@ je realizace oproti návrhu zjednodušena,
 což je v~odpovídající sekci explicitně zmíněno.
 Výsledný prototyp lze použít
 pro~účely experimentování s~různými modely hybridních systémů
-a pro~účely srovnání s~řešičem dReal.
+a pro~účely srovnání s~řešičem
+pracujícím s~intervalovou metrikou,
+konkrétně dReal (viz.~sekce \rf{p:search:hybrid:dreal}).
 
 Nejprve popíši projekt jako celek,
 poté rozeberu implementaci jednotlivých komponent,
 centrální komponentou konče.
+Na~závěr uvedu výčet některých nedostatků
+a dosud chybějících funkcionalit
+jako seznam úkolů do~budoucna.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Tue 17 Apr 2018 10:10:59 AM CEST
+% Wed 02 May 2018 09:55:23 PM CEST
 \begin{section}{Struktura a vlastnosti projektu}\label{s:impl:proj}
 Projekt jsem nazval \name{\acrf{sos}}.
 Řešič je koncipován
@@ -3814,12 +3839,13 @@ jako soubor knihoven, appletů a hlavní aplikace,
 implementovaných převážně v~jazyce C++ (není-li řečeno jinak).
 Přestože se jedná o~prototyp, je projekt strukturně koncipován tak,
 aby byla jeho případná rozšíření a další vývoj
-možná snadno provést přímo v~něm.
+možná provést snadno přímo v~něm.
 Výhledově je projekt zamýšlen jako soubor knihoven
 napsaný výhradně v~jazyce C++
 umožňující použití různých \acr{smt} a \acr{ode}
 řešičů jak jako samostatných aplikací, tak jako C++ knihoven.
-Projekt má otevřené zdrojové kódy
+Projekt používá verzovací systém \name{git},
+má otevřené zdrojové kódy
 a je veřejně dostupný včetně tohoto textu práce na~adrese
 \url{https://github.com/Tomaqa/sos}.
 
@@ -3832,41 +3858,29 @@ Tyto moduly jsou pochopitelně závislé na~knihovnách třetích stran.
 Kromě těchto (vyměnitelných) modulů je však celý projekt
 se~základními funkcemi
 nezávislý od~externích knihoven a využívá výhradně
-vlastní a standardní knihovny \acr{stl}.
+vlastní a standardní knihovny \acr{stl}
+a \acr{posix}.
 C++ zdrojové kódy jsou zapsány ve~stylu Stroustrup%
 \footnote{Podle tvůrce jazyka C++: Bjarne Stroustrup.}.
 
-Hlavní aplikace je prozatím umístěna v~souboru \binFn{prototype.sh}
-a je napsána ve~skriptovacím jazyce Bash.
+Hlavní aplikace je umístěna v~souboru \binFn{sos\_\-odeint}.
+Je implementována v~jazyce C++
+a podrobně rozebrána ve~vlastní sekci.
+Původně byla vyvíjena ve~skriptovacím jazyce Bash
+v~souboru \binFn{prototype.sh},
+který již v~aktuální verzi není přítomen,
+ale je zpětně dohledatelný.
 
 Nástroj byl vyvíjen a testován pouze v~\acr{os} Linux.
 \end{section} %%Struktura a vlastnosti projektu
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Tue 17 Apr 2018 10:56:38 AM CEST
-\begin{section}{Implementace \acr{smt} řešiče}\label{s:impl:smt}
-\acr{smt} řešič je vhodné mít implementován flexibilně tak,
-aby byla snadná jeho výměna, jak bylo diskutováno
-v~sekci \rf{sss:design:arch:comp:smt}.
-V~našem prototypu je řešič použit jako samostatná aplikace
-s~textovým rozhraním podle \acr{smt}-LIB standardu verze~2.
-Náš nástroj byl testován s~řešiči \acr{cvc}4 a z3.
-
-Zodpovědnost připojení textového vstupu a výstupu \acr{smt} řešiče
-náleží až~centrální komponentě.
-
-Oba zmíněné \acr{smt} řešiče jsou implementovány v~jazyce C++.
-Pokud by byly vyšší požadavky na~výkon nástroje,
-bylo by možné sestrojit C++ rozhraní a \acr{smt} řešič použít
-jako externí knihovnu.
-\end{section} %%Implementace \acr{smt} řešiče
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Tue 24 Apr 2018 03:57:40 PM CEST
 \begin{section}{Realizace výrazů a jejich vyhodnocení}
 \label{s:impl:exprs}
+\cmt{Expr\_value}
+
 Vzhledem k~tomu, že tyto struktury využívá většina komponent projektu,
 jsou implementovány jako samostatná knihovna
 a uvedeny ve~vlastní sekci.
@@ -4011,8 +4025,185 @@ které mohou obsahovat i~nepřímé argumenty.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Wed 02 May 2018 10:07:56 PM CEST
+\begin{section}{Implementace adaptéru \acr{smt} řešiče}\label{s:impl:smt}
+\acr{smt} řešič je vhodné mít implementován flexibilně tak,
+aby byla snadná jeho výměna, jak bylo diskutováno
+v~sekci \rf{sss:design:arch:comp:smt}.
+V~našem prototypu je řešič použit jako samostatná aplikace
+s~textovým rozhraním podle \acr{smt}-LIB standardu verze~2.
+Náš nástroj byl testován s~řešiči \acr{cvc}4 a z3
+(viz.~sekce \rf{p:search:smt:solver:cvc4} \cmt{a z3}).
+
+\acr{smt} řešič reprezentuje třída \id{SMT::\-Solver},
+která momentálně zahrnuje jak potřebné rozhraní, tak implementaci
+související s~propojením textového rozhraní
+se~synovským procesem \acr{smt} řešiče.
+Výhledově by bylo vhodné rozhraní a implementaci oddělit,
+tj.~třídu realizovat jako abstraktní,
+která poskytuje operace obecně potřebné
+k~řešení hybridních modelů
+bez~ohledu na~konkrétní implementaci.
+K~této třídě by byla poskytnuta
+jako základní implementace odvozená třída
+s~názvem např. \id{SMT::\-Smtlib},
+která by operace delegovala přes textové rozhraní.
+Bylo by však možné zvolit libovolnou jinou třídu,
+která by např. operovala přímo s~programovým
+rozhraním konkrétního \acr{smt} řešiče jako knihovny%
+\footnote{Oba zmíněné \acr{smt} řešiče jsou implementovány v~jazyce C++.
+Pokud by byly vyšší požadavky na~výkon nástroje,
+bylo by možné je použít jako externí knihovnu s~C++ rozhraním.}.
+
+%%%
+
+% Thu 03 May 2018 12:13:22 AM CEST
+\begin{paragraph}{Identifikátory a hodnoty}\label{p:impl:smt:consts}
+vstupních konstant jsou uloženy podle příkazů \id{int\--ode}
+po~řádcích reprezentovaných strukturou \id{Const\_\-ids\_\-rows},
+resp. \id{Const\_\-values\_\-rows}
+(pole struktur \id{Const\_\-ids\_\-row},
+resp. \id{Const\_\-values\_\-row})
+pro každou \acr{ode} zvlášť.
+Klíčem každého řádku identifikátorů je unikátní dvojice konstant
+počáteční a koncové hodnoty nezávislého parametru \id{t}
+(\id{Time\_\-const\_\-ids})
+a hodnotou je \id{Const\_\-ids\_\-entries}
+(pole struktur \id{Const\_\-ids\_\-entry}),
+tj.~pole identifikátorů voleb derivací, počátečních hodnot
+a vstupních parametrů každého jednotlivého systému,
+který používá danou \acr{ode} v~daném okamžiku.
+Použití pole umožňuje,
+aby definovanou \acr{ode}
+mohlo současně používat více systémů nezávisle,
+např. v~případě kaskádní kompozice.
+Struktury hodnot konstant jsou analogické.
+\end{paragraph} %%Identifikátory a hodnoty konstant
+
+%%%
+
+% Wed 02 May 2018 10:52:48 PM CEST
+\begin{paragraph}{\id{SMT::\-Solver}}\label{p:impl:smt:solver}
+komunikuje s~\acr{smt} řešičem
+pomocí operací definovaných \acr{smt}-LIB standardem
+(viz.~sekce \rf{ss:search:smt:smtlib}),
+nicméně jedná se o~obecný koncept operací
+použitelný pro~různé implementace.
+Každá uvedená operace je později rozvedena
+včetně konkrétních použitých funkcí.
+Realizace komunikace s~\acr{smt} řešičem
+je uvedena až v~další části.
+
+Kromě inicializace se jedná o~tyto operace:
+\begin{itemize}
+\item \id{(check\_\-sat)}~---~ověření splnitelnosti
+   aktuálních asercí; výstupem je \id{sat} nebo \id{unsat}
+   (nebo \id{unknown}, což je považováno za~chybu),
+\item \id{(get\_\-value)}~---~získání hodnot
+   konkrétních konstant, čemuž musí předcházet \id{check\_\-sat};
+   výstupem jsou exaktní racionální čísla
+   zpravidla ve~tvaru zlomků,
+\item \id{(assert)}~---~přidání hodnot
+   konstant spjatých s~aktuální fází výpočtu,
+   jako podmínky nebo jako konfliktu,
+   do~vrcholové úrovně zásobníku asercí,
+\item \id{(push)} a \id{(pop)}~---~přidání či odebrání úrovně
+   zásobníku asercí.
+\end{itemize}
+
+Získávání hodnot se vždy vztahuje pouze ke~vstupním konstantám
+dané fáze. Pokud je výstup reprezentován výrazem,
+je vyhodnocen pomocí objektu třídy \id{Expr::\-Eval}.
+Tyto výrazy mohou mít teoreticky neomezenou přesnost,
+což by vyžadovalo použití dynamických struktur
+s~možností rozšiřující přesnosti.
+Implementovány jsou ale jen statické typy
+čísel s~plovoucí řádovou čárkou.
+Problém nastává v~momentě,
+kdy je potřeba takové číslo vypsat zpět ve~tvaru textu,
+aby hodnota zůstala stejná.
+Výpis řeším zjednodušeně pomocí fixního počtu desetinných míst
+a ořezáním výsledných hodnot integrací na~ještě menší počet,
+abych ponechal určitý prostor pro~případné navýšení desetinných míst
+z~navazujících výpočtů hodnot konstant v~\acr{smt} řešiči.
+Jedná se o~poměrně náchylné řešení,
+lepším způsobem by bylo pamatování si načítaných textových reprezentací
+hodnot konstant a jejich opětovné použití při~výpise.
+
+Hodnoty dané fáze lze získat s~různou granularitou
+od~nejvyšší po~nejnižší se~strukturami (či jejími částmi)
+\id{Const\_\-}*\id{\_\-row}
+pomocí funkcí \id{get\_\-step\_\-time\_\-values} počínaje
+a \id{get\_\-step\_\-row\_\-values} konče.
+Vždy však jen v~rámci jediné fáze i~\acr{ode}.
+
+Aserce lze přidávat obecně pomocí funkce \id{assert},
+ale praktičtější je použití funkce \id{assert\_\-step\_\-row},
+která vytvoří formule s~veškerým obsahem struktur
+\id{Const\_\-ids\_\-row}, \id{Const\_\-values\_\-row}
+a výsledků integrace \acr{ode}.
+Současně se provede operace \id{push}.
+Vložené aserce jsou interně ukládány do~zásobníku,
+aby bylo možné v~případě konfliktu
+provést i~více návratů v~řadě.
+Návrat provede prostřednictvím funkce
+\id{assert\_\-last\_\-step\_\-row\_\-conflict}
+operaci \id{pop} a přidá negaci
+všech formulí se~vstupními konstantami fáze
+ze~zásobníku (tj.~nevyžaduje žádné argumenty).
+
+Rozhraní všech dosud zmíněných funkcí by mělo být nezávislé
+na~konkrétní implementaci adaptéru \acr{smt} řešiče.
+\end{paragraph} %%\id{SMT::\-Solver}
+
+%%%
+
+% Thu 03 May 2018 01:45:33 AM CEST
+\begin{paragraph}{Komunikace s~\acr{smt} řešičem}\label{s:impl:smt:pipe}
+je zprostředkována pomocí dvojice nepojmenovaných
+\name{rour} (angl. \name{unnamed} či \name{anonymous pipes})
+standardu \acr{posix}. Každá roura je jednosměrná
+a je realizována v~paměti, tj.~mimo souborový systém.
+Cílovou platformou tohoto řešení jsou systémy z~rodiny Unix,
+v~rámci nichž by mělo fungovat standardně.
+
+Nastavení komunikace provádí funkce \id{fork\_\-solver}
+technikou fork-exec:
+\begin{enumerate}
+\item Vytvoření dvou rour: funkce \id{pipe}.
+\item Vytvoření synovského procesu \acr{smt} řešiče: funkce \id{fork}.
+\item Synovský proces přesměruje standardní vstup a výstup do~rour:
+   funkce \id{dup2}.
+\item Synovský proces se nahradí procesem \acr{smt} řešiče:
+   funkce \id{execlp}.
+\end{enumerate}
+
+Poté rodičovský proces komunikuje prostřednictvím rour
+přes~jejich získané deskriptory.
+K~tomu slouží standardní funkce \id{write} a \id{read},
+které pracují na~úrovni (binárních) bytů.
+V~takové komunikaci je nutné mít dohodnutý nějaký protokol.
+V~našem případě stačí jako zprávy přijímat
+buď celistvé výrazy, pokud zpráva začíná závorkou,
+nebo řádky.
+
+Přijímání zpráv je implementováno sekvenčně po~jednom znaku,
+aby bylo možné detekovat konec zprávy a nečíst žádné znaky navíc.
+To je potenciálně neefektivní~---~lepším řešením by bylo
+vyhradit samostatné vlákno pro~přijímaní bloků dat
+poskytovaných jako jednotlivé zprávy.
+Takové řešení by bylo náročnější na implementaci
+a vyžadovalo by synchronizaci vláken.
+\end{paragraph} %%Komunikace s~\acr{smt} řešičem
+
+%%%
+
+\end{section} %%Implementace adaptéru \acr{smt} řešiče
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Wed 18 Apr 2018 03:30:27 PM CEST
-\begin{section}{Implementace \acr{ode} řešiče}\label{s:impl:ode}
+\begin{section}{Implementace adaptéru \acr{ode} řešiče}\label{s:impl:ode}
 V~sekci \rf{sss:design:arch:comp:ode} jsem rozebral
 a oddůvodnil návrh adaptéru pro~\acr{ode} řešiče
 pomocí abstraktní třídy a odvozených tříd.
@@ -4107,7 +4298,7 @@ protože každá \acr{ode} je řešena nezávisle.
 
 %%%
 
-% Wed 18 Apr 2018 10:53:27 AM CEST
+% Thu 03 May 2018 01:54:49 AM CEST
 \begin{paragraph}{Sjednocení klíčů.}\label{p:impl:ode:solver:spec:unif}
 Pokud je potřeba všechny \acr{ode} řešit synchronně
 (myšleno synchronizovaně po~krocích integrace),
@@ -4125,11 +4316,23 @@ na~integracích ostatních rovnic.
 Podle tvaru vstupu je možné implicitně rozpoznat,
 zda se jedná o~sjednocený stav,
 konkrétně podle \id{Param\_\-keyss}~---~pokud obsahuje
-jen jedinou položku \id{Param\_\-keys}.
-Ta je pak interpretována jako sjednocené klíče
+jen jedinou položku \id{Param\_\-keys},
+nebo pokud jsou všechny položky identické.
+Pak je první položka interpretována jako sjednocené klíče
 pro~všechny \acr{ode}.
+
 Sjednocení klíčů lze také explicitně vynutit,
 ale to je možné pouze při konstrukci řešiče.
+V~tomto případě se vytvoří mapování nesjednocených klíčů
+na~vytvořené sjednocené pomocí číselných indexů,
+které je přístupné z~funkce \id{cunif\_\-param\_\-keyss\_\-ids}.
+Druhá strana si tak může pomocí tohoto přeorganizovat
+své specifikace rovnic a nadále používat
+pouze sjednocených klíčů.
+To je sice efektivní varianta, ale relativně nepohodlná.
+Proto je umožňěno i~nadále při řešení
+rovnic poskytovat vstupní hodnoty v~nesjednoceném tvaru,
+které řešič interně sjednotí sám aplikací mapování.
 \end{paragraph} %%Sjednocení klíčů.
 
 %%%
@@ -4166,7 +4369,7 @@ nutné vložit token \id{*}.
 
 %%%%%%%
 
-% Wed 18 Apr 2018 10:59:20 AM CEST
+% Thu 03 May 2018 02:04:50 AM CEST
 \begin{subsubsection}{Řešení rovnic}\label{sss:impl:ode:solver:solve}
 Podobně jako u~specifikací rovnic
 je možné provést výpočet rovnic
@@ -4182,10 +4385,16 @@ Tento parametr není závislý na~stavu řešiče,
 zda je či není sjednocený.
 
 \id{Contexts} je pole objektů typu \id{Context}.
-Pokud je řešič ve~sjednoceném stavu,
+Pokud je voláno řešení rovnic jako sjednocených,
 je nutné předat jen jediný \id{Context},
 jelikož mají všechny \acr{ode} sjednocené klíče
 a tedy i~hodnoty jim přiřazené.
+Lze však použít i~obecnou funkci řešení rovnic
+(přijímající \id{\id{Contexts}}),
+která, v~případě, že se řešič nachází ve~sjednoceném stavu,
+se pokusí aplikovat interní mapování
+nesjednocených pozic na~sjednocené
+(jak bylo popsáno v~části o~sjednocených klíčích).
 (Nebo lze předat \id{Contexts} se shodnými položkami.)
 
 %%%
@@ -4365,12 +4574,14 @@ Spustitelná aplikace třídy je umístěna v~souboru \appletFn{odeint}.
 
 %%%%%%%%%%%%%
 
-\end{section} %%Implementace \acr{ode} řešiče
+\end{section} %%Implementace adaptéru \acr{ode} řešiče
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Sat 28 Apr 2018 06:01:31 PM CEST
 \begin{section}{Implementace zpracování vstupu}\label{s:impl:parse}
+\cmt{nevyžaduje UF logiku}
+
 Návrh zpracování vstupu je uveden v~sekci \rf{ss:design:arch:parse}.
 Pro~tyto účely byla vytvořena třída \id{Parser}.
 V~první řadě je vstup předzpracován (viz. další sekce).
@@ -4571,6 +4782,12 @@ nebo pomocí aplikace \appletFn{parser}
  \cmt{int-ode jsou nacteny v poradi, v jakem jsem ve vstupu. To znamená, že pořadí příkazů musí odpovídat
 pořadí časových úseků t. -- spravne bys to mel seradit}
 \end{section} %%Realizace řídící komponenty
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Wed 02 May 2018 09:33:54 PM CEST
+\begin{section}{Seznam dalších úkolů}\label{s:impl:todo}
+\end{section} %%Seznam dalších úkolů
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
