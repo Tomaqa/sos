@@ -3,8 +3,6 @@
 
 #include <sstream>
 
-#include <iostream>
-
 namespace SOS {
     Parser::Parser(istream& is, bool preprocess_only)
         : Parser(Expr::Preprocess(is).parse(), preprocess_only)
@@ -191,7 +189,7 @@ namespace SOS {
                "Unexpected command '"s + cmd + "' "
                + "at top level.");
         parse_expr(_expr);
-        expr.reset_pos_to_valid();
+        expr.reset_pos();
         add_smt_expr(move(expr));
     }
     catch (const Error& err) {

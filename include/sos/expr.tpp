@@ -1,8 +1,5 @@
 #include <sstream>
 
-#include <iostream>
-#include <iomanip>
-
 namespace SOS {
     template <typename T>
     Expr_place::Expr_ptr_t<T> Expr_place::new_place(T&& place)

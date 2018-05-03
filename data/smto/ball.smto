@@ -16,10 +16,10 @@
 #define T_MIN()   0
 #define T_MAX()   6.5
 
-#define X_MIN() (- 1)
+#define X_MIN() -1
 #define X_MAX() 15
 
-#define V_MIN() (- 18)
+#define V_MIN()   -18
 #define V_MAX()    18
 
 #define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
@@ -75,8 +75,8 @@
 
 (define-dt x dx      (v) v)
 
-(define-dt v dv_down () (+ (- #G) (* #D (^ v 2)) ))
-(define-dt v dv_up   () (- (- #G) (* #D (^ v 2)) ))
+(define-dt v dv_down () (+ -#G (* #D (^ v 2)) ))
+(define-dt v dv_up   () (- -#G (* #D (^ v 2)) ))
 
 ;;; Invariants
 
@@ -122,7 +122,7 @@
                    (x2_0 Real) (v2_0 Real)
                  ) Bool
     (and (=> (and      down1  (>  x1_t 0) ) (and      down2  (= x2_0 x1_t) (= v2_0 v1_t) ))
-         (=> (and      down1  (<= x1_t 0) ) (and (not down2) (= x2_0    0) (= v2_0 (* (- #K) v1_t )) ))
+         (=> (and      down1  (<= x1_t 0) ) (and (not down2) (= x2_0    0) (= v2_0 (* -#K v1_t )) ))
          (=> (and (not down1) (>  v1_t 0) ) (and (not down2) (= x2_0 x1_t) (= v2_0 v1_t) ))
          (=> (and (not down1) (<= v1_t 0) ) (and      down2  (= x2_0 x1_t) (= v2_0 v1_t) ))
 ))

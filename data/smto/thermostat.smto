@@ -6,12 +6,16 @@
 (define-fun x0 () Real 60)
 (define-fun on0 () Bool false)
 
-#define XMAX 100
 #define XMIN 50
+#define XMAX 100
 
 #define T 0.25
+(define-ode-step $(/ #T 2))
 
-#define STEPS 100
+#define T_MIN()   0
+#define T_MAX()  20
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
 #define STEPS-1 $d(- #STEPS 1)
 
 ;;; Declarations

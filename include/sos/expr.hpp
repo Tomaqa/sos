@@ -91,8 +91,6 @@ namespace SOS {
         template <typename Arg> void set_value(Arg arg);
     };
 
-    //! Most libraries use only 'Expr_token',
-    //! usage of 'Expr_value' is not properly tested !
     class Expr : public Expr_place {
     public:
         template <typename Arg> class Eval;
@@ -152,7 +150,6 @@ namespace SOS {
         bool valid_pos() const;
         void check_pos() const;
         void reset_pos();
-        void reset_pos_to_valid();
         void invalidate_pos() const;
         Expr& next();
         Expr& prev();
@@ -307,6 +304,7 @@ namespace SOS {
 
         iterator& rpos();
         void maybe_reset_pos();
+        void maybe_invalidate_pos() const;
         iterator to_iterator(const_iterator it);
     private:
         Expr& simplify_rec() noexcept;

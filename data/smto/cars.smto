@@ -10,6 +10,7 @@
 ;;; Constants
 
 #define T 0.5
+(define-ode-step $(/ #T 10))
 
 #define T_MIN()   0
 #define T_MAX()  10

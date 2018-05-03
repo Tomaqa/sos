@@ -14,13 +14,13 @@
 
 \usepackage{amsmath} %advanced maths
 \usepackage{mathtools}
-% \usepackage{amssymb} %additional math symbols
 
 \usepackage{microtype}
 
 \usepackage{fancyvrb}
 
-% \usepackage{letltxmacro}
+\usepackage{pdfpages}
+%% includepdf is used in 'FITthesis.cls'
 
 %%%%%%%%%%%%%%%%%
 
@@ -95,28 +95,6 @@
 \newacr{bdf}{BDF}{Backward differentiation formula}
 
 \newacr{sos}{SOS}{\acr{smt}+\acr{ode} solver}
-
-% \newcommand{\glosItem}[2]{\item[\itab{#1}]\tab{#2}}
-% \newcommand{\glosSymb}[2]{\glosItem{\ensuremath{#1}}{#2}}
-% \newcommand{\glosOpSymb}[2]{\glosSymb{#1{A},#1{a}}{#2 $A,a$}}
-% \newcommand{\glosBinOpSymb}[2]{\glosSymb{A#1B}{#2 $A$ a $B$}}
-% \glosOpSymb{\vec}{Vektor}
-% \glosOpSymb{\mat}{Matice}
-% \glosOpSymb{\pred}{Predikovaná hodnota}
-% \glosOpSymb{\gues}{Průběžně odhadovaná hodnota}
-% \glosOpSymb{\rand}{Náhodná proměnná}
-% \glosOpSymb{\mean}{Očekávaná hodnota náhodné proměnné}
-% \glosOpSymb{\trans}{Transpozice}
-% \glosOpSymb{\conj}{Konjugace}
-% \glosOpSymb{\ctrans}{Konjugovaná transpozice}
-% \glosOpSymb{\inv}{Inverze}
-% \glosOpSymb{\norm}{Eukleidovská vektorová norma}
-% \glosBinOpSymb{*}{Konvoluce mezi}
-% \glosBinOpSymb{}{Násobení}
-% \glosOpSymb{\id}{Identifikátor}
-% \glosSymb{\zvec}{Nulový vektor}
-% \glosSymb{\zmat}{Nulová matice}
-% \glosSymb{\imat}{Jednotková matice}
 
 %%%%%%%%%%%%%%%%%
 %%%% Debug commands
@@ -209,7 +187,7 @@ analýza hybridních systémů}
 \keywordsEN{\acr{sat}, \acr{smt}, numerical methods for~\acr{ode}s,
 hybrid systems analysis}
 \website{https://github.com/Tomaqa/sos} %volitelná URL práce,
-   % objeví se v tiráži~---~úplně odstraňte, nemáte-li URL práce
+%% objeví se v tiráži~---~úplně odstraňte, nemáte-li URL práce
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -315,7 +293,7 @@ a také v~modelování systémů přechodovými systémy.
 Není náhodou, že se tyto premisy shodují přesně se zadáním.
 
 % Struktura a návaznost
-\cmt{Struktura a návaznost \dots.}
+\cmt{Struktura a návaznost \dots}
 \end{section} %%Cíl práce
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2263,7 +2241,7 @@ a dále tyto funkce:
 
 %%%
 
-% Fri 27 Apr 2018 02:03:56 AM CEST
+% Thu 03 May 2018 01:56:05 PM CEST
 \begin{paragraph}{\id{set-logic}}\label{p:design:spec:ilang:smt:logic}
 nastavuje logiku použitou v~\acr{smt} řešiči:
 \begin{center}
@@ -2285,6 +2263,7 @@ Není-li příkaz uveden, je jako výchozí logika zvolena \id{QF\_\-UFLRA}.
 Pokud to implementace umožňuje,
 smí být také podporovány zmíněné logiky
 bez~volných funkčních symbolů (názvy jsou bez~znaků \id{UF}).
+Pak je jako výchozí logika volena \id{QF\_\-LRA}.
 \end{paragraph} %%\id{set-logic}
 
 %%%
@@ -2959,7 +2938,7 @@ Každý token je rozdělen na~části
 podle znaků \id{\#}
 a každá část je vyhodnocena zvlášť.
 Je-li token složen z~více než jedné takové části,
-jsou všechny expandované části složeny do~jediného tokenu,
+jsou všechny expandované části \hl{složeny do~jediného tokenu},
 a to i~v případě, že těla maker obsahují více než jeden token;
 nesmí však obsahovat výrazy.
 Vnitřní makra také nemohou mít žádné parametry,
@@ -3545,11 +3524,13 @@ odpoví výstupními hodnotami.
 
 %%%%%%%%%%%%%
 
-% Wed 02 May 2018 08:09:07 PM CEST
+% Thu 03 May 2018 01:52:27 PM CEST
 \begin{subsection}{Návrh zpracování vstupu}\label{ss:design:arch:parse}
 Úkolem komponenty pro~zpracování vstupu
 je nalézt příkazy \acr{ode} vstupního jazyka
-(viz.~\rf{sss:design:spec:ilang:ode}),
+(viz.~\rf{sss:design:spec:ilang:ode})
+a částečně také \acr{smt} konstrukty
+(viz.~\rf{sss:design:spec:ilang:smt}),
 zpracovat je a nahradit je za~konstrukce
 výhradně \acr{smt}-LIB standardu,
 nebo je zcela vyřadit.
@@ -3840,8 +3821,7 @@ implementovaných převážně v~jazyce C++ (není-li řečeno jinak).
 Přestože se jedná o~prototyp, je projekt strukturně koncipován tak,
 aby byla jeho případná rozšíření a další vývoj
 možná provést snadno přímo v~něm.
-Výhledově je projekt zamýšlen jako soubor knihoven
-napsaný výhradně v~jazyce C++
+Projekt je zamýšlen jako soubor knihoven
 umožňující použití různých \acr{smt} a \acr{ode}
 řešičů jak jako samostatných aplikací, tak jako C++ knihoven.
 Projekt používá verzovací systém \name{git},
@@ -3865,11 +3845,16 @@ C++ zdrojové kódy jsou zapsány ve~stylu Stroustrup%
 
 Hlavní aplikace je umístěna v~souboru \binFn{sos\_\-odeint}.
 Je implementována v~jazyce C++
-a podrobně rozebrána ve~vlastní sekci.
+a podrobněji rozebrána ve~vlastní sekci.
 Původně byla vyvíjena ve~skriptovacím jazyce Bash
 v~souboru \binFn{prototype.sh},
 který již v~aktuální verzi není přítomen,
 ale je zpětně dohledatelný.
+
+Před použitím nástroje je nutné jej sestavit.
+Návod je umístěn v~příloze \cmt{link}.
+Všechny uvedené soubory aplikací či appletů
+jsou přístupné až po~tomto sestavení.
 
 Nástroj byl vyvíjen a testován pouze v~\acr{os} Linux.
 \end{section} %%Struktura a vlastnosti projektu
@@ -3879,8 +3864,6 @@ Nástroj byl vyvíjen a testován pouze v~\acr{os} Linux.
 % Tue 24 Apr 2018 03:57:40 PM CEST
 \begin{section}{Realizace výrazů a jejich vyhodnocení}
 \label{s:impl:exprs}
-\cmt{Expr\_value}
-
 Vzhledem k~tomu, že tyto struktury využívá většina komponent projektu,
 jsou implementovány jako samostatná knihovna
 a uvedeny ve~vlastní sekci.
@@ -3890,7 +3873,7 @@ a jejich vyhodnocení šablonová třída \id{Expr::\-Eval<Arg>}.
 
 %%%
 
-% Wed 25 Apr 2018 12:09:06 AM CEST
+% Thu 03 May 2018 12:58:59 PM CEST
 \begin{paragraph}{\id{Expr}}\label{p:impl:exprs:expr}
 je odvozená třída od~abstraktní třídy \id{Expr\_\-place}.
 \id{Expr} využívá polymorfismu~---~obsahuje
@@ -3898,19 +3881,29 @@ stromovou strukturu jako seznam ukazatelů na~\id{Expr\_\-place},
 které představují argumenty výrazu.
 Argumenty jsou objekty tříd odvozených od~\id{Expr\_\-place}:
 buď uzly jako další podvýrazy (\id{Expr}),
-nebo koncové listy jako tokeny (\id{Expr\_\-token}).
+nebo koncové listy, které reprezentují nějakou hodnotu.
+Ty jsou implementovány šablonovou třídou \id{Expr\_\-value<Arg>},
+která může jako šablonový parametr obsahovat i~netextový typ
+(což je vlastně v~rozporu s~návrhem).
+Jako její speciální odvozená třída je zavedena
+třída \id{Expr\_\-token}, která obsahuje textovou hodnotu.
+Pokud uživatel nepoužívá objekty
+\id{Expr\_\-value<Arg>},
+pak je struktura nezávislá od~interpretace.
+
 \id{Expr\_\-token} umožňuje šablonovou
 interpretaci svého textového obsahu
 jako aritmetického typu pomocí \id{get\_\-value},
 a také nastavení podle aritmetické hodnoty pomocí \id{set\_\-value}.
+Tyto konverze však mohou být nepřesné,
+např. v~případě čísel s~plovoucí řádovou čárkou.
+V~takovém případě může být vhodnější použít \id{Expr\_\-value<Arg>}.
 
-K~práci s~argumenty využívám výhradně
-mechanismus virtuálních funkcí.
-Nepoužívám dynamické přetypování,
-pouze statické na~základě virtuálního příznaku.
-To je však implementováno v~neveřejné části třídy,
-uživatel používá pouze explicitní funkce třídy
-(\id{ptr\_\-to\_\-token}, \id{ptr\_\-to\_\-expr}, apod.).
+Zjištění typu ukazatele je doporučeno provádět pomocí funkcí
+\id{is\_\-evalue}, \id{is\_\-etoken} a \id{is\_\-expr}.
+Přetypování ukazatelů na~nekterý odvozený typ
+je rovněž doporučeno provádět pomocí explicitních funkcí
+(\id{ptr\_\-to\_\-expr}, apod.).
 
 \id{Expr} se typicky sestavuje z~textového vstupu:
 \id{std::\-string} nebo \id{std::\-istream}.
@@ -3919,16 +3912,22 @@ jsou znaky kulatých závorek \id{(} a \id{)},
 které interpretují argument jako (pod)výraz.
 Všechny ostatní znaky jsou interpretovány jako tokeny
 oddělené bílými znaky, jež nikdy nejsou součástí tokenů.
+Pro~listy jsou použity pouze objekty
+textového typu~---~\id{Expr\_\-token}.
 
 Každý objekt třídy obsahuje interní iterátor
 indikující pozici v~seznamu potomků
 a s~ním související funkce
 umožňující sekvenční čtení i~zápis,
 případně spojené i~s~přetypováním,
-např. \id{get}, \id{extract},
+např. \id{peek}, \id{get}, \id{extract},
 \id{get\_\-token}, \id{extract\_\-expr},
 \id{add\_\-new\_\-expr\_\-at\_\-pos},
-\id{erase\_\-at\_\-pos}, \dots.
+\id{erase\_\-at\_\-pos}, \dots
+
+Dále jsou vřazeny šablonové funkce,
+které provedou konverzi potomka libovolného typu
+na~aritmetický typ (\id{ptr\_\-to\_\-value}, \id{get\_\-value} apod.).
 
 Nad~sestavenými výrazy lze provést některé základní operace:
 \begin{itemize}
@@ -4025,7 +4024,7 @@ které mohou obsahovat i~nepřímé argumenty.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Wed 02 May 2018 10:07:56 PM CEST
+% Thu 03 May 2018 04:01:22 PM CEST
 \begin{section}{Implementace adaptéru \acr{smt} řešiče}\label{s:impl:smt}
 \acr{smt} řešič je vhodné mít implementován flexibilně tak,
 aby byla snadná jeho výměna, jak bylo diskutováno
@@ -4054,6 +4053,14 @@ rozhraním konkrétního \acr{smt} řešiče jako knihovny%
 \footnote{Oba zmíněné \acr{smt} řešiče jsou implementovány v~jazyce C++.
 Pokud by byly vyšší požadavky na~výkon nástroje,
 bylo by možné je použít jako externí knihovnu s~C++ rozhraním.}.
+
+Komponenta zahrnuje i~část zodpovědností,
+které nesouvisí výhradně jen s~\acr{smt} řešičem,
+ale jsou částečně spjaty s~kombinováním
+řešiče s~diferenciálními rovnicemi.
+Úlohou komponenty je zprostředkování \acr{smt} řešiče
+pro~účely tohoto nástroje,
+ne implementace nezávislého řešiče.
 
 %%%
 
@@ -4578,16 +4585,15 @@ Spustitelná aplikace třídy je umístěna v~souboru \appletFn{odeint}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Sat 28 Apr 2018 06:01:31 PM CEST
+% Thu 03 May 2018 01:45:29 PM CEST
 \begin{section}{Implementace zpracování vstupu}\label{s:impl:parse}
-\cmt{nevyžaduje UF logiku}
-
 Návrh zpracování vstupu je uveden v~sekci \rf{ss:design:arch:parse}.
 Pro~tyto účely byla vytvořena třída \id{Parser}.
 V~první řadě je vstup předzpracován (viz. další sekce).
 Poté je ke~zpracování vstupu použit objekt třídy \id{Expr},
 který by měl jako přímé potomky obsahovat pouze další výrazy \id{Expr},
-jelikož v~kořenové úrovni nejsou tokeny povoleny.
+jelikož v~kořenové úrovni nejsou tokeny povoleny
+(po~předzpracování).
 Výrazy v~první úrovni představují příkazy,
 které jsou procházeny rekurzivně,
 pokud se nějak dotýkají \acr{ode} řešiče.
@@ -4607,26 +4613,32 @@ což je pole struktur \id{Ode}.
    (viz.~sekce \rf{sss:impl:ode:solver:spec})
    ve~stejném pořadí, jako \id{Dt\_\-keys},
 \item \id{Param\_\-keys}~---~společné klíče nepřímých argumentů
-   pro~všechny rovnice v~\id{Ode\_\-spec},
-\item \id{Const\_\-ids\_\-rows}~---~pole struktur
-   \id{Const\_\-ids\_\-row}, z~nichž každá obsahuje
-   všechny identifikátory vstupních konstant
-   jednoho konkrétního příkazu \id{int\--ode}.
+   pro~všechny rovnice v~\id{Ode\_\-spec};
+   není kontrolováno, zda jsou klíče napříč všemi rovnicemi
+   dané \acr{ode} shodné,
+\item \id{Const\_\-ids\_\-rows}~---~pole identifikátorů
+   vstupních konstant jednoho příkazu \id{int\--ode},
+   jak bylo diskutováno v~sekci \rf{p:impl:smt:consts}.
 \end{enumerate}
 S~výjimkou \id{Const\_\-ids\_\-rows}
 pochází všechny ostatní hodnoty
 z~příkazů \id{define\--dt}.
-Jednotlivé položky \id{Const\_\-ids\_\-row} jsou v~rámci
+Položky \id{Const\_\-ids\_\-row} jsou v~rámci
 příslušného klíče \id{Ode\_\-key} ukládány v~pořadí,
 v~jakém jsou ve~vstupu čteny příkazy \id{int\--ode}.
+(Určení fází podle konstant názávislých proměnných \id{t}
+není zodpovědností zpracování vstupu.)
 
-Hodnoty klíčů jsou také duplicitně ukládány
+Hodnoty klíčů, včetně těch z~\id{Const\_\-ids\_\-rows},
+jsou také duplicitně ukládány
 do~vyhledávacích stromových struktur,
 aby byly rychle dohledatelné.
 
 Příkazy, které jsou zpracovány, jsou:
 \begin{itemize}
-\item \id{set\--logic},
+\item \id{set\--logic}~---~povoleny jsou všechny logiky
+   zmíněné v~sekci \rf{p:design:spec:ilang:smt:logic},
+   a to \hl{včetně} logik bez~volných funkčních symbolů,
 \item \id{define\--dt}~---~uloží se specifikace varianty
    derivace dané \acr{ode}; při~prvním výskytu
    klíče \id{Ode\_\-key} dojde k~deklaraci \acr{ode},
@@ -4638,9 +4650,9 @@ Příkazy, které jsou zpracovány, jsou:
    se vytvoří jedna položka \id{Const\_\-ids\_\-row}
    pro~odpovídající klíč \id{Ode\_\-key},
    která je vložena na~konec pole \id{Const\_\-ids\_\-rows};
-   příkaz je do~\acr{smt} vstupu transformován jako
-   funkce s~argumentem čísla fáze;
-   vstupní argumenty konstant \hl{musí být globální identifikátory}.
+   příkaz je do~\acr{smt} vstupu transformován jako \hl{konstanta}
+   (čemuž předchází její deklarace);
+   vstupní argumenty příkazu \hl{musí být globální identifikátory}.
 \end{itemize}
 
 Dále je zpracován každý token.
@@ -4655,7 +4667,7 @@ a na~chybový výstup
 vstup pro~\acr{ode} řešič.
 Pomocí přepínače \id{-E}
 lze také provést pouze předzpracování vstupu
-a výsledek vypsat na~standrardní výstup.
+a výsledek vypsat na~standardní výstup.
 \end{section} %%Implementace zpracování vstupu
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -4774,19 +4786,129 @@ nebo pomocí aplikace \appletFn{parser}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Mon 16 Apr 2018 10:17:50 PM CEST
+% Thu 03 May 2018 04:15:08 PM CEST
 \begin{section}{Realizace řídící komponenty}\label{s:impl:center}
-\cmt{prototyp}
-\cmt{uvest ze beru jen plne unifikovane dif. rovnice
- se solecnymi casovymi okamziky}
- \cmt{int-ode jsou nacteny v poradi, v jakem jsem ve vstupu. To znamená, že pořadí příkazů musí odpovídat
-pořadí časových úseků t. -- spravne bys to mel seradit}
+Úlohou centrální komponenty je řídit \acr{smt} a \acr{ode} řešič
+(sekce \rf{s:impl:smt} a \rf{s:impl:ode})
+a průběh kombinovaného výpočtu.
+Postupoval jsem dle návrhu komponenty
+uvedeném v~sekci \rf{sss:design:arch:comp:center}
+a návrhu řídícího algoritmu ze~sekce \rf{ss:design:arch:alg}.
+Komponenta je však realizována jako \hl{prototyp},
+některé funkcionality chybí
+nebo jsou zjednodušeny.
+
+Řídící komponenta je umístěna v~šablonové třídě \id{Solver<OSolver>},
+která komunikuje s~oběma řešiči
+výhradně pomocí programového rozhraní
+vlastních tříd \id{SMT::\-Solver} a \id{ODE::\-Solver};
+teprve na~nich leží zodpovědnost
+konkrétní realizace propojení s~řešiči třetích stran.
+\id{ODE::\-Solver} slouží jako rozhraní,
+konkrétní implementaci obsahuje
+zvolená odvozená třída \id{OSolver}.
+Výhledově by bylo lépe použít také třídu \acr{smt}
+řešiče jako rozhraní s~volitelnou implementací
+(jak bylo uvedeno v~sekci \rf{s:impl:smt})
+jako šablonového parametru.
+
+Oproti navrženému základnímu řídícímu algoritmu
+byla aplikována následující zjednodušení:
+\begin{itemize}
+\item Fáze výpočtu jsou brány v~pořadí,
+   ve~kterém se nachází příkazy \id{int\--ode};
+   je zodpovědnost uživatele,
+   aby hodnoty vstupních konstant nezávislé proměnné \id{t}
+   tvořily neklesající posloupnost.
+   Počet příkazů \id{int\--ode} na~jednu fázi,
+   včetně shodných \acr{ode},
+   však není omezen.
+\item Rozložení všech fází musí navíc být pro~všechny \acr{ode} \hl{stejné}.
+   To prakticky znamená to, že všechny příkazy \id{int\--ode}
+   musí používat pouze jednu společnou sadu konstant
+   nezávislé proměnné \id{t}.
+\item Všechny odlišné \acr{ode} jsou vkládány
+   do~jediné společné soustavy;
+   vícenásobný výskyt \acr{ode} v~rámci fází
+   je považován za~nový nezávislý systém
+   \cmt{!!! tohle je asi blbě ...
+   Kaskádní kompozice asi nebude fungovat
+   - bude kolize na klíči ODE v ODE řešiči.
+   Aby se počítaly synchronně, musí klíč odpovídat názvu ODE,
+   takže jen vložení jiné vstupní konstanty nepomůže.
+   Mělo by ale fungovat vícenásobná definice více ODE
+   s odlišnými názvy - ale se stejným tělem ..}.
+   Řešič \id{ODE::\-Solver} je tedy
+   vždy používán ve~sjednoceném stavu.
+\end{itemize}
+
+Výpočet se provádí funkcí \id{solve},
+která zavolá funkci \id{do\_\-step}
+pro~počáteční fázi
+a počítá se dokud není dosaženo poslední fáze
+(pak bylo nalezeno splňující ohodnocení vstupu),
+nebo dokud není proveden návrat z~počáteční fáze
+(pak vstup není splnitelný).
+
+Interakce s~oběma řešiči
+spočívá pouze v~sestavení či přeuspořádání
+požadovaných vstupních struktur.
+
+%%%
+
+% Thu 03 May 2018 05:48:25 PM CEST
+\begin{paragraph}{Inicializace \acr{ode} řešiče}
+\label{p:impl:center:ode_init}
+spočívá v~zaslání specifikací rovnic a klíčů nepřímých argumentů
+v~nezávislém tvaru. S~výhodou je využito toho,
+že \id{ODE::\-Solver} umí explicitně
+vynutit sjednocení klíčů
+a také později sám provádět mapování
+pozic hodnot nezávislých kontextů
+do~sjednoceného.
+Řídící komponenta tedy kromě příznaku
+v~konstruktoru řešiče,
+který vyžaduje sjednocení,
+je zcela oproštěna od~této skutečnosti
+a pracuje s~rovnicemi jako s~nezávislými.
+\end{paragraph} %%Realizace řídící komponenty
+
+%%%
+
+\cmt{řešení ode - jak je to s entries? viz. hore}
+
+\bigskip
+
+Celý nástroj lze použít jako knihovnu,
+nebo jako aplikaci.
+Aktuální podoba aplikace je umístěna v~souboru
+\binFn{sos\_\-odeint}, která používá odeint
+pro~řešení \acr{ode} (třída \id{ODE::\-Odeint}).
 \end{section} %%Realizace řídící komponenty
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Wed 02 May 2018 09:33:54 PM CEST
+% Thu 03 May 2018 06:24:34 PM CEST
 \begin{section}{Seznam dalších úkolů}\label{s:impl:todo}
+\begin{itemize}
+\item Podrobnější dokumentace zdrojových kódů.
+\item Implementace řídícího makra \id{\#for} ve~všech variantách.
+\item Kontrola příkazů \id{define\--dt}, zda mají všechny
+   v~rámci dané \acr{ode} shodné klíče nepřímých argumentů.
+\item Lepší zacházení s~výstupními textovými hodnotami z~\acr{smt}
+   řešiče, pokud se do~něj následně posílají zpět jako podmínky.
+\item Oddělení rozhraní od~implementace ve~třídě \id{SMT::\-Solver};
+   odvozenou třídu zavést jako druhý šablonový parametr třídy \id{Solver}.
+\item Vyhrazení samostatného vlákna pro~příjem
+   odchozích zpráv \acr{smt} řešiče po~blocích.
+\item Implementace odvozené třídy pro~implementaci
+   \acr{ode} řešiče \acr{sundials}.
+\item Umožnit obecnější nastavení fází výpočtu v~řídící komponentě.
+\item Umožnit obecnější koncové podmínky diferenciálních rovnic,
+   např. podle koncové hodnoty funkce.
+\item Implementace efektivnějšího algoritmu
+   redukujícího počet operací ověření splnitelnosti vstupu.
+\end{itemize}
 \end{section} %%Seznam dalších úkolů
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%

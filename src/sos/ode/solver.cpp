@@ -2,8 +2,6 @@
 
 #include <set>
 
-#include <iostream>
-
 namespace SOS {
     using std::set;
 

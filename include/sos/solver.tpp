@@ -34,6 +34,10 @@ namespace SOS {
         }
         _ode_solver = OSolver(move(odes_spec), move(param_keyss), true);
 
+        if (cparser().is_ode_step_set()) {
+            _ode_solver.set_step_size(cparser().code_step());
+        }
+
         _odes_row_values.reserve(codes().size());
         _ode_results.resize(codes().size());
     }

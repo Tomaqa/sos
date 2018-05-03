@@ -238,7 +238,7 @@ namespace SOS {
             Expr& subexpr = expr.get_expr();
             parse_nested_expr(subexpr, depth+1);
         }
-        expr.reset_pos_to_valid();
+        expr.reset_pos();
     }
     catch (const Error& err) {
         if (depth == 0) throw;
@@ -323,7 +323,7 @@ namespace SOS {
         if (expr && is_expr(expr.cpeek())) {
             params_expr = expr.extract_expr();
         }
-        //! do not parse this expression
+        /// Do not parse this expression
         Macro_param_keys macro_param_keys_ =
             params_expr.transform_to_tokens();
         Macro_body macro_body_ = extract_macro_body(expr, "def");

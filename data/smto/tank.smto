@@ -28,8 +28,12 @@
 #define DELTA 1
 
 #define T 0.35
+(define-ode-step $(/ #T 5))
 
-#define STEPS 19
+#define T_MIN()   0
+#define T_MAX()  10
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
 #define STEPS-1 $d(- #STEPS 1)
 
 ;;; Invariants
@@ -64,8 +68,8 @@
 
 ;;; Derivatives definition
 
-(define-dt y dy_in  () (- #INFLOW #OUTFLOW))
-(define-dt y dy_out () (- #OUTFLOW))
+(define-dt y dy_in  () (+ #INFLOW -#OUTFLOW))
+(define-dt y dy_out ()            -#OUTFLOW )
 
 (define-dt tau dtau_wait () 1)
 (define-dt tau dtau_pump () 0)

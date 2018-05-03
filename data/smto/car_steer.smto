@@ -8,9 +8,9 @@
 
 ;;; Constants
 
-(define-fun p_lo  () Real (- 1))
-(define-fun p_hi  () Real    1 )
-(define-fun p_min () Real (- 1.5 ))
+(define-fun p_lo  () Real   -1)
+(define-fun p_hi  () Real    1)
+(define-fun p_min () Real -1.5)
 
 (define-fun t0   () Real 0)
 
@@ -29,10 +29,12 @@
 #define OM 2
 
 #define T 0.35
+(define-ode-step $(/ #T 20))
 
-;#define STEPS 10
-#define STEPS 10
-;#define STEPS 1000
+#define T_MIN()   0
+#define T_MAX()  10
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
 #define STEPS-1 $d(- #STEPS 1)
 
 ;;; Constant invariants
@@ -41,8 +43,8 @@
              (<  p_min p_lo)
              (>= p0    p_lo)
              (<= p0    p_hi)
-             (>= gam0 (- (/ #PI 4)))
-             (<= gam0    (/ #PI 4) )
+             (>= gam0 (/ -#PI 4))
+             (<= gam0 (/  #PI 4))
 ))
 
 ;;; Declarations
@@ -79,16 +81,16 @@
 
 ;;; Derivatives definition
 
-(define-dt p dp_move (gam) (* (- #R) (sin gam)))
+(define-dt p dp_move (gam) (* -#R (sin gam)))
 (define-dt p dp_fail (gam) 0)
 
-(define-dt gam dgam_left  () (- #OM))
-(define-dt gam dgam_right ()    #OM )
-(define-dt gam dgam_ahead ()      0 )
+(define-dt gam dgam_left  () -#OM)
+(define-dt gam dgam_right ()  #OM)
+(define-dt gam dgam_ahead ()    0)
 
-(define-dt c dc_inc  ()    1 )
-(define-dt c dc_dec  () (- 2))
-(define-dt c dc_idle ()    0 )
+(define-dt c dc_inc  ()  1)
+(define-dt c dc_dec  () -2)
+(define-dt c dc_idle ()  0)
 
 ;;; Derivatives connection
 

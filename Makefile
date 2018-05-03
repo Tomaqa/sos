@@ -7,12 +7,14 @@ ROOT_DIR  := ./
 INCL_NAME  := include
 SRC_NAME   := src
 BUILD_NAME := build
+LIB_NAME   := lib
 BIN_NAME   := bin
 TEST_NAME  := test
 
 INCL_DIR  := $(ROOT_DIR)/$(INCL_NAME)/$(PROJ_NAME)
 SRC_DIR   := $(ROOT_DIR)/$(SRC_NAME)/$(PROJ_NAME)
 BUILD_DIR := $(ROOT_DIR)/$(BUILD_NAME)/$(PROJ_NAME)
+LIB_DIR   := $(ROOT_DIR)/$(LIB_NAME)/$(PROJ_NAME)
 BIN_DIR   := $(ROOT_DIR)/$(BIN_NAME)
 SRC_MAIN_DIR := $(ROOT_DIR)/$(SRC_NAME)/main
 BUILD_MAIN_DIR := $(ROOT_DIR)/$(BUILD_NAME)/main
@@ -25,21 +27,26 @@ TEST_BIN_DIR := $(ROOT_DIR)/$(TEST_NAME)
 TOOLS_DIR := $(ROOT_DIR)/tools
 DOC_DIR   := $(ROOT_DIR)/doc
 DATA_DIR  := $(ROOT_DIR)/data
+LOCAL_DIR  := $(ROOT_DIR)/local
 
 LIBS := -lm -pthread
 INCL := -I $(INCL_DIR)
 LDFLAGS := -Wl,--no-undefined
 FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
 # FLAGS += -Wfatal-errors
-FLAGS += -DDEBUG
+# FLAGS += -DDEBUG
 CPPFLAGS := $(FLAGS) -std=c++14
 CFLAGS   := $(FLAGS) -std=gnu99
 TEST_FLAGS := -I $(TEST_INCL_DIR)
 
 ###################################################
 
+## ! negeneruji se slozky v build, lib, bin.. podle struktury zdrojaku
+#  ! a pri prvnim prekladu dojde k chybe
 MKDIR := mkdir -p
-MKDIR_DIRS := "$(BUILD_DIR)" "$(BIN_DIR)" "$(DOC_DIR)"
+MKDIR_DIRS := "$(BUILD_DIR)" "$(LIB_DIR)" "$(BIN_DIR)" "$(DOC_DIR)"
+MKDIR_DIRS += "$(DATA_DIR)" "$(LOCAL_DIR)"
+MKDIR_DIRS += "$(TEST_BUILD_DIR)" "$(TEST_BIN_DIR)"
 
 FIND_FLAGS := -not -path '*/\.*' -type f -name
 

@@ -4,8 +4,6 @@
 
 #include <sys/wait.h>
 
-#include <iostream>
-
 namespace SOS {
     namespace SMT {
         Solver::~Solver()

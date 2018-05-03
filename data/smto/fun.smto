@@ -9,6 +9,7 @@
 #define HALF_COEF $(/ #COEF 2)
 
 #define T 0.25
+(define-ode-step $(/ #T 10))
 
 #define T_MIN()    0
 #define T_MAX()   30
@@ -51,7 +52,7 @@
 #enddef
 
 #define INIT_HIGH() #HALF_COEF
-#define INIT_LOW() -###HALF_COEF
+#define INIT_LOW() -#HALF_COEF
 
 #define INIT_Y() #INIT_INTERVAL(y_0 #INIT_LOW #INIT_HIGH 0.25)
 
@@ -69,13 +70,13 @@
 
 ;(define-dt y dy_inc () y)
 ;(define-dt y dy_dec () (- y))
-(define-dt y dy_inc () (* t #HALF_COEF))
-(define-dt y dy_dec () (- (* t #HALF_COEF)))
+;;(define-dt y dy_inc () (* t #HALF_COEF))
+;;(define-dt y dy_dec () (- (* t #HALF_COEF)))
 ;#define T_COEF $(/ 0.33 #T)
 ;(define-dt y dy_inc () (* t #T_COEF))
 ;(define-dt y dy_dec () (- (* t #T_COEF)))
-;(define-dt y dy_inc () #COEF)
-;(define-dt y dy_dec () (- #COEF))
+(define-dt y dy_inc () #COEF)
+(define-dt y dy_dec () (- #COEF))
 
 ;;; Invariants
 

@@ -252,12 +252,14 @@ namespace SOS {
 
     void Expr::set_pos(const_iterator it)
     {
-        rpos() = to_iterator(it);
+        set_pos(to_iterator(it));
     }
 
     void Expr::set_pos(iterator it)
     {
         rpos() = it;
+        _valid_pos = true;
+        maybe_invalidate_pos();
     }
 
     Expr::iterator Expr::to_iterator(const_iterator it)
@@ -268,7 +270,7 @@ namespace SOS {
     bool Expr::valid_pos() const
     {
         if (!_valid_pos) return false;
-        if (cpos() == end()) invalidate_pos();
+        maybe_invalidate_pos();
         return _valid_pos;
     }
 
@@ -281,13 +283,6 @@ namespace SOS {
     void Expr::reset_pos()
     {
         set_pos(begin());
-        _valid_pos = true;
-    }
-
-    void Expr::reset_pos_to_valid()
-    {
-        reset_pos();
-        valid_pos();
     }
 
     void Expr::maybe_reset_pos()
@@ -300,6 +295,11 @@ namespace SOS {
     void Expr::invalidate_pos() const
     {
         _valid_pos = false;
+    }
+
+    void Expr::maybe_invalidate_pos() const
+    {
+        if (cpos() == end()) invalidate_pos();
     }
 
     Expr& Expr::next()

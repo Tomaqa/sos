@@ -91,7 +91,7 @@
 #define INIT_T  ()  (= t_0 #T_MIN)
 #define INIT_TAU()  (= tau_0_0 #T_MIN)
 
-#define INIT_X()  #INIT_INTERVAL(x_0_0 (- 0.2) 0.1 0.025)
+#define INIT_X()  #INIT_INTERVAL(x_0_0 -0.2 0.1 0.025)
 #define INIT_Y()  (= y_0_0 0)
 #define INIT_Z()  (= z_0_0 0)
 
@@ -107,16 +107,16 @@
 
 ;;; Derivatives definition
 
-(define-dt x dx    (tau) (* (- #AX) (sin (* #OM tau)) ) )
+(define-dt x dx    (tau) (* -#AX (sin (* #OM tau)) ) )
 
-(define-dt y dy    (om1 om2 tau) (* (- #AY) (sin(* tau (+ 1 om1)))
+(define-dt y dy    (om1 om2 tau) (* -#AY (sin(* tau (+ 1 om1)))
                                          2  (sin om2) ))
 
-(define-dt z dz_a  (om1 om2 tau) (* (- #AZ) (sin(* tau (+ 1 om2)))
+(define-dt z dz_a  (om1 om2 tau) (* -#AZ (sin(* tau (+ 1 om2)))
                                          2  (cos om1) ))
-(define-dt z dz_b  (om1 om2 tau) (* (- #AZ) (sin(* tau (- 2 om2)))
+(define-dt z dz_b  (om1 om2 tau) (* -#AZ (sin(* tau (- 2 om2)))
                                          2  (sin om1) ))
-(define-dt z dz_c  (om1 om2 tau) (* (- #AZ) (sin(* tau (+ 2 om2)))
+(define-dt z dz_c  (om1 om2 tau) (* -#AZ (sin(* tau (+ 2 om2)))
                                          2  (cos om1) ))
 
 (define-dt om1 dom1_a () (* (- om1) 0.5) )
@@ -150,8 +150,8 @@
          (or (= dom2_ dom2))
          (or (= dtau_ dtau))
          (not (and z_a_ (not om1_a_)))
-         (>= om1_0 (- #PI)) (>= om1_t (- #PI))
-         (>= om2_0 (- #PI)) (>= om2_t (- #PI))
+         (>= om1_0 -#PI) (>= om1_t -#PI)
+         (>= om2_0 -#PI) (>= om2_t -#PI)
 ))
 
 #def INVARIANTS
