@@ -167,25 +167,77 @@
                                       %včetně současných akademických titulů
 \author{Tomáš Kolárik} %jméno autora bez akademických titulů
 \supervisor{doc. Dipl.-Ing. Dr. techn. Stefan Ratschan}
-\acknowledgements{Děkuji zejména celé své rodině
+\acknowledgements{Děkuji celé své rodině
 za~veškerou podporu a motivaci během celého studia.
 Dále panu vedoucímu doc. Dipl.-Ing. Dr. techn. Stefanu Ratschanovi
-za trpělivou a ochotnou asistenci s~touto prací.}
+za~profesionální a velmi ochotnou asistenci s~touto prací.}
 \abstractCS{
 % Cíl
+Práce se zabývá realizací řešiče
+pro~účely formální verifikace modelů hybridních systémů.
+Řešič ovládá podmnožiny predikátové logiky
+(\acr{smt}) a diferenciální rovnice (\acr{ode})
+a definuje jejich společný vstupní jazyk.
+
 % Postupy, metody
+Podobné řešiče již existují
+(např. dReal),
+ale jsou v~praxi těžko použitelné,
+jelikož používají pro~řešení \acr{ode}
+intervalovou aritmetiku,
+která garantuje maximální výši chyby,
+ale je pomalá.
+Cílem bylo na~straně \acr{ode} řešiče
+použít klasických numerických metod,
+které neposkytují garanci chyby
+a mohou být méně přesné,
+ale jsou rychlejší.
+
 % Výsledky, užitek
+Výsledkem práce je prototyp nástroje
+nazvaný \acr{sos} (\acrl{sos}),
+použitelný jako knihovna nebo aplikace,
+který umožňuje flexibilní
+propojení \acr{smt} a \acr{ode}
+řešiče, obou nezávislých od~ostatních komponent.
+\acr{smt} řešič může být libovolný,
+jenž je inkrementální
+a přijímá textový vstup
+ve~formátu \acr{smt}-LIB standardu.
+\acr{ode} řešič smí být jakýkoli
+řešící \acr{ivp},
+ale vyžaduje implementaci odvozené třídy.
+Pro~některé podmnožiny modelů hybridních systémů,
+zejména těch orientovaných na~čas,
+je ověření splnitelnosti vstupu několikanásobně
+rychlejší než v~případě řešiče dReal.
+
 % Závěr
+Tím bylo dosaženo cíle
+realizace efektivnějšího
+a v~praxi použitelnějšího
+přístupu k~formální verifikaci
+hybridních systémů s~diferenciálními rovnicemi,
+a to přes to, že se jedná pouze o~prototyp,
+který dosud obsahuje řadu nedostatků.
+Práce by měla sloužit jako zdroj inspirace
+pro~vývojáře průmyslových nástrojů,
+anebo by také mohla být nadále vyvíjena
+a zefektivňována
+v~rámci stávajícího projektu
+s~otevřenými zdrojovými kódy.
 }
 \abstractEN{
 
 }
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{2} %volba Prohlášení (číslo 1--6)
-\keywordsCS{\acr{sat}, \acr{smt}, numerické metody pro~\acr{ode},
-analýza hybridních systémů}
-\keywordsEN{\acr{sat}, \acr{smt}, numerical methods for~\acr{ode}s,
-hybrid systems analysis}
+\keywordsCS{\acr{sat}, \acr{smt}, \acr{smt}-LIB,
+numerické metody pro~\acr{ode},
+analýza hybridních systémů, formální verifikace}
+\keywordsEN{\acr{sat}, \acr{smt}, \acr{smt}-LIB,
+numerical methods for~\acr{ode}s,
+hybrid systems analysis, formal verification}
 \website{https://github.com/Tomaqa/sos} %volitelná URL práce,
 %% objeví se v tiráži~---~úplně odstraňte, nemáte-li URL práce
 
@@ -197,41 +249,48 @@ hybrid systems analysis}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Mon 03 Jul 2017 12:10:52 AM CEST
+% Thu 03 May 2018 11:16:40 PM CEST
 \begin{introduction}\label{ch:intro}
 % Úvod
-Většina lidí si z~informačních technologií
+Většina veřejnosti, a nejen té laické,
+si z~informačních technologií
 jako první vybaví stolní počítače,
 notebooky či mobily.
 Dnešní mobilní telefony jsou specifické tím,
-že jejich funkce značně souvisí s~vnějšími podněty z~reálného světa:
+že jejich funkce souvisí s~vnějšími podněty z~reálného světa:
 komunikují přes různá bezdrátová připojení,
 pořizují zvukové i~obrazové záznamy,
 ovládají se dotykovou obrazovkou, atd.
 To všechno znamená interakci s~fyzikálním světem
 pomocí různých snímačů a akčních členů.
 Existuje však odvětví zařízení,
-které se od mobilů liší v~podstatě jen v~jediné,
-nicméně naprosto zásadní specifikaci.
+které se např. od~mobilů liší v~jedné
+naprosto zásadní specifikaci.
 Jsou to bezpečnostně kritické systémy reálného času,
 jejichž hlavní rozdíl tkví v~tom,
-že na~základě vnějších podnětů
-\hl{musí} být vykonány dané akce
-bezpodmínečně do~nějakého časového okamžiku.
+že dané akce, které závisí na~vnějších podnětech,
+\hl{musí} být bezpodmínečně vykonány
+v~rámci daného \hl{časového intervalu}.
 Jakmile se to nestane (ať už opožděně nebo vůbec),
 dojde k~nějaké katastrofě,
-jejíž následky budou velmi drahé
+jejíž následky budou drahé
 (finanční prostředky, ale i~lidské životy).
+Pokud se jedinci opozdí příjem mobilního hovoru,
+bude ho to jistě mrzet méně
+(alespoň to předpokládejme),
+než když se opozdí reakce na~sešlápnutí brzdového pedálu.
+Je tedy nutné zavést určité \hl{garance}.
 Typickým příkladem takových systémů
 jsou např. dopravní prostředky (letadla, tramvaje)
 a průmyslová zařízení (robotické stroje).
 S~rostoucími požadavky na~tyto systémy
-však závratně roste počet různých stavů,
+závratně roste počet různých stavů,
 ve~kterých se mohou nacházet,
 a které také chceme rozlišovat
 na~přípustné a nepřípustné.
 Jak lze ale uchopit takto komplexní problémy,
 které ještě musí splňovat časové požadavky?
+Jak specifikace garantovat?
 
 % Význam tématu pro společnost
 Takové systémy už lidstvo používá mnoho desítek let,
@@ -240,88 +299,160 @@ Je to způsobeno tím,
 že do~určité doby stačilo tyto systémy jen simulovat,
 tj. vygenerovat reprezentativní sadu vstupních dat
 a kontrolovat výstupy, zda odpovídají zadání.
+Tento postup se nazývá \name{funkční verifikace}.
 To naráží na~potíž,
 že u~bezpečnostně kritických aplikací je záhodno
 testovat téměř všechny možné přípustné vstupy.
 Vzhledem k~tomu,
 že množství kombinací různých vstupních dat
 roste exponenciálně s~počtem sledovaných specifikací,
-došli vývojáři do~bodu,
+došli někteří vývojáři do~bodu,
 kdy byl tento postup testování již příliš
 dlouhý, drahý a nespolehlivý.
-Tehdy se začalo přecházet na~jiný způsob
-ověření spolehlivosti systémů~---~pomocí
-jejich \hl{modelu}~---~matematického popisu,
+Tehdy se začal používat i~jiný způsob
+ověření spolehlivosti systémů,
+pomocí jejich \name{modelu}~---~matematického popisu,
 který zanedbává nedůležitá hlediska
 a soustředí se na~funkce systému.
 Pro~takový zjednodušený model systému
-potom lze formálně (zcela přesně) dokázat,
+potom lze formálně (tj.~exaktně, zcela přesně) dokázat,
 zda mohou či nemohou nastat zakázané stavy.
+Tento postup se nazývá \name{formální verifikace}.
+
+% Zaměření
 Ve~své práci se zabývám možnými nástroji
-sloužícími k~ověření takovýchto modelů systémů.
+sloužícími k~ověření takových modelů systémů.
+Jedním z~nejznámějších přístupů
+je aplikace problému splnitelnosti Booleovské formule:
+\name{\acr{sat}} (angl. \name{\acrl{sat}}),
+v~němž lze např. modelovat přechodové systémy.
+Tento problém je podrobně prozkoumán
+a v~praxi často používán.
+Přesto, že se jedná o~\acr{np}-úplný problém,
+jsou jeho dnešní řešiče velmi efektivní.
+Tyto řešiče jsou ale relativně limitující
+v~tom smyslu, že povolují pouze proměnné Booleovského typu.
+V~minulém desetiletí započal fenomén
+zobecněného problému,
+který operuje na~nějakých podmnožinách
+predikátové logiky: \name{\acr{smt}}
+(angl. \name{\acrl{smt}}).
+Vstupní formule tohoto problému mají
+větší vyjadřovací schopnost
+a jsou lépe uchopitelné pro~návrháře,
+jelikož zpravidla umožňují použití
+aritmetických rovnic a nerovnic.
+Takovými formulemi lze popsat velké množství modelů systémů,
+přesto jsou však v~některých případech stále nedostatečné.
+A těchto případů rozhodně není málo:
+jedná se právě o~případy, kdy je nutné
+do~modelu zahrnout fyzikální, chemické aj.
+jevy z~reálného světa,
+pro~které je zcela přirozené,
+že jsou popsány \name{obyčejnými diferenciálními rovnicemi}
+(\name{\acr{ode}}, angl. \name{\acrl{ode}}),
+které v~obecném případě problém \acr{smt} neovládá.
+Systémy, které jeví jak diskrétní rysy
+(např. Booleovské proměnné),
+tak spojité rysy (např. \acr{ode}),
+se nazývají \name{hybridní}.
+Jedním z~cílů této práce je odpovědět na otázku,
+jak tyto problémy efektivně skloubit dohromady,
+a jak popsat a ověřit modely hybridních systémů.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Mon 03 Jul 2017 12:10:25 AM CEST
+% Thu 03 May 2018 10:43:19 PM CEST
 \begin{section}{Cíl práce}\label{s:intro:goal}
-% Zaměření
-Systémy jsou typicky modelovány \hl{přechodovým systémem},
-který popisuje možné stavy systému a přechody mezi nimi
-(stavový prostor).
-Jednoduché systémy lze modelovat diskrétním časem a libovolnými stavy.
-K~jejich analýze lze použít \acr{sat} řešič
-rozšířený o~rovnice a nerovnice
-(aritmetická omezení)~---~\name{\acrf{smt}}~\cit{smt}.
-Problém nastává, pokud chceme modelovat čas spojitě,
-což je pro~fyzikální systémy zcela přirozené.
-Pak je nutné sáhnout po~diferenciálních rovnicích,
-neboť je přechod ve~spojitých veličinách chápán
-jako změna~---~derivace.
-Zadání je omezeno na~obyčejné diferenciální rovnice
-(obsahují funkce pouze jedné nezávislé proměnné)~---~\name{\acrf{ode}}.
 \acr{smt} řešiče a řešiče diferenciálních rovnic
-již existují, ale často jen separátně.
-Cílem mé práce bylo vhodně zvolit
-oba jednotlivé existující řešiče a propojit je.
-To souviselo také s~nutností definovat
-společný vstupní jazyk a snažit se držet standardů.
+již existují, ale většinou jen separátně.
+Existují i~řešiče, které již obě domény kombinují,
+nicméně zatím se jeví jako těžko uplatnitelné v~praxi,
+protože jsou příliš pomalé.
+Příčinou je to, že kladou důraz na~přesnost
+a umožňují garanci maximální chyby.
+Tento přístup se týká strany
+\acr{ode} řešiče.
+
+Mým úkolem bylo realizovat
+odlišný přístup v~řešení \acr{ode}
+pomocí \name{klasických numerických metod},
+které neposkytují exaktní garance chyb
+a mohou být méně přesné.
+Od~tohoto postupu se však očekává,
+že bude mnohem rychlejší,
+a tedy i~použitelný v~praxi.
+Vzhledem ke~komplexnosti problému
+se nemá jednat o~koncový produkt,
+nýbrž jen o~prototyp.
+I~ten by však měl
+pro~některé praktické úlohy
+vykazovat vyšší výkon,
+než stávající řešiče.
+
+Předpokládaným postupem práce
+bylo vhodně zvolit
+oba jednotlivé existující řešiče,
+definovat společný vstupní jazyk,
+implementovat řešiče či jejich adaptéry
+a propojit je.
+Na~závěr pak ve~výsledném nástroji
+experimentovat s~různými modely hybridních systémů
+a výsledky porovnat s~některým stávajícím řešičem.
 
 % Motivace
 Mou osobní motivací bylo zejména mé zalíbení
 v~\acr{sat} řešičích, se kterými jsem v~minulosti reálně pracoval,
-a také v~modelování systémů přechodovými systémy.
-Není náhodou, že se tyto premisy shodují přesně se zadáním.
+a obecně ve~formální verifikaci.
 
 % Struktura a návaznost
-\cmt{Struktura a návaznost \dots}
+Text této práce postupuje od~teoretických podkladů
+přes rozbor možných řešení formulovaných problémů,
+návrh a následně realizaci zvoleného řešení,
+a končí experimentální částí,
+která se zabývá konkrétními příklady modelů,
+měřením výkonnosti a srovnáním nástroje se~stávajícími řešiči.
+Zvídavému čtenáři by nemělo uniknout
+množství příloh obsahujících
+přídavné informace a příklady.
 \end{section} %%Cíl práce
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Thu 03 May 2018 11:16:31 PM CEST
 \begin{section}{Požadavky zadání}\label{s:intro:req}
 Zadání požaduje propojení existujících \acr{smt} a \acr{ode} řešičů
 a s~tím související úkoly:
 \begin{itemize}
-\item najít \acr{ode} řešič používající klasické numerické metody,
-\item srovnat výsledný program s~existujícími
-   \acr{smt}+\acr{ode} řešiči a dosáhnout pokud možno větší výkonnosti,
+\item provést potřebnou rešerši (viz.~dále),
 \item navrhnout společné rozhraní
-   a vstupní jazyk pro~\acr{smt}+\acr{ode}
+   a vstupní jazyk pro~\acr{smt} i~\acr{ode}
    na~základě \name{\acr{smt}-LIB} standardu~\cit{smtlib},
-\item implementovat návrh.
+\item připojit \acr{ode} řešič používající klasické numerické metody,
+\item navrhnout řídící algoritmus,
+\item implementovat návrh,
+\item srovnat výsledný nástroj s~existujícími hybridními
+   řešiči a dosáhnout pokud možno větší výkonnosti.
 \end{itemize}
 \end{section} %%Požadavky zadání
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{section}{Rešerše}\label{s:intro:search}
-Nejprve bylo nutné se seznámit
-s~již existujícími nástroji, které:
+Zadání vyžadovalo seznámení se
+s~uvedenými problémy a existujícími nástroji:
 \begin{itemize}
-\item řeší jak \acr{smt}, tak \acr{ode},
-   ale používají pomalou intervalovou aritmetiku;
-\item řeší jen \acr{smt},
-\item řeší jen \acr{ode} pomocí klasických numerických metod.
+\item teoretické podklady problémů \acr{sat}, \acr{smt} a \acr{ode},
+\item obecné možnosti řešení problémů,
+\item rešerše samostatných \acr{smt} řešičů
+   a analýza jejich použití,
+\item studování \acr{smt}-LIB standardu,
+\item rešerše \acr{ode} řešičů, které používají klasické numerické metody,
+   a analýza jejich použití,
+\item seznámení se se~stávajícími hybridními řešiči,
+   které ale používají pomalou intervalovou aritmetiku,
+\item inspirovat se zejména těmito řešiči
+   při~návrhu řídícího algoritmu.
 \end{itemize}
 \end{section} %%Rešerše
 
@@ -4908,6 +5039,9 @@ pro~řešení \acr{ode} (třída \id{ODE::\-Odeint}).
    např. podle koncové hodnoty funkce.
 \item Implementace efektivnějšího algoritmu
    redukujícího počet operací ověření splnitelnosti vstupu.
+\item Implementace výstupu \id{unknown} pro~případy,
+   kdy výpočet pravděpodobně nikdy neskončí
+   (např. pro~intervalové počáteční podmínky).
 \end{itemize}
 \end{section} %%Seznam dalších úkolů
 
