@@ -83,6 +83,51 @@ namespace SOS {
     }
 
     template <typename OSolver>
+    void Solver<OSolver>::print_results()
+    {
+        const Time_const_ids& init_time_ids =
+            SMT::cconst_ids_row_time_consts(cconst_ids_row(0, 0));
+        const Time_const_ids& end_time_ids =
+            SMT::cconst_ids_row_time_consts(cconst_ids_row(0, csteps()-1));
+        const Time_const_value init_t =
+            smt_solver().get_step_time_values(init_time_ids).first;
+        const Time_const_value end_t =
+            smt_solver().get_step_time_values(end_time_ids).first;
+
+        string str;
+        const int odes_count = codes().size();
+        const int entries_count = cconst_entries_count();
+        for (int e = 0; e < entries_count; e++) {
+            for (int o = 0; o < odes_count; o++) {
+                const Const_ids_entry& init_entry =
+                    SMT::cconst_ids_row_entries(cconst_ids_row(o, 0))[e];
+                const Const_ids_entry& end_entry =
+                    SMT::cconst_ids_row_entries(
+                        cconst_ids_row(o, csteps()-1)
+                    )[e];
+                const Init_const_id& init_const =
+                    SMT::cconst_ids_entry_init_const(init_entry);
+                const Init_const_id& end_const =
+                    SMT::cconst_ids_entry_init_const(end_entry);
+                const Init_const_value init_val =
+                    SMT::cconst_values_entry_init_value(
+                        smt_solver().get_step_entry_values(init_entry)
+                    );
+                const Init_const_value end_val =
+                    SMT::cconst_values_entry_init_value(
+                        smt_solver().get_step_entry_values(end_entry)
+                    );
+
+                cout << init_const << "(" << init_t << ") = " << init_val
+                     << "  -->  "
+                     << end_const << "(" << end_t << ") = " << end_val
+                     << endl;
+            }
+            if (e < entries_count-1) cout << endl;
+        }
+    }
+
+    template <typename OSolver>
     void Solver<OSolver>::set_traject_ofile(string ofile)
     {
         _traj_ofs = ofstream(move(ofile));

@@ -28,9 +28,20 @@ namespace SOS {
 
         if (sat == Sat::unsat) return;
 
-        if (store_traj) {
+        if (!_quiet) {
             cout << endl;
-            system(("tools/plot_traject.sh "s + _ofile).c_str());
+            solver.print_results();
+        }
+
+        if (store_traj) {
+            string redirect;
+            if (!_quiet) {
+                cout << endl;
+            }
+            else {
+                redirect = " &>/dev/null";
+            }
+            system(("tools/plot_traject.sh "s + _ofile + redirect).c_str());
         }
     }
 

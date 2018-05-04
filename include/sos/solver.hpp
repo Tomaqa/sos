@@ -31,6 +31,8 @@ namespace SOS {
         bool is_verbose() const                           { return _verbose; }
         bool is_quiet() const                               { return _quiet; }
 
+        void print_results();
+
         void set_traject_ofile(string ofile);
 
         Sat solve();
