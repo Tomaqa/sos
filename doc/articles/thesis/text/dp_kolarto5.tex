@@ -171,6 +171,8 @@
 za~veškerou podporu a motivaci během celého studia.
 Dále panu vedoucímu doc. Dipl.-Ing. Dr. techn. Stefanu Ratschanovi
 za~profesionální a velmi ochotnou asistenci s~touto prací.}
+
+% Fri 04 May 2018 11:40:02 AM CEST
 \abstractCS{
 % Cíl
 Práce se zabývá realizací řešiče
@@ -205,8 +207,10 @@ jenž je inkrementální
 a přijímá textový vstup
 ve~formátu \acr{smt}-LIB standardu.
 \acr{ode} řešič smí být jakýkoli
-řešící \acr{ivp},
+řešící \acr{ivp} po~předem danou dobu,
 ale vyžaduje implementaci odvozené třídy.
+Použit byl řešič odeint,
+a z~\acr{smt} řešičů to byly \acr{cvc}4 a z3.
 Pro~některé podmnožiny modelů hybridních systémů,
 zejména těch orientovaných na~čas,
 je ověření splnitelnosti vstupu několikanásobně
@@ -3392,7 +3396,7 @@ protože \acr{smt} řešič pracuje s~exaktními hodnotami.
 
 %%%%%%%
 
-% Fri 27 Apr 2018 10:09:24 PM CEST
+% Fri 04 May 2018 11:35:20 AM CEST
 \begin{subsubsection}{\acr{ode} řešič}\label{sss:design:arch:comp:ode}
 \acr{ode} řešič postačuje použít jako samostatnou komponentu,
 jelikož má fungovat jako
@@ -3445,9 +3449,9 @@ měla by být jeho implementace
 uvnitř odvozené třídy snadná,
 a navíc by takové řešení mělo být efektivní.
 
-Po~řešiči je (prozatím) vyžadována
+Po~řešiči je však obecně (prozatím) vyžadována
 pouze integrace na~základě
-exaktních počátečních podmínek
+exaktních počátečních podmínek (tj.~\acr{ivp})
 a koncových podmínek
 určených předem danou délkou integrace,
 bez~řešení jakýchkoli invariant.
@@ -3599,7 +3603,7 @@ může být ve~výrazu obsaženo více.
 
 %%%%%%%
 
-% Tue 24 Apr 2018 02:11:09 PM CEST
+% Fri 04 May 2018 11:39:03 AM CEST
 \begin{subsubsection}{Abstraktní řešič}\label{sss:design:arch:ode:solver}
 Řešič bude implementován abstraktní třídou tak,
 aby umožňoval snadné odvození na~konkrétní \acr{ode} řešič
@@ -3607,6 +3611,9 @@ s~implementací různých metod integrace funkcí.
 Odvozené třídy by měly řešit pouze implementaci konkrétních metod,
 ale veřejné i neveřejné rozhraní by měla řešit abstraktní třída,
 včetně stanovení použitých datových struktur.
+Odvozenou třídu by mělo být možné
+implementovat pro~jakýkoli \acr{ode} řešič,
+který řeší \acr{ivp} s~koncovými podmínkami závisejících na~čase.
 
 Řešič bude umožňovat inicializaci
 specifikací diferenciálních rovnic
@@ -5054,7 +5061,60 @@ pro~řešení \acr{ode} (třída \id{ODE::\-Odeint}).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Fri 04 May 2018 11:16:19 AM CEST
 \begin{conclusion}\label{ch:outro}
+% Úvod
+Cílem práce bylo aplikovat odlišný přístup
+v~analýze systémů modelovaných
+v~\acr{smt} a \acr{ode},
+který klade při~integracích větší
+důraz na~rychlost, než na přesnost,
+a tím byl lépe použitelný v~praxi.
+
+% Rešerše
+Stávající řešiče používají při~řešení \acr{ode}
+intervalovou aritmetiku, která poskytuje
+garanci maximální chyby,
+ale je pomalá.
+Separátně jsem zkoumal \acr{smt} řešiče
+a \acr{ode} řešiče, které používají
+klasické numerické metody,
+a vybíral vhodnou kombinaci
+pro~nový nástroj.
+
+% Splnění cílů
+Výsledky práce splňují předsevzaté cíle:
+výsledný prototyp řešiče je v~některých
+praktických úlohách násobně rychlejší,
+než stávající řešič dReal.
+Byl navržen a realizován společný vstupní jazyk,
+ve~kterém lze vstup parametrizovat pomocí maker,
+a není problém např. vytvořit kaskádní kompozici systémů.
+
+% Další zásluhy
+Navíc je možné flexibilně
+nasazovat různé \acr{smt} a \acr{ode} řešiče.
+Požadavky na~rozhraní \acr{smt} řešiče
+jsou minimální: stačí, aby byl inkrementální
+a byl konformní se~standardem \acr{smt}-LIB,
+pak lze použít jako samostatný proces.
+U~\acr{ode} řešiče stačí, aby řešil \acr{ivp}
+a koncové podmínky závisely jen na~čase,
+ale vyžaduje implementaci
+odvozené třídy a dodržení programového rozhraní.
+Aktuálně je používán řešič odeint.
+Z~\acr{smt} řešičů byly testovány
+\acr{cvc}4 a z3.
+
+% Výhled
+Prototyp zatím obsahuje řadu nedostatků a zjednodušení.
+Může posloužit jako inspirace pro~budoucí vývojáře
+průmyslových nástrojů.
+Druhou, ještě více uspokojivou možností
+by bylo pokračování ve~vývoji stávajícího projektu
+s~otevřenými zdrojovými kódy,
+ať už samostatně či v~týmu,
+směrem ke~konečnému produktu použitelném v~praxi.
 \end{conclusion}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
