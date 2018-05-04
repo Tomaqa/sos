@@ -8,6 +8,8 @@ namespace SOS {
     class Parser::Run : public Util::Run {
     public:
         using Util::Run::Run;
+
+        virtual string usage() const override;
     protected:
         virtual void do_stuff() override;
 

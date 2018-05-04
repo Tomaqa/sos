@@ -2604,7 +2604,7 @@ Příklady:
 \end{center}
 
 Identifikátory \id{<fun\_\-name>}
-je nutné používat výhradně uvnitř \id{int-ode} příkazů.
+je nutné používat výhradně uvnitř \id{int\--ode} příkazů.
 Identifikátory \id{<dt\_\-name>} jsou zavedeny jako konstanty druhu \id{Dt},
 které lze používat uvnitř příkazů \id{assert}
 pro~účely propojení konstant druhu \id{Dt} se~stavem systému.
@@ -2623,7 +2623,7 @@ použít funkci některé \id{ode}
 jako \hl{konstantní} vstup pro jinou \id{ode},
 zvolte pro~tento argument \id{<arg>}
 název odlišný od~\id{<fun\_\-name>};
-vstupní konstanty pro~příkaz \id{int-ode} zůstávají stejné.}, př.:
+vstupní konstanty pro~příkaz \id{int\--ode} zůstávají stejné.}, př.:
 \begin{center}
 \id{(define-dt x dx (y) (+ x y))}\\
 \id{(define-dt y dy (x) (- x y))}
@@ -2632,7 +2632,7 @@ vstupní konstanty pro~příkaz \id{int-ode} zůstávají stejné.}, př.:
 
 %%%
 
-% Sat 28 Apr 2018 06:18:39 PM CEST
+% Fri 04 May 2018 07:54:54 PM CEST
 \begin{paragraph}{\id{int-ode}}\label{p:design:spec:ilang:ode:int}
 obaluje výraz integrace neznámé funkce v~konkrétní fázi
 a dosazuje do~\id{ode} hodnoty či konstanty.
@@ -2682,6 +2682,15 @@ Příklady:
 \id{(int-ode z dz\_\-1 (z\_\-1 t\_\-1 t\_\-2) (k))} \\
 \id{(int-ode z dz\_\-2 (z\_\-1 t\_\-1 t\_\-3) (k))}
 \end{center}
+
+Je možné pro~stejnou \acr{ode}
+a pro~stejný pár konstant nezávislé proměnné \id{t}
+použít i~více příkazů \id{int\--ode}
+s~odlišnými argumenty:
+\begin{Verbatim}[samepage=true]
+(int-ode x dx.0_0 (x.0_0 t_0 t_1) ())
+(int-ode x dx.1_0 (x.1_0 t_0 t_1) ())
+\end{Verbatim}
 \end{paragraph} %%\id{int-ode}
 
 %%%
@@ -3175,8 +3184,6 @@ přidáním znaku do~tokenu s~\id{\$}:
 
 
 %%%
-
-\clearpage
 
 % Fri 27 Apr 2018 05:18:55 PM CEST
 \begin{paragraph}{Příklady obecného použití maker:}
@@ -5001,19 +5008,19 @@ byla aplikována následující zjednodušení:
    To prakticky znamená to, že všechny příkazy \id{int\--ode}
    musí používat pouze jednu společnou sadu konstant
    nezávislé proměnné \id{t}.
-\item Všechny odlišné \acr{ode} jsou vkládány
-   do~jediné společné soustavy;
-   vícenásobný výskyt \acr{ode} v~rámci fází
-   je považován za~nový nezávislý systém
-   \cmt{!!! tohle je asi blbě ...
-   Kaskádní kompozice asi nebude fungovat
-   - bude kolize na klíči ODE v ODE řešiči.
-   Aby se počítaly synchronně, musí klíč odpovídat názvu ODE,
-   takže jen vložení jiné vstupní konstanty nepomůže.
-   Mělo by ale fungovat vícenásobná definice více ODE
-   s odlišnými názvy - ale se stejným tělem ..}.
-   Řešič \id{ODE::\-Solver} je tedy
-   vždy používán ve~sjednoceném stavu.
+\item Podle pořadí výskytu se také sestavují soustavy \acr{ode}:
+   pro~každý příkaz \id{int\--ode}
+   se v~rámci dané \acr{ode} a fáze
+   vloží soubor vstupních identifikátorů na~poslední pozici řádku%
+   \footnote{Ve~struktuře \id{Const\_\-ids\_\-rows}
+   v~řádku s~klíčem \id{Time\_\-const\_\-ids}
+   na~konec pole \id{Const\_\-ids\_\-entries},
+   viz.~\rf{p:impl:smt:consts}.};
+   soustavy \acr{ode} se pak berou podle shodných pozic
+   v~těchto řádcích. Soustavy \acr{ode}
+   jsou integrovány sjednoceně,
+   ale navzájem odděleně
+   (více je uvedeno v~samostatné části).
 \end{itemize}
 
 Výpočet se provádí funkcí \id{solve},
@@ -5049,20 +5056,58 @@ a pracuje s~rovnicemi jako s~nezávislými.
 
 %%%
 
-\cmt{řešení ode - jak je to s entries? viz. hore}
+% Fri 04 May 2018 10:09:41 PM CEST
+\begin{paragraph}{Řešení dílčích \acr{ode}.}
+Řešič \id{ODE::\-Solver} je vždy
+používán ve~sjednoceném stavu
+v~rámci každé soustavy \acr{ode}.
+Soustavy nemohou být navzájem závislé
+jinak, než jako konstantní vstupy%
+\footnote{Pokud je nutné synchronně integrovat více soustav současně,
+je nutné provést duplikaci definic \acr{ode}
+(příkazy \id{define\--dt})
+s~odlišnými názvy jejich klíčů
+(název identifikátoru \acr{ode},
+případně i~parametrů).}.
+
+Soustavy často reprezentují nějakou kompozici více systémů,
+které mají shodné specifikace rovnic,
+ale různé vstupní a výstupní konstanty.
+Vznikají pouze v~případech,
+kdy je příkaz \id{int\--ode} použit
+vícekrát pro~stejný identifikátor \acr{ode}
+a současně stejnou fázi,
+tj.~dvojici identifikátorů nezávislé proměnné \id{t}.
+
+Soustavy \acr{ode} nejsou uloženy souvisle,
+neboť prvním kritériem rozdělení
+těchto dat ve~zpracování vstupu
+je identifikátor \acr{ode}, poté fáze a až následně soustava,
+tj.~pořadí v~řádku.
+Ve~vnější smyčce se iteruje přes soustavy
+a ve~vnitřní přes dílčí \acr{ode}.
+Tím se pro~každou soustavu vypočte výsledný vektor integrace
+(výstupní hodnoty všech \acr{ode} dané soustavy).
+
+\acr{smt} řešič ale přijímá hodnoty
+organizované nejprve podle \acr{ode} a poté podle soustav.
+Je tedy ještě nutné provést transpozici matice výsledků.
+\end{paragraph} %%Řešení dílčích \acr{ode}.
+
+%%%
 
 \bigskip
 
 Celý nástroj lze použít jako knihovnu,
 nebo jako aplikaci.
 Aktuální podoba aplikace je umístěna v~souboru
-\binFn{sos\_\-odeint}, která používá odeint
-pro~řešení \acr{ode} (třída \id{ODE::\-Odeint}).
+\binFn{sos\_\-odeint}, která pro~řešení \acr{ode}
+používá odeint (třída \id{ODE::\-Odeint}).
 \end{section} %%Realizace řídící komponenty
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Thu 03 May 2018 06:24:34 PM CEST
+% Fri 04 May 2018 10:42:23 PM CEST
 \begin{section}{Seznam dalších úkolů}\label{s:impl:todo}
 \begin{itemize}
 \item Podrobnější dokumentace zdrojových kódů.
@@ -5085,6 +5130,15 @@ pro~řešení \acr{ode} (třída \id{ODE::\-Odeint}).
 \item Implementace výstupu \id{unknown} pro~případy,
    kdy výpočet pravděpodobně nikdy neskončí
    (např. pro~intervalové počáteční podmínky).
+\item V~případě poptávky umožnit i~synchronní
+   vzájemnou závislost soustav \acr{ode}
+   bez~nutnosti redundantních
+   specifikací diferenciálních rovnic,
+   které se liší jen v~identifikátoru \acr{ode}%
+   \footnote{Možným návrhem budiž zavedení příkazu
+   \id{declare\--ode} se zavedením identifikátoru \acr{ode}
+   a přiřazením identifikátorů variant derivací,
+   které by se mohly objevovat vícekrát napříč těmito příkazy.}.
 \end{itemize}
 \end{section} %%Seznam dalších úkolů
 

@@ -25,6 +25,12 @@ namespace SOS {
         Solver(istream& is);
         Solver(string input);
 
+        void be_verbose()                                 { _verbose = true; }
+        void be_quiet()                                     { _quiet = true; }
+
+        bool is_verbose() const                           { return _verbose; }
+        bool is_quiet() const                               { return _quiet; }
+
         void set_traject_ofile(string ofile);
 
         Sat solve();
@@ -93,6 +99,9 @@ namespace SOS {
 
         Const_values_rows _odes_row_values;
         Ode_results _ode_results;
+
+        bool _verbose{false};
+        bool _quiet{false};
 
         ofstream _traj_ofs;
     };

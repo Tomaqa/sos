@@ -27,13 +27,19 @@ namespace SOS {
             set_ostream_ptr();
         }
 
+        string Run::usage_row(char opt, string desc)
+        {
+            return "\n    -"s + opt
+                   + "    " + move(desc);
+        }
+
         string Run::usage() const
         {
             return "USAGE: "s + _argv[0] + " [options] [<input_file>]\n"
                    + "Options:"
-                   + "\n    -h    Displays this message and exits"
-                   + "\n    -i    Sets input file name"
-                   + "\n    -o    Sets output file name";
+                   + usage_row('h', "Displays this message and exits")
+                   + usage_row('i', "Sets input file name")
+                   + usage_row('o', "Sets output file name");
         }
 
         void Run::getopts()

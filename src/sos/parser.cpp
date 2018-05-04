@@ -17,6 +17,8 @@ namespace SOS {
     Parser::Parser(Expr expr, bool preprocess_only)
         : _expr(move(expr))
     {
+        expect(!_expr.empty(),
+               "Empty input is not allowed.");
         if (preprocess_only) return;
         parse();
     }

@@ -42,7 +42,7 @@ namespace SOS {
     {
         string str("");
         int size_ = istream_remain_size(is);
-        if (size_ <= 0) return str;
+        if (size_ < 0) return str;
         str.reserve(size_*1.2);
         char c;
         string tmp;

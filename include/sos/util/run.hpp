@@ -22,10 +22,12 @@ namespace SOS {
 
             int run();
 
-            string usage() const;
+            virtual string usage() const;
         protected:
             using Argv = char* const*;
             template <typename T> using Stream_ptr = T*;
+
+            static string usage_row(char opt, string desc);
 
             virtual void init();
             virtual void do_stuff()                                        { }

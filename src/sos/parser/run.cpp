@@ -1,6 +1,12 @@
 #include "parser/run.hpp"
 
 namespace SOS {
+    string Parser::Run::usage() const
+    {
+        return Util::Run::usage()
+               + usage_row('E', "Will preprocess only");
+    }
+
     void Parser::Run::do_stuff()
     {
         Parser parser(*_is_ptr, _preprocess_only);

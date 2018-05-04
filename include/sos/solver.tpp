@@ -98,7 +98,9 @@ namespace SOS {
     template <typename OSolver>
     bool Solver<OSolver>::do_step(int step)
     {
-        cout << endl << "Step " << step << " ..." << endl;
+        if (is_verbose()) {
+            cout << endl << "Step " << step << " ..." << endl;
+        }
         const Sat sat = smt_check_sat();
         expect(sat != Sat::unknown, "unknown");
         if (sat == Sat::unsat) {
