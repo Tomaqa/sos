@@ -174,56 +174,66 @@ za~profesionální a velmi ochotnou asistenci s~touto prací.}
 
 % Fri 04 May 2018 11:40:02 AM CEST
 \abstractCS{
-% Cíl
-Práce se zabývá realizací řešiče
-pro~účely formální verifikace modelů hybridních systémů.
-Řešič ovládá podmnožiny predikátové logiky
-(\acr{smt}) a diferenciální rovnice (\acr{ode})
-a definuje jejich společný vstupní jazyk.
+% Úvod
+Na~mnoho dnešních systémů, např. vestavných,
+jsou kladeny vysoké nároky na~splnění specifikací,
+které často závisí na~jevech z~fyzikálního okolí.
+Pro~rozsáhlé systémy se osvědčuje
+použití formální verifikace jako nástroje
+pro~garanci splnění specifikací.
 
-% Postupy, metody
-Podobné řešiče již existují
+% Motivace
+Formální verifikace exaktně ověřuje
+matematický model systému;
+jedním z~používaných způsobů je např. \acr{sat}.
+Problém nastává, když potřebujeme
+v~modelu použít také diferenciální rovnice (\acr{ode}),
+které jsou pro~popis fyzikálních jevů zcela přirozené.
+
+% Cíl
+Práce se zabývá ověřením konceptu,
+který kombinuje \acr{sat} i~\acr{ode}
+a lze použít např. pro~formální verifikaci
+modelů vestavných systémů.
+Takové řešiče již existují
 (např. dReal),
 ale jsou v~praxi těžko použitelné,
-jelikož používají pro~řešení \acr{ode}
-intervalovou aritmetiku,
-která garantuje maximální výši chyby,
-ale je pomalá.
-Cílem bylo na~straně \acr{ode} řešiče
-použít klasických numerických metod,
-které neposkytují garanci chyby
-a mohou být méně přesné,
+jelikož při~řešení \acr{ode}
+více dbají na~přesnost,
+ale jsou pomalé.
+Cílem bylo pro~\acr{ode} použít
+klasických numerických metod,
+které mohou být méně přesné,
 ale jsou rychlejší.
 
-% Výsledky, užitek
-Výsledkem práce je prototyp nástroje
+% Postupy, metody
+Součástí práce je prototyp nástroje
 nazvaný \acr{sos} (\acrl{sos}),
-použitelný jako knihovna nebo aplikace,
-který umožňuje flexibilní
-propojení \acr{smt} a \acr{ode}
-řešiče, obou nezávislých od~ostatních komponent.
-\acr{smt} řešič může být libovolný,
-jenž je inkrementální
-a přijímá textový vstup
-ve~formátu \acr{smt}-LIB standardu.
-\acr{ode} řešič smí být jakýkoli
-řešící \acr{ivp} po~předem danou dobu,
-ale vyžaduje implementaci odvozené třídy.
+který kombinuje \acr{smt} (rozšíření problému \acr{sat})
+s~diferenciálními rovnicemi.
+Propojení \acr{smt} a \acr{ode} řešiče
+je flexibilní, jelikož jsou oba
+nezávislé od~ostatních komponent.
 Použit byl řešič odeint,
 a z~\acr{smt} řešičů to byly \acr{cvc}4 a z3.
-Pro~některé podmnožiny modelů hybridních systémů,
-zejména těch orientovaných na~čas,
-je ověření splnitelnosti vstupu několikanásobně
-rychlejší než v~případě řešiče dReal.
+
+% Výsledky, užitek
+Hlavním výstupem
+je potvrzení zvoleného konceptu,
+který používá klasické numerické metody
+pro~řešení \acr{ode}:
+pro~některé praktické úlohy
+je verifikace modelu naším způsobem několikanásobně
+rychlejší než v~případě řešiče dReal,
+aniž by byl znatelný rozdíl
+v~přesnosti výstupů.
 
 % Závěr
 Tím bylo dosaženo cíle
 realizace efektivnějšího
 a v~praxi použitelnějšího
 přístupu k~formální verifikaci
-hybridních systémů s~diferenciálními rovnicemi,
-a to přes to, že se jedná pouze o~prototyp,
-který dosud obsahuje řadu nedostatků.
+systémů s~diferenciálními rovnicemi.
 Práce by měla sloužit jako zdroj inspirace
 pro~vývojáře průmyslových nástrojů,
 anebo by také mohla být nadále vyvíjena
@@ -237,11 +247,15 @@ s~otevřenými zdrojovými kódy.
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{2} %volba Prohlášení (číslo 1--6)
 \keywordsCS{\acr{sat}, \acr{smt}, \acr{smt}-LIB,
-numerické metody pro~\acr{ode},
-analýza hybridních systémů, formální verifikace}
+numerické metody řešení~\acr{ode},
+formální verifikace,
+vestavné systémy,
+analýza modelů hybridních systémů}
 \keywordsEN{\acr{sat}, \acr{smt}, \acr{smt}-LIB,
 numerical methods for~\acr{ode}s,
-hybrid systems analysis, formal verification}
+formal verification,
+embedded systems,
+hybrid systems model analysis}
 \website{https://github.com/Tomaqa/sos} %volitelná URL práce,
 %% objeví se v tiráži~---~úplně odstraňte, nemáte-li URL práce
 
@@ -285,8 +299,9 @@ bude ho to jistě mrzet méně
 než když se opozdí reakce na~sešlápnutí brzdového pedálu.
 Je tedy nutné zavést určité \hl{garance}.
 Typickým příkladem takových systémů
-jsou např. dopravní prostředky (letadla, tramvaje)
-a průmyslová zařízení (robotické stroje).
+jsou např. dopravní prostředky (letadla, tramvaje),
+průmyslová zařízení (robotické stroje)
+a obecně \name{vestavné systémy}.
 S~rostoucími požadavky na~tyto systémy
 závratně roste počet různých stavů,
 ve~kterých se mohou nacházet,
@@ -329,7 +344,8 @@ sloužícími k~ověření takových modelů systémů.
 Jedním z~nejznámějších přístupů
 je aplikace problému splnitelnosti Booleovské formule:
 \name{\acr{sat}} (angl. \name{\acrl{sat}}),
-v~němž lze např. modelovat přechodové systémy.
+v~němž lze např. ověřit splnitelnost
+formule reprezentující chování vestavného systému.
 Tento problém je podrobně prozkoumán
 a v~praxi často používán.
 Přesto, že se jedná o~\acr{np}-úplný problém,
@@ -338,9 +354,9 @@ Tyto řešiče jsou ale relativně limitující
 v~tom smyslu, že povolují pouze proměnné Booleovského typu.
 V~minulém desetiletí započal fenomén
 zobecněného problému,
-který operuje na~nějakých podmnožinách
-predikátové logiky: \name{\acr{smt}}
-(angl. \name{\acrl{smt}}).
+který operuje i~s~dalšími typy proměnných,
+zejména aritmetických: \name{\acr{smt}}
+(angl. \name{\acrl{smt}})~\cit{smt-de_moura}\cit{smt}.
 Vstupní formule tohoto problému mají
 větší vyjadřovací schopnost
 a jsou lépe uchopitelné pro~návrháře,
@@ -354,71 +370,55 @@ do~modelu zahrnout fyzikální, chemické aj.
 jevy z~reálného světa,
 pro~které je zcela přirozené,
 že jsou popsány \name{obyčejnými diferenciálními rovnicemi}
-(\name{\acr{ode}}, angl. \name{\acrl{ode}}),
+(\name{\acr{ode}}, angl. \name{\acrl{ode}})~\cit{ode-lec}\cit{ode},
 které v~obecném případě problém \acr{smt} neovládá.
-Systémy, které jeví jak diskrétní rysy
-(např. Booleovské proměnné),
-tak spojité rysy (např. \acr{ode}),
-se nazývají \name{hybridní}.
-Jedním z~cílů této práce je odpovědět na otázku,
-jak tyto problémy efektivně skloubit dohromady,
-a jak popsat a ověřit modely hybridních systémů.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Thu 03 May 2018 10:43:19 PM CEST
+% Fri 04 May 2018 05:35:04 PM CEST
 \begin{section}{Cíl práce}\label{s:intro:goal}
-\acr{smt} řešiče a řešiče diferenciálních rovnic
+\acr{smt} řešiče~\cit{opensmt-art}\cit{cvc4-art}
+a řešiče diferenciálních rovnic~\cit{sundials-art}\cit{odeint-art}
 již existují, ale většinou jen separátně.
-Existují i~řešiče, které již obě domény kombinují,
+Existují i~řešiče, které již obě domény kombinují
+(např. dReal~\cit{dreal-smo-art}),
 nicméně zatím se jeví jako těžko uplatnitelné v~praxi,
 protože jsou příliš pomalé.
-Příčinou je to, že kladou důraz na~přesnost
+Příčinou je to, že používají intervalovou aritmetiku,
+čímž kladou důraz na~přesnost
 a umožňují garanci maximální chyby.
 Tento přístup se týká strany
 \acr{ode} řešiče.
 
-Mým úkolem bylo realizovat
+Mým úkolem bylo ověřit
 odlišný přístup v~řešení \acr{ode}
-pomocí \name{klasických numerických metod},
+pomocí \name{klasických numerických metod}~\cit{ode-nsolve-intro},
 které neposkytují exaktní garance chyb
 a mohou být méně přesné.
-Od~tohoto postupu se však očekává,
+Od~tohoto postupu se však očekávalo,
 že bude mnohem rychlejší,
 a tedy i~použitelný v~praxi.
-Vzhledem ke~komplexnosti problému
-se nemá jednat o~koncový produkt,
-nýbrž jen o~prototyp.
-I~ten by však měl
-pro~některé praktické úlohy
-vykazovat vyšší výkon,
-než stávající řešiče.
+Součástí práce je prototyp nástroje,
+který implementuje avizované postupy,
+pro~účely ověření zvoleného konceptu.
 
-Předpokládaným postupem práce
-bylo vhodně zvolit
-oba jednotlivé existující řešiče,
-definovat společný vstupní jazyk,
-implementovat řešiče či jejich adaptéry
-a propojit je.
-Na~závěr pak ve~výsledném nástroji
-experimentovat s~různými modely hybridních systémů
-a výsledky porovnat s~některým stávajícím řešičem.
+%%%
 
-% Motivace
-Mou osobní motivací bylo zejména mé zalíbení
-v~\acr{sat} řešičích, se kterými jsem v~minulosti reálně pracoval,
-a obecně ve~formální verifikaci.
+% Fri 04 May 2018 06:15:12 PM CEST
+\begin{paragraph}{Výsledky.}\label{p:intro:goal:results}
+Přestože je implementovaný nástroj pouhým prototypem,
+i~tak splnil očekávání
+a pro~některé praktické úlohy
+vykazuje násobně vyšší výkon,
+než stávající řešič dReal.
+Přitom mnohdy není znatelný rozdíl
+v~přesnosti výstupů porovnávaných řešičů.
 
-% Struktura a návaznost
-Text této práce postupuje od~teoretických podkladů
-přes rozbor možných řešení formulovaných problémů,
-návrh a následně realizaci zvoleného řešení,
-a končí experimentální částí,
-která se zabývá konkrétními příklady modelů,
-měřením výkonnosti a srovnáním nástroje se~stávajícími řešiči.
-Zvídavému čtenáři by nemělo uniknout
-množství příloh obsahujících
-přídavné informace a příklady.
+\cmt{konkrétní příklady}
+\end{paragraph} %%Výsledky.
+
+%%%
+
 \end{section} %%Cíl práce
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -435,30 +435,66 @@ a s~tím související úkoly:
 \item připojit \acr{ode} řešič používající klasické numerické metody,
 \item navrhnout řídící algoritmus,
 \item implementovat návrh,
-\item srovnat výsledný nástroj s~existujícími hybridními
-   řešiči a dosáhnout pokud možno větší výkonnosti.
+\item \hl{srovnat výkonnost navrženého konceptu}
+   s~existujícím řešičem dReal a dosáhnout pokud možno větší výkonnosti.
 \end{itemize}
-\end{section} %%Požadavky zadání
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
 
-\begin{section}{Rešerše}\label{s:intro:search}
+% Fri 04 May 2018 05:54:11 PM CEST
+\begin{paragraph}{Rešerše.}\label{p:intro:req:search}
 Zadání vyžadovalo seznámení se
 s~uvedenými problémy a existujícími nástroji:
 \begin{itemize}
 \item teoretické podklady problémů \acr{sat}, \acr{smt} a \acr{ode},
 \item obecné možnosti řešení problémů,
-\item rešerše samostatných \acr{smt} řešičů
+\item rešerše samostatných \acr{sat} či \acr{smt} řešičů
    a analýza jejich použití,
 \item studování \acr{smt}-LIB standardu,
 \item rešerše \acr{ode} řešičů, které používají klasické numerické metody,
    a analýza jejich použití,
-\item seznámení se se~stávajícími hybridními řešiči,
+\item seznámení se se~stávajícími řešiči kombinujícími
+   \acr{sat} a \acr{ode},
    které ale používají pomalou intervalovou aritmetiku,
 \item inspirovat se zejména těmito řešiči
-   při~návrhu řídícího algoritmu.
+   při~návrhu vstupního jazyka a řídícího algoritmu.
 \end{itemize}
-\end{section} %%Rešerše
+\end{paragraph} %%Rešerše.
+
+%%%
+
+\end{section} %%Požadavky zadání
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Fri 04 May 2018 06:14:31 PM CEST
+\begin{section}{Struktura a návaznost}\label{s:intro:struct}
+Předpokládaným postupem práce
+bylo vhodně zvolit
+oba jednotlivé existující řešiče,
+definovat společný vstupní jazyk,
+implementovat řešiče či jejich adaptéry
+a propojit je.
+A na~závěr to nejdůležitější:
+ve~výsledném nástroji
+experimentovat s~různými modely systémů
+a výsledky porovnat se~stávajícím řešičem dReal.
+
+% Motivace
+Mou osobní motivací k~tématu bylo zejména mé zalíbení
+v~\acr{sat} řešičích, se kterými jsem v~minulosti reálně pracoval,
+a obecně ve~formální verifikaci.
+
+Text této práce postupuje od~teoretických podkladů
+přes rozbor možných řešení formulovaných problémů,
+návrh a následně realizaci zvoleného řešení,
+a končí experimentální částí,
+která se zabývá konkrétními příklady modelů,
+měřením výkonnosti a srovnáním nástroje s~řešičem dReal.
+Zvídavému čtenáři by nemělo uniknout
+množství příloh obsahujících
+přídavné informace a příklady.
+\end{section} %%Struktura a návaznost práce
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -489,7 +525,7 @@ Možnosti jejich řešení jsou uvedeny až v~následující sekci rešerše ře
 
 % Tue 20 Mar 2018 09:36:48 PM CET
 \begin{subsection}{Problém splnitelnosti: \acr{sat}}
-label{ss:theory:formulation:sat}
+\label{ss:theory:formulation:sat}
 Problém splnitelnosti Booleovské formule
 je základním problémem
 ze~třídy \acr{np}-úplných problémů%
@@ -2006,7 +2042,7 @@ $\delta$-splnitelnost je numericky aproximována
 (resp. exaktně rozhodnuta na~zjednodušené formuli)
 s~přesností $\delta$ (racionální číslo).
 \cmt{Přesněji: řeší exaktně 'delta-perturbated' formule,
-nevím zda je to přepsáno správně.}
+nevím zda je to přepsáno správně. .. OK}
 
 dReal je postaven nad~některými existujícími nástroji,
 zejména Open\acr{smt}2~\cit{opensmt} a Mini\acr{sat}~\cit{minisat}
@@ -5039,7 +5075,7 @@ pro~řešení \acr{ode} (třída \id{ODE::\-Odeint}).
    odvozenou třídu zavést jako druhý šablonový parametr třídy \id{Solver}.
 \item Vyhrazení samostatného vlákna pro~příjem
    odchozích zpráv \acr{smt} řešiče po~blocích.
-\item Implementace odvozené třídy pro~implementaci
+\item Realizace odvozené třídy pro~implementaci
    \acr{ode} řešiče \acr{sundials}.
 \item Umožnit obecnější nastavení fází výpočtu v~řídící komponentě.
 \item Umožnit obecnější koncové podmínky diferenciálních rovnic,
@@ -5061,7 +5097,7 @@ pro~řešení \acr{ode} (třída \id{ODE::\-Odeint}).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Fri 04 May 2018 11:16:19 AM CEST
+% Fri 04 May 2018 06:29:54 PM CEST
 \begin{conclusion}\label{ch:outro}
 % Úvod
 Cílem práce bylo aplikovat odlišný přístup
@@ -5084,14 +5120,20 @@ pro~nový nástroj.
 
 % Splnění cílů
 Výsledky práce splňují předsevzaté cíle:
-výsledný prototyp řešiče je v~některých
-praktických úlohách násobně rychlejší,
-než stávající řešič dReal.
-Byl navržen a realizován společný vstupní jazyk,
-ve~kterém lze vstup parametrizovat pomocí maker,
-a není problém např. vytvořit kaskádní kompozici systémů.
+zvolený koncept se~ukázal jako nadějná
+alternativa ke~stávajícím řešičům.
+Experimenty na~některých
+praktických úlohách ukázaly,
+že použití našeho řešení
+je násobně rychlejší,
+než v~případě stávajícího řešiče dReal.
+A to i~přesto, že implementovaný nástroj
+je pouhým prototypem.
 
 % Další zásluhy
+Přidanou hodnotou je použitý prototyp nástroje,
+který zahrnuje společný vstupní jazyk,
+ve~kterém lze vstup parametrizovat pomocí maker.
 Navíc je možné flexibilně
 nasazovat různé \acr{smt} a \acr{ode} řešiče.
 Požadavky na~rozhraní \acr{smt} řešiče
@@ -5107,7 +5149,9 @@ Z~\acr{smt} řešičů byly testovány
 \acr{cvc}4 a z3.
 
 % Výhled
-Prototyp zatím obsahuje řadu nedostatků a zjednodušení.
+Nový koncept byl prověřen a nyní čeká
+na~řádnou implementaci,
+jelikož náš prototyp zatím obsahuje řadu nedostatků a zjednodušení.
 Může posloužit jako inspirace pro~budoucí vývojáře
 průmyslových nástrojů.
 Druhou, ještě více uspokojivou možností
