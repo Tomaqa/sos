@@ -17,7 +17,7 @@ doc/odeint
 *.blg
 *.gl*
 *.ist
-*.lof
+*.lo*
 *.out
 *.toc
 *~

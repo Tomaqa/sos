@@ -5318,7 +5318,9 @@ Výška musí splňovat invariant,
 Znaménko rychlosti musí odpovídat diskrétnímu stavu.
 
 Počáteční podmínky jsou následující:
-\cmt{...}
+\id{v = 0} a interval \id{5 <= x <= 15}
+vyjádřen jako výčet hodnot s~krokem \id{0.25}
+(\id{(or (x = 5) (x = 5.25) \dots)}).
 
 V~našem případě nám invariant výšky působí potíže,
 jelikož jej nejsme schopni zaručit.
@@ -5410,7 +5412,8 @@ výrazně rychlejší.
 Naše řešení je v~tomto případě nevhodné,
 neboť vyžaduje mnoho fází
 a při~zvolení malého množství
-dochází k~přílišnému porušování invariantů.
+dochází k~přílišnému porušování invariantů,
+a tedy návratům.
 
 Nejedná se však o~nepřekonatelný problém,
 jelikož nedostatek plynoucí z~ignorování
@@ -5428,7 +5431,7 @@ zásadně převyšuje dobu integrací.
 To je dobrá zpráva,
 neboť je zde prostor pro~optimalizaci
 pomocí maximální redukce těchto operací
-a většího vytížení \acr{ode} řešiče.
+a případného většího vytížení \acr{ode} řešiče.
 \end{paragraph} %%Diskuze výsledků.
 
 %%%
@@ -5440,23 +5443,122 @@ Připomeňme, že jsme vyřadili všechny intervalové podmínky
 a nahradily je výčty hodnot.
 Jak se dReal chová v~případě, že pracuje
 s~intervalovými podmínkami,
-tak jak byl navržen?
+pro~které byl navržen?
 
 %%%
 
-% Sat 05 May 2018 09:05:25 PM CEST
+% Sat 05 May 2018 10:53:08 PM CEST
 \begin{paragraph}{dReal s~intervalovými podmínkami.}
 \label{p:exp:examples:ball:dreal_int}
 Řešiči dReal jsem úlohu předložil
-také v~původní formě s~intervalovými počátečními podmínkami,
+také v~původní formě s~intervalovými počátečními podmínkami
+\id{5 <= x <= 15},
 tj.~nekonečnou množinou počátečních stavů.
 
-\cmt{,,,}
+\pic{ball_dreal_d0_01_x.pdf}{ball:dreal:d0.01:x}{0.65}
+   {Skákající míč v~dReal s~intervalovými podmínkami s~$\delta = 0{,}01$}
+   {$\delta$ značí vstupní velikost nejistoty.
+    Znázorněna je jen funkce \id{x} (výška).}
+\pic{ball_dreal_d1_x.pdf}{ball:dreal:d1:x}{0.65}
+   {Skákající míč v~dReal s~intervalovými podmínkami s~$\delta = 1$}
+   {$\delta$ značí vstupní velikost nejistoty.
+    Znázorněna je jen funkce \id{x} (výška).}
+
+dReal samozřejmě nepracuje s~nekonečnou množinou,
+ale umožňuje nastavit velikost nejistoty $\delta$,
+o~kterou jsou vstupní formule zjednodušeny.
+Obrázky \rfPic{ball:dreal:d0.01:x} a \rfPic{ball:dreal:d1:x}
+ukazují výslednou trajektorii funkce \id{x}
+s~různými volbami $\delta$.
+
+\tab{ball_dreal_int_cmp}{0.5}
+   {Skákající míč: srovnání délky výpočtu řešiče dReal
+    s~intervalovými podmínkami}
+   {$\delta$ značí vstupní velikost nejistoty.
+    Řádek s~${\delta = 0}$ reprezentuje variantu
+    s~aproximovanými intervalovými podmínkami.}
+   {r||c|l}
+   {$\delta$  & Délka výpočtu [s] & Výstup \\ \hline
+    $0$       & $0{,}10$ & \id{sat} \\ \hline
+    $0{,}001$ & $0{,}58$ & \id{sat} \\ \hline
+    $0{,}01$  & $0{,}46$ & \id{sat} \\ \hline
+    $0{,}1$   & $0{,}36$ & \id{sat} \\ \hline
+    $1$       & $0{,}25$ & \id{sat} \\ \hline
+    $10$      & $0{,}12$ & \id{sat} \\ \hline
+    }
+
+Tabulka \rfTab{ball_dreal_int_cmp} navzájem
+srovnává délku výpočtu pro~různé volby $\delta$
+společně s~variantou aproximovaných intervalových podmínek.
+
+Z~výsledného měření to vypadá,
+že nejlepší variantou z~hlediska délky výpočtu
+je výčet vstupních hodnot,
+tj.~vyhnutí se použití intervalu.
+To je zároveň hlavní rozdíl
+mezi použitím našeho řešiče a dReal
+(použití klasických numerických metod
+implikuje exaktní počáteční podmínky),
+nicméně v~dReal je zřejmě
+náš způsob také dobře použitelný.
+
+Jako neformální závěr z~tohoto experimentu
+bych uvedl, že je obecně efektivnější
+úlohu koncipovat jako \acr{ivp},
+než jako I\acr{ivp} (intervalová varianta),
+což nakonec není nic překvapivého.
 \end{paragraph} %%dReal s~intervalovými podmínkami.
 
 %%%
 
 \end{subsection} %%Skákající míč
+
+%%%%%%%%%%%%%
+
+% Sun 06 May 2018 12:26:24 AM CEST
+\begin{subsection}{Elektrický oscilátor}\label{ss:exp:examples:osc}
+Jedná se opět o~příklad převzatý z~dReal,
+který modeluje elektrický oscilátor.
+Příklad je jen demonstrační,
+nemá žádný vyšší smysl
+a neslouží k~modelování reálného systému.
+
+Model se skládá z~několika nelineárních \acr{ode}:
+\id{x}, \id{y} a \id{z}, které představují oscilující funkce,
+\id{om1} ($\omega_1$) a \id{om2} ($\omega_2$),
+což jsou měnící se fáze%
+\footnote{Myšleno jako fáze vlny;
+termín je v~konfliktu s~fází výpočtu našeho řešiče.},
+a \id{tau} ($\tau$), který slouží jako časovač
+pro~přepínání diskrétních stavů.
+
+Jednotlivá \acr{ode} jsou přibližně popsána takto
+(liší se v~konstantách a v~různých diskrétních stavech):
+\begin{flalign*}
+\qquad \der{x} &= -ax \cdot \sin \left( \omega \cdot \tau \right) && \\
+\qquad \der{y} &= -ay \cdot \sin \left( \omega_1 \cdot \tau \right)
+                      \cdot \sin \left( \omega_2 \right) \cdot 2 && \\
+\qquad \der{z} &= -az \cdot \sin \left( \omega_2 \cdot \tau \right)
+                      \cdot \cos \left( \omega_1 \right) \cdot 2 && \\
+\qquad \der{\omega_1} &= - \omega_1 && \\
+\qquad \der{\omega_2} &= - \omega_2 && \\
+\qquad \der{\tau} &= 1
+\end{flalign*}
+
+Diskrétní stav je tvořen třemi stavy,
+mezi kterými se cyklicky přepíná podle časovače \id{tau}
+a nezávisí na~žádných jiných invariantech.
+Jedná se tedy čistě o~systém řízený časem,
+což hraje v~náš prospěch.
+Podmínky přechodů ale nezávisí na~přesné hodnotě \id{tau},
+ale na~intervalech (jsou tedy nedeterministické).
+Ty jsou aproximovány s~krokem \id{0.1}.
+
+Počáteční podmínky: \id{y = 0}, \id{z = 0},
+\id{om1 = 2}, \id{om2 = 2.5}, \id{tau = 0}
+a interval \id{-0.2 <= x <= 0.1}
+je aproximován s~krokem \id{0.25}.
+\end{subsection} %%Elektrický oscilátor
 
 %%%%%%%%%%%%%
 
