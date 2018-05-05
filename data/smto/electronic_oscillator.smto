@@ -211,10 +211,8 @@
                   (= x_20 x_1t) (= y_20 (* 0.2 y_1t))
                   (= om1_20 1.5) (= om2_20 1) ))
         ;; Jumps from mode2
-         ;(=> (and (not z_a_1) (not om1_a_1) (<  tau_1t 8) )
          (=> (and (not z_a_1) (not om1_a_1) (<  tau_1t 9) )
              (and (not z_a_2) (not om1_a_2) ))
-         ;(=> (and (not z_a_1) (not om1_a_1) (>= tau_1t 8) )
          (=> (and (not z_a_1) (not om1_a_1) (>= tau_1t 9) )
              (and (not z_a_2)      om1_a_2
                   (= x_20 (* 0.2 x_1t)) (= y_20 (* 0.5 y_1t))

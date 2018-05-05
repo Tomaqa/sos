@@ -11,10 +11,10 @@
 
 #define G 9.8
 
-#define T 0.05
+#define T 0.1
 
 #define T_MIN()   0
-#define T_MAX()   6.5
+#define T_MAX()   8
 
 #define X_MIN() -1
 #define X_MAX() 15

@@ -685,7 +685,7 @@ namespace SOS {
         void Solver::init_unif_traject(Param_keys param_keys_) const
         {
             trajects().resize(1);
-            init_traject(traject(), move(param_keys_), has_unif_param_t());
+            init_traject(traject(), move(param_keys_));
         }
 
         void Solver::init_trajects(Param_keyss param_keyss_) const
@@ -693,16 +693,14 @@ namespace SOS {
             const int size_ = size();
             trajects().resize(size_);
             for (int i = 0; i < size_; i++) {
-                init_traject(traject(i), move(param_keyss_[i]),
-                             ode_has_param_t(i));
+                init_traject(traject(i), move(param_keyss_[i]));
             }
         }
 
         void Solver::init_traject(Traject& traject_,
-                                  Param_keys param_keys_,
-                                  bool has_param_t) const
+                                  Param_keys param_keys_) const
         {
-            traject_.init(move(param_keys_), has_param_t);
+            traject_.init(move(param_keys_), size());
         }
 
         void Solver::reset_unif_traject(const Context& context_) const

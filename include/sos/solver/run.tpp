@@ -28,10 +28,7 @@ namespace SOS {
 
         if (sat == Sat::unsat) return;
 
-        if (!_quiet) {
-            cout << endl;
-            solver.print_results();
-        }
+        solver.print_results();
 
         if (store_traj) {
             string redirect;

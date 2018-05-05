@@ -1,4 +1,14 @@
 #include <iostream>
+#include <iomanip>
+
+#ifdef PROFILE
+#include <omp.h>
+
+extern double wall_time;
+extern double check_sat_time;
+extern double other_smt_time;
+extern double ode_time;
+#endif //< PROFILE
 
 namespace SOS {
     using std::cout;
@@ -85,6 +95,7 @@ namespace SOS {
     template <typename OSolver>
     void Solver<OSolver>::print_results()
     {
+        if (is_quiet()) return;
         const Time_const_ids& init_time_ids =
             SMT::cconst_ids_row_time_consts(cconst_ids_row(0, 0));
         const Time_const_ids& end_time_ids =
@@ -94,7 +105,7 @@ namespace SOS {
         const Time_const_value end_t =
             smt_solver().get_step_time_values(end_time_ids).first;
 
-        string str;
+        cout << endl;
         const int odes_count = codes().size();
         const int entries_count = cconst_entries_count();
         for (int e = 0; e < entries_count; e++) {
@@ -125,6 +136,30 @@ namespace SOS {
             }
             if (e < entries_count-1) cout << endl;
         }
+
+        #ifdef PROFILE
+        const double smt_time = check_sat_time + other_smt_time;
+        const double smt_rel_time = (smt_time/wall_time)*100;
+        const double check_sat_rel_time = (check_sat_time/smt_time)*100;
+        const double other_smt_time = smt_time - check_sat_time;
+        const double other_smt_rel_time = 100. - check_sat_rel_time;
+        const double ode_rel_time = (ode_time/wall_time)*100;
+        const double other_time = wall_time - smt_time - ode_time;
+        const double other_rel_time = 100. - smt_rel_time - ode_rel_time;
+
+        cout << std::setprecision(3) << endl
+             << "Wall time: " << wall_time << "s\n"
+             << "SMT time: " << smt_time << "s"
+             << " (" << smt_rel_time << " %)" << endl
+             << "    " << "check-sat time: " << check_sat_time << "s"
+                       << " (" << check_sat_rel_time << " %)" << endl
+             << "    " << "other SMT time: " << other_smt_time << "s"
+                       << " (" << other_smt_rel_time << " %)" << endl
+             << "ODE time: " << ode_time << "s"
+             << " (" << ode_rel_time << " %)" << endl
+             << "Other time: " << other_time << "s"
+             << " (" << other_rel_time << " %)" << endl;
+        #endif //< PROFILE
     }
 
     template <typename OSolver>
@@ -136,7 +171,13 @@ namespace SOS {
     template <typename OSolver>
     typename Solver<OSolver>::Sat Solver<OSolver>::solve()
     {
+        #ifdef PROFILE
+        const double ts = omp_get_wtime();
+        #endif //< PROFILE
         const bool sat = do_step(0);
+        #ifdef PROFILE
+        wall_time = omp_get_wtime() - ts;
+        #endif //< PROFILE
         return sat ? Sat::sat : Sat::unsat;
     }
 
@@ -146,6 +187,7 @@ namespace SOS {
         if (is_verbose()) {
             cout << endl << "Step " << step << " ..." << endl;
         }
+
         const Sat sat = smt_check_sat();
         expect(sat != Sat::unknown, "unknown");
         if (sat == Sat::unsat) {
@@ -154,6 +196,7 @@ namespace SOS {
         if (step == csteps()) {
             return true;
         }
+
         smt_get_values(step);
         solve_odes();
         smt_add_asserts(step);
@@ -163,22 +206,34 @@ namespace SOS {
     template <typename OSolver>
     typename Solver<OSolver>::Sat Solver<OSolver>::smt_check_sat()
     {
-        return smt_solver().check_sat();
+        #ifdef PROFILE
+        const double ts = omp_get_wtime();
+        #endif //< PROFILE
+        const Sat sat = smt_solver().check_sat();
+        #ifdef PROFILE
+        const double time_ = omp_get_wtime() - ts;
+        check_sat_time += time_;
+        #endif //< PROFILE
+        return sat;
     }
 
     template <typename OSolver>
     bool Solver<OSolver>::backtrack(int step)
     {
         if (step == 0) return false;
-        cout << "Backtrack ..." << endl;
-        --step;
+        if (is_verbose()) {
+            cout << "Backtrack ..." << endl;
+        }
         smt_add_conflict();
-        return do_step(step);
+        return do_step(step-1);
     }
 
     template <typename OSolver>
     void Solver<OSolver>::smt_get_values(int step)
     {
+        #ifdef PROFILE
+        const double ts = omp_get_wtime();
+        #endif //< PROFILE
         _odes_row_values.clear();
         for (auto& ode : codes()) {
             const Const_ids_row& row_ids = cconst_ids_row(ode, step);
@@ -186,11 +241,18 @@ namespace SOS {
                 smt_solver().get_step_row_values(row_ids);
             _odes_row_values.emplace_back(move(row_vals));
         }
+        #ifdef PROFILE
+        other_smt_time += omp_get_wtime() - ts;
+        #endif //< PROFILE
     }
 
     template <typename OSolver>
     void Solver<OSolver>::solve_odes()
     {
+        #ifdef PROFILE
+        const double ts = omp_get_wtime();
+        #endif //< PROFILE
+
         const int odes_count = codes().size();
         const int entries_count = cconst_entries_count();
         Ode_results trans_ode_results;
@@ -225,6 +287,10 @@ namespace SOS {
             trans_ode_results.emplace_back(move(res));
         }
 
+        #ifdef PROFILE
+        ode_time += omp_get_wtime() - ts;
+        #endif //< PROFILE
+
         for (int o = 0; o < odes_count; o++) {
             _ode_results[o].clear();
             _ode_results[o].reserve(entries_count);
@@ -241,6 +307,9 @@ namespace SOS {
     template <typename OSolver>
     void Solver<OSolver>::smt_add_asserts(int step)
     {
+        #ifdef PROFILE
+        const double ts = omp_get_wtime();
+        #endif //< PROFILE
         const int odes_size = codes().size();
         for (int o = 0; o < odes_size; o++) {
             const Const_ids_row& row_ids = cconst_ids_row(o, step);
@@ -248,11 +317,20 @@ namespace SOS {
             const Ode_result& ode_res = _ode_results[o];
             smt_solver().assert_step_row(row_ids, row_vals, ode_res);
         }
+        #ifdef PROFILE
+        other_smt_time += omp_get_wtime() - ts;
+        #endif //< PROFILE
     }
 
     template <typename OSolver>
     void Solver<OSolver>::smt_add_conflict()
     {
+        #ifdef PROFILE
+        const double ts = omp_get_wtime();
+        #endif //< PROFILE
         smt_solver().assert_last_step_row_conflict();
+        #ifdef PROFILE
+        other_smt_time += omp_get_wtime() - ts;
+        #endif //< PROFILE
     }
 }

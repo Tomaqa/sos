@@ -153,8 +153,7 @@ namespace SOS {
             void init_unif_traject(Param_keys param_keys_) const;
             void init_trajects(Param_keyss param_keyss_) const;
             void init_traject(Traject& traject_,
-                              Param_keys param_keys_,
-                              bool has_param_t) const;
+                              Param_keys param_keys_) const;
             void reset_unif_traject(const Context& context_) const;
             void reset_trajects(const Contexts& contexts_) const;
             void reset_traject(Traject& traject_,

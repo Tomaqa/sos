@@ -35,6 +35,7 @@ LDFLAGS := -Wl,--no-undefined
 FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
 # FLAGS += -Wfatal-errors
 # FLAGS += -DDEBUG
+FLAGS += -DPROFILE -fopenmp
 CPPFLAGS := $(FLAGS) -std=c++14
 CFLAGS   := $(FLAGS) -std=gnu99
 TEST_FLAGS := -I $(TEST_INCL_DIR)

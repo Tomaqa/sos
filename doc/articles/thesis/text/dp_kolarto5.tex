@@ -12,6 +12,9 @@
 \usepackage{graphicx} %graphics files inclusion
 \usepackage{dirtree} %directory tree visualisation
 
+\usepackage{csvsimple} % For csv importing.
+% \usepackage{longtable}
+
 \usepackage{amsmath} %advanced maths
 \usepackage{mathtools}
 
@@ -117,8 +120,8 @@
 
 \newcommand{\reg}{\textsuperscript{\textregistered}}
 
-\newcommand{\itab}[1]{\hspace{0em}\rlap{#1}}
-\newcommand{\tab}[1]{\hspace{.2\textwidth}\rlap{#1}}
+% \newcommand{\itab}[1]{\hspace{0em}\rlap{#1}}
+% \newcommand{\tab}[1]{\hspace{.2\textwidth}\rlap{#1}}
 
 %%%%%%%%%%%%%%%%%
 %%%% Math mode commands
@@ -155,6 +158,76 @@
 \newcommand{\binFn}[1]{\id{\binDir{}/\-#1}}
 \newcommand{\appletDir}{\id{\binDir{}/\-applet}}
 \newcommand{\appletFn}[1]{\id{\appletDir{}/\-#1}}
+
+%%%%%%%%%%%%%%%%%
+
+\newcommand{\picFn}[1]{../img/#1}
+\newcommand{\picL}{pic}
+\newcommand{\rfPic}[1]{(\rf{\picL:#1})}
+
+% 1-File basename
+% 2-Label
+% 3-Width ratio
+% 4-Caption
+% 5-Details
+\newcommand{\pic}[5]{
+\begin{figure}
+{\centering
+\includegraphics[width=#3\linewidth]{\picFn{#1}}
+\caption{#4}
+\label{\picL:#2}
+}\smallskip
+#5
+\end{figure}
+}
+
+\newcommand{\tabFn}[1]{../data/#1}
+\newcommand{\tabL}{tab}
+\newcommand{\rfTab}[1]{(\rf{\tabL:#1})}
+
+% 1-File basename
+% 2-Label
+% 3-Width ratio
+% 4-Caption
+% 5-Details
+% \newcommand{\tab}[5]{
+% \begin{table}
+% \caption{#4}
+% \medskip
+% #5
+% \centering
+% \vskip 0.5\baselineskip
+% \resizebox{#3\columnwidth}{!}{
+% % \csvautotabular[respect all]{\tabFn{#1}}
+% \csvautotabular{\tabFn{#1}}
+% }
+% \label{\tabL:#2}
+% \end{table}
+% }
+
+% 1-Label
+% 2-Width ratio
+% 3-Caption
+% 4-Details
+% 5-Column desription
+% 5-Tabular body
+\newcommand{\tab}[6]{
+\begin{table}
+\caption{#3}
+{\centering
+\vskip 0.5\baselineskip
+\resizebox{#2\columnwidth}{!}{
+\begin{tabular}{#5}
+\toprule
+#6
+\end{tabular}
+}
+\label{\tabL:#1}\\
+}\medskip
+#4
+\end{table}
+}
+
 
 %%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%
@@ -1940,7 +2013,7 @@ ze~sekce \rf{ss:search:ode:classic}.
 %%%
 
 % Wed 14 Mar 2018 09:20:11 PM CET
-\begin{paragraph}{Značení.}\label{p:search:ode:sign}
+\begin{paragraph}{Značení.}\label{p:search:ode:valid:sign}
 ${[t_n]}$ je interval ${[t_{n}, t_{n+1}]}$ délky $h_n$;
 ${[y_n]}$ je uzávěr ${[y^{min}_{n}, y^{max}_{n}}]$ v~bodě $t_n$
 (tj.~garantované meze řešení v~$t_n$);
@@ -3863,7 +3936,7 @@ analyticky ji lze těžko předpovědět.
 
 % Sat 28 Apr 2018 01:56:07 PM CEST
 \begin{paragraph}{Základní algoritmus.}
-\label{ss:design:arch:alg:discuss}
+\label{ss:design:arch:alg:basic}
 Pro~účely prototypu navrhnu zatím alespoň základní algoritmus,
 který postupuje jen po~jednotlivých
 cestách ve~stromu prohledávaného prostoru,
@@ -5146,7 +5219,256 @@ používá odeint (třída \id{ODE::\-Odeint}).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Sat 05 May 2018 12:41:59 PM CEST
 \chapter{Experimentální část}\label{ch:exp}
+V~této kapitole aplikuji realizovaný koncept
+na~vybraných praktických úlohách
+a srovnám výsledný výkon s~řešičem dReal.
+Nejprve uvedu metodiku,
+dle které jsem při~měření postupoval,
+a poté jednotlivé příklady.
+Na~závěr uvedu další úlohy,
+na~které by bylo možné řešič použít.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sat 05 May 2018 01:11:05 PM CEST
+\begin{section}{Metodika}\label{s:exp:method}
+U~každého příkladu jsem měřil jednak celkový čas
+našeho postupu a řešiče dReal pro~srovnání,
+a dále jsem zvlášť u~našeho kódu prováděl
+profilaci částí výpočtu spadajících
+jen do~\acr{smt} a do~\acr{ode} řešiče
+(resp. jejich adaptérů).
+
+Je záhodno zdůraznit, že srovnání
+s~řešičem dReal není přesné,
+protože dReal je robustnější a poskytuje
+relevantnější výsledky, které až na~zvolenou odchylku
+přesně dodržují všechny invarianty po celou dobu integrace.
+(Je však otázkou, nakolik je to v~daném příkladě užitečné.)
+Náš koncept pracuje pouze na~principu diskretizace času,
+a ke~kontrole invariant dochází jen v~těchto bodech.
+Počáteční podmínky jsem ale nastavoval stejně (není-li řečeno jinak),
+tj.~i~v~řešiči dReal jsem intervalové podmínky jen aproximoval,
+aby bylo srovnání v~tomto ohledu relevantní.
+
+dReal jsem spouštěl jen se základními parametry,
+nestudoval jsem možnosti použití různých tamních heuristik
+(např. BMC heuristika).
+Dále v~případech, kdy jsem převáděl příklady modelů
+do~formátu dReal, nemohu zaručit,
+že jsem učinil natolik efektivně,
+jak by mohla učinit osoba
+podrobněji znalá tohoto programu.
+
+%%%%%%%%%%%%%
+
+% Sat 05 May 2018 01:14:37 PM CEST
+\begin{subsection}{Měřící platforma}\label{ss:exp:method:platform}
+Všechna měření byla provedena
+na~procesoru
+Intel\reg Core\textsuperscript{TM}
+i7-4702MQ o~taktovací frekvenci $2{,}2$ GHz
+na~\acr{os} Arch Linux.
+Paralelismu nebylo využito.
+
+K~měření celkového času pro~srovnání s~řešičem dReal
+byl použit příkaz \id{time}
+(který zahrnuje i~systémové režie spojené s~procesem).
+
+K~profilaci vlastního kódu byly použity
+funkce \id{omp\_\-get\_\-wtime}
+standardu \acr{omp}.
+\end{subsection} %%Měřící platforma
+
+%%%%%%%%%%%%%
+
+\end{section} %%Metodika
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sat 05 May 2018 08:57:44 PM CEST
+\begin{section}{Praktické úlohy}\label{s:exp:examples}
+V~této sekci rozeberu jednotlivé úlohy,
+které jsem spouštěl jak v~našem řešiči,
+tak v~řešiči dReal,
+a výsledky porovnal.
+První uvedenou úlohu rozeberu podrobněji,
+neboť prozdradí některá první zjištění,
+která se budou v~dalších úlohách opakovat.
+
+%%%%%%%%%%%%%
+
+% Sat 05 May 2018 04:38:44 PM CEST
+\begin{subsection}{Skákající míč}\label{ss:exp:examples:ball}
+Jedná se o~jednoduchý demonstrační příklad,
+který vyžaduje dodržení invariantu hodnoty integrované funkce.
+Příklad je převzat z~dReal,
+s~jedinou úpravou~---~aproximace intervalových počátečních podmínek.
+
+Diskrétní stav modelu je triviální:
+obsahuje jedinou Booleovskou proměnnou,
+která indikuje, zda míč padá k~zemi, nebo se odráží vzhůru.
+
+Spojitý stav je reprezentován proměnnými
+\id{x} (výška, resp. vertikální pozice) a \id{v} (rychlost).
+Výška musí splňovat invariant,
+že není záporná: \id{x >= 0}.
+Znaménko rychlosti musí odpovídat diskrétnímu stavu.
+
+Počáteční podmínky jsou následující:
+\cmt{...}
+
+V~našem případě nám invariant výšky působí potíže,
+jelikož jej nejsme schopni zaručit.
+Budeme jej nuceni nějakým způsobem relaxovat:
+invariant jsem modifikoval na~tvar \id{x >= -1}.
+Je nutno nastavit velký počet fází
+(tj.~malou vzdálenost mezi ověřením invariantů),
+aby se minimalizovalo porušení původního invariantu
+(kdy je míč pod~úrovní podložky).
+
+Použita byla základní varianta
+fixní délky fáze,
+která v~tomto případě není příliš efektivní,
+neboť v~drtivé většině fází ke~změně diskrétního stavu nedochází.
+Lepší variantou by bylo dynamické nastavování délky fáze
+podle nějakého odhadu doby,
+po kterou by se zaručeně vědělo, že ještě ke~změně nemůže dojít.
+Tyto odhady by bylo možné přidat do~vstupu
+jako formule popisující následné časové okamžiky.
+V~každém případě je použití našeho nástroje pro~tento příklad,
+bez~kontrolování
+invariant v~rámci integrací,
+neperspektivní.
+
+\pic{ball_dreal.pdf}{ball:dreal}{0.95}
+   {Skákající míč v~dReal (s~aproximovanými intervalovými podmínkami)}
+   {Oranžová čára přestavuje funkci \id{x} (výška),
+    modrá čára funkci \id{v} (rychlost).}
+\pic{ball_0_05.pdf}{ball_0.05}{0.85}
+   {Skákající míč s~délkou fáze $0{,}05$ s.}
+   {Funkce \id{x} značí výšku, \id{v} rychlost.}
+\pic{ball_0_2.pdf}{ball_0.2}{0.85}
+   {Skákající míč s~délkou fáze $0{,}2$ s.}
+   {Funkce \id{x} značí výšku, \id{v} rychlost.}
+
+Na~obrázku \rfPic{ball:dreal}
+je uveden grafický výstup příkladu v~dReal,
+na~obrázcích \rfPic{ball_0.05} a \rfPic{ball_0.2}
+pak výstupy našeho nástroje, s~odlišnými délkami fází.
+S~kratší délkou fáze dojde k~méně výraznému porušení
+invariantu, kdy výška míče klesne pod~nulu.
+
+\tab{ball_cmp}{0.6}
+   {Skákající míč: srovnání délky výpočtu}
+   {Řádky s~\id{T} se týkají našeho nástroje s~fixní délkou fáze \id{T} [s].}
+   {r||c|l}
+   {Varianta & Délka výpočtu [s] & Výstup \\ \hline
+    dReal & $0{,}10$ & \id{sat} \\ \hline
+    \id{T = 0.025} & $8{,}3$ \  & \id{sat} \\ \hline
+    \id{T = \ 0.05} & $1{,}96$ & \id{sat} \\ \hline
+    \id{T = \ \  0.1} & $0{,}54$ & \id{sat} \\ \hline
+    \id{T = \ \  0.2} & $1{,}04$ & \id{sat} \\ \hline
+    }
+
+\tab{ball_prof}{0.6}
+   {Skákající míč: profilace částí výpočtu}
+   {Poměry značí relativní dobu výpočtu dotčené části
+    vzhledem k~celkovému času.}
+   {r||c|c}
+   {\id{T} [s] & Poměr \acr{smt} [\%] & Poměr \acr{ode} [\%] \\ \hline
+    $0{,}025$ & $99{,}9$ & $0{,}1$ \\ \hline
+     $0{,}05$ & $99{,}9$ & $0{,}1$ \\ \hline
+      $0{,}1$ & $99{,}8$ & $0{,}2$ \\ \hline
+      $0{,}2$ & $99{,}7$ & $0{,}3$ \\ \hline
+    }
+
+Tabulka \rfTab{ball_cmp} zachycuje naměřené délky výpočtu
+našeho nástroje s~rozdílnými délkami fází
+a výsledek řešiče dReal.
+Tabulka \rfTab{ball_prof} uvádí rozložení
+celkové doby výpočtu mezi řešiče \acr{smt} a \acr{ode}.
+
+%%%
+
+% Sat 05 May 2018 08:18:14 PM CEST
+\begin{paragraph}{Diskuze výsledků.}\label{p:exp:examples:ball:results}
+Z~tabulky \rfTab{ball_cmp} vyplývá, že zvolená délka fází
+dramaticky ovlivňuje celkovou délku výpočtu.
+Současně se vyskytl parazitní jev,
+kdy je případ s~\id{T = 0.2} pomalejší
+než \id{T = 0.1}.
+To je způsobeno tím, že v~prvním jmenovaném
+případě dochází k~návratům
+z~důvodu porušení i~relaxovaného invariantu \id{x >= -1},
+k~čemuž u~kratších délek fází nedochází.
+
+Smutnou zprávou je, že je dReal
+výrazně rychlejší.
+Naše řešení je v~tomto případě nevhodné,
+neboť vyžaduje mnoho fází
+a při~zvolení malého množství
+dochází k~přílišnému porušování invariantů.
+
+Nejedná se však o~nepřekonatelný problém,
+jelikož nedostatek plynoucí z~ignorování
+invariantů v~průběhu integrací
+je pouze záležitostí nedostatečné implementace,
+z~hlediska navrženého konceptu řešení \acr{ivp}
+se nejedná o~překážku.
+
+Tabulka \rfTab{ball_prof} ukazuje,
+že předpoklady uvedené v~návrhu
+řídícího algoritmu v~sekci \rf{ss:design:arch:alg}
+byly správné: doba strávená operacemi
+ověření splnitelnosti vstupu
+zásadně převyšuje dobu integrací.
+To je dobrá zpráva,
+neboť je zde prostor pro~optimalizaci
+pomocí maximální redukce těchto operací
+a většího vytížení \acr{ode} řešiče.
+\end{paragraph} %%Diskuze výsledků.
+
+%%%
+
+\bigskip
+
+dReal si s~tímto příkladem poradil velmi dobře.
+Připomeňme, že jsme vyřadili všechny intervalové podmínky
+a nahradily je výčty hodnot.
+Jak se dReal chová v~případě, že pracuje
+s~intervalovými podmínkami,
+tak jak byl navržen?
+
+%%%
+
+% Sat 05 May 2018 09:05:25 PM CEST
+\begin{paragraph}{dReal s~intervalovými podmínkami.}
+\label{p:exp:examples:ball:dreal_int}
+Řešiči dReal jsem úlohu předložil
+také v~původní formě s~intervalovými počátečními podmínkami,
+tj.~nekonečnou množinou počátečních stavů.
+
+\cmt{,,,}
+\end{paragraph} %%dReal s~intervalovými podmínkami.
+
+%%%
+
+\end{subsection} %%Skákající míč
+
+%%%%%%%%%%%%%
+
+\end{section} %%Praktické úlohy
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sat 05 May 2018 01:57:37 PM CEST
+\begin{section}{Další možné aplikace}\label{s:exp:next}
+\end{section} %%Další možné aplikace
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -5228,6 +5550,18 @@ směrem ke~konečnému produktu použitelném v~praxi.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \printglossary[type=\acronymtype, title=Seznam použitých symbolů a zkratek]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Kompletní ukázkový příklad}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Další příklady modelů}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\chapter{Další příklady použití maker}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

@@ -1,4 +1,4 @@
-set terminal svg size 640,480 noenhance
+set terminal svg size 640,400 noenhance
 
 set output ofname
 

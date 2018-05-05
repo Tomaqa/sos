@@ -47,11 +47,11 @@ namespace SOS {
         }
 
         void Solver::Traject::init(Param_keys param_keys_,
-                                   bool has_param_t_)
+                                   size_t odes_count_)
         {
-            if (has_param_t_) param_keys_.pop_back();
+            param_keys_.resize(odes_count_);
             _param_keys = move(param_keys_);
-            _has_param_t = has_param_t_;
+            _odes_count = odes_count_;
         }
 
         void Solver::Traject::reset(size_t size_)
@@ -62,7 +62,7 @@ namespace SOS {
 
         void Solver::Traject::add_step(Step step_)
         {
-            if (_has_param_t) step_.second.pop_back();
+            step_.second.resize(_odes_count);
             steps().emplace_back(move(step_));
         }
 
