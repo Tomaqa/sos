@@ -26,6 +26,10 @@ namespace SOS {
         if (_verbose) cout << endl;
         cout << sat << endl;
 
+        #ifdef PROFILE
+        solver.print_profile();
+        #endif //< PROFILE
+
         if (sat == Sat::unsat) return;
 
         solver.print_results();

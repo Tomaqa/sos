@@ -7,7 +7,7 @@
 ;;   => !z_a, !om1_a
 ;; mode3: dx dy dz_c dom1_a dom2 dtau
 ;;   => !z_a, om1_a
-;; missing: z_a, !om1_a
+;; undefined: z_a, !om1_a
 
 ;;; Constants
 
@@ -19,10 +19,10 @@
 
 #define OM #PI
 
-#define T 0.5
+#define T 5.0
 
 #define T_MIN   0
-#define T_MAX  17
+#define T_MAX  36
 #define TAU_MIN #T_MIN
 #define TAU_MAX #T_MAX
 
@@ -37,6 +37,13 @@
 #define OM1_MAX  4
 #define OM2_MIN #OM1_MIN
 #define OM2_MAX #OM1_MAX
+
+#define TAU_MOD1_LO() 4
+#define TAU_MOD1_HI() 5
+#define TAU_MOD2_LO() 8
+#define TAU_MOD2_HI() 10
+#define TAU_MOD3_LO() 5
+#define TAU_MOD3_HI() 6
 
 #define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
 #define STEPS-1 $d(- #STEPS 1)
@@ -78,20 +85,20 @@
 
 ;;; Initializations
 
-#def _INIT_INTERVAL(var val max step)
+#def _APX_INTERVAL(var val max step)
 #if $(<= #val #max)
     (= #var #val)
-    #_INIT_INTERVAL(#var $(+ #val #step) #max #step)
+    #_APX_INTERVAL(#var $(+ #val #step) #max #step)
 #endif
 #enddef
-#def INIT_INTERVAL(var min max step)
-    (or #_INIT_INTERVAL(#var #min #max #step))
+#def APX_INTERVAL(var min max step)
+    (or #_APX_INTERVAL(#var #min #max #step))
 #enddef
 
 #define INIT_T  ()  (= t_0 #T_MIN)
 #define INIT_TAU()  (= tau_0_0 #T_MIN)
 
-#define INIT_X()  #INIT_INTERVAL(x_0_0 -0.2 0.1 0.025)
+#define INIT_X()  #APX_INTERVAL(x_0_0 -0.2 0.1 0.025)
 #define INIT_Y()  (= y_0_0 0)
 #define INIT_Z()  (= z_0_0 0)
 
@@ -152,6 +159,12 @@
          (not (and z_a_ (not om1_a_)))
          (>= om1_0 -#PI) (>= om1_t -#PI)
          (>= om2_0 -#PI) (>= om2_t -#PI)
+         (=> (and      z_a_       om1_a_ )
+             (and (<= tau_0 #TAU_MOD1_HI) (<= tau_t #TAU_MOD1_HI) ) )
+         (=> (and (not z_a_) (not om1_a_))
+             (and (<= tau_0 #TAU_MOD2_HI) (<= tau_t #TAU_MOD2_HI) ) )
+         (=> (and (not z_a_)      om1_a_ )
+             (and (<= tau_0 #TAU_MOD3_HI) (<= tau_t #TAU_MOD3_HI) ) )
 ))
 
 #def INVARIANTS
@@ -190,6 +203,17 @@
 
 ;;; Jump conditions
 
+#define TAU_INT_STEP 0.1
+#def TAU_MOD1_INT(tau)
+    #APX_INTERVAL(#tau #TAU_MOD1_LO #TAU_MOD1_HI #TAU_INT_STEP)
+#enddef
+#def TAU_MOD2_INT(tau)
+    #APX_INTERVAL(#tau #TAU_MOD2_LO #TAU_MOD2_HI #TAU_INT_STEP)
+#enddef
+#def TAU_MOD3_INT(tau)
+    #APX_INTERVAL(#tau #TAU_MOD3_LO #TAU_MOD3_HI #TAU_INT_STEP)
+#enddef
+
 (define-fun jump ( (z_a_1 Bool) (om1_a_1 Bool)
                    (z_a_2 Bool) (om1_a_2 Bool)
                    (x_1t Real) (y_1t Real) (z_1t Real) (om1_1t Real) (om2_1t Real) (tau_1t Real)
@@ -204,29 +228,35 @@
          (=> (or (not (= z_a_1 z_a_2)) (not (= om1_a_1 om1_a_2)))
              (= tau_20 0) )
          ;; Jumps from mode1
-         (=> (and      z_a_1       om1_a_1  (<  tau_1t 4) )
+         (=> (and      z_a_1       om1_a_1  (<  tau_1t #TAU_MOD1_LO) )
              (and      z_a_2       om1_a_2  ))
-         (=> (and      z_a_1       om1_a_1  (>= tau_1t 4) )
-             (and (not z_a_2) (not om1_a_2)
-                  (= x_20 x_1t) (= y_20 (* 0.2 y_1t))
-                  (= om1_20 1.5) (= om2_20 1) ))
+         (=> (and      z_a_1       om1_a_1  #TAU_MOD1_INT(tau_1t) )
+             (or (and      z_a_2       om1_a_2  )
+                 (and (not z_a_2) (not om1_a_2)
+                      (= x_20 x_1t) (= y_20 (* 0.2 y_1t))
+                      (= om1_20 1.5) (= om2_20 1) )
+         ))
         ;; Jumps from mode2
-         (=> (and (not z_a_1) (not om1_a_1) (<  tau_1t 9) )
+         (=> (and (not z_a_1) (not om1_a_1) (<  tau_1t #TAU_MOD2_LO) )
              (and (not z_a_2) (not om1_a_2) ))
-         (=> (and (not z_a_1) (not om1_a_1) (>= tau_1t 9) )
-             (and (not z_a_2)      om1_a_2
-                  (= x_20 (* 0.2 x_1t)) (= y_20 (* 0.5 y_1t))
-                  ;(= om1_20 sin_om1_1t) (= om2_20 (- om2_1t)) ))
-                  ;; Sin is computed for wrong amount of time (#T),
-                  ;; how to correct it?
-                  (= om1_20 0) (= om2_20 (- om2_1t)) ))
+         (=> (and (not z_a_1) (not om1_a_1) #TAU_MOD2_INT(tau_1t) )
+             (or (and (not z_a_2) (not om1_a_2) )
+                 (and (not z_a_2)      om1_a_2
+                      (= x_20 (* 0.2 x_1t)) (= y_20 (* 0.5 y_1t))
+                      ;(= om1_20 sin_om1_1t) (= om2_20 (- om2_1t)) ))
+                      ;; Sin is computed for wrong amount of time (#T),
+                      ;; how to correct it?
+                      (= om1_20 0) (= om2_20 (- om2_1t)) )
+         ))
         ;; Jumps from mode3
-         (=> (and (not z_a_1)      om1_a_1  (<  tau_1t 5) )
+         (=> (and (not z_a_1)      om1_a_1  (<  tau_1t #TAU_MOD3_LO) )
              (and (not z_a_2)      om1_a_2  ))
-         (=> (and (not z_a_1)      om1_a_1  (>= tau_1t 5) )
-             (and      z_a_2       om1_a_2
-                  (= x_20 x_1t) (= y_20 y_1t)
-                  (= om1_20 1) (= om2_20 1) ))
+         (=> (and (not z_a_1)      om1_a_1  #TAU_MOD3_INT(tau_1t) )
+             (or (and (not z_a_2)      om1_a_2  )
+                 (and      z_a_2       om1_a_2
+                      (= x_20 x_1t) (= y_20 y_1t)
+                      (= om1_20 1) (= om2_20 1) )
+         ))
 ))
 
 #def JUMPS

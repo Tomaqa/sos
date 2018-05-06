@@ -5253,9 +5253,16 @@ Počáteční podmínky jsem ale nastavoval stejně (není-li řečeno jinak),
 tj.~i~v~řešiči dReal jsem intervalové podmínky jen aproximoval,
 aby bylo srovnání v~tomto ohledu relevantní.
 
+Dále je potřeba, aby oba řešiče počítaly
+podobný rozsah nezávislé proměnné \id{t}.
+To jsem řešil tak, že jsem dReal spustil
+po~určitý počet kroků (tj.~kroky \acr{bmc}, změny diskrétního stavu),
+a podle koncové hodnoty proměnné \id{t}
+nastavil vstup do~našeho řešiče.
+
 dReal jsem spouštěl jen se základními parametry,
 nestudoval jsem možnosti použití různých tamních heuristik
-(např. BMC heuristika).
+(např. \acr{bmc} heuristika).
 Dále v~případech, kdy jsem převáděl příklady modelů
 do~formátu dReal, nemohu zaručit,
 že jsem učinil natolik efektivně,
@@ -5314,18 +5321,18 @@ která indikuje, zda míč padá k~zemi, nebo se odráží vzhůru.
 Spojitý stav je reprezentován proměnnými
 \id{x} (výška, resp. vertikální pozice) a \id{v} (rychlost).
 Výška musí splňovat invariant,
-že není záporná: \id{x >= 0}.
+že není záporná: \id{x~>=~0}.
 Znaménko rychlosti musí odpovídat diskrétnímu stavu.
 
 Počáteční podmínky jsou následující:
-\id{v = 0} a interval \id{5 <= x <= 15}
+\id{v~=~0} a interval \id{5~<=~x~<=~15}
 vyjádřen jako výčet hodnot s~krokem \id{0.25}
-(\id{(or (x = 5) (x = 5.25) \dots)}).
+(\id{(or (x~=~5) (x~=~5.25) \dots)}).
 
 V~našem případě nám invariant výšky působí potíže,
 jelikož jej nejsme schopni zaručit.
 Budeme jej nuceni nějakým způsobem relaxovat:
-invariant jsem modifikoval na~tvar \id{x >= -1}.
+invariant jsem modifikoval na~tvar \id{x~>=~-1}.
 Je nutno nastavit velký počet fází
 (tj.~malou vzdálenost mezi ověřením invariantů),
 aby se minimalizovalo porušení původního invariantu
@@ -5349,16 +5356,16 @@ neperspektivní.
    {Skákající míč v~dReal (s~aproximovanými intervalovými podmínkami)}
    {Oranžová čára přestavuje funkci \id{x} (výška),
     modrá čára funkci \id{v} (rychlost).}
-\pic{ball_0_05.pdf}{ball_0.05}{0.85}
+\pic{ball_0_05.pdf}{ball:0.05}{0.85}
    {Skákající míč s~délkou fáze $0{,}05$ s.}
    {Funkce \id{x} značí výšku, \id{v} rychlost.}
-\pic{ball_0_2.pdf}{ball_0.2}{0.85}
+\pic{ball_0_2.pdf}{ball:0.2}{0.85}
    {Skákající míč s~délkou fáze $0{,}2$ s.}
    {Funkce \id{x} značí výšku, \id{v} rychlost.}
 
 Na~obrázku \rfPic{ball:dreal}
 je uveden grafický výstup příkladu v~dReal,
-na~obrázcích \rfPic{ball_0.05} a \rfPic{ball_0.2}
+na~obrázcích \rfPic{ball:0.05} a \rfPic{ball:0.2}
 pak výstupy našeho nástroje, s~odlišnými délkami fází.
 S~kratší délkou fáze dojde k~méně výraznému porušení
 invariantu, kdy výška míče klesne pod~nulu.
@@ -5368,17 +5375,18 @@ invariantu, kdy výška míče klesne pod~nulu.
    {Řádky s~\id{T} se týkají našeho nástroje s~fixní délkou fáze \id{T} [s].}
    {r||c|l}
    {Varianta & Délka výpočtu [s] & Výstup \\ \hline
-    dReal & $0{,}10$ & \id{sat} \\ \hline
+    dReal & $\hll{0{,}10}$ & \id{sat} \\ \hline
     \id{T = 0.025} & $8{,}3$ \  & \id{sat} \\ \hline
     \id{T = \ 0.05} & $1{,}96$ & \id{sat} \\ \hline
     \id{T = \ \  0.1} & $0{,}54$ & \id{sat} \\ \hline
     \id{T = \ \  0.2} & $1{,}04$ & \id{sat} \\ \hline
     }
 
-\tab{ball_prof}{0.6}
+\tab{ball_prof}{0.5}
    {Skákající míč: profilace částí výpočtu}
    {Poměry značí relativní dobu výpočtu dotčené části
-    vzhledem k~celkovému času.}
+    vzhledem k~celkovému času.
+    \id{T} značí fixní délku fáze.}
    {r||c|c}
    {\id{T} [s] & Poměr \acr{smt} [\%] & Poměr \acr{ode} [\%] \\ \hline
     $0{,}025$ & $99{,}9$ & $0{,}1$ \\ \hline
@@ -5400,11 +5408,11 @@ celkové doby výpočtu mezi řešiče \acr{smt} a \acr{ode}.
 Z~tabulky \rfTab{ball_cmp} vyplývá, že zvolená délka fází
 dramaticky ovlivňuje celkovou délku výpočtu.
 Současně se vyskytl parazitní jev,
-kdy je případ s~\id{T = 0.2} pomalejší
-než \id{T = 0.1}.
+kdy je případ s~\id{T~=~0.2} pomalejší
+než \id{T~=~0.1}.
 To je způsobeno tím, že v~prvním jmenovaném
 případě dochází k~návratům
-z~důvodu porušení i~relaxovaného invariantu \id{x >= -1},
+z~důvodu porušení i~relaxovaného invariantu \id{x~>=~-1},
 k~čemuž u~kratších délek fází nedochází.
 
 Smutnou zprávou je, že je dReal
@@ -5452,7 +5460,7 @@ pro~které byl navržen?
 \label{p:exp:examples:ball:dreal_int}
 Řešiči dReal jsem úlohu předložil
 také v~původní formě s~intervalovými počátečními podmínkami
-\id{5 <= x <= 15},
+\id{5~<=~x~<=~15},
 tj.~nekonečnou množinou počátečních stavů.
 
 \pic{ball_dreal_d0_01_x.pdf}{ball:dreal:d0.01:x}{0.65}
@@ -5470,6 +5478,11 @@ o~kterou jsou vstupní formule zjednodušeny.
 Obrázky \rfPic{ball:dreal:d0.01:x} a \rfPic{ball:dreal:d1:x}
 ukazují výslednou trajektorii funkce \id{x}
 s~různými volbami $\delta$.
+(V~předchozím případě s~aproximovanými intervaly
+jsem $\delta$ nastavil na~nějakou vysokou hodnotu
+(např. $1000$), protože nízké hodnoty pouze negativně
+ovlivňovaly dobu výpočtu, aniž by měly pozitivní vliv
+na~přesnost výsledku.)
 
 \tab{ball_dreal_int_cmp}{0.5}
    {Skákající míč: srovnání délky výpočtu řešiče dReal
@@ -5479,12 +5492,12 @@ s~různými volbami $\delta$.
     s~aproximovanými intervalovými podmínkami.}
    {r||c|l}
    {$\delta$  & Délka výpočtu [s] & Výstup \\ \hline
-    $0$       & $0{,}10$ & \id{sat} \\ \hline
-    $0{,}001$ & $0{,}58$ & \id{sat} \\ \hline
-    $0{,}01$  & $0{,}46$ & \id{sat} \\ \hline
-    $0{,}1$   & $0{,}36$ & \id{sat} \\ \hline
-    $1$       & $0{,}25$ & \id{sat} \\ \hline
-    $10$      & $0{,}12$ & \id{sat} \\ \hline
+    $0$       & $\hll{0{,}10}$ & \id{sat} \\ \hline
+    $0{,}001$ &      $0{,}58$  & \id{sat} \\ \hline
+    $0{,}01$  &      $0{,}46$  & \id{sat} \\ \hline
+    $0{,}1$   &      $0{,}36$  & \id{sat} \\ \hline
+    $1$       &      $0{,}25$  & \id{sat} \\ \hline
+    $10$      &      $0{,}12$  & \id{sat} \\ \hline
     }
 
 Tabulka \rfTab{ball_dreal_int_cmp} navzájem
@@ -5515,8 +5528,8 @@ což nakonec není nic překvapivého.
 
 %%%%%%%%%%%%%
 
-% Sun 06 May 2018 12:26:24 AM CEST
-\begin{subsection}{Elektrický oscilátor}\label{ss:exp:examples:osc}
+% Sun 06 May 2018 02:47:52 PM CEST
+\begin{subsection}{Elektrický oscilátor}\label{ss:exp:examples:el_osc}
 Jedná se opět o~příklad převzatý z~dReal,
 který modeluje elektrický oscilátor.
 Příklad je jen demonstrační,
@@ -5544,6 +5557,7 @@ Jednotlivá \acr{ode} jsou přibližně popsána takto
 \qquad \der{\omega_2} &= - \omega_2 && \\
 \qquad \der{\tau} &= 1
 \end{flalign*}
+kde $\omega$ je konstanta.
 
 Diskrétní stav je tvořen třemi stavy,
 mezi kterými se cyklicky přepíná podle časovače \id{tau}
@@ -5554,10 +5568,142 @@ Podmínky přechodů ale nezávisí na~přesné hodnotě \id{tau},
 ale na~intervalech (jsou tedy nedeterministické).
 Ty jsou aproximovány s~krokem \id{0.1}.
 
-Počáteční podmínky: \id{y = 0}, \id{z = 0},
-\id{om1 = 2}, \id{om2 = 2.5}, \id{tau = 0}
-a interval \id{-0.2 <= x <= 0.1}
-je aproximován s~krokem \id{0.25}.
+Počáteční podmínky: \id{y~=~0}, \id{z~=~0},
+\id{om1~=~2}, \id{om2~=~2.5}, \id{tau~=~0}
+a interval \id{-0.2~<=~x~<=~0.1},
+který je aproximován s~krokem \id{0.25}.
+
+Je nutné dodržet následující invarianty:
+\id{-5~<=~x~<=~5}, \id{-5~<=~y~<=~5}, \id{-5~<=~z~<=~5},
+a přechody provést vždy jen v~rámci
+vymezených intervalů pro~\id{tau}:
+stav~1: \id{4~<=~tau~<=~5},
+stav~2: \id{8~<=~tau~<=~10},
+stav~3: \id{5~<=~tau~<=~6}.
+
+\pic{el_osc_dreal.pdf}{el_osc:dreal}{0.95}
+   {Elektrický oscilátor v~dReal (s~aproximovanými intervalovými podmínkami)}
+   {Funkce \id{x} má červenou barvu, \id{y} fialovou, \id{z} hnědou,
+    \id{om1} modrou, \id{om2} oranžovou a \id{tau} zelenou.}
+\pic{el_osc_0_5.pdf}{el_osc:0.5}{0.85}
+   {Elektrický oscilátor s~délkou fáze $0{,}5$ s.}
+   {Funkce \id{tau} je časovač sloužící
+    k~cyklickému přepínání diskrétních stavů.}
+\pic{el_osc_5.pdf}{el_osc:5}{0.85}
+   {Elektrický oscilátor s~délkou fáze $5$ s.}
+   {Funkce \id{tau} je časovač sloužící
+    k~cyklickému přepínání diskrétních stavů.
+    Trajektorie funkcí jsou v~tomto případě méně hladké.}
+
+Na~obrázku \rfPic{el_osc:dreal}
+je uveden grafický výstup příkladu v~dReal,
+na~obrázcích \rfPic{el_osc:0.5} a \rfPic{el_osc:5}
+pak výstupy našeho nástroje, s~odlišnými délkami fází.
+Z~grafů je patrné, že trajektorie funkcí jsou nejvíce hladké
+(tj.~více přesné) v~případě řešiče dReal.
+
+\tab{el_osc_cmp}{0.6}
+   {Elektrický oscilátor: srovnání délky výpočtu}
+   {Řádky s~\id{T} se týkají našeho nástroje s~fixní délkou fáze \id{T} [s].}
+   {r||c|l}
+   {Varianta & Délka výpočtu [s] & Výstup \\ \hline
+    dReal             & $\hll{0{,}47}$ & \id{sat} \\ \hline
+    \id{T = 0.25}     & $14{,}5$ \ \ \ & \id{sat} \\ \hline
+    \id{T = \ 0.5}    & $4{,}5$  \ \   & \id{sat} \\ \hline
+    \id{T = \ \ \  1} & $0{,}83$       & \id{sat} \\ \hline
+    \id{T = \ \ \  2} & $10{,}1$ \ \ \ & \id{unsat} \\ \hline
+    \id{T = \ \ \  4} & $1{,}26$       & \id{unsat} \\ \hline
+    \id{T = \  1.5}   & $\hll{0{,}47}$ & \id{sat} \\ \hline
+    \id{T = \  2.5}   & $\hll{0{,}21}$ & \id{sat} \\ \hline
+    \id{T = \  5.0}   & $\hll{0{,}10}$ & \id{sat} \\ \hline
+    }
+
+\tab{el_osc_prof}{0.5}
+   {Elektrický oscilátor: profilace částí výpočtu}
+   {Poměry značí relativní dobu výpočtu dotčené části
+    vzhledem k~celkovému času.
+    \id{T} značí fixní délku fáze.}
+   {r||c|c}
+   {\id{T} [s] & Poměr \acr{smt} [\%] & Poměr \acr{ode} [\%] \\ \hline
+     $0{,}25$ & $99{,}9$ & $0{,}1$ \\ \hline
+     $0{,}5$  & $99{,}9$ & $0{,}1$ \\ \hline
+     $1$      & $99{,}7$ & $0{,}3$ \\ \hline
+     $1{,}5$  & $99{,}5$ & $0{,}4$ \\ \hline
+     $2$      & $99{,}5$ & $0{,}5$ \\ \hline
+     $2{,}5$  & $99{,}1$ & $0{,}8$ \\ \hline
+     $4$      & $98{,}9$ & $1{,}1$ \\ \hline
+     $5{,}0$  & $98{,}1$ & $1{,}7$ \\ \hline
+    }
+
+Tabulka \rfTab{el_osc_cmp} zachycuje výstupy
+a naměřené délky výpočtu řešiče dReal
+a našeho nástroje s~rozdílnými délkami fází.
+Tabulka \rfTab{el_osc_prof} uvádí rozložení
+celkové doby výpočtu mezi řešiče \acr{smt} a \acr{ode}.
+
+%%%
+
+% Sun 06 May 2018 03:08:36 PM CEST
+\begin{paragraph}{Diskuze výsledků.}\label{p:exp:examples:el_osc:results}
+Tento příklad přínáší potěšující zprávy,
+konkrétně tabulka \rfTab{el_osc_cmp}.
+Opět významně závisí na~volbě (fixní) délky fáze \id{T},
+to je zřejmé a bude to platit pro~všechny (splnitelné) vstupy.
+Tentokrát byly možné i~volby vyšších hodnot \id{T},
+neboť bezprostředně nehrozilo porušení invariant během integrace
+a přechody mezi diskrétními stavy závisely pouze na~čase.
+V~případě \id{T~=~5} jsme téměř dosáhli minimálního počtu
+potřebných ověření splnitelnosti,
+tj.~jen v~okamžicích přechodů.
+(Tak se přibližně chová také dReal.)
+
+Tím jsme se více přiblížili přímému srovnání
+integračních metod~---~klasických numerických metod
+a metod s~intervalovou aritmetikou.
+V~tomto případě \hl{je naše řešení rychlejší}.
+Nutno však podotknout, že výsledné trajektorie jsou méně přesné.
+
+Pro~některé volby hodnot \id{T} není možné splnit invarianty.
+
+Tabulka \rfTab{el_osc_prof} opět potvrzuje,
+že délka výpočtu strávená \acr{smt} řešičem
+stále vysoce převyšuje \acr{ode} řešič,
+a to i~v~případě \id{T~=~5}.
+\end{paragraph} %%Diskuze výsledků.
+
+%%%
+
+\bigskip
+
+\tab{el_osc_dreal_int_cmp}{0.5}
+   {Elektrický oscilátor: srovnání délky výpočtu řešiče dReal
+    s~intervalovými podmínkami}
+   {$\delta$ značí vstupní velikost nejistoty.
+    Řádek s~${\delta = 0}$ reprezentuje variantu
+    s~aproximovanými intervalovými podmínkami.}
+   {r||c|l}
+   {$\delta$  & Délka výpočtu [s] & Výstup \\ \hline
+    $0$       & $\hll{0{,}47}$       & \id{sat} \\ \hline
+    $0{,}001$ &      $22{,}3$ \ \ \  & \id{sat} \\ \hline
+    $0{,}01$  &      $19{,}4$ \ \ \  & \id{sat} \\ \hline
+    $0{,}1$   &      $11{,}0$ \ \ \  & \id{sat} \\ \hline
+    $1$       &      $6{,}6$  \ \    & \id{sat} \\ \hline
+    $10$      &      $0{,}5$  \ \    & \id{sat} \\ \hline
+    }
+
+\pic{el_osc_dreal_d10.pdf}{el_osc:dreal:d10}{0.8}
+   {Elektrický oscilátor v~dReal
+    s~intervalovými podmínkami s~$\delta = 10$}
+   {$\delta$ značí vstupní velikost nejistoty.}
+
+Pro~úplnost ještě uvádím výstupy řešiče dReal
+za~použití intervalových podmínek pro \id{x} a \id{tau}
+v~tabulce \rfTab{el_osc_dreal_int_cmp}.
+V~tomto případě jsou rozdíly
+oproti aproximovaným intervalovým podmínkám
+mnohem vyšší, kromě případu ${\delta = 10}$,
+který je však vůči vstupu hodně tolerantní
+(viz.~obrázek \rfPic{el_osc:dreal:d10}).
 \end{subsection} %%Elektrický oscilátor
 
 %%%%%%%%%%%%%

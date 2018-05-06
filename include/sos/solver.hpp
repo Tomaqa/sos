@@ -32,6 +32,9 @@ namespace SOS {
         bool is_quiet() const                               { return _quiet; }
 
         void print_results();
+        #ifdef PROFILE
+        void print_profile() const;
+        #endif //< PROFILE
 
         void set_traject_ofile(string ofile);
 

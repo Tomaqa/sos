@@ -136,8 +136,12 @@ namespace SOS {
             }
             if (e < entries_count-1) cout << endl;
         }
+    }
 
-        #ifdef PROFILE
+    #ifdef PROFILE
+    template <typename OSolver>
+    void Solver<OSolver>::print_profile() const
+    {
         const double smt_time = check_sat_time + other_smt_time;
         const double smt_rel_time = (smt_time/wall_time)*100;
         const double check_sat_rel_time = (check_sat_time/smt_time)*100;
@@ -159,8 +163,8 @@ namespace SOS {
              << " (" << ode_rel_time << " %)" << endl
              << "Other time: " << other_time << "s"
              << " (" << other_rel_time << " %)" << endl;
-        #endif //< PROFILE
     }
+    #endif //< PROFILE
 
     template <typename OSolver>
     void Solver<OSolver>::set_traject_ofile(string ofile)
