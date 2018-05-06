@@ -66,6 +66,7 @@
 
 \newacr{gpl}{GPL}{General Public License}
 \newacr{gnu}{GNU}{GNU's Not Unix!}
+\newacr{mit}{MIT}{Massachusetts Institute of~Technology}
 \newacr{os}{OS}{Operační systém}
 \newacr{posix}{POSIX}{Portable Operating System Interface}
 
@@ -1076,8 +1077,9 @@ nazývány jako \name{numerická integrace}.
 \begin{section}{Hybridní systémy}\label{s:theory:hybrid}
 (Dynamický) systém se nazývá \name{hybridním},
 pokud vykazuje jak diskrétní, tak spojité změny.
-Diskrétní změny je charakterizováno \name{skoky} (angl. \name{jumps}),
-spojité \name{toky} (angl. \name{flows}).
+Diskrétní změny jsou charakterizovány \name{skoky} (angl. \name{jumps}),
+spojité \name{toky} (angl. \name{flows});
+tyto pojmy ale nebudou příliš používány.
 Skoky jsou obvykle popsány \name{konečným automatem},
 toky pomocí soustav \acr{ode}.
 
@@ -1418,16 +1420,47 @@ je k~nalezení v~referenčním dokumentu~\cit{smtlib-reference-art}.
 
 %%%%%%%%%%%%%
 
-% Sat 24 Mar 2018 07:49:48 PM CET
+% Sun 06 May 2018 10:02:17 PM CEST
 \begin{subsection}{\acr{smt} řešiče}\label{ss:search:smt:solver}
-\cmt{Všechny zde uvedené \acr{smt} řešiče používají
-líný přístup \cmt{jakto?}.}
 Použití \acr{smt} řešičů se do~značné míry kryje se \acr{sat} řešiči,
 často je nahradily, resp. rozšířily.
+Uvádím jen malé množství řešičů,
+v~porovnání s~celkovým počtem.
 
 %%%
 
-% Sun 18 Mar 2018 10:04:17 PM CET
+% Sun 06 May 2018 09:51:57 PM CEST
+\begin{paragraph}{\acr{cvc}4}\label{p:search:smt:solver:cvc4}
+je inkrementální open-source \acr{smt} řešič~\cit{cvc4}\cit{cvc4-art},
+který je navržen pro~snadné rozšiřování
+a poskytuje rozhraní v~C++
+a také rozhraní textové přes vstupní jazyk,
+tzn. že nástroj lze použít jak jako knihovnu,
+tak samostatně,
+tj.~jako \name{černou skříňku} (angl. \name{black box}).
+Jedná se o~poměrně rozsáhlý projekt.
+
+\acr{cvc}4 přijímá vlastní vstupní jazyk,
+nebo standard \acr{smt}-LIB verze 1 nebo 2.
+Podporuje řadu teorií (resp. logik):
+číselné aritmetiky, bitvektory, pole, řetězce \dots
+Podporuje také kvantifikátory
+a nelineární logiky.
+
+Nástroj původně používal vlastní \acr{sat} řešič,
+nyní používá Mini\acr{sat}~\cit{cvc4-art}.
+K~řešení \acr{smt} používá líný přístup
+založený na~algoritmu \acr{dpll}.
+
+Řešič se celkově umístil na~1.~pozici
+v~mezinárodní soutěži
+\name{\acr{smt}-COMP}~\cit{smtcomp}\cit{smtcomp-art}
+v~roce 2015 a 2017.
+\end{paragraph} %%\acr{cvc}4
+
+%%%
+
+% Sun 06 May 2018 09:41:58 PM CEST
 \begin{paragraph}{Open\acr{smt}}\label{p:search:smt:solver:opensmt}
 (konkrétně jeho druhá verze)
 je inkrementální open-source \acr{smt} řešič napsán v~jazyce C++,
@@ -1439,9 +1472,14 @@ Nástroj byl implementován
 s~důrazem na~snadnou rozšiřitelnost o~nové \set{T}-řešiče,
 současně však zůstává efektivní%
 \footnote{V~letech 2008 a 2009
-byl oceněn v~soutěži \name{\acr{smt}-COMP}
+byl oceněn v~soutěži
+\name{\acr{smt}-COMP}~\cit{smtcomp}\cit{smtcomp-art}
 jako nejrychlejší open-source \acr{smt} řešič
-ve~čtyřech logikách ze~\acr{smt}-LIB.}.
+ve~čtyřech logikách ze~\acr{smt}-LIB.
+V~pozdějších ročnících se už ale vysoko neumisťoval.}.
+Řešič není tak rozsáhlý,
+jako např. \acr{cvc}4,
+a jeho nasazení může být snazší.
 
 Open\acr{smt} používá líný přístup.
 Jeho architektura je dekomponována do~tří hlavních bloků:
@@ -1454,39 +1492,52 @@ konkrétním problémům,
 v~případě že je lze řešit efektivněji než v~obecném případě.
 
 Řešič lze v~aplikacích používat také odděleně
-jako \name{černou skříňku} (angl. \name{black box}),
-a to buď prostřednictvím volání funkcí \acr{api},
+jako černou skříňku,
+a to buď prostřednictvím programového rozhraní (\acr{api}),
 nebo zpracováním formule jako textového vstupu
 (např. ve~formátu \acr{smt}-LIB).
+Mně se však nepodařilo řešič v~textovém módu uspokojivě používat.
 
-\cmt{Vyjmenovat logiky}
+Řešič mj. podporuje logiky
+\id{QF\_\-LRA}, \id{QF\_\-UFLRA} a \id{QF\_\-BV}
+(podle \acr{smt}-LIB standardu).
+Bohužel nepodporuje žádnou nelineární logiku.
 \end{paragraph} %%Open\acr{smt}
 
 %%%
 
-% Wed 07 Mar 2018 02:06:57 PM CET
-\begin{paragraph}{\acr{cvc}4}\label{p:search:smt:solver:cvc4}
-je open-source \acr{smt} řešič~\cit{cvc4}.
-Stejně jako Open\acr{smt} je navržen
-pro~snadné rozšiřování a poskytuje rozhraní v~C++
-a také rozhraní textové přes vstupní jazyk,
-tzn. že nástroj lze použít jak jako knihovnu,
-tak samostatně.
+% Mon 07 May 2018 12:14:32 AM CEST
+\begin{paragraph}{z3}\label{p:search:smt:solver:z3}
+je důkazní nástroj pocházející od~Microsoft\reg Research,
+nicméně má otevřené zdrojové kódy
+a je publikován pod~licencí \acr{mit}~\cit{z3-art}\cit{z3}.
+Je napsán převážně v~jazyce C++
+a podporuje většinu rozšířených \acr{os}.
+V~Microsoftu se používá
+pro~účely softwarové analýzy a verifikace
+a generování testů.
 
-\acr{cvc}4 přijímá vlastní vstupní jazyk,
-nebo standard \acr{smt}-LIB verze 1 nebo 2,
-kde však neposkytuje plnou functionalitu
-(nelineární aritmetiky nejsou zatím adekvátně podporovány).
-Má již vestavěno několik základních teorií,
-např. číselné aritmetiky, bitvektory, řetězce \dots
-Podporuje kvantifikátory
-a je schopen generovat modely.
+Nástroj přijímá několik vstupních textových formátů,
+mj.~vlastní formát a \acr{smt}-LIB.
+Je možné jej použít také jako knihovnu
+s~programových rozhraním
+v~několika jazycích (C++, Java, Python, \dots).
 
-\cmt{1. v~\acr{smt}-COMP 2017}
-\cmt{složitější než Open\acr{smt}}
-\cmt{Vyjmenovat logiky}
-\cmt{\cit{cvc4-art}}
-\end{paragraph} %%\acr{cvc}4
+z3 provádí poměrně důkladné předzpracování vstupu
+a podle povahy vstupu používá různé nástroje.
+Ovládá oba přístupy k~řešení
+\acr{smt}: pilný i~líný,
+a zvolí ten, který usoudí jako vhodnější.
+Např. v~teorii bitvektorů bývá mnohdy
+vhodnější použít pilný přístup,
+protože zakódování do~Booleovských proměnných je snadné.
+
+Kromě komponent \set{T}-řešičů
+se dále používá \acr{sat} řešič
+založený na~\acr{dpll} algoritmu
+a také samostatná komponenta
+pro~práci s~kvantifikátory~\cit{z3-art}.
+\end{paragraph} %%z3
 
 %%%
 
@@ -3177,7 +3228,7 @@ Příklady příkazových maker:
 #def SUM_SQR() (+
    #for (i 0 #N)  ;; equiv. to: #for (i 0 (<= #i #N) (+ #i 1))
                   ;; equiv. to: #for (i (0 1 2 3 4 5))
-   #let j ((+ #i 1))
+   #let j ((+ #i 1))  ;; or #let j (+ #i 1)
        (* #i #j)
    #endlet j
    #endfor
@@ -4310,7 +4361,7 @@ v~sekci \rf{sss:design:arch:comp:smt}.
 V~našem prototypu je řešič použit jako samostatná aplikace
 s~textovým rozhraním podle \acr{smt}-LIB standardu verze~2.
 Náš nástroj byl testován s~řešiči \acr{cvc}4 a z3
-(viz.~sekce \rf{p:search:smt:solver:cvc4} \cmt{a z3}).
+(viz.~sekce \rf{p:search:smt:solver:cvc4} a \rf{p:search:smt:solver:z3}).
 
 \acr{smt} řešič reprezentuje třída \id{SMT::\-Solver},
 která momentálně zahrnuje jak potřebné rozhraní, tak implementaci
@@ -5221,7 +5272,8 @@ používá odeint (třída \id{ODE::\-Odeint}).
    \acr{ode} řešiče \acr{sundials}.
 \item Umožnit obecnější nastavení fází výpočtu v~řídící komponentě.
 \item Umožnit obecnější koncové podmínky diferenciálních rovnic,
-   např. podle koncové hodnoty funkce.
+   např. podle koncové hodnoty funkce,
+   nebo přímo umožnit průběžnou kontrolu obecných invariant.
 \item Implementace efektivnějšího algoritmu
    redukujícího počet operací ověření splnitelnosti vstupu.
 \item Implementace výstupu \id{unknown} pro~případy,
