@@ -233,7 +233,7 @@
 %%%%%%%%%%%%%%%%%
 
 \department{Katedra číslicového návrhu}
-\title{SMT řešič s~diferenciálními rovnicemi}
+\title{SAT s~diferenciálními rovnicemi}
 \authorGN{Tomáš} %(křestní) jméno autora
 \authorFN{Kolárik} %příjmení autora
 \authorWithDegrees{Bc. Tomáš Kolárik} %jméno autora
@@ -245,7 +245,7 @@ za~veškerou podporu a motivaci během celého studia.
 Dále panu vedoucímu doc. Dipl.-Ing. Dr. techn. Stefanu Ratschanovi
 za~profesionální a velmi ochotnou asistenci s~touto prací.}
 
-% Fri 04 May 2018 11:40:02 AM CEST
+% Sun 06 May 2018 08:22:32 PM CEST
 \abstractCS{
 % Úvod
 Na~mnoho dnešních systémů, např. vestavných,
@@ -258,7 +258,7 @@ pro~garanci splnění specifikací.
 % Motivace
 Formální verifikace exaktně ověřuje
 matematický model systému;
-jedním z~používaných způsobů je např. \acr{sat}.
+jedním z~používaných postupů je např. \acr{sat}.
 Problém nastává, když potřebujeme
 v~modelu použít také diferenciální rovnice (\acr{ode}),
 které jsou pro~popis fyzikálních jevů zcela přirozené.
@@ -284,27 +284,29 @@ Součástí práce je prototyp nástroje
 nazvaný \acr{sos} (\acrl{sos}),
 který kombinuje \acr{smt} (rozšíření problému \acr{sat})
 s~diferenciálními rovnicemi.
-Propojení \acr{smt} a \acr{ode} řešiče
-je flexibilní, jelikož jsou oba
-nezávislé od~ostatních komponent.
+\acr{smt} a \acr{ode} řešiče
+jsou oba nezávislé od~ostatních komponent.
 Použit byl řešič odeint,
 a z~\acr{smt} řešičů to byly \acr{cvc}4 a z3.
 
 % Výsledky, užitek
-Hlavním výstupem
-je potvrzení zvoleného konceptu,
-který používá klasické numerické metody
-pro~řešení \acr{ode}:
-pro~některé praktické úlohy
-je verifikace modelu naším způsobem několikanásobně
-rychlejší než v~případě řešiče dReal,
-aniž by byl znatelný rozdíl
-v~přesnosti výstupů.
+Hlavními výstupy jsou zjištění,
+že použití klasických numerických metod
+urychluje celkový výpočet,
+a dále, že výpočet úloh
+s~přesnými počátečními podmínkami (\acr{ivp})
+je mnohem rychlejší,
+než úloh s~intervaly (I\acr{ivp}).
+Intervaly lze přitom efektivně aproximovat
+výčty hodnot v~logickém součtu.
+Tato zjištění potvrzují náš zvolený koncept,
+a byla ověřena v~některých příkladech,
+kdy byl náš postup rychlejší,
+než u~stávajícího řešiče dReal.
 
 % Závěr
 Tím bylo dosaženo cíle
-realizace efektivnějšího
-a v~praxi použitelnějšího
+v~praxi použitelnějšího
 přístupu k~formální verifikaci
 systémů s~diferenciálními rovnicemi.
 Práce by měla sloužit jako zdroj inspirace
@@ -340,7 +342,7 @@ hybrid systems model analysis}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Thu 03 May 2018 11:16:40 PM CEST
+% Sun 06 May 2018 08:33:20 PM CEST
 \begin{introduction}\label{ch:intro}
 % Úvod
 Většina veřejnosti, a nejen té laické,
@@ -446,6 +448,15 @@ pro~které je zcela přirozené,
 (\name{\acr{ode}}, angl. \name{\acrl{ode}})~\cit{ode-lec}\cit{ode},
 které v~obecném případě problém \acr{smt} neovládá.
 
+Takový nástroj by měl mnoho možných uplatnění,
+např. ověření modelů regulátorů,
+které mají udržovat danou veličinu ve~stanovených mezích;
+návrh modelů popisujících dynamiku nějakých těles
+tak, aby nedocházelo ke~kolizím s~ostatními;
+experimentování se~specifikacemi
+spolehlivostních modelů,
+atd.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Fri 04 May 2018 05:35:04 PM CEST
@@ -468,26 +479,39 @@ odlišný přístup v~řešení \acr{ode}
 pomocí \name{klasických numerických metod}~\cit{ode-nsolve-intro},
 které neposkytují exaktní garance chyb
 a mohou být méně přesné.
-Od~tohoto postupu se však očekávalo,
+Tyto metody pracují s~úlohami,
+které mají přesné vstupní podmínky (\acr{ivp}).
+Od~tohoto postupu se očekávalo,
 že bude mnohem rychlejší,
-a tedy i~použitelný v~praxi.
+a tedy i~lépe použitelný v~praxi.
 Součástí práce je prototyp nástroje,
 který implementuje avizované postupy,
 pro~účely ověření zvoleného konceptu.
 
 %%%
 
-% Fri 04 May 2018 06:15:12 PM CEST
+% Sun 06 May 2018 08:42:38 PM CEST
 \begin{paragraph}{Výsledky.}\label{p:intro:goal:results}
-Přestože je implementovaný nástroj pouhým prototypem,
-i~tak splnil očekávání
-a pro~některé praktické úlohy
-vykazuje násobně vyšší výkon,
-než stávající řešič dReal.
-Přitom mnohdy není znatelný rozdíl
-v~přesnosti výstupů porovnávaných řešičů.
+Navržený koncept se podařilo potvrdit.
+Největší rozdíl byl pozorován
+mezi úlohami \acr{ivp} a úlohami s~intervaly
+(I\acr{ivp}), a to bez~ohledu
+na~použitý řešič.
+Úlohy \acr{ivp} se ukázaly jako mnohem
+snazší pro~výpočet,
+a jak náš řešič, tak řešič dReal,
+tyto úlohy počítal relativně rychle.
 
-\cmt{konkrétní příklady}
+V~příkladech, kde tomu nebránila
+naše nedostatečná implementace,
+si počínalo naše řešení rychleji, než řešič dReal.
+Konkrétně se jednalo např. o~modelový příklad
+elektrického oscilátoru, jehož změny diskrétního stavu
+závisí pouze na~čase,
+v~němž naše nejlepší testovaná konfigurace
+dosáhla téměř pětinásobně kratšího času.
+Tím se potvrdilo,
+že je zvolený koncept pro~\acr{ode} řešič efektivnější.
 \end{paragraph} %%Výsledky.
 
 %%%
@@ -5227,7 +5251,7 @@ a srovnám výsledný výkon s~řešičem dReal.
 Nejprve uvedu metodiku,
 dle které jsem při~měření postupoval,
 a poté jednotlivé příklady.
-Na~závěr uvedu další úlohy,
+Na~závěr uvedu některé případy užití,
 na~které by bylo možné řešič použít.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -5272,7 +5296,7 @@ podrobněji znalá tohoto programu.
 %%%%%%%%%%%%%
 
 % Sat 05 May 2018 01:14:37 PM CEST
-\begin{subsection}{Měřící platforma}\label{ss:exp:method:platform}
+\begin{subsection}{Měřicí prostředky}\label{ss:exp:method:resources}
 Všechna měření byla provedena
 na~procesoru
 Intel\reg Core\textsuperscript{TM}
@@ -5287,7 +5311,10 @@ byl použit příkaz \id{time}
 K~profilaci vlastního kódu byly použity
 funkce \id{omp\_\-get\_\-wtime}
 standardu \acr{omp}.
-\end{subsection} %%Měřící platforma
+
+Z~\acr{smt} řešičů jsem používal řešič z3,
+který si počínal efektivněji než \acr{cvc}4.
+\end{subsection} %%Měřicí prostředky
 
 %%%%%%%%%%%%%
 
@@ -5708,20 +5735,104 @@ který je však vůči vstupu hodně tolerantní
 
 %%%%%%%%%%%%%
 
+% Sun 06 May 2018 06:47:06 PM CEST
+\begin{subsection}{Závěr experimentů}\label{ss:exp:examples:conclusion}
+Některé úlohy potvrdily, že náš zvolený koncept
+je nadějný pro~uplatnění v~praxi.
+Použití klasických numerických metod v~\acr{ode} řešiči
+je rychlejší než použití intervalové aritmetiky,
+kterou používá řešič dReal.
+I~tento řešič si však dokáže počínat relativně efektivně,
+pokud pracuje s~úlohou \acr{ivp},
+a ne s~intervaly (I\acr{ivp}).
+Intervaly lze efektivně aproximovat výčtem hodnot
+jako logického součtu.
+To je nejdůležitější pozorování této práce.
+
+Náš nástroj drtivou většinu doby výpočtu stráví
+na~straně \acr{smt} řešiče.
+Proto bude následnou snahou
+tyto operace maximálně redukovat,
+zejména umožněním kontrolování invariant v~rámci integrací
+(což se nevylučuje s~konceptem řešení \acr{ivp})
+a aplikováním sofistikovanějšího
+řídícího algoritmu, který by efektivněji zacházel s~návraty.
+
+S~náročností \acr{smt} operací souvisí to,
+že výkon našeho postupu výrazně závisí
+na~zvoleném počtu fází,
+tj.~počtem přerušení integrací \acr{ode} řešiče
+a kontrolování splnitelnosti celého vstupu \acr{smt} řešičem.
+Pokud se zvolený počet fází blíží
+minimu~---~počtu změn diskrétního
+stavu~---~pak je naše řešení násobně rychlejší než dReal,
+a to i~v~tomto raném stádiu vývoje.
+\end{subsection} %%Závěr experimentů
+
+%%%%%%%%%%%%%
+
 \end{section} %%Praktické úlohy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Sat 05 May 2018 01:57:37 PM CEST
-\begin{section}{Další možné aplikace}\label{s:exp:next}
-\end{section} %%Další možné aplikace
+% Sun 06 May 2018 06:44:17 PM CEST
+\begin{section}{Případy užití}\label{s:exp:use_case}
+Všechny zmiňované hybridní řešiče
+(náš, dReal, atd.)
+mohou být použity pro~účely modelování hybridních systémů
+a ověření jejich specifikací.
+
+Uvedu pár praktických příkladů,
+k~čemu by mělo být možné tyto nástroje využít:
+\begin{itemize}
+\item Obecně modely regulátorů:
+   je požadavek udržovat některou veličinu
+   v~rámci stanovených mezí,
+   což periodicky kontroluje řídící systém
+   a zapíná nebo vypíná regulaci
+   (např. termostat, vodní nádrž, \dots).
+\item Model autonomního řízení dopravního prostředku:
+   zkušený inženýr navrhne diferenciální rovnice tak,
+   že dobře popisují dynamiku prostředku,
+   a všechny diskrétní stavy;
+   testují se modelové situace,
+   zda se prostředek chová dle očekávání:
+   objetí překážky, udržování vzdálenosti,
+   zaparkování, \dots
+\item Modelování řídícího systému serveru:
+   na~server přichází požadavky podle
+   definované statistické distribuční funkce
+   obecně do~více vyrovnávacích pamětí;
+   ověření, s~jakými prostředky je systém schopen
+   příchozí požadavky obsloužit.
+\item Spolehlivostní modely (blokové, Markovské):
+   možnost experimentování se~vstupními parametry tak,
+   aby model splňoval nějaké požadavky
+   (např. střední doba do~poruchy).
+\end{itemize}
+a dále uvádím jen některé úvahy a nápady:
+\begin{itemize}
+\item Motorika robota:
+   motorickým pohybům robotů,
+   zejména těm neupevněným k~podložce,
+   může působit potíže udržet rovnováhu
+   kvůli setrvačnosti vlastních pohybů
+   (např. prudké pohyby paží humanoidního robota).
+   To je možné řešit např. protipohyby.
+   Nešlo by pro~obecný pohyb (v~rámci daného systému)
+   vypočítat odpovídající protipohyb, aby zůstal robot stabilní?
+\item Jeden ze~způsobů testování logických obvodů
+   využívá řešiče \acr{sat}. Testování společně s~analogovými obvody
+   je však problematické. Nebylo by k~tomu možné využít hybridního řešiče?
+\end{itemize}
+\end{section} %%Případy užití
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Fri 04 May 2018 06:29:54 PM CEST
+% Sun 06 May 2018 07:12:29 PM CEST
 \begin{conclusion}\label{ch:outro}
 % Úvod
 Cílem práce bylo aplikovat odlišný přístup
@@ -5746,13 +5857,28 @@ pro~nový nástroj.
 Výsledky práce splňují předsevzaté cíle:
 zvolený koncept se~ukázal jako nadějná
 alternativa ke~stávajícím řešičům.
-Experimenty na~některých
-praktických úlohách ukázaly,
+Experimenty na~praktických úlohách ukázaly,
 že použití našeho řešení
-je násobně rychlejší,
+může být rychlejší,
 než v~případě stávajícího řešiče dReal.
+Konkrétně se jednalo např. o~modelový příklad
+elektrického oscilátoru,
+v~němž naše nejlepší konfigurace dosáhla
+téměř pětinásobně kratšího výpočetního času.
 A to i~přesto, že implementovaný nástroj
 je pouhým prototypem.
+Výkonnost našeho postupu výrazně závisí
+na~zvoleném počtu fází výpočtu,
+tj.~četnosti střídání výpočtu \acr{smt} a \acr{ode} řešiče.
+
+% Pozorování
+Nejdůležitějším pozorováním této práce
+je efektivita úloh \acr{ivp}
+vůči úlohám s~intervaly (I\acr{ivp}).
+Intervaly lze efektivně aproximovat
+pomocí výčtu hodnot v~logickém součtu.
+S~takovým vstupem si i~řešič dReal
+počíná relativně rychle.
 
 % Další zásluhy
 Přidanou hodnotou je použitý prototyp nástroje,
@@ -5765,12 +5891,13 @@ jsou minimální: stačí, aby byl inkrementální
 a byl konformní se~standardem \acr{smt}-LIB,
 pak lze použít jako samostatný proces.
 U~\acr{ode} řešiče stačí, aby řešil \acr{ivp}
-a koncové podmínky závisely jen na~čase,
+a koncové podmínky závisely (zatím) jen na~čase,
 ale vyžaduje implementaci
 odvozené třídy a dodržení programového rozhraní.
 Aktuálně je používán řešič odeint.
 Z~\acr{smt} řešičů byly testovány
-\acr{cvc}4 a z3.
+\acr{cvc}4 a z3,
+ale z3 si počíná efektivněji.
 
 % Výhled
 Nový koncept byl prověřen a nyní čeká
