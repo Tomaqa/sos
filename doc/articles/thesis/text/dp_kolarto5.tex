@@ -63,6 +63,8 @@
 \newacr{ansi}{ANSI}{American National Standards Institute}
 \newacr{ascii}{ASCII}{American Standard Code for~Information Interchange}
 \newacr{pdf}{PDF}{Portable Document Format}
+\newacr{cpu}{CPU}{Central processing unit}
+\newacr{gpu}{GPU}{Graphics processing unit}
 
 \newacr{gpl}{GPL}{General Public License}
 \newacr{gnu}{GNU}{GNU's Not Unix!}
@@ -466,7 +468,7 @@ atd.
 a řešiče diferenciálních rovnic~\cit{sundials-art}\cit{odeint-art}
 již existují, ale většinou jen separátně.
 Existují i~řešiče, které již obě domény kombinují
-(např. dReal~\cit{dreal-smo-art}),
+(např. dReal~\cit{dreal-art}),
 nicméně zatím se jeví jako těžko uplatnitelné v~praxi,
 protože jsou příliš pomalé.
 Příčinou je to, že používají intervalovou aritmetiku,
@@ -491,7 +493,7 @@ pro~účely ověření zvoleného konceptu.
 
 %%%
 
-% Sun 06 May 2018 08:42:38 PM CEST
+% Mon 07 May 2018 04:45:48 PM CEST
 \begin{paragraph}{Výsledky.}\label{p:intro:goal:results}
 Navržený koncept se podařilo potvrdit.
 Největší rozdíl byl pozorován
@@ -513,6 +515,13 @@ v~němž naše nejlepší testovaná konfigurace
 dosáhla téměř pětinásobně kratšího času.
 Tím se potvrdilo,
 že je zvolený koncept pro~\acr{ode} řešič efektivnější.
+
+Úspěchu jsme dosáhli i~přesto,
+že se zatím jedná pouze o~prototypovou implementaci,
+zatímco dReal pochází z~disertační práce
+na~Carnegie Mellon University
+pod~vedením Edmund M. Clarka (nositel Turingovy ceny)
+a je již několik let ve~vývoji.
 \end{paragraph} %%Výsledky.
 
 %%%
@@ -1992,65 +2001,95 @@ Tabulka:
 
 Existují také \hl{adaptivní} Runge--Kutta metody,
 které v~každém kroce počítají odhad chyby aproximace,
-podle níž se dynamicky mění délka kroku $h_n$.
+podle níž se dynamicky mění délka kroku $h_n$
+(např. Dormand--Prince 5).
 \end{subsubsection} %%Runge--Kutta metody
 
 %%%%%%%
 
-% Sat 24 Mar 2018 07:59:43 PM CET
+% Mon 07 May 2018 11:08:36 AM CEST
 \begin{subsubsection}{\acr{ode} řešiče}\label{sss:search:ode:classic:solver}
 Následují řešiče, které některé z~uvedených klasických metod implementují.
+Nejen z~výkonnostních důvodů jsem zkoumal pouze
+řešiče napsané v~jazyce C či C++.
 
 %%%
 
+% Mon 07 May 2018 12:34:52 PM CEST
 \begin{paragraph}{\acr{sundials}}\label{p:search:ode:classic:solver:sundials}
 (\name{\acrl{sundials}}) je nástroj napsán v~jazyce
-\acr{ansi} C~\cit{sundials}.
-Pracuje s~třídami datových vektorů,
-nad~kterými lze vytvářet uživatelsky definované
-datové struktury a operace v~rámci aplikačního rozhraní.
-Má implementovány výchozí struktury
-s~předdefinovanými operacemi
-jak pro~sériové prostředí,
-tak i~paralelní se sdílenou (\name{\acr{omp}})
-nebo distribuovanou (\name{\acr{mpi}}) pamětí.
-Veškerá paralelizace je obsažena
-pouze v~rámci specifických operací nad~danými vektory
-(a lze ji rovněž uživatelsky implementovat),
+\acr{ansi} C~\cit{sundials},
+který je možné používat jak v~sériových,
+tak v~paralelních prostředích.
+\uv{Jedná se o~soubor pokročilých nástrojů
+pro~řešení rozsáhlých problémů,
+které mohou být modelovány jako systémy
+nelineárních algebraických rovnic,
+nebo jako \acr{ivp} v~rovnicích \acr{ode}
+nebo diferenciálních algebraických rovnicích
+(\acr{dae}).}~\cit{sundials-art}.
+Tomu odpovídají nástroje KINSOL, CV\acr{ode} a IDA.
+Nás zajímají jen \acr{ode}, a tedy jen CV\acr{ode},
+který byl přepsán z~Fortranu do~C,
+počínaje už rokem 1993.
+
+Nástroje operují s~uživatelsky definovatelnými
+strukturami datových vektorů, nad~kterými lze rovněž
+definovat potřebné operace.
+Tyto struktury mají standardizované programové rozhraní.
+Je možné také použít výchozí podoby datových struktur
+s~definovanými operacemi nad~sdíleným (např. \acr{omp})
+či distribuovaným (výchozí je \acr{mpi}) modelem paměti.
+Veškerý (případný) paralelismus je obsažen
+výhradně v~rámci vektorových operací,
 a tudíž není rozlišováno mezi sériovým a paralelním kódem aplikace.
 
-\acr{sundials} sestává z~více komponent.
-Diskutuji pouze jedinou z~nich~---~\name{CV\acr{ode}},
-který je určen pro~řešení \acr{ode}.
-Další komponenty řeší
-také diferenciální algebraické rovnice
-(\name{\acr{dae}})~---~\name{IDA}~---~a nelineární
-algebraické systémy~---~\name{KINSOL}.
-CV\acr{ode} je výsledkem
-přepsání řešiče \name{V\acr{ode}} z~Fortranu do~C,
-počínaje už rokem 1993~\cit{sundials-art}.
-
-\cmt{CV\acr{ode}S --- includes forward and disjoint sensitivity analysis}
+CV\acr{ode} implementuje lineární vícekrokové metody.
+Pro~úlohy bez~silného tlumení používá
+Adams--Moultonovy metody,
+pro~úlohy se~silným tlumením pak \acr{bdf}.
+Tzn. že používá výhradně implicitní metody,
+tj.~pomalejší, ale přesnější než explicitní.
 \end{paragraph} %%\acr{sundials}
 
 %%%
 
+% Mon 07 May 2018 12:34:47 PM CEST
 \begin{paragraph}{odeint}\label{p:search:ode:classic:solver:odeint}
 je flexibilní C++ knihovna
 pro~numerické řešení \acr{ode}~\cit{odeint}.
 Je navržena v~duchu šablonového metaprogramování
 (\name{\acr{tmp}})~---~veškeré její numerické algoritmy
-jsou nezávislé na~použitých datových kontejnerech.
-Také díky komfortnímu aplikačnímu rozhraní
-je implementace numerických simulací rychlá a snadná.
+jsou nezávislé na~použitých datových kontejnerech
+a jejich vzájemných operacích~\cit{odeint-art}.
+Lze tak např. pracovat i~s~maticemi,
+či s~poli umístěnými v~\acr{gpu}.
+Operace lze např. předefinovat na~\acr{simd}
+operace (např. s~použitím \acr{omp}).
+Nasazení řešiče je díky flexibilitě rychlé a snadné.
+
+\acr{tmp} je specifické tím,
+že programové rozhraní není definováno
+ve~zdrojových kódech,
+ale používají se jen koncepty popsané v~dokumentaci,
+při~jejichž dodržení se generuje kód
+přímo adaptovaný na~konkrétní datové typy.
+Jedná se o~tzv. \name{statický polymorfismus}~\cit{odeint-art}.
 
 Knihovna je součástí rodiny C++ knihoven \name{Boost}~\cit{boost-libs}.
-Obsahuje pouze hlavičkové soubory
-a umožňuje změnit chování numerických operací~---~tímto způsobem
-lze např. použít odeint
-se \acr{simd} operacemi~\cit{odeint-art}.
+Obsahuje pouze hlavičkové soubory,
+což prodlužuje délku překladu,
+ale umožňuje efektivnější statickou optimalizaci.
 
-\cmt{gsl}
+Řešič se zaměřuje zejména na~explicitní Runge--Kutta metody
+(např. RK4, Dormand--Prince 5),
+lze však implementovat i~jiné, např. vícekrokové.
+Integrace je prováděna po~krocích formou in-place,
+dle předloženého konceptu;
+výchozí variantou je projití všech kroků
+až do~koncové hodnoty nezávislé proměnné.
+Lze také průběžně ukládat odhad chyby,
+který je nutný pro~adaptivní metody.
 \end{paragraph} %%odeint
 
 %%%
@@ -2063,27 +2102,32 @@ se \acr{simd} operacemi~\cit{odeint-art}.
 
 %%%%%%%%%%%%%
 
-% Wed 14 Mar 2018 04:59:37 PM CET
+% Mon 07 May 2018 01:14:58 PM CEST
 \begin{subsection}{Garantovaná řešení}\label{ss:search:ode:valid}
 Tato řešení využívají \name{intervalovou aritmetiku}%
 \footnote{Nejsou nám známy metody s~garantovaným rozsahem aproximační chyby
 založená na~jiném principu, než je intervalová aritmetika.},
 což umožňuje jednak specifikovat počáteční podmínky
-s~nějakou nejistotou jakožto intervalový rozsah,
+s~nějakou nejistotou jakožto intervalový rozsah
+(pak problém nazývám jako \name{Interval}~\acr{ivp},
+\name{I\acr{ivp}}%
+\footnote{Některé zdroje tento problém formulují
+jako \acr{ivp} s~tím, že počáteční podmínky
+jsou nějakými množinami, včetně intervalů.
+Já budu \acr{ivp} v~našem pojetí a I\acr{ivp}
+striktně rozlišovat.}~\cit{ode-valid-runge_kutta-art}),
 druhak obalení úseků výsledku do~intervalových uzávěrů,
 tzn.~že meze odchylky aproximace od~exaktního řešení
 jsou přesně známy.
 Taková řešení se nazývají jako \name{garantovaná}
-(angl. \name{guaranteed} nebo \name{validated}).
-Některé zdroje tento problém formulují
-jako problém s~intervalovými počátečními podmínkami
-(\name{Interval}~\acr{ivp}, \name{I\acr{ivp}})%
-~\cit{ode-valid-runge_kutta-art},
-některé setrvávají u~názvu \acr{ivp}.
+(angl. \name{guaranteed}
+nebo \name{validated})~\cit{ode-valid-runge_kutta-art}.
 Garance rozsahu řešení je klíčovým rozdílem
 těchto metod
 od klasických řešičů \acr{ode}
 ze~sekce \rf{ss:search:ode:classic}.
+
+\cmt{obrázek}
 
 %%%
 
@@ -2148,14 +2192,17 @@ použitím klasických numerických metod
 
 Zkoumané hybridní řešiče nám však posloužily
 jako zdroj cenných informací
-pramenících z~kombinace diskrétního a spojitého modelu
-a také nás inspirovaly ve~volbě vstupního jazyka.
-S~těmito řešiči budou také srovnány výsledky našeho produktu.
+pramenících z~kombinování \acr{sat} s~\acr{ode}
+a také nás inspirovaly v~návrhu vstupního jazyka.
+S~řešičem dReal budou také srovnány výsledky našeho produktu.
 
-\cmt{\cit{hydlogic-art}}
+Uvedené hybridní řešiče
+se zaměřují zejména na~analýzu hybridních systémů
+formou \acr{bmc}~\cit{hydlogic-art}\cit{dreal-smo-art}.
 
 %%%
 
+% Mon 07 May 2018 03:08:57 PM CEST
 \begin{paragraph}{i\acr{sat}-\acr{ode}}\label{p:search:hybrid:isat-ode}
 \uv{kombinuje \name{i\acr{sat}},
 který řeší rozsáhlé Boolovské kombinace aritmetických omezení,
@@ -2174,65 +2221,99 @@ Projekt nezveřejnil zdrojové kódy,
 přístupný je jen dynamicky linkovaný binární soubor
 s~externími závislostmi
 a je stále ve~stádiu vývoje.
-
-\cmt{Zatím jsem nebyl schopen spustit kvůli chybějícím starým knihovnám.}
+Tento soubor se mi nepodařilo spustit.
 \end{paragraph} %%i\acr{sat}-\acr{ode}
 
 %%%
 
-% Fri 23 Mar 2018 09:44:23 PM CET
+% Mon 07 May 2018 03:08:57 PM CEST
+\begin{paragraph}{hydlogic}\label{p:search:hybrid:hydlogic}
+byl vyvinut zejména z~důvodu podpory
+nelineárních hybridních systémů,
+se~kterými autoři uvádí,
+že měly tehdejší nástroje
+(včetně i\acr{sat}-\acr{ode})
+potíže~\cit{hydlogic-art}.
+
+Interní inkrementální \acr{smt} řešič používá líný přístup
+(viz.~sekce \rf{s:search:smt}),
+přičemž \set{T}-řešič implementuje
+mj.~veškerou spojitou část výpočtu,
+tj.~včetně integrace.
+Jako jedna z~komponent
+je využíván \acr{ode} řešič VN\acr{ode}-LP~\cit{vnode-lp}.
+
+Software tohoto nástroje jsem netestoval.
+\end{paragraph} %%hydlogic
+
+%%%
+
+% Mon 07 May 2018 03:35:26 PM CEST
 \begin{paragraph}{dReal}\label{p:search:hybrid:dreal}
-je nástroj napsán v~jazyce C++, který rozhoduje,
+je open-source nástroj napsán v~jazyce C++, který rozhoduje,
 zda je vstupní formule nesplnitelná (\id{unsat}),
-nebo $\delta$-splnitelná (\id{$\delta$-sat})~\cit{dreal}.
-Nesplnitelnost je rozhodnuta exaktně a doložena důkazem;
+nebo $\delta$-splnitelná
+(\id{$\delta$-sat})~\cit{dreal-art}\cit{dreal-smo-art}\cit{dreal}.
+Nesplnitelnost je rozhodnuta exaktně a volitelně doložena důkazem;
 $\delta$-splnitelnost je numericky aproximována
 (resp. exaktně rozhodnuta na~zjednodušené formuli)
-s~přesností $\delta$ (racionální číslo).
-\cmt{Přesněji: řeší exaktně 'delta-perturbated' formule,
-nevím zda je to přepsáno správně. .. OK}
+s~nejistotou $\delta$ (racionální číslo).
+
+Diskutuji jen 3.~verzi nástroje,
+ve~vývoji je však již i~4.~verze.
 
 dReal je postaven nad~některými existujícími nástroji,
 zejména Open\acr{smt}2~\cit{opensmt} a Mini\acr{sat}~\cit{minisat}
 a na~straně diferenciálních rovnic pak CAPD
-(viz.~\cit{dreal-smt-format-art}),
+(viz.~\cit{dreal-smo-art}\cit{dreal-smt-format-art}),
 který počítá intervalové uzávěry \acr{ode}.
-Zpracovává nelineární logiky
+dReal zpracovává nelineární logiky
 reálných čísel, zejména nad~polynomy,
 trigonometrickými či exponenciálními funkcemi,
 rozšířené o~\acr{ode}.
 
-Integrace nástrojů je v~implementaci řešena interně.
+Propojení nástrojů je v~implementaci řešeno interně.
 Základ tvoří lineární \set{T}-řešič v~Open\acr{smt},
 který je doplněn o~nelineární logiku a \acr{ode}.
 Konkrétně rozšiřuje logiku \id{QF\_\-LRA}
-na~\id{QF\_\-NRA} a ještě
+na~\id{QF\_\-NRA} (podle \acr{smt}-LIB standardu) a ještě
 o~diferenciální rovnice, nazvanou \id{QF\_\-NRA\_\-\acr{ode}}.
 Z~hlediska jazyka spočívá rozšíření v~přidání několika málo příkazů
 pro~definice \acr{ode}, nastavení invariant,
 propojení diskrétních stavů s~\acr{ode} apod.
-Nad tímto vstupem operuje řešič přímo,
-tj.~\acr{smt} a \acr{ode} část
-se nespouští zvlášť v~nezávislých komponentách.
+Nad tímto vstupem operuje řešič přímo
+a \acr{ode} část je součástí \set{T}-řešiče.
 Tento vstupní jazyk~\cit{dreal-smt-format-art}
 byl hlavním zdrojem naší inspirace
 při~návrhu vlastního vstupního jazyka.
 
 Program také používá vlastní specifikační jazyk,
 ze~kterého se generují nástrojem dReach \acr{smt} formule
-podle zvoleného počtu kroků%
-\footnote{dReal tento proces
-nazývá přímo jako \acr{bmc}.}.
+pro~účely \acr{bmc} se~zvoleným počtem kroků.
 Tento předstupeň je lépe lidsky čitelný
 a navíc brání chybám
 vzniklým z~ručního vytváření rozsáhlých \acr{smt} formulí.
 
-V~projektu je zahrnuto několik výkonnostních úloh
-ve~vstupních jazycích dReal (specifikace i~\acr{smt} formule).
-\cmt{např. dron se očividně počítá hodně dlouho;
-v~testech (ctest) několik úloh timeoutuje}
+Nástroj také explicitně umožňuje efektivnější
+kódování paralelní kompozice více systémů
+pomocí nových příkazů ve~vstupním jazyce.
 
-\cmt{\cit{dreal-smo-art}}
+dReal poskytuje některé přídavné heuristiky výpočtu
+(např. \acr{bmc}), které jsem ale nezkoumal.
+
+V~projektu je zahrnuto několik výkonnostních úloh
+ve~vstupních jazycích dReal
+(jako \acr{bmc} specifikace i~\acr{smt} formule).
+Některé úlohy jsem později použil pro~srovnání s~naším konceptem.
+Některé složitější úlohy (viz.~např. \cit{dreal-smo-art})
+se počítají velmi dlouho, v~řádu hodin a výše.
+
+Za~zmínku stojí, že dReal (jeho původní verze)
+pochází z~disertační práce
+na~Carnegie Mellon University
+pod~vedením Edmund M. Clarka,
+který je nositelem Turingovy ceny
+v~roce 2007.
 \end{paragraph} %%dReal
 
 %%%
@@ -2560,7 +2641,7 @@ a dále tyto funkce:
 
 %%%
 
-% Thu 03 May 2018 01:56:05 PM CEST
+% Mon 07 May 2018 04:35:22 PM CEST
 \begin{paragraph}{\id{set-logic}}\label{p:design:spec:ilang:smt:logic}
 nastavuje logiku použitou v~\acr{smt} řešiči:
 \begin{center}
@@ -2574,6 +2655,7 @@ podle \acr{smt}-LIB:
 \item \id{QF\_\-UFNRA}~---~nelineární bez~kvantifikátorů,
 \item \id{UFLRA}~---~lineární s~kvantifikátory.
 \end{itemize}
+Použití kvantifikátorů jsme však dosud nezkoumali.
 
 Příkaz smí být volán nejvýše jednou
 a musí předcházet všem ostatním uvedeným příkazům.
@@ -5350,7 +5432,7 @@ podrobněji znalá tohoto programu.
 % Sat 05 May 2018 01:14:37 PM CEST
 \begin{subsection}{Měřicí prostředky}\label{ss:exp:method:resources}
 Všechna měření byla provedena
-na~procesoru
+na~\acr{cpu}
 Intel\reg Core\textsuperscript{TM}
 i7-4702MQ o~taktovací frekvenci $2{,}2$ GHz
 na~\acr{os} Arch Linux.
@@ -5980,7 +6062,7 @@ směrem ke~konečnému produktu použitelném v~praxi.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Kompletní ukázkový příklad}
+\chapter{Kompletní příklad užití}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

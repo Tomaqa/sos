@@ -16,23 +16,31 @@ namespace SOS {
     using std::endl;
 
     template <typename OSolver>
-    Solver<OSolver>::Solver(istream& is)
+    Solver<OSolver>::Solver(istream& is, bool parse_only)
         : _parser(is)
     {
-        init();
+        init(parse_only);
     }
 
     template <typename OSolver>
-    Solver<OSolver>::Solver(string input)
+    Solver<OSolver>::Solver(string input, bool parse_only)
         : _parser(move(input))
     {
-        init();
+        init(parse_only);
     }
 
     template <typename OSolver>
-    void Solver<OSolver>::init()
+    string Solver<OSolver>::smt_input() const
     {
-        _smt_solver = SMT::Solver(cparser().csmt_input());
+        return cparser().csmt_input();
+    }
+
+    template <typename OSolver>
+    void Solver<OSolver>::init(bool parse_only)
+    {
+        if (parse_only) return;
+
+        _smt_solver = SMT::Solver(smt_input());
 
         Odes_spec odes_spec;
         Param_keyss param_keyss;

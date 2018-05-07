@@ -19,6 +19,7 @@ namespace SOS {
     private:
         bool _verbose{false};
         bool _quiet{false};
+        bool _parse_only{false};
     };
 }
 

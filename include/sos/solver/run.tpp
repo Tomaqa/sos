@@ -5,14 +5,20 @@ namespace SOS {
         return Util::Run::usage()
                + usage_row('v', "Sets verbose mode")
                + usage_row('q', "Sets quiet mode")
+               + usage_row('P', "Parse only and exit")
                + "\nSetting output file will enable storing "
-               + "trajectories of all ODEs.";
+                 + "trajectories of all ODEs.";
     }
 
     template <typename OSolver>
     void Solver<OSolver>::Run::do_stuff()
     {
-        Solver<OSolver> solver(*_is_ptr);
+        Solver<OSolver> solver(*_is_ptr, _parse_only);
+
+        if (_parse_only) {
+            cout << solver.smt_input() << endl;
+            return;
+        }
 
         if (_verbose) solver.be_verbose();
         else if (_quiet) solver.be_quiet();
@@ -49,7 +55,7 @@ namespace SOS {
     template <typename OSolver>
     string Solver<OSolver>::Run::getopt_str() const noexcept
     {
-        return Util::Run::getopt_str() + "vq";
+        return Util::Run::getopt_str() + "vqP";
     }
 
     template <typename OSolver>
@@ -64,6 +70,9 @@ namespace SOS {
         case 'q':
             _quiet = true;
             _verbose = false;
+            break;
+        case 'P':
+            _parse_only = true;
             break;
         }
     }

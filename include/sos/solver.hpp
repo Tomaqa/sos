@@ -22,14 +22,16 @@ namespace SOS {
         Solver& operator =(const Solver& rhs)                       = default;
         Solver(Solver&& rhs)                                        = default;
         Solver& operator =(Solver&& rhs)                            = default;
-        Solver(istream& is);
-        Solver(string input);
+        Solver(istream& is, bool parse_only = false);
+        Solver(string input, bool parse_only = false);
 
         void be_verbose()                                 { _verbose = true; }
         void be_quiet()                                     { _quiet = true; }
 
         bool is_verbose() const                           { return _verbose; }
         bool is_quiet() const                               { return _quiet; }
+
+        string smt_input() const;
 
         void print_results();
         #ifdef PROFILE
@@ -72,7 +74,7 @@ namespace SOS {
         using Ode_result = ODE::State;
         using Ode_results = vector<Ode_result>;
 
-        void init();
+        void init(bool parse_only);
 
         const Parser& cparser() const                      { return _parser; }
         const Odes& codes() const                { return cparser().codes(); }
