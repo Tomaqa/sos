@@ -71,6 +71,7 @@
 \newacr{mit}{MIT}{Massachusetts Institute of~Technology}
 \newacr{os}{OS}{Operační systém}
 \newacr{posix}{POSIX}{Portable Operating System Interface}
+\newacr{cc}{CC}{Creative Commons}
 
 \newacr{simd}{SIMD}{Single instruction multiple data}
 \newacr{omp}{OpenMP}{Open Multi-Processing}
@@ -622,11 +623,11 @@ Tato práce klade větší důraz na~praktickou část.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Fri 09 Mar 2018 12:23:51 AM CET
+% Mon 07 May 2018 05:18:37 PM CEST
 \begin{section}{Formulace problémů}\label{s:theory:formulation}
 Tato sekce popisuje konkrétní problémy a jejich varianty,
 kterými se v~této práci zabývám.
-Možnosti jejich řešení jsou uvedeny až v~následující sekci rešerše řešičů.
+Možnosti jejich řešení jsou uvedeny až v~následující kapitole.
 
 %%%%%%%%%%%%%
 
@@ -688,7 +689,7 @@ systému reprezentovaného přechodovým systémem~\cit{bmc-art}.
 Hlavním cílem je dokázání správnosti modelu,
 tj. zda není možné dospět do~zakázaných stavů.
 K~účelům specifikace takových přechodových systémů
-se používá temporální logika,
+lze použít temporální logiku,
 většinou \acr{ltl} nebo \acr{ctl}.
 
 Základní myšlenka techniky \acr{bmc} spočívá
@@ -1023,10 +1024,10 @@ což je běžné pro~fyzikální vztahy reálného světa.
 \hl{Obyčejná} diferenciální rovnice (\name{\acr{ode}})
 obsahuje derivace vztažené pouze
 k~\hl{jediné nezávislé proměnné},
-což je zpravidla čas~\cit{ode}.
+což je zpravidla čas.
 Řešení tohoto speciálního případu je obecně mnohem jednodušší,
 přesto však stále není obecně možné nalézt analytické řešení,
-a proto se používají numerické metody~\cit{odeint-art}.
+a proto se používají numerické metody~\cit{odeint-art}\cit{ode}.
 
 Kromě omezení na~\acr{ode} dále vymezuji
 následující vlastnosti:
@@ -1082,7 +1083,7 @@ nazývány jako \name{numerická integrace}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Sat 24 Mar 2018 10:42:01 AM CET
+% Mon 07 May 2018 05:40:38 PM CEST
 \begin{section}{Hybridní systémy}\label{s:theory:hybrid}
 (Dynamický) systém se nazývá \name{hybridním},
 pokud vykazuje jak diskrétní, tak spojité změny.
@@ -1116,7 +1117,7 @@ je nutné využít matematický aparát.
 
 %%%
 
-% Sat 17 Mar 2018 11:03:23 AM CET
+% Mon 07 May 2018 05:32:13 PM CEST
 \begin{paragraph}{Hybridní automat.}\label{s:theory:hybrid:auto}
 Hybridní systém lze jako celek
 matematicky modelovat jako \name{hybridní automat}.
@@ -1128,6 +1129,16 @@ Diskrétní změna stavu odpovídá skoku
 spojitá změna pak toku
 (průběhu \acr{ode}).
 Módy mohou mít také definovány \name{invarianty}.
+Jednoduchá ukázka hybridního automatu
+je uvedena na~obrázku \rfPic{thermostat:model}.
+
+\pic{thermostat_model.pdf}{thermostat:model}{0.65}
+   {Ukázka hybridního automatu modelu termostatu}
+   {$x$ značí teplotu.}
+
+Dále budou v~textu preferovány pojmy
+diskrétní stav před~módem
+a spojitý stav před~(spojitými) proměnnými.
 
 Analýza hybridního systému pak spočívá
 v~rozhodování o~množině stavů,
@@ -1138,8 +1149,7 @@ Existuje několik nástrojů
 analyzujících hybridní systémy
 modelované jako hybridní automaty,
 ale většinou nejsou založeny
-na~problému \acr{smt}.
-\cmt{Proč? Proč je to lepší/horší?}
+na~problému \acr{sat}.
 \end{paragraph} %%Hybridní automat.
 
 %%%
@@ -1151,28 +1161,30 @@ používají standardně pro~modelování systémů
 a jejich analýzu;
 k~tomu jsou hojně využívány
 \acr{sat} či \acr{smt} řešiče pro~diskrétní
-a \acr{ode} řešiče pro~spojité systémy.
-Výzvou této práce je obě domény efektivně kombinovat
-a zároveň využít nástrojů
-vycházejících z~fenoménu problému \acr{sat}.
+a \acr{ode} řešiče pro~spojité systémy
+(a nebo i~jiné postupy).
+Výzvou této práce je ověřit koncept,
+který obě domény kombinuje
+a současně využívá nástrojů
+vycházejících z~fenoménu problému \acr{sat}
+a používá klasické numerické metody pro~řešení \acr{ode}.
 \end{section} %%Hybridní systémy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Sat 24 Mar 2018 07:35:28 PM CET
+% Mon 07 May 2018 05:16:55 PM CEST
 \chapter{Možnosti řešení problematiky}\label{ch:search}
 V~této kapitole rozebírám možnosti řešení problémů
 uvedených v~kapitole \rf{ch:theory}
 a provádím rešerši existujících řešičů.
+V~této kapitole rovněž nezabíhám příliš do~detailů.
+
 Uvedené řešiče jsou jak izolované (jen \acr{smt} či \acr{ode}),
 tak hybridní (kombinují oba problémy),
 ale s~odlišným typem \acr{ode} řešiče, než na jaký jsme cílili.
 Pro~úplnost také uvádím sekci ohledně řešení problému \acr{sat}.
-
-U~řešičů zmiňuji více či méně podrobně
-jejich vlastnosti a zdůvodňuji proč jsem je použil či nepoužil.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1259,7 +1271,7 @@ nebo i~jejich kombinace~\cit{smt-stanford}.
 
 %%%
 
-% Sat 10 Mar 2018 03:55:11 PM CET
+% Mon 07 May 2018 11:51:07 PM CEST
 \begin{paragraph}{Pilný přístup}\label{p:search:smt:eager}
 soustředí většinu výpočtů
 do~\hl{externího} \acr{sat} řešiče tak,
@@ -1267,12 +1279,16 @@ do~\hl{externího} \acr{sat} řešiče tak,
 do~\acr{sat} formule (např. celá čísla pomocí bitů
 jako Booleovských proměnných).
 
-Výkonnost tohoto postupu je zcela závislá na~použitém \acr{sat} řešiči
-a nevyužívá zřejmých faktů vázaných k~dané teorii
-(např. komutativita)~\cit{smt}.
+Do~\acr{sat} řešiče jsou kódovány
+také axiomy teorie,
+což může potenciálně problém vyřešit rychle.
+Slabinou této metody je hrozba exploze
+velikosti přeložené formule~\cit{smt-stanford}.
+
+Výkonnost tohoto postupu je kriticky závislá na~použitém \acr{sat} řešiči.
 Na~druhou stranu je z~hlediska rozhraní a výpočtu
 v~podstatě nezávislý na~použitém \acr{sat} řešiči.
-Je flexibilnější než druhý přístup,
+Je flexibilnější než líný přístup,
 protože část specifickou pro~teorii tvoří \uv{jen}
 optimalizovaný překlad formule,
 samotný výpočet už ne.
@@ -1452,7 +1468,7 @@ Jedná se o~poměrně rozsáhlý projekt.
 \acr{cvc}4 přijímá vlastní vstupní jazyk,
 nebo standard \acr{smt}-LIB verze 1 nebo 2.
 Podporuje řadu teorií (resp. logik):
-číselné aritmetiky, bitvektory, pole, řetězce \dots
+číselné aritmetiky, bitvektory, pole, řetězce\dots
 Podporuje také kvantifikátory
 a nelineární logiky.
 
@@ -1558,7 +1574,7 @@ pro~práci s~kvantifikátory~\cit{z3-art}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Mon 12 Mar 2018 10:16:54 PM CET
+% Mon 07 May 2018 06:51:07 PM CEST
 \begin{section}{Numerické metody řešení \acr{ode}}\label{s:search:ode}
 Tyto metody numericky \hl{aproximují} průběh \acr{ode}.
 Obecně používají nějaký \name{krok},
@@ -1614,10 +1630,11 @@ neexistuje přesná definice.
 Jsou volně definovány
 jako takové, kde je pro~explicitní metody buď nutné nastavit
 velmi malou velikost kroku,
-nebo je řešení nestabilní~\cit{ode-nsolve},
+nebo je řešení nestabilní,
 na rozdíl od implicitních metod,
 které mohou naopak být stabilní
-i~pro~jakoukoli zvolenou velikost kroku~\cit{ode-nsolve-intro}.
+i~pro~jakoukoli zvolenou
+velikost kroku~\cit{ode-nsolve-intro}\cit{ode-nsolve}.
 Tyto rovnice často obsahují funkce s~několika
 časovými škálami s~rozdílnými granularitami.},
 u~kterých je výpočet \hl{nestabilní}.
@@ -1656,6 +1673,16 @@ Liší se tím,
 že na~rozdíl od~klasických \acr{ode} řešičů
 garantují rozsah chyby aproximace, ale jsou příliš pomalé.
 Jejich princip je popsán v~další podsekci.
+
+\pic{ode-nsolve_example.pdf}{ode:nsolve:example}{0.35}
+   {Ukázka numerické integrace Eulerovy funkce s~délkou kroku~1}
+   {Červená čára značí exaktní řešení, modrá explicitní Eulerovu metodu,
+    zelená lichoběžníkovou metodu.\\
+   Zdroj: Krishnavedala (\acr{cc}0), Wikimedia Commons, \cit{ode-nsolve}.}
+
+Na~obrázku \rfPic{ode:nsolve:example}
+je znázorněn příklad numerické integrace
+Eulerovy funkce. Použité metody jsou popsány v~následujících podsekcích.
 
 %%%%%%%%%%%%%
 
@@ -1734,6 +1761,10 @@ Jedná se o~\hl{jednokrokovou} metodu řádu ${p = 1}$.
 
 %%%
 
+\pic{trapezoid_step.pdf}{trapezoid:step}{0.65}
+   {Ilustrace kroku lichoběžníkové metody}
+   {Červená křivka značí exaktní řešení.}
+
 % Sat 24 Mar 2018 08:24:43 PM CET
 \begin{paragraph}{Lichoběžníková metoda:}\label{p:search:ode:classic:lmm:trap}
 \begin{equation}\label{eq:ode:lmm:trap}
@@ -1743,6 +1774,7 @@ Jedná se o~\hl{jednokrokovou} metodu řádu ${p = 1}$.
 ${\beta_{1} = \beta_{0} = \frac{1}{2}}$)
 je \hl{implicitní} a \hl{jednokroková}
 metoda řádu ${p = 2}$.
+Metoda je ilustrována na~obrázku \rfPic{trapezoid:step}.
 \end{paragraph} %%Lichoběžníková metoda:
 
 %%%
@@ -2082,7 +2114,7 @@ což prodlužuje délku překladu,
 ale umožňuje efektivnější statickou optimalizaci.
 
 Řešič se zaměřuje zejména na~explicitní Runge--Kutta metody
-(např. RK4, Dormand--Prince 5),
+(např. RK4 a Dormand--Prince 5),
 lze však implementovat i~jiné, např. vícekrokové.
 Integrace je prováděna po~krocích formou in-place,
 dle předloženého konceptu;
@@ -2127,8 +2159,6 @@ těchto metod
 od klasických řešičů \acr{ode}
 ze~sekce \rf{ss:search:ode:classic}.
 
-\cmt{obrázek}
-
 %%%
 
 % Wed 14 Mar 2018 09:20:11 PM CET
@@ -2144,7 +2174,14 @@ pro~celé ${[t_n]}$.
 
 \bigskip
 
+\pic{validated_ode_example.pdf}{validated:ode:example}{0.6}
+   {Ukázka podoby kroku garantovaného řešení \acr{ode}
+    s~intervalovými uzávěry}
+   {}
+
 Celý výpočet je rozdělen do~kroků v~bodech $t_n$.
+Přibližná grafická podoba kroku je znázorněna
+na~obrázku \rfPic{validated:ode:example}.
 Je-li metoda jednokroková,
 je její průběh následující~\cit{ode-valid-runge_kutta-art}:
 \begin{enumerate}
@@ -3566,7 +3603,7 @@ Poté rozeberu interní návrh jednotlivých komponent.
 
 %%%%%%%%%%%%%
 
-% Mon 09 Apr 2018 02:17:08 PM CEST
+% Mon 07 May 2018 08:52:58 PM CEST
 \begin{subsection}{Model komponent}\label{ss:design:arch:comp}
 Stěžejními komponentami jsou \acr{smt} a \acr{ode} řešič.
 Úkolem je zajistit jejich vzájemnou komunikaci
@@ -3595,6 +3632,13 @@ a možnost použít libovolnou verzi
 by bylo velkým přínosem.
 Proto bylo snahou nalézt řešení
 využívající tohoto postupu.
+
+\pic{comp_design.pdf}{comp:design}{0.75}
+   {Blokové schema modelu komponent ve~stádiu návrhu}
+   {Směry šipek určují směr výstupů z~komponent.}
+
+Obrázek \rfPic{comp:design} zachycuje
+blokové schema navržených komponent.
 
 %%%%%%%
 
@@ -4091,7 +4135,14 @@ analyticky ji lze těžko předpovědět.
 
 %%%
 
-% Sat 28 Apr 2018 01:56:07 PM CEST
+\pic{alg_tree.pdf}{alg:tree}{0.99}
+   {Ilustrace postupu základního algoritmu prohledávaným prostorem}
+   {Je uvedena jen zjednodušená varianta o~jediné \acr{ode}
+    se~dvěma variantami derivací.
+    Hodnoty \id{\_x0}, \id{\_x1}, \dots představují výčet možných
+    počátečních hodnot.}
+
+% Mon 07 May 2018 11:29:29 PM CEST
 \begin{paragraph}{Základní algoritmus.}
 \label{ss:design:arch:alg:basic}
 Pro~účely prototypu navrhnu zatím alespoň základní algoritmus,
@@ -4102,6 +4153,14 @@ bez~předběžných výpočtů jiných variant.
 Takový postup je jednodušší implementovat,
 ale v~každé fázi vyžaduje ověření splnitelnosti,
 a tedy významně závisí na~její výkonnosti.
+Nástin postupu je znázorněn na~obrázku
+\rfPic{alg:tree}.
+
+Z~obrázku vidíme, že v~některých případech
+se v~uzlech ověřuje splnitelnost zbytečně mnohokrát
+a pokud by se naráz předpočítávaly všechny varianty,
+mohla by se např. celkově ve~fázi~1
+ověřovat splnitelnost jen dva krát, ne pět krát.
 
 V této variantě ztrácí smysl přidávat
 nové hodnoty jako podmíněné klauzule,
@@ -4261,6 +4320,14 @@ Původně byla vyvíjena ve~skriptovacím jazyce Bash
 v~souboru \binFn{prototype.sh},
 který již v~aktuální verzi není přítomen,
 ale je zpětně dohledatelný.
+
+\pic{comp_impl.pdf}{comp:impl}{0.85}
+   {Blokové schema modelu komponent implementovaného prototypu}
+   {Směry šipek určují směr výstupů z~komponent.
+    Některé vnořené třídy jsou vynechány (např. \id{Expr::\-Eval}).}
+
+Na~obrázku \rfPic{comp:impl} je zachycena
+blokové schema modelu komponent implementovaného prototypu aplikace.
 
 Před použitím nástroje je nutné jej sestavit.
 Návod je umístěn v~příloze \cmt{link}.
