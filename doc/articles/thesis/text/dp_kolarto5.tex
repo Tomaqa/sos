@@ -3512,8 +3512,8 @@ přidáním znaku do~tokenu s~\id{\$}:
 
 %%%
 
-% Fri 27 Apr 2018 05:18:55 PM CEST
-\begin{paragraph}{Příklady obecného použití maker:}
+% Tue 08 May 2018 03:31:35 PM CEST
+\begin{paragraph}{Příklad použití maker:}
 \label{p:design:spec:ilang:macros:examples}
 \begin{Verbatim}[samepage=true]
 #define STEPS() 10
@@ -3531,83 +3531,11 @@ přidáním znaku do~tokenu s~\id{\$}:
     #INT_ODE(y) ;; (= y_1 (int-ode y dy_0 (y_0 t_0 t_1) ())) ...
 ))
 \end{Verbatim}
-\begin{Verbatim}[samepage=true]
-#def FACT(n)
-#if $(= #n 0)  *
-#else          #FACT( $d(- #n 1) ) #n
-#endif
-#enddef
-(assert (= $(#FACT(5)) 120) ) ;; $(* 1 2 3 4 5) == 120  => true
-#define SEQ() 1 2 3
-( #SEQ )  ;; (1 2 3)
-( #SEQ# ) ;; (123)
-( #FACT#(3) )  ;; error: missing parameters for 'FACT' !
-( #FACT(3)# )  ;; (* 1 2 3)
-( ##FACT(3) )  ;; (FACT(3))
-( ###FACT(3) ) ;; (*123)
-\end{Verbatim}
-\end{paragraph} %%Příklady použití maker:
 
-%%%
-
-\clearpage
-
-% Fri 27 Apr 2018 05:18:55 PM CEST
-\begin{paragraph}{Použití maker ve~vstupním jazyce:}
-\label{p:design:spec:ilang:macros:usage}
-\begin{itemize}
-\item Definice numerických literálů,
-   které lze použít i~v~příkazech \id{define\--dt}:
-   \begin{Verbatim}[samepage=true]
-   #define K() 5
-   (define-dt x dx () (* #K t))
-   \end{Verbatim}
-\item Nastavení fází výpočtu:
-   \begin{Verbatim}[samepage=true]
-   #define T()     0.5
-   #define T_MIN()   0
-   #define T_MAX()  10
-   #define STEPS() $d(+ $f(/ (- #T_MAX #T_MIN) #T) )
-   ;; ...
-   #def T_STEPS()
-   #for (j 1 #STEPS)
-   #let i $d(- #j 1)
-       (= t_#j  (+ t_#i  #T))
-   #endlet j
-   #endfor
-   #enddef
-   \end{Verbatim}
-\item Deklarace všech konstant fází:
-   \begin{Verbatim}[samepage=true]
-   #def DECL_CONSTS(const type)
-   #for (i 0 #STEPS)
-       (declare-fun #const##_#i () #type)
-   #endfor
-   #enddef
-   #DECL_CONSTS(t  Real)
-   ;; ...
-   \end{Verbatim}
-   Stejný způsob lze použít pro~invarianty,
-   volby variant derivací, skoky a integrace.
-\item Aproximace intervalových počátečních podmínek:
-   \begin{Verbatim}[samepage=true]
-   #def INIT_INTERVAL(var min max step) (or
-   #for (i #min (<= #i #max) (+ #i #step))
-      (= #var #i)
-   #endfor
-   ) #enddef
-   \end{Verbatim}
-\item Kaskádní kompozice systémů:
-   každý systém reprezentovat vlastní sadou konstant
-   s~nějakou číselnou příponou
-   a vstup generovat pomocí maker \id{\#for}
-   nebo rekurzivních maker.
-   Krajní systémy generovat zvlášť,
-   nebo pomocí makra \id{\#if},
-   a ostatní propojit pomocí parametrických uživatelských maker,
-   např. s~parametrem \id{\#i} a \id{\#let j \$d(+ \#i 1)}.
-\end{itemize}
-\end{paragraph} %%Použití maker ve~vstupním jazyce:
+Další příklady jsou uvedeny
+v~příloze \rf{appendix:macros},
+včetně případů užití.
+\end{paragraph} %%Příklad použití maker:
 
 %%%
 
@@ -6303,7 +6231,123 @@ bude vygenerován graf nástrojem gnuplot.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Další příklady použití maker}
+% Tue 08 May 2018 03:32:12 PM CEST
+\chapter{Další příklady použití maker}\label{appendix:macros}
+Tato příloha uvádí další příklady použití maker.
+První sekce uvádí použití přímo v~textovém kódu vstupu,
+druhá sekce komentuje případy užití maker jako celku
+v~kontextu tématu práce.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 03:33:46 PM CEST
+\begin{section}{Ukázky použití a chování maker}\label{s:macros:examples}
+\begin{Verbatim}[samepage=true]
+#def SEQ(n)
+#if $( > #n 0 )
+  #SEQ( $d(- #n 1) ) #n
+#endif
+#enddef
+#define FACT(n) * #SEQ(#n)
+(assert (= $(#FACT(5)) 120) ) ;; $(* 1 2 3 4 5) == 120  => true
+
+#define NUMS() 1 2 3
+( #NUMS )  ;; (1 2 3)
+( #NUMS# ) ;; (123)
+( #FACT#(3) )  ;; error: missing parameters for 'FACT' !
+( #FACT(3)# )  ;; (* 1 2 3)
+( ##FACT(3) )  ;; (FACT(3))
+( ###FACT(3) ) ;; (*123)
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+( $f (- 3.5 1.9) )        ;; ( 1.60000... )
+( $d (- 3.5 1.9) )        ;; ( 2 )
+( $d (+ $f(- 3.5 1.9) ))  ;; ( 1 )
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+#define N 5
+#define N5 1
+#def PRINT(x)
+#let i 1
+#let j 2
+  #x
+#endlet i
+#endlet j
+#enddef
+( #PRINT(N) )      ;; ( N )
+( #PRINT(#N) )     ;; ( 5 )
+( #PRINT(\#N) )    ;; ( 5 )
+( #PRINT(\#N5) )   ;; ( 1 )
+( #PRINT(\#N#N) )  ;; ( 1 )
+( #PRINT(\#N\#N) ) ;; ( 55 )
+( #PRINT(N#i) )    ;; error: user macro 'i' was not defined !
+( #PRINT(N\#i) )   ;; ( N1 )
+( #PRINT(#N\#i) )  ;; ( 51 )
+( #PRINT(\#N\#i) ) ;; ( 51 )
+( #PRINT(\#i\##_\#j) ) ;; ( 1_2 )
+\end{Verbatim}
+\end{section} %%Ukázky použití a chování maker
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 03:37:07 PM CEST
+\begin{section}{Případy užití maker ve~vstupním jazyce}
+\label{s:macros:use_cases}
+\begin{itemize}
+\item Definice numerických literálů,
+   které lze použít i~v~příkazech \id{define\--dt}:
+   \begin{Verbatim}[samepage=true]
+   #define K() 5
+   (define-dt x dx () (* #K t))
+   \end{Verbatim}
+\item Nastavení fází výpočtu:
+   \begin{Verbatim}[samepage=true]
+   #define T()     0.5
+   #define T_MIN()   0
+   #define T_MAX()  10
+   #define STEPS() $d(+ $f(/ (- #T_MAX #T_MIN) #T) )
+   ;; ...
+   #def T_STEPS()
+   #for (j 1 #STEPS)
+   #let i $d(- #j 1)
+       (= t_#j  (+ t_#i  #T))
+   #endlet j
+   #endfor
+   #enddef
+   \end{Verbatim}
+\item Deklarace všech konstant fází:
+   \begin{Verbatim}[samepage=true]
+   #def DECL_CONSTS(const type)
+   #for (i 0 #STEPS)
+       (declare-fun #const##_#i () #type)
+   #endfor
+   #enddef
+   #DECL_CONSTS(t  Real)
+   ;; ...
+   \end{Verbatim}
+   Stejný způsob lze použít pro~invarianty,
+   volby variant derivací, skoky a integrace.
+\item Aproximace intervalových počátečních podmínek:
+   \begin{Verbatim}[samepage=true]
+   #def INIT_INTERVAL(var min max step) (or
+   #for (i #min (<= #i #max) (+ #i #step))
+      (= #var #i)
+   #endfor
+   ) #enddef
+   \end{Verbatim}
+\item Kaskádní kompozice systémů:
+   každý systém reprezentovat vlastní sadou konstant
+   s~nějakou číselnou příponou
+   a vstup generovat pomocí maker \id{\#for}
+   nebo rekurzivních maker.
+   Krajní systémy generovat zvlášť,
+   nebo pomocí makra \id{\#if},
+   a ostatní propojit pomocí parametrických uživatelských maker,
+   např. s~parametrem \id{\#i} a \id{\#let j \$d(+ \#i 1)}.
+\end{itemize}
+\end{section} %%Případy užití maker ve~vstupním jazyce
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
