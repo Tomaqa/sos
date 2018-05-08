@@ -54,7 +54,7 @@ Source codes are written in C++14 in Stroustrup code style.
 When source files structure changes,
 one needs to manually remove the tail of `Makefile`
 and run `tools/dev/deps.sh`.
-Calling `make clean` is also likely to be necessary.
+Calling `make clean` is also likely to be appropriate.
 
 ## Contributing
 

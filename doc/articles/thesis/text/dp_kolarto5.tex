@@ -56,7 +56,7 @@
 
 
 \newacr{cvut}{{\v C}VUT}{{\v C}esk{\' e} vysok{\' e}
-   u{\v c}en{\' i} technick{\' e} v Praze}
+   u{\v c}en{\' i} technick{\' e} v~Praze}
 \newacr{fit}{FIT}{Fakulta informa{\v c}n{\' i}ch technologi{\' i}}
 
 \newacr{api}{API}{Application programming interface}
@@ -503,7 +503,7 @@ jelikož zpravidla umožňují použití
 aritmetických rovnic a nerovnic.
 Takovými formulemi lze popsat velké množství modelů systémů,
 přesto jsou však v~některých případech stále nedostatečné.
-A těchto případů rozhodně není málo:
+A~těchto případů rozhodně není málo:
 jedná se právě o~případy, kdy je nutné
 do~modelu zahrnout fyzikální, chemické aj.
 jevy z~reálného světa,
@@ -643,7 +643,7 @@ oba jednotlivé existující řešiče,
 definovat společný vstupní jazyk,
 implementovat řešiče či jejich adaptéry
 a propojit je.
-A na~závěr to nejdůležitější:
+A~na~závěr to nejdůležitější:
 ve~výsledném nástroji
 experimentovat s~různými modely systémů
 a výsledky porovnat se~stávajícím řešičem dReal.
@@ -979,7 +979,7 @@ Tyto axiomy definují sčítání, násobení a rovnost
 přirozených čísel a také \name{indukci}
 (axiom \rf{i:theory:int:ind}).
 Tato teorie bohužel není rozhodnutelná
-(ani bez~kvantifikatorů;
+(ani bez~kvantifikátorů;
 na vině je operace násobení)
 a dokonce není ani úplná%
 \footnote{Tj.~existují v~ní formule, které nelze dokázat.}.
@@ -1256,7 +1256,7 @@ neboť jsou součástí \acr{smt} řešičů.
 
 Z~důvodů implementačních a konvence
 je většinou vstup do~řešičů uváděn
-v~konjuktivní normální formě (angl. \acr{cnf}),
+v~konjunktivní normální formě (angl. \acr{cnf}),
 neboli jako konjunkce klauzulí,
 kde klauzule je disjunkce literálů.
 Standardně se používá \acr{dimacs}-\acr{cnf} formát.
@@ -1377,7 +1377,7 @@ dokud není dosaženo konvergence~\cit{smt-de_moura}.
 Tedy, oba řešiče navzájem intenzivně komunikují
 a formování Booleovské formule probíhá (typicky) inkrementálně%
 \footnote{To také umožňuje dynamicky
-přídávat a odebírat formule s~omezeními.}
+přidávat a odebírat formule s~omezeními.}
 s~možností návratů.
 V~případě \name{online} varianty jsou oba řešiče
 více propojeny a \set{T}-řešič využívá funkce \acr{sat} řešiče přímo.
@@ -1418,7 +1418,7 @@ jejíž nejvýznamnější činností
 je standardizace teorií
 a vstupně-výstupního jazyka pro~řešiče~\cit{smtlib}.
 S~tím souvisí udržování komunity vývojářů
-a souboru standardizovaných výkonnostních úloh (benchmarks),
+a souboru standardizovaných výkonnostních úloh (benchmarků),
 ve~kterých jednotlivé týmy soutěží např. v~rámci \name{\acr{smt}-COMP},
 podobně jako tomu je u~komunity \acr{sat} řešičů.
 
@@ -1528,7 +1528,7 @@ Jedná se o~poměrně rozsáhlý projekt.
 \acr{cvc}4 přijímá vlastní vstupní jazyk,
 nebo standard \acr{smt}-LIB verze 1 nebo 2.
 Podporuje řadu teorií (resp. logik):
-číselné aritmetiky, bitvektory, pole, řetězce\dots
+číselné aritmetiky, bit vektory, pole, řetězce\dots
 Podporuje také kvantifikátory
 a nelineární logiky.
 
@@ -1613,7 +1613,7 @@ a podle povahy vstupu používá různé nástroje.
 Ovládá oba přístupy k~řešení
 \acr{smt}: pilný i~líný,
 a zvolí ten, který usoudí jako vhodnější.
-Např. v~teorii bitvektorů bývá mnohdy
+Např. v~teorii bit vektorů bývá mnohdy
 vhodnější použít pilný přístup,
 protože zakódování do~Booleovských proměnných je snadné.
 
@@ -1660,7 +1660,7 @@ ${f_n \sim f(t_n, y_n)}$.
 O~metodě je volně řečeno, že je (má přesnost) \name{řádu} $p$,
 pokud její odchylka aproximace od~exaktního řešení
 konverguje k~${\set{O}( h^{\set{O}(p)} )}$\:%
-\footnote{Jedná se o~intiutivní definici,
+\footnote{Jedná se o~intuitivní definici,
 přesné definice řádu metody,
 lokální a globální chyby a dalších termínů
 nalezne čtenář např. zde~\cit{ode-nsolve-intro}.}.
@@ -2092,7 +2092,7 @@ Tabulka:
 \bigskip
 
 Existují také \hl{adaptivní} Runge--Kutta metody,
-které v~každém kroce počítají odhad chyby aproximace,
+které v~každém kroku počítají odhad chyby aproximace,
 podle níž se dynamicky mění délka kroku $h_n$
 (např. Dormand--Prince 5).
 \end{subsubsection} %%Runge--Kutta metody
@@ -2150,7 +2150,7 @@ tj.~pomalejší, ale přesnější než explicitní.
 \begin{paragraph}{odeint}\label{p:search:ode:classic:solver:odeint}
 je flexibilní C++ knihovna
 pro~numerické řešení \acr{ode}~\cit{odeint}.
-Je navržena v~duchu šablonového metaprogramování
+Je navržena v~duchu šablonového meta-programování
 (\name{\acr{tmp}})~---~veškeré její numerické algoritmy
 jsou nezávislé na~použitých datových kontejnerech
 a jejich vzájemných operacích~\cit{odeint-art}.
@@ -2513,7 +2513,7 @@ postačují vyšší délky fází,
 čímž se urychluje výpočet.
 
 Nástroj není koncipován jako konečný produkt,
-není příliš uživatelsky přívetivý
+není příliš uživatelsky přivětivý
 a může obsahovat řadu chyb.
 Nástroj má sloužit pro~účely experimentování
 s~navrženým způsobem řešení úloh,
@@ -3446,7 +3446,7 @@ podle znaků \id{\#}
 a každá část je vyhodnocena zvlášť.
 Je-li token složen z~více než jedné takové části,
 jsou všechny expandované části \hl{složeny do~jediného tokenu},
-a to i~v případě, že těla maker obsahují více než jeden token;
+a to i~v~případě, že těla maker obsahují více než jeden token;
 nesmí však obsahovat výrazy.
 Vnitřní makra také nemohou mít žádné parametry,
 jelikož parametry maker nikdy nejsou součástí tokenu,
@@ -4013,7 +4013,7 @@ s~různými vstupními argumenty podle konstant
 aktuálních příkazů \id{int\--ode}.
 Při výpočtech budou v~implementaci
 interně volána sestavená vyhodnocení
-v~každém kroce integrace,
+v~každém kroku integrace,
 což vyžaduje, aby bylo volání vyhodnocení
 přiměřeně efektivní,
 jelikož kroků integrace
@@ -4062,7 +4062,7 @@ Postup je následující:
 \item Substituce příkazů integrací \id{int\--ode}
    za~pomocné konstanty nebo funkce druhu \id{Real};
    sekvenční uložení identifikátorů argumentů příkazů \id{int\--ode}
-   a roztřízení podle jednotlivých \acr{ode}
+   a roztřídění podle jednotlivých \acr{ode}
    a podle unikátních párů identifikátorů nezávislých proměnných \id{t}.
    (Nastavení fází je zodpovědnost centrální komponenty.)
 \item (Volitelné) nastavení počáteční délky kroku integrací
@@ -4222,7 +4222,7 @@ a pokud by se naráz předpočítávaly všechny varianty,
 mohla by se např. celkově ve~fázi~1
 ověřovat splnitelnost jen dva krát, ne pět krát.
 
-V této variantě ztrácí smysl přidávat
+V~této variantě ztrácí smysl přidávat
 nové hodnoty jako podmíněné klauzule,
 namísto toho stačí aserce jen vkládat do~zásobníku asercí.
 Důvod, proč samotné podmíněné klauzule nefungují,
@@ -4276,7 +4276,7 @@ Postup je následující:
       tj.~ohodnocení všech konstant.
    \item Není-li splnitelná, proveď návrat:
       \begin{enumerate}
-      \item Pokud \id{s = 0}, vstup není splnitelný. Konec.
+      \item Pokud \id{s~= 0}, vstup není splnitelný. Konec.
       \item Odeber vrchní úroveň zásobníku asercí: \id{(pop~1)}.
       \item Přidej konfliktní klauzuli (aserci)
          znemožňující vstupní (nikoli výstupní%
@@ -4446,7 +4446,7 @@ V~takovém případě může být vhodnější použít \id{Expr\_\-value<Arg>}.
 
 Zjištění typu ukazatele je doporučeno provádět pomocí funkcí
 \id{is\_\-evalue}, \id{is\_\-etoken} a \id{is\_\-expr}.
-Přetypování ukazatelů na~nekterý odvozený typ
+Přetypování ukazatelů na~některý odvozený typ
 je rovněž doporučeno provádět pomocí explicitních funkcí
 (\id{ptr\_\-to\_\-expr}, apod.).
 
@@ -4757,7 +4757,7 @@ a vyžadovalo by synchronizaci vláken.
 % Wed 18 Apr 2018 03:30:27 PM CEST
 \begin{section}{Implementace adaptéru \acr{ode} řešiče}\label{s:impl:ode}
 V~sekci \rf{sss:design:arch:comp:ode} jsem rozebral
-a oddůvodnil návrh adaptéru pro~\acr{ode} řešiče
+a odůvodnil návrh adaptéru pro~\acr{ode} řešiče
 pomocí abstraktní třídy a odvozených tříd.
 Podrobnější návrh komponenty \acr{ode} řešiče
 jsem uvedl v~sekci \rf{ss:design:arch:ode}.
@@ -4882,7 +4882,7 @@ Druhá strana si tak může pomocí tohoto přeorganizovat
 své specifikace rovnic a nadále používat
 pouze sjednocených klíčů.
 To je sice efektivní varianta, ale relativně nepohodlná.
-Proto je umožňěno i~nadále při řešení
+Proto je umožněno i~nadále při řešení
 rovnic poskytovat vstupní hodnoty v~nesjednoceném tvaru,
 které řešič interně sjednotí sám aplikací mapování.
 \end{paragraph} %%Sjednocení klíčů.
@@ -5105,7 +5105,7 @@ které třída \id{Odeint} částečně zahrnuje.
 Zatím je použita pouze výchozí funkce
 \id{odeint::\-integrate},
 které jsou z~třídy \id{Solver}
-v~každém kroce integrace poskytovány vypočtené
+v~každém kroku integrace poskytovány vypočtené
 hodnoty z~objektů typu \id{Dt\_\-eval}.
 Funkce používá metodu Dormand--Prince 5,
 což je explicitní adaptivní Runge--Kutta metoda
@@ -5171,7 +5171,7 @@ z~příkazů \id{define\--dt}.
 Položky \id{Const\_\-ids\_\-row} jsou v~rámci
 příslušného klíče \id{Ode\_\-key} ukládány v~pořadí,
 v~jakém jsou ve~vstupu čteny příkazy \id{int\--ode}.
-(Určení fází podle konstant názávislých proměnných \id{t}
+(Určení fází podle konstant nezávislých proměnných \id{t}
 není zodpovědností zpracování vstupu.)
 
 Hodnoty klíčů, včetně těch z~\id{Const\_\-ids\_\-rows},
@@ -5601,7 +5601,7 @@ které jsem spouštěl jak v~našem řešiči,
 tak v~řešiči dReal,
 a výsledky porovnal.
 První uvedenou úlohu rozeberu podrobněji,
-neboť prozdradí některá první zjištění,
+neboť prozradí některá první zjištění,
 která se budou v~dalších úlohách opakovat.
 
 %%%%%%%%%%%%%
@@ -5944,7 +5944,7 @@ celkové doby výpočtu mezi řešiče \acr{smt} a \acr{ode}.
 
 % Sun 06 May 2018 03:08:36 PM CEST
 \begin{paragraph}{Diskuze výsledků.}\label{p:exp:examples:el_osc:results}
-Tento příklad přínáší potěšující zprávy,
+Tento příklad přináší potěšující zprávy,
 konkrétně tabulka \rfTab{el_osc_cmp}.
 Opět významně závisí na~volbě (fixní) délky fáze \id{T},
 to je zřejmé a bude to platit pro~všechny (splnitelné) vstupy.
@@ -6137,7 +6137,7 @@ Konkrétně se jednalo např. o~modelový příklad
 elektrického oscilátoru,
 v~němž naše nejlepší konfigurace dosáhla
 téměř pětinásobně kratšího výpočetního času.
-A to i~přesto, že implementovaný nástroj
+A~to i~přesto, že implementovaný nástroj
 je pouhým prototypem.
 Výkonnost našeho postupu výrazně závisí
 na~zvoleném počtu fází výpočtu,
@@ -6203,11 +6203,11 @@ směrem ke~konečnému produktu použitelném v~praxi.
 % Tue 08 May 2018 02:55:02 PM CEST
 \chapter{Návod k~použití programu}\label{appendix:usage}
 Program, včetně zdrojových kódů a textu práce, je veřejně přístupný
-v~git repozitáři na~zdrese \url{https://github.com/Tomaqa/sos}
+v~git repositáři na~adrese \url{https://github.com/Tomaqa/sos}
 pod~tolerantní licencí \acr{mit}.
 
 Nejprve uvedu obsah projektu, ať už pořízeného z~přiloženého CD
-nebo přímo z~git repozitáře,
+nebo přímo z~git repositáře,
 poté návod k~sestavení projektu ze~zdrojových kódů
 a následně návod k~použití spustitelné aplikace.
 Prototyp aplikace necílí na~uživatelskou přívětivost,
@@ -6230,7 +6230,7 @@ proto neočekávejte vždy intuitivní chování programu.
    .1 include\DTcomment{adresář s~hlavičkovými a šablonovými soubory}.
       .2 sos\DTcomment{soubory týkající se knihovny implementace}.
       .2 test\DTcomment{soubory pro~testy}.
-   .1 local\DTcomment{lokální uživatelské soubory nezávislé na~repozitáři}.
+   .1 local\DTcomment{lokální uživatelské soubory nezávislé na~repositáři}.
    .1 src\DTcomment{adresář se~zdrojovými kódy}.
       .2 main\DTcomment{soubory týkající se aplikací a appletů}.
       .2 sos\DTcomment{soubory týkající se knihovny implementace}.
