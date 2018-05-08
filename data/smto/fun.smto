@@ -8,7 +8,7 @@
 #define COEF 2.5
 #define HALF_COEF $(/ #COEF 2)
 
-#define T 0.25
+#define T 0.4
 (define-ode-step $(/ #T 10))
 
 #define T_MIN()    0
@@ -68,10 +68,10 @@
 
 (define-dt low dlow () (- (/ t #COEF) (* low (sin (* low #COEF)))))
 
-;(define-dt y dy_inc () y)
-;(define-dt y dy_dec () (- y))
-(define-dt y dy_inc () (* t #HALF_COEF))
-(define-dt y dy_dec () (- (* t #HALF_COEF)))
+(define-dt y dy_inc () y)
+(define-dt y dy_dec () (- y))
+;(define-dt y dy_inc () (* t #HALF_COEF))
+;(define-dt y dy_dec () (- (* t #HALF_COEF)))
 ;#define T_COEF $(/ 0.33 #T)
 ;(define-dt y dy_inc () (* t #T_COEF))
 ;(define-dt y dy_dec () (- (* t #T_COEF)))

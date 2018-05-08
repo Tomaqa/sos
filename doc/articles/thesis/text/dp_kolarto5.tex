@@ -520,6 +520,8 @@ tak, aby nedocházelo ke~kolizím s~ostatními;
 experimentování se~specifikacemi
 spolehlivostních modelů,
 atd.
+Ukázkový motivační příklad je uveden
+v~příloze \rf{appendix:example}.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -5579,15 +5581,21 @@ který si počínal efektivněji než \acr{cvc}4.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Sat 05 May 2018 08:57:44 PM CEST
+% Tue 08 May 2018 11:58:54 PM CEST
 \begin{section}{Srovnávací úlohy}\label{s:exp:examples}
-V~této sekci rozeberu jednotlivé úlohy,
+V~této sekci rozeberu dvě úlohy,
 které jsem spouštěl jak v~našem řešiči,
 tak v~řešiči dReal,
 a výsledky porovnal.
 První uvedenou úlohu rozeberu podrobněji,
 neboť prozradí některá první zjištění,
 která se budou v~dalších úlohách opakovat.
+Poslední srovnání je obsaženo v~ukázkové
+úloze v~příloze \rf{appendix:example}.
+
+V~příloze \rf{appendix:next_examples}
+uvádím úlohy, které se mi podařilo
+realizovat pouze v~našem nástroji.
 
 %%%%%%%%%%%%%
 
@@ -5992,14 +6000,18 @@ který je však vůči vstupu hodně tolerantní
 
 %%%%%%%%%%%%%
 
-% Sun 06 May 2018 06:47:06 PM CEST
+% Wed 09 May 2018 12:18:50 AM CEST
 \begin{subsection}{Závěr experimentů}\label{ss:exp:examples:conclusion}
+Tento závěr vychází také z~úloh
+uvedených v~přílohách
+\rf{appendix:next_examples} a \rf{appendix:example}.
+
 Některé úlohy potvrdily, že náš zvolený koncept
 je nadějný pro~uplatnění v~praxi.
 Použití klasických numerických metod v~\acr{ode} řešiči
 je rychlejší než použití intervalové aritmetiky,
 kterou používá řešič dReal.
-I~tento řešič si však dokáže počínat relativně efektivně,
+I~tento řešič si však někdy dokáže počínat relativně efektivně,
 pokud pracuje s~úlohou \acr{ivp},
 a ne s~intervaly (I\acr{ivp}).
 Intervaly lze efektivně aproximovat výčtem hodnot
@@ -6135,7 +6147,7 @@ vůči úlohám s~intervaly (I\acr{ivp}).
 Intervaly lze efektivně aproximovat
 pomocí výčtu hodnot v~logickém součtu.
 S~takovým vstupem si i~řešič dReal
-počíná relativně rychle.
+někdy počíná relativně rychle.
 
 % Další zásluhy
 Přidanou hodnotou je použitý prototyp nástroje,
@@ -6146,7 +6158,7 @@ nasazovat různé \acr{smt} a \acr{ode} řešiče.
 Požadavky na~rozhraní \acr{smt} řešiče
 jsou minimální: stačí, aby byl inkrementální
 a byl konformní se~standardem \acr{smt}-LIB,
-pak lze použít jako samostatný proces.
+pak lze řešič použít jako samostatný proces.
 U~\acr{ode} řešiče stačí, aby řešil \acr{ivp}
 a koncové podmínky závisely (zatím) jen na~čase,
 ale vyžaduje implementaci
@@ -6280,16 +6292,8 @@ bude vygenerován graf nástrojem gnuplot.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\chapter{Kompletní příklad užití}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\chapter{Další příklady modelů}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 % Tue 08 May 2018 03:32:12 PM CEST
-\chapter{Další příklady použití maker}\label{appendix:macros}
+\chapter{Příklady použití maker}\label{appendix:macros}
 Tato příloha uvádí další příklady použití maker.
 První sekce uvádí použití přímo v~textovém kódu vstupu,
 druhá sekce komentuje případy užití maker jako celku
@@ -6403,6 +6407,346 @@ v~kontextu tématu práce.
    např. s~parametrem \id{\#i} a \id{\#let j \$d(+ \#i 1)}.
 \end{itemize}
 \end{section} %%Případy užití maker ve~vstupním jazyce
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 11:08:40 PM CEST
+\chapter{Další úlohy}\label{appendix:next_examples}
+Zde uvádím úlohu, kterou se mi nepodařilo srovnat
+s~řešičem dReal.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 11:10:10 PM CEST
+\begin{section}{Uzavřená funkce}\label{s:next_examples:fun}
+Tato modelová úloha slouží pro~ověření
+zacházení s~návraty a se~zcela
+nedeterministickými přechody mezi diskrétními stavy.
+
+Jsou dány dvě schodovité funkce
+jako horní (\id{high}) a dolní (\id{low}) mez:
+\begin{flalign*}
+   \der{high} &= t - high \cdot \sin (high) \\
+   \der{low}  &= \frac{t}{K} - low \cdot \sin (low \cdot K)
+\end{flalign*}
+kde jsem v~tomto případě zvolil $K = 2{,}5$.
+
+Dále je dána funkce \id{y} s~variantami derivací
+$\der{y} = y$ a $\der{y} = -y$.
+Úkolem je zaručit invariant \id{low <= y <= high},
+přičemž je nutné vždy integrovat po~fixně danou dobu \id{T}
+(to odpovídá fixní délce fáze našeho řešiče).
+
+Pokoušel jsem se úlohu modelovat v~dReal,
+ale nebyl jsem schopen dosáhnout dokončení výpočtu
+alespoň do~úseku \id{t = 5}
+(do~té doby je úloha nezajímavá,
+protože např. téměř stačí jen setrvat na~$0$).
+Konkrétně výpočet selhal už ve~stádiu generování
+vstupu nástrojem dReach,
+který současně s~generováním ověřuje splnitelnost
+zvolené cesty (přechody mezi diskrétními stavy).
+Počíná si však dle mého názoru velmi neefektivně:
+postupně zkouší všechny možné
+kombinace \hl{nezávisle} na~sobě,
+dokud nenarazí na~splnitelnou.
+Pro~\id{t = 5} a rozumně malé \id{T} (např. $0{,}25$;
+jinak není možné invarianty dodržet)
+to dělá cestu o~$20$ přechodech,
+což je $2^{20}$ kombinací.
+Po~dvou a půl hodinách se dReach nedostal
+ani do~$400$.~kombinace (a všechny byly do té doby nesplnitelné).
+
+\tab{fun_cmp}{0.6}
+   {Uzavřená funkce: srovnání výstupů}
+   {\id{T} značí fixní délku fáze.
+    Pro~\id{T = 0.2} program po~delší době spadl.}
+   {r||c|l}
+   {\id{T} [s] & Délka výpočtu [s] & Výstup \\ \hline
+    $0{,}2$   & X \ \          & X \\ \hline
+    $0{,}25$  & $4{,}8$ \ \    & \id{sat} \\ \hline
+    $0{,}33$  & $1{,}3$ \ \    & \id{sat} \\ \hline
+    $0{,}4$   & $0{,}73$ \     & \id{sat} \\ \hline
+    $0{,}5$   & $34$ \ \ \ \ \ \ & \id{unsat} \\ \hline
+    }
+
+\pic{fun_0_25.pdf}{fun:0.25}{0.9}
+   {Uzavřená funkce \id{y} s~délkou fáze $0{,}25$ s.}
+   {}
+\pic{fun_0_4.pdf}{fun:0.4}{0.9}
+   {Uzavřená funkce \id{y} s~délkou fáze $0{,}4$ s.}
+   {}
+
+Výpočet jsem provedl až~do~\id{t = 30}.
+V~tabulce \rfTab{fun_cmp} jsou zaznamenány naměřené výsledky
+a na~obrázcích \rfPic{fun:0.25} a \rfPic{fun:0.4} výsledné podoby řešení.
+\end{section} %%Uzavřená funkce
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 09:02:21 PM CEST
+\chapter{Kompletní motivační příklad užití}\label{appendix:example}
+V~této příloze uvedu kompletní příklad
+od~návrhu specifikace systému
+přes~sestavení textového vstupu
+až~po~vyhodnocení našim nástrojem.
+
+V~sekci výsledků také uvedu srovnání s~řešičem dReal.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 09:05:07 PM CEST
+\begin{section}{Popis sytému}\label{s:example:spec}
+Máme halu s~blíže nespecifikovanou automatickou linkou
+na~výrobu a montáž kovových dílů.
+Jedna jednotka linky vyžaduje pro~svoji práci
+dodržení okolní teploty, aby fungovala správně.
+Výrobce části linky garantuje její
+autonomní spolehlivou činnost při~dodržení provozních podmínek,
+což by znamenalo, že bychom nepotřebovali
+zaměstnance, který zde linku obsluhuje.
+To by náš nadřízený ocenil zejména na~nočních směnách.
+Proto bude naší snahou zaručit
+provozní teplotu, k~čemuž využijeme
+automaticky řízeného \hl{termostatu}.
+
+Specifikace vyžadují, aby se provozní teplota
+(veličina $x$) pohybovala v~následujícím rozmezí:
+\[
+   70 \leq x \leq 80
+\]
+
+Jedná se o~jednoduchý systém,
+který lze modelovat dvoustavovým hybridním automatem.
+Po~usilovné práci naši inženýři navrhli
+shodou okolností stejný model,
+jako je uveden na~obrázku \rfPic{thermostat:model}.
+Pokles teploty při~vypnutém topení
+je modelován rovnicí $\der{x} = 50 - x$
+a nárůst při~zapnutém topení rovnicí $\der{x} = 100 - x$.
+(Zda je takový model realistický či snad reálný
+nyní nechme stranou.)
+Našim úkolem je ověřit,
+zda bude možné teplotu udržet v~rámci stanovených mezí
+a jaká bude nutná perioda řídícího systému.
+\end{section} %%Popis sytému
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 09:05:07 PM CEST
+\begin{section}{Tvar vstupu}\label{s:example:input}
+Rozhodli jsme se provést verifikaci
+na~základě uvedného modelu
+po~dobu jedné minuty.
+
+Po~nastudování vstupního jazyka
+ze~sekce \rf{ss:design:spec:ilang}
+včetně maker ze~sekce \rf{sss:design:spec:ilang:macros}
+jsme vytvořili následující vstup pro~řešič:
+\begin{Verbatim}[samepage=true]
+#define DT_OFF_X_MIN 50  ;; lower bound ignoring invariants
+#define DT_ON_X_MAX 100  ;; upper bound ignoring invariants
+
+#define X_MIN 70  ;; minimum permitted temperature
+#define X_MAX 80  ;; maximum permitted temperature
+
+#define SWITCH_X_MIN 73  ;; lower switching threshold
+#define SWITCH_X_MAX 77  ;; upper switching threshold
+
+;; Fixed period of checking invariants... which value to choose?
+#define T ???  ;; experiment with this
+(define-ode-step $(/ #T 5))  ;; some permissive integration step size
+#define T_MIN()   0  ;; time at which to start the verification
+#define T_MAX()  60  ;; time until which to provide verification
+
+#define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
+#define STEPS-1 $d(- #STEPS 1)
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Declarations
+#def DECL_CONSTS(const type)
+#for (i 0 #STEPS)
+    (declare-fun #const##_#i () #type)
+#endfor
+#enddef
+#DECL_CONSTS(t      Real)
+#DECL_CONSTS(x      Real)
+#DECL_CONSTS(on     Bool)
+#DECL_CONSTS(dx     Dt)
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Initializations
+;; ... definition of #INIT_INTERVAL is ommited ...
+;; Choose some initial value between the permitted bounds
+#define INIT_X() #INIT_INTERVAL(x_0 #X_MIN #X_MAX 0.25)
+(assert (and (= t_0 #T_MIN)
+             #INIT_X
+             (not on_0)
+))
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Derivatives definition
+(define-dt x dx_on  () (- #DT_ON_X_MAX  x))
+(define-dt x dx_off () (- #DT_OFF_X_MIN x))
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Invariants
+(define-fun invariant ( (t Real) (x Real) (dx Dt) ) Bool
+    (and (<= #X_MIN x #X_MAX)
+         (or (= dx dx_on) (= dx dx_off))
+))
+#def INVARIANTS
+#for (i 0 #STEPS)
+    (invariant t_#i x_#i dx_#i)
+#endfor
+#enddef
+(assert (and #INVARIANTS ))
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Derivatives connection
+(define-fun connect ((dx Dt) (on Bool)) Bool
+    (and (=>      on  (= dx dx_on ))
+         (=> (not on) (= dx dx_off))
+))
+#def CONNECTS
+#for (i 0 #STEPS)
+    (connect dx_#i on_#i)
+#endfor
+#enddef
+(assert (and #CONNECTS ))
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Jump conditions
+(define-fun jump ((on1 Bool) (on2 Bool) (x2 Real)) Bool
+    (and (=> (and      on1  (<  x2 #SWITCH_X_MAX) )      on2  )
+         (=> (and      on1  (>= x2 #SWITCH_X_MAX) ) (not on2) )
+         (=> (and (not on1) (>  x2 #SWITCH_X_MIN) ) (not on2) )
+         (=> (and (not on1) (<= x2 #SWITCH_X_MIN) )      on2  )
+))
+#def JUMPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (jump on_#i on_#j x_#j)
+#endlet j
+#endfor
+#enddef
+(assert (and #JUMPS ))
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Steps definition
+#def T_STEPS
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= t_#j  (+ t_#i  #T))
+#endlet j
+#endfor
+#enddef
+(assert (and #T_STEPS ))
+\end{Verbatim}
+\begin{Verbatim}[samepage=true]
+;;; Integration
+#def INT_ODE(var)
+#for (i 0 #STEPS-1)
+#let j $d(+ #i 1)
+    (= #var##_#j (int-ode #var d#var##_#i (#var##_#i t_#i t_#j) ()) )
+#endlet j
+#endfor
+#enddef
+(assert (and #INT_ODE(x) ))
+\end{Verbatim}
+
+Ideální je zvolit hodnotu \id{\#T} co nejvyšší,
+aby byly co nejnižší nároky na~řídící systém,
+ale v~první řadě musí být splněny invarianty.
+Musíme ručně experimentovat s~různými hodnotami.
+\end{section} %%Tvar vstupu
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 09:50:11 PM CEST
+\begin{section}{Výsledky}\label{s:example:results}
+Experimentovali jsme s~různými hodnotami pro~\id{\#T}
+a ověřili, pro které můžeme zadané specifikace zaručit.
+Po~sestavení vstupu už to byla rychlá práce.
+
+\tab{thermostat_cmp}{0.6}
+   {Termostat: srovnání výstupů}
+   {\id{T} značí fixní délku fáze.
+    (V~tomto případě nás příliš doba výpočtu nezajímá.)}
+   {r||c|l}
+   {\id{T} [s] & Délka výpočtu [s] & Výstup \\ \hline
+    $0{,}25$  & $1{,}25$ \ \ \ & \id{sat} \\ \hline
+    $0{,}33$  & $0{,}75$ \ \ \ & \id{sat} \\ \hline
+    $0{,}4$   & $0{,}52$ \ \ \ & \id{sat} \\ \hline
+    $0{,}5$   & $0{,}20$ \ \ \ & \id{unsat} \\ \hline
+    }
+
+Do~tabulky \rfTab{thermostat_cmp} jsme zaznamenali naměřené výsledky.
+Pro~\id{T = 0.5} jsme zjistili, že již specifikace není možné zaručit.
+
+\pic{thermostat_0_25.pdf}{thermostat:0.25}{0.9}
+   {Termostat s~délkou fáze $0{,}25$ s.}
+   {Veličina \id{x} značí teplotu.}
+
+\pic{thermostat_0_4.pdf}{thermostat:0.4}{0.9}
+   {Termostat s~délkou fáze $0{,}4$ s.}
+   {Veličina \id{x} značí teplotu.
+    Meze pro~\id{x} byly splněny velmi těsně.}
+
+Také jsme si na~obrázky
+\rfPic{thermostat:0.25} a \rfPic{thermostat:0.4}
+vykreslili podobu možného řešení.
+Pro \id{T = 0.4} jsou specifikace splněny těsně,
+a je na~našem zvážení, zda raději nezvolit
+nižší hodnotu, aby zbyla nějaká rezerva.
+
+Tím jsme úspěšně ověřili specifikaci našeho modelu termostatu
+a můžeme se nyní pustit do~fyzické realizace,
+a umožnit tak automatizované řízení naší části montážní linky.
+
+%%%
+
+% Tue 08 May 2018 09:50:11 PM CEST
+\begin{paragraph}{Srovnání s~dReal.}\label{s:example:results:cmp}
+Tato úloha je také orientována na~čas,
+takže se dalo očekávat, že si povede řešič dReal hůře než náš.
+Navíc je přímo nutné zvolit konkrétní fixní délku periody \id{T}.
+Zvolil jsem tu nejjednodušší variantu,
+kterou jsem použil v~měření vlastního řešiče: \id{T = 0.4},
+a použil jsem aproximované intervaly,
+stejně jako v~našem zadání.
+Tuto úlohu řešil dReal $46{,}3$ sekund
+a vyžadoval více než~$2$ GB paměti.
+To je výrazně horší výsledek než náš.
+
+\pic{thermostat_dreal_x.pdf}{thermostat:dreal:x}{0.65}
+   {Termostat v~dReal s~délkou fáze $0{,}4$}
+   {Veličina \id{x} značí teplotu.
+    (Délka fáze odpovídá fixní periodě,
+    která je v~této úloze explicitně zadána.)}
+
+Výsledná trajektorie z~řešiče dReal
+je zachycena na~obrázku \rfPic{thermostat:dreal:x}.
+
+Navíc jsem měl opět podobné problémy s~nástrojem dReach,
+jaké jsem popisoval v~sekci \rf{s:next_examples:fun}.
+Tentokrát se počet kroků \acr{bmc} rovnal $150$
+a dReach ani nebyl schopen spustit první kombinaci,
+protože předtím generuje všechny možné kombinace
+(tj.~$2^{150}$)
+do~souboru a vyčerpal paměť.
+Lze mu však explicitně nastavit konkrétní kombinaci,
+po~které se má vydat,
+a zadal jsem mu sekvenci,
+která jen cyklicky přecházela z~jednoho stavu do~druhého,
+a tato cesta byla (naštěstí) splnitelná.
+\end{paragraph} %%Srovnání s~dReal.
+
+%%%
+
+\end{section} %%Výsledky
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

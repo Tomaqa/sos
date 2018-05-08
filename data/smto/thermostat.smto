@@ -1,19 +1,21 @@
 ;;;; Thermostat in SMT+ODE format
 
-;;; Constants
+;;; Literals
 
-(define-fun t0 () Real 0)
-(define-fun x0 () Real 60)
-(define-fun on0 () Bool false)
+#define DT_OFF_X_MIN 50  ;; lower bound ignoring invariants
+#define DT_ON_X_MAX 100  ;; upper bound ignoring invariants
 
-#define XMIN 50
-#define XMAX 100
+#define X_MIN 70  ;; minimum permitted temperature
+#define X_MAX 80  ;; maximum permitted temperature
 
-#define T 0.25
-(define-ode-step $(/ #T 2))
+#define SWITCH_X_MIN 73  ;; lower switching threshold
+#define SWITCH_X_MAX 77  ;; upper switching threshold
 
-#define T_MIN()   0
-#define T_MAX()  20
+;; Fixed period of checking invariants... which value to choose?
+#define T 0.25  ;; experiment with this
+(define-ode-step $(/ #T 5))  ;; permissive integration step size
+#define T_MIN()   0  ;; time at which to start the verification
+#define T_MAX()  60  ;; time until which to provide verification
 
 #define STEPS $d(+ $(/ (- #T_MAX #T_MIN) #T) )
 #define STEPS-1 $d(- #STEPS 1)
@@ -35,12 +37,43 @@
 
 ;;; Initializations
 
-(assert (and (= t_0 t0) (= x_0 x0) (= on_0 on0)))
+#def _INIT_INTERVAL(var val max step)
+#if $(<= #val #max)
+    (= #var #val)
+    #_INIT_INTERVAL(#var $(+ #val #step) #max #step)
+#endif
+#enddef
+#def INIT_INTERVAL(var min max step)
+    (or #_INIT_INTERVAL(#var #min #max #step))
+#enddef
+
+;; Choose some initial value between the permitted bounds
+#define INIT_X() #INIT_INTERVAL(x_0 #X_MIN #X_MAX 0.25)
+
+(assert (and (= t_0 #T_MIN)
+             #INIT_X
+             (not on_0)
+))
 
 ;;; Derivatives definition
 
-(define-dt x dx_on  () (- #XMAX x))
-(define-dt x dx_off () (- #XMIN x))
+(define-dt x dx_on  () (- #DT_ON_X_MAX  x))
+(define-dt x dx_off () (- #DT_OFF_X_MIN x))
+
+;;; Invariants
+
+(define-fun invariant ( (t Real) (x Real) (dx Dt) ) Bool
+    (and (<= #X_MIN x #X_MAX)
+         (or (= dx dx_on) (= dx dx_off))
+))
+
+#def INVARIANTS
+#for (i 0 #STEPS)
+    (invariant t_#i x_#i dx_#i)
+#endfor
+#enddef
+
+(assert (and #INVARIANTS ))
 
 ;;; Derivatives connection
 
@@ -55,15 +88,15 @@
 #endfor
 #enddef
 
-(assert (and #CONNECTS))
+(assert (and #CONNECTS ))
 
 ;;; Jump conditions
 
 (define-fun jump ((on1 Bool) (on2 Bool) (x2 Real)) Bool
-    (and (=> (and      on1  (<  x2 77) )      on2  )
-         (=> (and      on1  (>= x2 77) ) (not on2) )
-         (=> (and (not on1) (>  x2 73) ) (not on2) )
-         (=> (and (not on1) (<= x2 73) )      on2  )
+    (and (=> (and      on1  (<  x2 #SWITCH_X_MAX) )      on2  )
+         (=> (and      on1  (>= x2 #SWITCH_X_MAX) ) (not on2) )
+         (=> (and (not on1) (>  x2 #SWITCH_X_MIN) ) (not on2) )
+         (=> (and (not on1) (<= x2 #SWITCH_X_MIN) )      on2  )
 ))
 
 #def JUMPS
@@ -74,7 +107,7 @@
 #endfor
 #enddef
 
-(assert (and #JUMPS))
+(assert (and #JUMPS ))
 
 ;;; Steps definition
 
@@ -86,17 +119,16 @@
 #endfor
 #enddef
 
-(assert (and #T_STEPS))
+(assert (and #T_STEPS ))
 
 ;;; Integration
 
-#def INT_ODE(f ivar ovar)
+#def INT_ODE(var)
 #for (i 0 #STEPS-1)
 #let j $d(+ #i 1)
-    (= #ovar##_#j (int-ode #f d#f##_#i (#ivar##_#i t_#i t_#j) ()) )
+    (= #var##_#j (int-ode #var d#var##_#i (#var##_#i t_#i t_#j) ()) )
 #endlet j
 #endfor
 #enddef
 
-(assert (and #INT_ODE(x x x)
-))
+(assert (and #INT_ODE(x) ))

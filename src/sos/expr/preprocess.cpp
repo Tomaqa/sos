@@ -65,6 +65,8 @@ namespace SOS {
                 }
                 else {
                     getline(is, tmp);
+                    istringstream iss(move(tmp));
+                    tmp = parse_lines(iss);
                     str += "def" + tmp + " " + c + "enddef";
                 }
                 str += " ";
