@@ -7,6 +7,8 @@
 ;; Used units are metres and seconds
 ;; `(accel.i, brake.i)' is discrete state of i-th car
 
+;; !! This example is incomplete !!
+
 ;;; Constants
 
 #define T 0.5

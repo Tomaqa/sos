@@ -323,7 +323,64 @@ v~rámci stávajícího projektu
 s~otevřenými zdrojovými kódy.
 }
 \abstractEN{
+Many nowadays systems, namely embedded,
+are insisted to~satisfy high specification requirements,
+which often depend on~physical features of~real world.
+Formal verification showed to~be convenient method
+to~guarantee fulfillment of~specifications
+of~complex systems.
 
+Formal verification checks mathematical model of~a~system exactly;
+one of~used approaches is e.g.~\acr{sat}.
+Problem arises when one needs to~use
+another means of~modelling---%
+differential equations (\acr{ode}s),
+which describe physical features natively.
+
+Goal of~this paper is to~prove a~concept
+which combines \acr{sat} with~\acr{ode}s
+and can be used e.g.~to~formally verify
+models of~embedded systems.
+Such solvers already exist (e.g.~dReal),
+but their usage in~industry is limited
+due to~their preference of~accuracy over~speed
+in~\acr{ode}s.
+The objective was to~apply
+classic numerical methods for~solving \acr{ode}s,
+which are less accurate, but faster.
+
+This work includes prototype implementation
+named \acr{sos} (\acrl{sos}),
+which combines \acr{smt}
+(extension of~\acr{sat})
+with~\acr{ode}s.
+\acr{smt} and \acr{ode} solvers
+are both independent of~rest components.
+Used solvers are odeint
+and from~\acr{smt} solvers \acr{cvc}4 and z3.
+
+The~major observations are
+that using classic numerical methods
+fastens overall computation,
+and that computation time of~tasks
+with precise initial values (\acr{ivp})
+is much smaller than at~tasks with~intervals (I\acr{ivp}).
+And intervals can be effectively approximated
+by value enumerations in~logical sum.
+These observations approve our chosen concept
+and were verified in~some examples,
+where our procedure was faster
+than in~current solver dReal.
+
+Thus the~goal of~a~more appropriate method
+for~industry needs,
+in~the~field of~formal verification with~\acr{ode}s,
+has been reached.
+This work is assumed to~serve
+as~a~source of~inspiration
+to~designers of~industry tools.
+Or, it can be developing and improving henceforth
+inside the~current open-source project.
 }
 \placeForDeclarationOfAuthenticity{V~Praze}
 \declarationOfAuthenticityOption{2} %volba Prohlášení (číslo 1--6)
