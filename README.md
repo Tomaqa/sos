@@ -24,7 +24,7 @@ make
 ### Dependencies
 * C++, STL, POSIX
 * Boost
-* z3 prover
+* [z3 prover](https://github.com/Z3Prover/z3)
 * gnuplot [optional]
 
 To avoid using Boost, one must delete all source files related to odeint
@@ -32,6 +32,7 @@ and use only `euler` equivalents.
 
 To use different SMT solver, one must manually edit source file
 `src/sos/smt/solver.cpp` with line containing `execlp`.
+There is a commented line with [CVC4](https://github.com/CVC4/CVC4).
 
 ## Usage
 

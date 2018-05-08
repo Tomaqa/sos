@@ -1516,7 +1516,8 @@ v~porovnání s~celkovým počtem.
 
 % Sun 06 May 2018 09:51:57 PM CEST
 \begin{paragraph}{\acr{cvc}4}\label{p:search:smt:solver:cvc4}
-je inkrementální open-source \acr{smt} řešič~\cit{cvc4}\cit{cvc4-art},
+je inkrementální \acr{smt} řešič~\cit{cvc4}\cit{cvc4-art}
+s~otevřenými zdrojovými kódy,
 který je navržen pro~snadné rozšiřování
 a poskytuje rozhraní v~C++
 a také rozhraní textové přes vstupní jazyk,
@@ -1548,7 +1549,9 @@ v~roce 2015 a 2017.
 % Sun 06 May 2018 09:41:58 PM CEST
 \begin{paragraph}{Open\acr{smt}}\label{p:search:smt:solver:opensmt}
 (konkrétně jeho druhá verze)
-je inkrementální open-source \acr{smt} řešič napsán v~jazyce C++,
+je inkrementální \acr{smt} řešič
+s~otevřenými zdrojovými kódy
+napsanými v~jazyce C++,
 který podporuje standardní iniciativu
 \acr{smt}-LIB~\cit{opensmt}\cit{opensmt-art}.
 Je postaven
@@ -1559,7 +1562,7 @@ současně však zůstává efektivní%
 \footnote{V~letech 2008 a 2009
 byl oceněn v~soutěži
 \name{\acr{smt}-COMP}~\cit{smtcomp}\cit{smtcomp-art}
-jako nejrychlejší open-source \acr{smt} řešič
+jako nejrychlejší volně dostupný \acr{smt} řešič
 ve~čtyřech logikách ze~\acr{smt}-LIB.
 V~pozdějších ročnících se už ale vysoko neumisťoval.}.
 Řešič není tak rozsáhlý,
@@ -2347,7 +2350,8 @@ Software tohoto nástroje jsem netestoval.
 
 % Mon 07 May 2018 03:35:26 PM CEST
 \begin{paragraph}{dReal}\label{p:search:hybrid:dreal}
-je open-source nástroj napsán v~jazyce C++, který rozhoduje,
+je nástroj s~otevřenými zdrojovými kódy
+napsanými v~jazyce C++, který rozhoduje,
 zda je vstupní formule nesplnitelná (\id{unsat}),
 nebo $\delta$-splnitelná
 (\id{$\delta$-sat})~\cit{dreal-art}\cit{dreal-smo-art}\cit{dreal}.
@@ -4346,7 +4350,7 @@ a jejich vyhodnocení šablonová třída \id{Expr::\-Eval<Arg>}.
 
 %%%
 
-% Thu 03 May 2018 12:58:59 PM CEST
+% Tue 08 May 2018 06:16:47 PM CEST
 \begin{paragraph}{\id{Expr}}\label{p:impl:exprs:expr}
 je odvozená třída od~abstraktní třídy \id{Expr\_\-place}.
 \id{Expr} využívá polymorfismu~---~obsahuje
@@ -4398,6 +4402,17 @@ např. \id{peek}, \id{get}, \id{extract},
 \id{add\_\-new\_\-expr\_\-at\_\-pos},
 \id{erase\_\-at\_\-pos}, \dots
 
+\pic{expr_tree.pdf}{expr:tree}{0.65}
+   {Ukázka struktury objektu třídy \id{Expr}}
+   {Obrázek zanedbává informaci o~tom, že každý potomek \id{Expr}
+    je uložen jako ukazatel na~abstraktní třídu \id{Expr\_\-place}.
+    Červené šípky ukazují na~počátečního potomka.
+    \id{pos} značí interní ukazatel na~aktuální pozici
+    v~rámci sekvenčního průchodu potomky každého objektu \id{Expr}.}
+
+Struktura objektu třídy \id{Expr}
+je ilustrována na~obrázku \rfPic{expr:tree}.
+
 Dále jsou vřazeny šablonové funkce,
 které provedou konverzi potomka libovolného typu
 na~aritmetický typ (\id{ptr\_\-to\_\-value}, \id{get\_\-value} apod.).
@@ -4435,7 +4450,7 @@ bez~jakékoli spojitosti s~aritmetickým vyhodnocením.
 
 %%%
 
-% Tue 17 Apr 2018 01:00:32 PM CEST
+% Tue 08 May 2018 06:19:22 PM CEST
 \begin{paragraph}{\id{Expr::\-Eval<Arg>}.}\label{p:impl:exprs:eval}
 Nové objekty vyhodnocení se konstruují z~objektů třídy \id{Expr},
 které musí být v~binárním či unárním tvaru, či v~jejich kombinaci.
@@ -4483,6 +4498,15 @@ jako nulární funkce, které jsou volány společně
 s~voláním vyhodnocení objektu \id{Eval::\-Oper}.
 Celý výraz \id{Expr::\-Eval<Arg>} je pak vyhodnocen
 voláním kořenového objektu \id{Eval::\-Oper}.
+
+Příklady vyhodnocení výrazu:
+\begin{center}
+   \id{(+ 5 (* 2 x))  -->  f(x) = 5 + 2*x} \\
+   \id{(sin (* 2 t)) [x t]  -->  f(x, t) = sin(2*t)} \\
+   \id{(+ y (* x x)) [x]  -->  f(x, y) = y + x*x}
+\end{center}
+kde \id{f} naznačuje vytvořenou funkci
+a \id{[]} explicitní nastavení klíčů nepřímých argumentů.
 \end{paragraph} %%\id{Expr::\-Eval<Arg>}.
 
 %%%
@@ -4537,7 +4561,7 @@ ne implementace nezávislého řešiče.
 
 %%%
 
-% Thu 03 May 2018 12:13:22 AM CEST
+% Tue 08 May 2018 06:40:42 PM CEST
 \begin{paragraph}{Identifikátory a hodnoty}\label{p:impl:smt:consts}
 vstupních konstant jsou uloženy podle příkazů \id{int\--ode}
 po~řádcích reprezentovaných strukturou \id{Const\_\-ids\_\-rows},
@@ -4558,6 +4582,29 @@ aby definovanou \acr{ode}
 mohlo současně používat více systémů nezávisle,
 např. v~případě kaskádní kompozice.
 Struktury hodnot konstant jsou analogické.
+
+\tab{const_ids_rows}{0.75}
+   {Struktura \id{Const\_\-ids\_\-rows} pro~\acr{ode} s~klíčem \id{x}}
+   {Názvy identifikátorů jsou jen příklady (nicméně mají typický tvar),
+    smí být libovolné.
+    V~tomto případě obsahuje model dva nezávislé systémy
+    používající definici \acr{ode} \id{x}.
+    Každá \acr{ode} obsahuje vlastní takovou tabulku.}
+   {r||l|l|l}
+   {\id{Time\_\-const\_\-ids} & \id{Const\_\-ids\_\-entry} $1$
+                              & \id{Const\_\-ids\_\-entry} $2$
+                              & \dots\\\hline\hline
+    \id{t\_0}, \id{t\_1} & \id{dx.1\_0}, \id{x.1\_0}, \id{k\_0}
+                         & \id{dx.2\_0}, \id{x.2\_0}, \id{k\_0}
+                         & \dots\\\hline
+    \id{t\_1}, \id{t\_2} & \id{dx.1\_1}, \id{x.1\_1}, \id{k\_1}
+                         & \id{dx.2\_1}, \id{x.2\_1}, \id{k\_1}
+                         & \dots\\\hline
+    \dots
+   }
+
+Struktura \id{Const\_\-ids\_\-rows} pro~jednu \acr{ode}
+je naznačena v~tabulce \rfTab{const_ids_rows}.
 \end{paragraph} %%Identifikátory a hodnoty konstant
 
 %%%
@@ -4759,6 +4806,15 @@ pro~korespondující vyhodnocení \id{Dt\_\-eval}.
 Pole klíčů je vždy shodné pro~všechny \id{Dt\_\-spec}
 (resp. \id{Dt\_\-eval})
 v~rámci \id{Ode\_\-spec}, tj.~\acr{ode}.
+
+\pic{odes_spec.pdf}{odes:spec}{0.75}
+   {Struktura a vztah objektů \id{Odes\_\-spec} a \id{Param\_\-keyss}}
+   {Specifikace jsou v~nezávislém tvaru.
+    Tvar \id{Param\_\-keys} pro~sjednocený by odpovídal \id{[x, y, t]}.}
+
+Strukturu a vztah konstruktů
+\id{Odes\_\-spec} a \id{Param\_\-keyss}
+zachycuje obrázek \rfPic{odes:spec}.
 
 Standardně tedy každá dvojice z~množin
 \id{Odes\_\-spec} a \id{Param\_\-keyss}
@@ -5090,8 +5146,9 @@ což je pole struktur \id{Ode}.
    není kontrolováno, zda jsou klíče napříč všemi rovnicemi
    dané \acr{ode} shodné,
 \item \id{Const\_\-ids\_\-rows}~---~pole identifikátorů
-   vstupních konstant jednoho příkazu \id{int\--ode},
-   jak bylo diskutováno v~sekci \rf{p:impl:smt:consts}.
+   vstupních konstant jednoho příkazu
+   \id{int\--ode}~---~viz.~sekce \rf{p:impl:smt:consts}
+   a tabulka \rfTab{const_ids_rows}.
 \end{enumerate}
 S~výjimkou \id{Const\_\-ids\_\-rows}
 pochází všechny ostatní hodnoty
@@ -5523,7 +5580,7 @@ který si počínal efektivněji než \acr{cvc}4.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Sat 05 May 2018 08:57:44 PM CEST
-\begin{section}{Praktické úlohy}\label{s:exp:examples}
+\begin{section}{Srovnávací úlohy}\label{s:exp:examples}
 V~této sekci rozeberu jednotlivé úlohy,
 které jsem spouštěl jak v~našem řešiči,
 tak v~řešiči dReal,
@@ -5971,7 +6028,7 @@ a to i~v~tomto raném stádiu vývoje.
 
 %%%%%%%%%%%%%
 
-\end{section} %%Praktické úlohy
+\end{section} %%Srovnávací úlohy
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
