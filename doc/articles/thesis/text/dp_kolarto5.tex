@@ -101,7 +101,7 @@
    DIfferential/ALgebraic Equation Solvers}
 \newacr{bdf}{BDF}{Backward differentiation formula}
 
-\newacr{sos}{SOS}{\acr{smt}+\acr{ode} solver}
+\newacr{sos}{SOS}{\acr{smt}+\acr{ode} Solver}
 
 %%%%%%%%%%%%%%%%%
 %%%% Debug commands
@@ -249,7 +249,8 @@
 \acknowledgements{Děkuji celé své rodině
 za~veškerou podporu a motivaci během celého studia.
 Dále panu vedoucímu doc. Dipl.-Ing. Dr. techn. Stefanu Ratschanovi
-za~profesionální a velmi ochotnou asistenci s~touto prací.}
+za~navržené téma práce
+a profesionální a velmi ochotnou asistenci s~jejím vypracováním.}
 
 % Sun 06 May 2018 08:22:32 PM CEST
 \abstractCS{
@@ -4341,7 +4342,7 @@ jako seznam úkolů do~budoucna.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Wed 02 May 2018 09:55:23 PM CEST
+% Tue 08 May 2018 02:15:21 PM CEST
 \begin{section}{Struktura a vlastnosti projektu}\label{s:impl:proj}
 Projekt jsem nazval \name{\acrf{sos}}.
 Řešič je koncipován
@@ -4375,9 +4376,15 @@ C++ zdrojové kódy jsou zapsány ve~stylu Stroustrup%
 \pic{comp_impl.pdf}{comp:impl}{0.85}
    {Blokové schema modelu komponent implementovaného prototypu}
    {Směry šipek určují směr výstupů z~komponent.
+    Řídící komponentu reprezentuje třída \id{Solver},
+    \acr{smt} a \acr{ode} řešiče třídy *\id{::Solver},
+    zpracování vstupu třída \id{Parser}
+    a knihovnu výrazů a jejich vyhodnocení
+    třída \id{Expr}. Předzpracování vstupu
+    je vnořeno do~\id{Expr} do~třídy \id{Preprocess}.
     Některé vnořené třídy jsou vynechány (např. \id{Expr::\-Eval}).}
 
-Na~obrázku \rfPic{comp:impl} je zachycena
+Na~obrázku \rfPic{comp:impl} je zachyceno
 blokové schema modelu komponent implementovaného prototypu aplikace.
 
 Hlavní aplikace je umístěna v~souboru \binFn{sos\_\-odeint}.
@@ -6193,8 +6200,12 @@ směrem ke~konečnému produktu použitelném v~praxi.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Tue 08 May 2018 11:18:16 AM CEST
+% Tue 08 May 2018 02:55:02 PM CEST
 \chapter{Návod k~použití programu}\label{appendix:usage}
+Program, včetně zdrojových kódů a textu práce, je veřejně přístupný
+v~git repozitáři na~zdrese \url{https://github.com/Tomaqa/sos}
+pod~tolerantní licencí \acr{mit}.
+
 Nejprve uvedu obsah projektu, ať už pořízeného z~přiloženého CD
 nebo přímo z~git repozitáře,
 poté návod k~sestavení projektu ze~zdrojových kódů
@@ -6204,9 +6215,11 @@ proto neočekávejte vždy intuitivní chování programu.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% Tue 08 May 2018 11:35:38 AM CEST
+% Tue 08 May 2018 02:54:58 PM CEST
 \begin{section}{Obsah projektu}\label{s:usage:tree}
 \dirtree{%
+   .1 LICENSE.md\DTcomment{obsah použité licence \acr{mit}}.
+   .1 README.md\DTcomment{stručný popis projektu}.
    .1 bin\DTcomment{adresář se~spustitelnými soubory implementace}.
       .2 applet\DTcomment{spustitelné dílčí applety}.
    .1 data\DTcomment{adresář s~uživatelskými datovými soubory}.
@@ -6225,7 +6238,6 @@ proto neočekávejte vždy intuitivní chování programu.
    .1 test\DTcomment{spustitelné soubory testů}.
    .1 tools\DTcomment{adresář s~pomocnými skripty}.
 }
-   % .1 readme.txt\DTcomment{stručný popis obsahu CD}.
 \end{section} %%Obsah projektu
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -6245,11 +6257,11 @@ Pro~použití jiného \acr{smt} řešiče
 je nutné před~sestavením ručně upravit zdrojový soubor
 \srcFn{sos/\-smt/\-solver.cpp} na~řádku s~funkcí \id{execlp}.
 Buď lze odkomentovat řádek s~řešičem \acr{cvc}4,
-nebo přidat nový řádek.
+nebo přidat nový řádek s~jiným řešičem.
 
 Pokud uživatel nemá dostupné knihovny Boost,
 může před~sestavením smazat všechny zdrojové soubory *\id{odeint}*
-a používat implementaci Eulerovy metody.
+a používat jen implementaci Eulerovy metody.
 \end{section} %%Návod k~sestavení
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
