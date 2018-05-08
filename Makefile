@@ -47,6 +47,7 @@ MKDIR_DIRS := "$(LIB_DIR)" "$(DOC_DIR)"
 MKDIR_DIRS += "$(DATA_DIR)" "$(LOCAL_DIR)"
 MKDIR_DIRS += "$(TEST_BUILD_DIR)" "$(TEST_BIN_DIR)"
 MKDIR_DIRS += $(shell tools/dev/dirs.sh $(SRC_DIR) $(BUILD_DIR))
+MKDIR_DIRS += $(shell tools/dev/dirs.sh $(SRC_MAIN_DIR) $(BUILD_MAIN_DIR))
 MKDIR_DIRS += $(shell tools/dev/dirs.sh $(SRC_MAIN_DIR) $(BIN_DIR))
 
 FIND_FLAGS := -not -path '*/\.*' -type f -name
