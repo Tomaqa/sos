@@ -1,6 +1,10 @@
 C := gcc
 CPP := g++
 
+FLAGS := -g -Wall -pedantic -O1 -Wshadow
+
+###################################################
+
 PROJ_NAME := sos
 
 ROOT_DIR  := ./
@@ -32,7 +36,7 @@ LOCAL_DIR  := $(ROOT_DIR)/local
 LIBS := -lm -pthread
 INCL := -I $(INCL_DIR)
 LDFLAGS := -Wl,--no-undefined
-FLAGS := $(INCL) -g -Wall -pedantic -O1 -Wshadow
+FLAGS += $(INCL)
 # FLAGS += -Wfatal-errors
 # FLAGS += -DDEBUG
 FLAGS += -DPROFILE -fopenmp
@@ -82,7 +86,6 @@ CMDS := $(patsubst $(SRC_MAIN_DIR)/%, $(BIN_DIR)/%, $(MAIN_SOURCES:.cpp=))
 .PHONY: init
 
 ## Compiles and links all algorithms' source files
-# all: init ${OBJECTS} ${MAIN_OBJECTS} ${TEST_OBJECTS} ${CMDS}
 default: main
 
 all: main test
@@ -133,11 +136,15 @@ $(TEST_BIN_DIR)/%: ${OBJECTS} $(TEST_BUILD_DIR)/%.o
 
 
 ## Cleans object files and executables
-# clean:
-# rm -fr $(BUILD_DIR)/* $(BIN_DIR)/*
+clean:
+	rm -fr $(BUILD_DIR)/* $(BUILD_MAIN_DIR)/* $(BIN_DIR)/*
+
+clean_test:
+	rm -fr $(TEST_BUILD_DIR)/* $(TEST_BIN_DIR)/*
+
+clean_all: clean clean_test
 
 #####################################
-
 build/test/expr_test.o: src/test/expr_test.cpp include/test/test.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp include/sos/expr.hpp include/sos/expr.tpp \
@@ -196,6 +203,16 @@ build/main/sos_odeint.o: src/main/sos_odeint.cpp \
  include/sos/ode/solver/context.hpp include/sos/ode/solver/traject.hpp \
  include/sos/solver.tpp include/sos/solver/run.tpp \
  include/sos/ode/odeint.hpp
+build/main/sos_euler.o: src/main/sos_euler.cpp include/sos/solver/run.hpp \
+ include/sos/sos.hpp include/sos/sos.tpp include/sos/util/run.hpp \
+ include/sos/util.hpp include/sos/util.tpp include/sos/solver.hpp \
+ include/sos/parser.hpp include/sos/smt.hpp include/sos/expr.hpp \
+ include/sos/expr.tpp include/sos/ode.hpp include/sos/expr/eval.hpp \
+ include/sos/expr/eval.tpp include/sos/expr/eval/oper.hpp \
+ include/sos/expr/eval/oper.tpp include/sos/smt/solver.hpp \
+ include/sos/ode/solver.hpp include/sos/ode/solver/context.hpp \
+ include/sos/ode/solver/traject.hpp include/sos/solver.tpp \
+ include/sos/solver/run.tpp include/sos/ode/euler.hpp
 build/sos/sos.o: src/sos/sos.cpp include/sos/sos.hpp include/sos/sos.tpp
 build/sos/expr/preprocess.o: src/sos/expr/preprocess.cpp \
  include/sos/expr/preprocess.hpp include/sos/sos.hpp include/sos/sos.tpp \
@@ -278,7 +295,8 @@ build/sos/smt/solver.o: src/sos/smt/solver.cpp include/sos/smt/solver.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp include/sos/smt.hpp include/sos/expr.hpp \
  include/sos/expr.tpp include/sos/expr/eval.hpp include/sos/expr/eval.tpp \
- include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp
+ include/sos/expr/eval/oper.hpp include/sos/expr/eval/oper.tpp \
+ include/sos/parser.hpp include/sos/ode.hpp
 build/sos/util/run.o: src/sos/util/run.cpp include/sos/util/run.hpp \
  include/sos/sos.hpp include/sos/sos.tpp include/sos/util.hpp \
  include/sos/util.tpp

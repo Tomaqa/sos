@@ -162,6 +162,8 @@
 \newcommand{\binFn}[1]{\id{\binDir{}/\-#1}}
 \newcommand{\appletDir}{\id{\binDir{}/\-applet}}
 \newcommand{\appletFn}[1]{\id{\appletDir{}/\-#1}}
+\newcommand{\srcDir}{\id{src}}
+\newcommand{\srcFn}[1]{\id{\srcDir{}/\-#1}}
 
 %%%%%%%%%%%%%%%%%
 
@@ -4313,14 +4315,6 @@ a \acr{posix}.
 C++ zdrojové kódy jsou zapsány ve~stylu Stroustrup%
 \footnote{Podle tvůrce jazyka C++: Bjarne Stroustrup.}.
 
-Hlavní aplikace je umístěna v~souboru \binFn{sos\_\-odeint}.
-Je implementována v~jazyce C++
-a podrobněji rozebrána ve~vlastní sekci.
-Původně byla vyvíjena ve~skriptovacím jazyce Bash
-v~souboru \binFn{prototype.sh},
-který již v~aktuální verzi není přítomen,
-ale je zpětně dohledatelný.
-
 \pic{comp_impl.pdf}{comp:impl}{0.85}
    {Blokové schema modelu komponent implementovaného prototypu}
    {Směry šipek určují směr výstupů z~komponent.
@@ -4329,9 +4323,18 @@ ale je zpětně dohledatelný.
 Na~obrázku \rfPic{comp:impl} je zachycena
 blokové schema modelu komponent implementovaného prototypu aplikace.
 
+Hlavní aplikace je umístěna v~souboru \binFn{sos\_\-odeint}.
+Je implementována v~jazyce C++
+a podrobněji rozebrána ve~vlastní sekci.
+Původně byla vyvíjena ve~skriptovacím jazyce Bash
+v~souboru \binFn{prototype.sh},
+který již v~aktuální verzi není přítomen,
+ale je zpětně dohledatelný.
+
 Před použitím nástroje je nutné jej sestavit.
-Návod je umístěn v~příloze \cmt{link}.
-Všechny uvedené soubory aplikací či appletů
+Návod k~sestavení a spuštění programu
+je umístěn v~příloze \rf{appendix:usage}.
+Všechny následně uvedené soubory aplikací či appletů
 jsou přístupné až po~tomto sestavení.
 
 Nástroj byl vyvíjen a testován pouze v~\acr{os} Linux.
@@ -5407,7 +5410,7 @@ používá odeint (třída \id{ODE::\-Odeint}).
 % Fri 04 May 2018 10:42:23 PM CEST
 \begin{section}{Seznam dalších úkolů}\label{s:impl:todo}
 \begin{itemize}
-\item Podrobnější dokumentace zdrojových kódů.
+\item Doplnit dokumentaci zdrojových kódů.
 \item Implementace řídícího makra \id{\#for} ve~všech variantách.
 \item Kontrola příkazů \id{define\--dt}, zda mají všechny
    v~rámci dané \acr{ode} shodné klíče nepřímých argumentů.
@@ -5496,7 +5499,7 @@ podrobněji znalá tohoto programu.
 
 %%%%%%%%%%%%%
 
-% Sat 05 May 2018 01:14:37 PM CEST
+% Tue 08 May 2018 10:47:48 AM CEST
 \begin{subsection}{Měřicí prostředky}\label{ss:exp:method:resources}
 Všechna měření byla provedena
 na~\acr{cpu}
@@ -5504,6 +5507,10 @@ Intel\reg Core\textsuperscript{TM}
 i7-4702MQ o~taktovací frekvenci $2{,}2$ GHz
 na~\acr{os} Arch Linux.
 Paralelismu nebylo využito.
+
+Vlastní projekt jsem přeložil
+programem \id{g++}
+s~optimalizací \id{-O1}.
 
 K~měření celkového času pro~srovnání s~řešičem dReal
 byl použit příkaz \id{time}
@@ -6129,6 +6136,96 @@ směrem ke~konečnému produktu použitelném v~praxi.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Tue 08 May 2018 11:18:16 AM CEST
+\chapter{Návod k~použití programu}\label{appendix:usage}
+Nejprve uvedu obsah projektu, ať už pořízeného z~přiloženého CD
+nebo přímo z~git repozitáře,
+poté návod k~sestavení projektu ze~zdrojových kódů
+a následně návod k~použití spustitelné aplikace.
+Prototyp aplikace necílí na~uživatelskou přívětivost,
+proto neočekávejte vždy intuitivní chování programu.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 11:35:38 AM CEST
+\begin{section}{Obsah projektu}\label{s:usage:tree}
+\dirtree{%
+   .1 bin\DTcomment{adresář se~spustitelnými soubory implementace}.
+      .2 applet\DTcomment{spustitelné dílčí applety}.
+   .1 data\DTcomment{adresář s~uživatelskými datovými soubory}.
+      .2 smto\DTcomment{soubory ve~formátu vstupního jazyka}.
+   .1 doc\DTcomment{adresář dokumentace projektu}.
+      .2 articles\DTcomment{adresář pro~tematické vědecké články}.
+         .3 thesis\DTcomment{adresář s~textem diplomové práce}.
+   .1 include\DTcomment{adresář s~hlavičkovými a šablonovými soubory}.
+      .2 sos\DTcomment{soubory týkající se knihovny implementace}.
+      .2 test\DTcomment{soubory pro~testy}.
+   .1 local\DTcomment{lokální uživatelské soubory nezávislé na~repozitáři}.
+   .1 src\DTcomment{adresář se~zdrojovými kódy}.
+      .2 main\DTcomment{soubory týkající se aplikací a appletů}.
+      .2 sos\DTcomment{soubory týkající se knihovny implementace}.
+      .2 test\DTcomment{soubory pro~testy}.
+   .1 test\DTcomment{spustitelné soubory testů}.
+   .1 tools\DTcomment{adresář s~pomocnými skripty}.
+}
+   % .1 readme.txt\DTcomment{stručný popis obsahu CD}.
+\end{section} %%Obsah projektu
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 11:41:12 AM CEST
+\begin{section}{Návod k~sestavení}\label{s:usage:build}
+Standardní sestavení programu se provede jediným příkazem:
+\begin{verbatim}
+   $ make
+\end{verbatim}
+Standardní verze programu závisí na~knihovnách Boost (odeint)
+a na~\acr{smt} řešiči z3 nainstalovaném v~systému.
+Volitelně je program závislý na~nástroji gnuplot,
+pokud má uživatel zájem o~generování výstupních grafů.
+
+Pro~použití jiného \acr{smt} řešiče
+je nutné před~sestavením ručně upravit zdrojový soubor
+\srcFn{sos/\-smt/\-solver.cpp} na~řádku s~funkcí \id{execlp}.
+Buď lze odkomentovat řádek s~řešičem \acr{cvc}4,
+nebo přidat nový řádek.
+
+Pokud uživatel nemá dostupné knihovny Boost,
+může před~sestavením smazat všechny zdrojové soubory *\id{odeint}*
+a používat implementaci Eulerovy metody.
+\end{section} %%Návod k~sestavení
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Tue 08 May 2018 11:41:12 AM CEST
+\begin{section}{Spuštění programu}\label{s:usage:run}
+Hlavní aplikace je umístěna v~souborech \binFn{sos\_\-odeint}
+a \binFn{sos\_\-euler}, které používají jako \acr{ode} řešič
+odeint, resp. vlastní implementaci Eulerovy metody.
+\binFn{sos\_\-euler} je vhodná z~hlediska nezávislosti
+na~externích knihovnách, jinak je téměř vždy lepší použít
+\binFn{sos\_\-odeint}.
+
+Zobrazení zprávy s~povolenými vstupními parametry aplikace
+se provede pomocí
+\begin{verbatim}
+   $ bin/sos_odeint -h
+\end{verbatim}
+
+Příklad použití se~vstupním i~výstupním souborem:
+\begin{verbatim}
+   $ bin/sos_odeint data/smto/ball.smto -o local/out
+\end{verbatim}
+po~čemž se do~souboru \id{local/\-out}
+zapíší textová data pro~generování grafu
+a do~souboru \id{local/\-out\_\-plot.svg}
+bude vygenerován graf nástrojem gnuplot.
+\end{section} %%Spuštění programu
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \chapter{Kompletní příklad užití}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -6140,25 +6237,6 @@ směrem ke~konečnému produktu použitelném v~praxi.
 \chapter{Další příklady použití maker}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \chapter{Obsah přiloženého CD}
-
-% \begin{figure}
-%    \dirtree{%
-%    .1 readme.txt\DTcomment{stručný popis obsahu CD}.
-%    .1 exe\DTcomment{adresář se spustitelnou formou implementace}.
-%    .1 src.
-%       .2 impl\DTcomment{zdrojové kódy implementace}.
-%       .2 thesis\DTcomment{zdrojová forma práce ve formátu \LaTeX{}}.
-%    .1 text\DTcomment{text práce}.
-%       .2 thesis.pdf\DTcomment{text práce ve formátu \acr{pdf}}.
-%       .2 thesis.ps\DTcomment{text práce ve formátu PS}.
-%    }
-% \end{figure}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-% \chapter{Instalační příručka}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

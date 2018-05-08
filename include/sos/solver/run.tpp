@@ -7,7 +7,8 @@ namespace SOS {
                + usage_row('q', "Sets quiet mode")
                + usage_row('P', "Parse only and exit")
                + "\nSetting output file will enable storing "
-                 + "trajectories of all ODEs.";
+                 + "trajectories of all ODEs."
+               + "\nOnly non-blocking reading from stdin is supported.";
     }
 
     template <typename OSolver>
