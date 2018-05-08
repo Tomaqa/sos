@@ -43,7 +43,7 @@ TEST_FLAGS := -I $(TEST_INCL_DIR)
 ###################################################
 
 MKDIR := mkdir -p
-MKDIR_DIRS := "$(BUILD_DIR)" "$(LIB_DIR)" "$(BIN_DIR)" "$(DOC_DIR)"
+MKDIR_DIRS := "$(LIB_DIR)" "$(DOC_DIR)"
 MKDIR_DIRS += "$(DATA_DIR)" "$(LOCAL_DIR)"
 MKDIR_DIRS += "$(TEST_BUILD_DIR)" "$(TEST_BIN_DIR)"
 MKDIR_DIRS += $(shell tools/dev/dirs.sh $(SRC_DIR) $(BUILD_DIR))
