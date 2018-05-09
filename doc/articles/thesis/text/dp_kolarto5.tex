@@ -328,8 +328,8 @@ Many nowadays systems, namely embedded,
 are insisted to~satisfy high specification requirements,
 which often depend on~physical features of~real world.
 Formal verification showed to~be convenient method
-to~guarantee fulfillment of~specifications
-of~complex systems.
+to~guarantee specifications fulfillment
+in~complex systems.
 
 Formal verification checks mathematical model of~a~system exactly;
 one of~used approaches is e.g.~\acr{sat}.
@@ -379,7 +379,7 @@ in~the~field of~formal verification with~\acr{ode}s,
 has been reached.
 This work is assumed to~serve
 as~a~source of~inspiration
-to~designers of~industry tools.
+to~industry tools' designers.
 Or, it can be developing and improving henceforth
 inside the~current open-source project.
 }
@@ -559,7 +559,7 @@ pro~účely ověření zvoleného konceptu.
 % Mon 07 May 2018 04:45:48 PM CEST
 \begin{paragraph}{Výsledky.}\label{p:intro:goal:results}
 Navržený koncept se podařilo potvrdit.
-Největší rozdíl byl pozorován
+Největší rozdíl byl pozorován obecně
 mezi úlohami \acr{ivp} a úlohami s~intervaly
 (I\acr{ivp}), a to bez~ohledu
 na~použitý řešič.
@@ -1487,7 +1487,7 @@ Příklady některých logik:
 \bigskip
 
 Základní příkazy jazyka jsou deklarace či definice konstant a funkcí,
-nových druhů, a přidávání formulí do \name{asercí}.
+nových druhů, a přidávání formulí do~\name{asercí},
 neboli podmínek, které musí být splněny.
 Ověření splnitelnosti pak spočívá v~hledání ohodnocení
 všech konstant a funkcí splňující konjunkci všech asercí,
@@ -1610,7 +1610,7 @@ a generování testů.
 Nástroj přijímá několik vstupních textových formátů,
 mj.~vlastní formát a \acr{smt}-LIB.
 Je možné jej použít také jako knihovnu
-s~programových rozhraním
+s~programovým rozhraním
 v~několika jazycích (C++, Java, Python, \dots).
 
 z3 provádí poměrně důkladné předzpracování vstupu
@@ -1623,9 +1623,9 @@ vhodnější použít pilný přístup,
 protože zakódování do~Booleovských proměnných je snadné.
 
 Kromě komponent \set{T}-řešičů
-se dále používá \acr{sat} řešič
+dále nástroj používá \acr{sat} řešič
 založený na~\acr{dpll} algoritmu
-a také samostatná komponenta
+a také samostatnou komponentu
 pro~práci s~kvantifikátory~\cit{z3-art}.
 \end{paragraph} %%z3
 
@@ -1643,14 +1643,14 @@ pro~práci s~kvantifikátory~\cit{z3-art}.
 \begin{section}{Numerické metody řešení \acr{ode}}\label{s:search:ode}
 Tyto metody numericky \hl{aproximují} průběh \acr{ode}.
 Obecně používají nějaký \name{krok},
-který určuje vzdálenost mezi sousedními vypočítávanými body.
+který určuje vzdálenost mezi sousedními počítanými body.
 Krok může být fixní či variabilní.
 Některé metody používají více kroků,
 což kromě různých vzdáleností také znamená,
 že hodnota bodů závisí na~více než jednom předchozím bodu.
 Obecně platí, že čím menší je zvolený krok,
 tím je menší odchylka od exaktního řešení,
-ale současně vzrůstá výpočetní složitost.
+ale vzrůstá výpočetní složitost.
 
 %%%
 
@@ -1689,7 +1689,7 @@ která obsahuje i~dosud neznámé hodnoty, např.
 \end{equation}
 Explicitní metody jsou časově efektivnější,
 ale nehodí se pro~řešení
-\name{rovnic se silným tlumením} (angl. \name{stiff})%
+\name{rovnic se silným tlumením} (angl. \name{stiff equations})%
 \footnote{Pro rovnice se silným tlumením
 neexistuje přesná definice.
 Jsou volně definovány
@@ -2184,7 +2184,7 @@ lze však implementovat i~jiné, např. vícekrokové.
 Integrace je prováděna po~krocích formou in-place,
 dle předloženého konceptu;
 výchozí variantou je projití všech kroků
-až do~koncové hodnoty nezávislé proměnné.
+až do~koncové hodnoty nezávislé proměnné $t$.
 Lze také průběžně ukládat odhad chyby,
 který je nutný pro~adaptivní metody.
 \end{paragraph} %%odeint
@@ -2219,9 +2219,9 @@ jsou přesně známy.
 Taková řešení se nazývají jako \name{garantovaná}
 (angl. \name{guaranteed}
 nebo \name{validated})~\cit{ode-valid-runge_kutta-art}.
-Garance rozsahu řešení je klíčovým rozdílem
-těchto metod
-od klasických řešičů \acr{ode}
+Garance rozsahu řešení a možnost použití intervalů
+jsou klíčovými rozdíly
+těchto metod od klasických řešičů \acr{ode}
 ze~sekce \rf{ss:search:ode:classic}.
 
 %%%
@@ -2310,7 +2310,7 @@ formou \acr{bmc}~\cit{hydlogic-art}\cit{dreal-smo-art}.
 který řeší rozsáhlé Boolovské kombinace aritmetických omezení,
 s~rovnicemi \acr{ode}}~\cit{isat-ode}\cit{isat-ode-art}.
 
-K~řešení \acr{ode} používá interní nástroj
+K~řešení \acr{ode} interně používá nástroj
 \name{VN\acr{ode}-LP}~\cit{vnode-lp},
 který se nejprve pokouší dokázat,
 že existuje jediné řešení problému,
@@ -2654,7 +2654,8 @@ nějakého druhu.
 Numerické obsahují číslice a případně desetinnou tečku (\id{\hll{.}})
 nebo záporné znaménko (\id{-})%
 \footnote{Záporné literály v~\acr{smt}-LIB povoleny nejsou,
-proto je nutné provést transformaci na~výraz
+proto je nutné při~zpracování vstupu
+provést transformaci na~výraz
 s~unární funkcí \id{-} a kladným literálem.};
 na~začátku nejsou povoleny přídavné \id{0} a kladné znaménko;
 desetinná čísla musí obsahovat číslici před i~po~desetinné tečce;
@@ -2758,7 +2759,7 @@ podle \acr{smt}-LIB:
 \item \id{QF\_\-UFNRA}~---~nelineární bez~kvantifikátorů,
 \item \id{UFLRA}~---~lineární s~kvantifikátory.
 \end{itemize}
-Použití kvantifikátorů jsme však dosud nezkoumali.
+Vliv použití kvantifikátorů jsme však dosud nezkoumali.
 
 Příkaz smí být volán nejvýše jednou
 a musí předcházet všem ostatním uvedeným příkazům.
@@ -2893,7 +2894,7 @@ Tyto však mohou být využity pouze uvnitř příkazu \id{define\--dt}
 
 %%%
 
-% Tue 24 Apr 2018 12:11:52 AM CEST
+% Wed 09 May 2018 02:11:19 AM CEST
 \begin{paragraph}{\id{define-dt}}\label{p:design:spec:ilang:ode:dt}
 slouží k~definici \id{dt}, tj.~výrazu popisujícího variantu derivace funkce,
 a současně k~deklaraci \id{ode} neznámé funkce
@@ -2945,11 +2946,12 @@ pro~účely propojení konstant druhu \id{Dt} se~stavem systému.
 Argumenty \id{<arg>} vstupují do~výrazu \id{<expr>}
 jako konstanty druhu \id{Real} jakožto počáteční podmínky integrace
 a také jako vstupní hodnoty v~každé fázi integrace.
-Pokud \id{<arg>} pochází z~konstanty, její hodnota se nemění;
+Pokud je \id{<arg>} nepoužitý identifikátor
+(v~kontextu argumentů \id{define\--dt}), její hodnota se nemění;
 pokud se však jedná o~identifikátor některé \id{ode}
 (pocházející z~\id{<fun\_\-name>}),
 její hodnota se průběžně mění,
-jelikož jsou všechna \acr{ode} integrována synchronně.
+jelikož jsou všechna související \acr{ode} integrována synchronně.
 Tímto způsobem se definují soustavy více \acr{ode}%
 \footnote{Pokud chcete z~nějakého důvodu
 použít funkci některé \id{ode}
@@ -2968,7 +2970,7 @@ vstupní konstanty pro~příkaz \id{int\--ode} zůstávají stejné.}, př.:
 % Fri 04 May 2018 07:54:54 PM CEST
 \begin{paragraph}{\id{int-ode}}\label{p:design:spec:ilang:ode:int}
 obaluje výraz integrace neznámé funkce v~konkrétní fázi
-a dosazuje do~\id{ode} hodnoty či konstanty.
+a dosazuje do~\id{ode} literály či konstanty.
 Návratová hodnota výrazu je druhu \id{Real} a lze jej používat
 uvnitř příkazů \id{assert}.
 
@@ -2977,7 +2979,8 @@ kde jsou funkce povoleny,
 což např. není vrcholová úroveň vstupu.
 
 Na~rozdíl od~příkazu \id{define\--dt} pracuje tento
-výhradně s~identifikátory, ne s~obecnými klíči.
+výhradně s~identifikátory konstant, ne s~obecnými klíči
+(resp. identifikátory \id{ode}).
 Slouží k~tomu, aby dosazoval do~rovnic definovaných
 příkazem \id{define\--dt} konkrétní
 počáteční a koncové hodnoty
@@ -3075,9 +3078,9 @@ i~další \acr{smt} konstrukty tohoto jazyka.
 \label{p:design:spec:ilang:struct:const}
 Všechny konstanty musejí být deklarovány a konstanty
 počátečních podmínek
-musí být i~definovány.
+musí být definovány.
 Každé konstantě se typicky dává jako přípona číslo fáze,
-ale řešič na~to nebere žádný ohled.
+ale řešič by na~to neměl brát žádný ohled.
 
 Je vhodné deklarovat konstanty
 nezávislé proměnné \id{t},
@@ -3139,9 +3142,6 @@ znamenají zavedení podmínek,
 které musí být splněny \hl{mezi} všemi fázemi,
 ale mohou být porušeny v~průběhu integrace.
 Mohou a nemusí být závislé na~aktuálním stavu systému.
-Pro~stanovení podmínek pro~konstanty závisle
-na~konkrétním diskrétním stavu systému
-doporučujeme použít až část definice skoků uvedenou dále.
 
 Pokud to implementace \hl{explicitně} sama neprovádí,
 je nutné omezit všechny konstanty jednotlivých fází druhu \id{Dt}
@@ -3219,7 +3219,9 @@ spojitého stavu modelu při~některém skoku
 (např. reset časovače),
 je nutné tyto konstanty v~jednotlivých fázích zdvojit,
 kde první značí např. hodnotu na~začátku fáze
-a druhá na~konci fáze.
+(např. s~příponou \id{\_0})
+a druhá na~konci fáze
+(např. s~příponou \id{\_t}).
 Příklad:
 \begin{Verbatim}[samepage=true]
 (declare-fun tau_0_0  () Real) (declare-fun tau_0_1  () Real)
@@ -3263,8 +3265,10 @@ Dochází tím k~propojení konkrétních vstupních a výstupních konstant
 druhu \id{Real} a konstant druhu \id{Dt}.
 Podle argumentů mezí nezávislé proměnné \id{t}
 těchto příkazů je určeno rozložení fází výpočtu.
-Všechna \acr{ode} ve~stejných časových mezích jsou
-integrována synchronně.
+Všechna \acr{ode},
+která jsou navzájem závislá
+a nachází se ve~stejných časových mezích,
+jsou integrována synchronně.
 
 Příklad:
 \begin{Verbatim}[samepage=true]
@@ -3364,7 +3368,7 @@ Mezi tato makra patří:
    \id{<body>} tedy může obsahovat i~libovolná vnořená makra
    včetně dalších definic; korektnost závisí až na~kontextu
    místa volání makra. Makro smí být definováno i~rekurzivně,
-   ale je nutné ohlídat koncové podmínky.
+   ale uživatel si musí pohlídat koncové podmínky.
 
    Ve~variantě \rf{i:macro:def:def} může být tělo i~víceřádkové;
    varianta \rf{i:macro:def:define} je zakončena koncem řádku.
@@ -3436,6 +3440,7 @@ a proto mezi nimi
 nebude nadále rozlišováno.
 Názvy lokálních a globálních maker se mohou navzájem překrývat,
 přednost má vždy naposledy definované lokální makro.
+(Lokální makra mohou být definována vícekrát.)
 
 V~každém místě volání jsou makra nahrazena za~definovaný text,
 který může být závislý na~parametrech
@@ -3553,15 +3558,15 @@ včetně případů užití.
 
 %%%%%%%%%%%%%
 
-% Sat 28 Apr 2018 11:04:53 PM CEST
+% Wed 09 May 2018 02:44:36 AM CEST
 \begin{subsection}{Výstupy}\label{ss:design:spec:out}
 Výstupem řešiče je především příznak splnitelnosti.
 Je-li vstup splnitelný,
-pak volitelně také ohodnocení diferencovaných konstant
-v~jednotlivých fázích.
+pak je volitelně také počáteční a koncové
+ohodnocení diferencovaných funkcí.
 Pokud je navíc zadán výstupní soubor,
 jsou do~něj zapsány celé trajektorie
-všech diferencovaných funkcí
+diferencovaných funkcí
 a z~těchto dat je vykreslen společný graf.
 
 V~případě konečné množiny počátečních podmínek
@@ -4280,8 +4285,8 @@ jako seznam úkolů do~budoucna.
 \begin{section}{Struktura a vlastnosti projektu}\label{s:impl:proj}
 Projekt jsem nazval \name{\acrf{sos}}.
 Řešič je koncipován
-jako soubor knihoven, appletů a hlavní aplikace,
-implementovaných převážně v~jazyce C++ (není-li řečeno jinak).
+jako soubor knihoven, appletů a hlavních aplikací,
+implementovaných v~jazyce C++.
 Přestože se jedná o~prototyp, je projekt strukturně koncipován tak,
 aby byla jeho případná rozšíření a další vývoj
 možná provést snadno přímo v~něm.
@@ -4291,12 +4296,14 @@ umožňující použití různých \acr{smt} a \acr{ode}
 Projekt používá verzovací systém \name{git},
 má otevřené zdrojové kódy
 a je veřejně dostupný včetně tohoto textu práce na~adrese
-\url{https://github.com/Tomaqa/sos}.
+\url{https://github.com/Tomaqa/sos}
+pod~tolerantní licencí \acr{mit}.
 
 Zdrojové kódy napsané v~C++ používají standard C++14
 (nejsou zpětně kompatibilní se staršími standardy)
 a jsou umístěny ve~jmenném prostoru \id{SOS}.
-Moduly, které zprostředkovávají některý z~řešičů,
+Moduly, které zprostředkovávají
+některý z~\acr{smt} či \acr{ode} řešičů,
 jsou izolovány od dalších zodpovědností.
 Tyto moduly jsou pochopitelně závislé na~knihovnách třetích stran.
 Kromě těchto (vyměnitelných) modulů je však celý projekt
@@ -4321,8 +4328,7 @@ C++ zdrojové kódy jsou zapsány ve~stylu Stroustrup%
 Na~obrázku \rfPic{comp:impl} je zachyceno
 blokové schema modelu komponent implementovaného prototypu aplikace.
 
-Hlavní aplikace je umístěna v~souboru \binFn{sos\_\-odeint}.
-Je implementována v~jazyce C++
+Hlavní aplikace je umístěna v~souboru \binFn{sos\_\-odeint}
 a podrobněji rozebrána ve~vlastní sekci.
 Původně byla vyvíjena ve~skriptovacím jazyce Bash
 v~souboru \binFn{prototype.sh},
@@ -5463,8 +5469,9 @@ používá odeint (třída \id{ODE::\-Odeint}).
 \begin{itemize}
 \item Doplnit dokumentaci zdrojových kódů.
 \item Implementace řídícího makra \id{\#for} ve~všech variantách.
-\item Kontrola příkazů \id{define\--dt}, zda mají všechny
-   v~rámci dané \acr{ode} shodné klíče nepřímých argumentů.
+\item Kontrola příkazů \id{define\--dt},
+    zda mají v~rámci dané \acr{ode} všechny
+    shodné klíče nepřímých argumentů.
 \item Lepší zacházení s~výstupními textovými hodnotami z~\acr{smt}
    řešiče, pokud se do~něj následně posílají zpět jako podmínky.
 \item Oddělení rozhraní od~implementace ve~třídě \id{SMT::\-Solver};
@@ -5491,6 +5498,11 @@ používá odeint (třída \id{ODE::\-Odeint}).
    \id{declare\--ode} se zavedením identifikátoru \acr{ode}
    a přiřazením identifikátorů variant derivací,
    které by se mohly objevovat vícekrát napříč těmito příkazy.}.
+\item Přepsat funkci řídicí komponenty \id{do\_\-step} tak,
+   aby buď využívala explicitní zásobník,
+   nebo ještě lépe byla založena jen na~iterační smyčce.
+   (Jinak hrozí přetečení systémového zásobníku
+    u~rozsáhlých úloh s~velkým množstvím návratů.)
 \end{itemize}
 \end{section} %%Seznam dalších úkolů
 
@@ -5502,7 +5514,7 @@ používá odeint (třída \id{ODE::\-Odeint}).
 \chapter{Experimentální část}\label{ch:exp}
 V~této kapitole aplikuji realizovaný koncept
 na~vybraných praktických úlohách
-a srovnám výsledný výkon s~řešičem dReal.
+a srovnávám výsledný výkon s~řešičem dReal.
 Nejprve uvedu metodiku,
 dle které jsem při~měření postupoval,
 a poté jednotlivé příklady.
@@ -5529,7 +5541,8 @@ přesně dodržují všechny invarianty po celou dobu integrace.
 Náš koncept pracuje pouze na~principu diskretizace času,
 a ke~kontrole invariant dochází jen v~těchto bodech.
 Počáteční podmínky jsem ale nastavoval stejně (není-li řečeno jinak),
-tj.~i~v~řešiči dReal jsem intervalové podmínky jen aproximoval,
+tj.~i~v~řešiči dReal jsem intervalové podmínky
+jen aproximoval~---~úlohy jsem koncipoval jako \acr{ivp},
 aby bylo srovnání v~tomto ohledu relevantní.
 
 Dále je potřeba, aby oba řešiče počítaly
@@ -5550,12 +5563,12 @@ podrobněji znalá tohoto programu.
 
 %%%%%%%%%%%%%
 
-% Tue 08 May 2018 10:47:48 AM CEST
+% Wed 09 May 2018 03:28:31 AM CEST
 \begin{subsection}{Měřicí prostředky}\label{ss:exp:method:resources}
 Všechna měření byla provedena
 na~\acr{cpu}
 Intel\reg Core\textsuperscript{TM}
-i7-4702MQ o~taktovací frekvenci $2{,}2$ GHz
+i7-4702MQ o~(základní) taktovací frekvenci $2{,}6$ GHz
 na~\acr{os} Arch Linux.
 Paralelismu nebylo využito.
 
@@ -5604,7 +5617,8 @@ realizovat pouze v~našem nástroji.
 Jedná se o~jednoduchý demonstrační příklad,
 který vyžaduje dodržení invariantu hodnoty integrované funkce.
 Příklad je převzat z~dReal,
-s~jedinou úpravou~---~aproximace intervalových počátečních podmínek.
+s~jedinou úpravou~---~aproximace intervalových počátečních podmínek
+(převedení na~\acr{ivp}).
 
 Diskrétní stav modelu je triviální:
 obsahuje jedinou Booleovskou proměnnou,
@@ -5955,7 +5969,7 @@ a metod s~intervalovou aritmetikou.
 V~tomto případě \hl{je naše řešení rychlejší}.
 Nutno však podotknout, že výsledné trajektorie jsou méně přesné.
 
-Pro~některé volby hodnot \id{T} není možné splnit invarianty.
+Pro~některé volby hodnot \id{T} není možné invarianty splnit.
 
 Tabulka \rfTab{el_osc_prof} opět potvrzuje,
 že délka výpočtu strávená \acr{smt} řešičem
@@ -5993,7 +6007,8 @@ za~použití intervalových podmínek pro \id{x} a \id{tau}
 v~tabulce \rfTab{el_osc_dreal_int_cmp}.
 V~tomto případě jsou rozdíly
 oproti aproximovaným intervalovým podmínkám
-mnohem vyšší, kromě případu ${\delta = 10}$,
+mnohem vyšší, než v~předchozí úloze,
+kromě případu ${\delta = 10}$,
 který je však vůči vstupu hodně tolerantní
 (viz.~obrázek \rfPic{el_osc:dreal:d10}).
 \end{subsection} %%Elektrický oscilátor
@@ -6128,7 +6143,7 @@ zvolený koncept se~ukázal jako nadějná
 alternativa ke~stávajícím řešičům.
 Experimenty na~praktických úlohách ukázaly,
 že použití našeho řešení
-může být rychlejší,
+je často rychlejší,
 než v~případě stávajícího řešiče dReal.
 Konkrétně se jednalo např. o~modelový příklad
 elektrického oscilátoru,
@@ -6157,7 +6172,7 @@ Navíc je možné flexibilně
 nasazovat různé \acr{smt} a \acr{ode} řešiče.
 Požadavky na~rozhraní \acr{smt} řešiče
 jsou minimální: stačí, aby byl inkrementální
-a byl konformní se~standardem \acr{smt}-LIB,
+a byl konformní se~standardem \acr{smt}-LIB;
 pak lze řešič použít jako samostatný proces.
 U~\acr{ode} řešiče stačí, aby řešil \acr{ivp}
 a koncové podmínky závisely (zatím) jen na~čase,
@@ -6421,9 +6436,9 @@ s~řešičem dReal.
 
 % Tue 08 May 2018 11:10:10 PM CEST
 \begin{section}{Uzavřená funkce}\label{s:next_examples:fun}
-Tato modelová úloha slouží pro~ověření
-zacházení s~návraty a se~zcela
-nedeterministickými přechody mezi diskrétními stavy.
+Tato modelová úloha má zcela
+nedeterministické přechody mezi diskrétními stavy
+a slouží pro~ověření zacházení s~návraty.
 
 Jsou dány dvě schodovité funkce
 jako horní (\id{high}) a dolní (\id{low}) mez:
@@ -6441,9 +6456,9 @@ přičemž je nutné vždy integrovat po~fixně danou dobu \id{T}
 
 Pokoušel jsem se úlohu modelovat v~dReal,
 ale nebyl jsem schopen dosáhnout dokončení výpočtu
-alespoň do~úseku \id{t = 5}
+ani do~úseku \id{t = 5}
 (do~té doby je úloha nezajímavá,
-protože např. téměř stačí jen setrvat na~$0$).
+protože např. téměř stačí jen setrvat na~hodnotě $0$).
 Konkrétně výpočet selhal už ve~stádiu generování
 vstupu nástrojem dReach,
 který současně s~generováním ověřuje splnitelnost
@@ -6462,7 +6477,8 @@ ani do~$400$.~kombinace (a všechny byly do té doby nesplnitelné).
 \tab{fun_cmp}{0.6}
    {Uzavřená funkce: srovnání výstupů}
    {\id{T} značí fixní délku fáze.
-    Pro~\id{T = 0.2} program po~delší době spadl.}
+    Pro~\id{T = 0.2} program po~delší době spadl
+    (pravděpodobně přetekl systémový zásobník).}
    {r||c|l}
    {\id{T} [s] & Délka výpočtu [s] & Výstup \\ \hline
     $0{,}2$   & X \ \          & X \\ \hline
@@ -6491,7 +6507,7 @@ a na~obrázcích \rfPic{fun:0.25} a \rfPic{fun:0.4} výsledné podoby řešení.
 V~této příloze uvedu kompletní příklad
 od~návrhu specifikace systému
 přes~sestavení textového vstupu
-až~po~vyhodnocení našim nástrojem.
+až~po~vyhodnocení naším nástrojem.
 
 V~sekci výsledků také uvedu srovnání s~řešičem dReal.
 
@@ -6528,7 +6544,7 @@ je modelován rovnicí $\der{x} = 50 - x$
 a nárůst při~zapnutém topení rovnicí $\der{x} = 100 - x$.
 (Zda je takový model realistický či snad reálný
 nyní nechme stranou.)
-Našim úkolem je ověřit,
+Naším úkolem je ověřit,
 zda bude možné teplotu udržet v~rámci stanovených mezí
 a jaká bude nutná perioda řídícího systému.
 \end{section} %%Popis sytému
@@ -6538,7 +6554,7 @@ a jaká bude nutná perioda řídícího systému.
 % Tue 08 May 2018 09:05:07 PM CEST
 \begin{section}{Tvar vstupu}\label{s:example:input}
 Rozhodli jsme se provést verifikaci
-na~základě uvedného modelu
+na~základě uvedeného modelu
 po~dobu jedné minuty.
 
 Po~nastudování vstupního jazyka
@@ -6710,7 +6726,7 @@ a umožnit tak automatizované řízení naší části montážní linky.
 
 % Tue 08 May 2018 09:50:11 PM CEST
 \begin{paragraph}{Srovnání s~dReal.}\label{s:example:results:cmp}
-Tato úloha je také orientována na~čas,
+Tato úloha je opět orientována na~čas,
 takže se dalo očekávat, že si povede řešič dReal hůře než náš.
 Navíc je přímo nutné zvolit konkrétní fixní délku periody \id{T}.
 Zvolil jsem tu nejjednodušší variantu,
