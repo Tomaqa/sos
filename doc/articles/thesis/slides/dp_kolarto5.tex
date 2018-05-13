@@ -1,0 +1,315 @@
+\documentclass[t]{beamer}
+
+\usepackage[utf8]{inputenc}
+\usepackage{default}
+\usepackage[T1]{fontenc}
+\usepackage[czech]{babel}
+
+%\usepackage{cutwin}
+%\usepackage{wrapfig}
+\usepackage{subcaption}
+\usepackage{cleveref}
+
+\usetheme{Boadilla}
+\usecolortheme{beaver}
+
+\usepackage{hyperref}
+\usepackage{graphicx}
+
+%%%Definice
+
+\newcommand{\picFn}[1]{../img/#1}
+\newcommand{\picL}{pic}
+\newcommand{\rfPic}[1]{(\rf{\picL:#1})}
+
+% 1-File basename
+% 2-Label
+% 3-Width ratio
+\newcommand{\pic}[3]{
+\begin{figure}
+\centering
+\includegraphics[width=#3\linewidth]{\picFn{#1}}
+\label{\picL:#2}
+\end{figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+%%%Titulni strana
+
+\title[Diplomová práce]{SAT s~diferenciálními rovnicemi}
+\subtitle{Diplomová práce}
+\author[Kolárik Tomáš (FIT ČVUT)]{
+Kolárik Tomáš
+\\\textit{kolarto5@fit.cvut.cz}
+\\\medskip
+Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
+}
+
+%%%Uvod
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\vfill
+\hfill \inserttotalframenumber~slajdů, 10~minut
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Obsah prezentace}
+\begin{enumerate}
+\item Motivace.
+\item Cíle práce.
+\item Výsledky.
+\item Ukázka úloh.
+\item Realizace.
+\end{enumerate}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Motivační příklad}
+\begin{itemize}
+\item Ke~\textit{spolehlivé} činnosti přístroje
+   je nutné dodržet provozní teplotu.
+\item Řešení: použití \textit{termostatu}.
+\item Termostat popíšeme \textit{automatem}.
+   \begin{itemize}
+   \item Rozsah povolené teploty specifikujeme jako invarianty
+      (nejsou na~obrázku).
+   \end{itemize}
+\item Jak verifikovat správnou funkci termostatu?
+   \begin{itemize}
+   \item Tj.~dodržení invariant.
+   \end{itemize}
+\end{itemize}
+
+\vfill
+
+\pic{thermostat_model.pdf}{themostat:model}{0.7}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Motivace (1)}
+\begin{itemize}
+\item Používanou spolehlivou metodou \textit{garance}
+   dodržení specifikací je \textbf{formální verifikace}.
+   \begin{itemize}
+   \item K~tomu je nutné sestavit matematický \textit{model} systému.
+   \end{itemize}
+\item Dnes hojně využívaný způsob: \textbf{SAT}.
+\end{itemize}
+
+\begin{alertblock}{Problém}
+\begin{itemize}
+\item \textit{Vestavné systémy} interagují
+   s~\textit{fyzikálním okolím}.
+\item Přirozený popis fyzikálních jevů: \textbf{diferenciální rovnice}.
+   \begin{itemize}
+   \item Ordinary differential equation (ODE).
+   \end{itemize}
+\item SAT (ani jeho aritmetická rozšíření) \textit{neumí} ODE.
+\end{itemize}
+\end{alertblock} %%Problém
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Motivace (2)}
+\begin{block}{Současný stav}
+\begin{itemize}
+\item Řešice kombinující SAT a soustavy ODE již existují.
+\item K~řešení ODE ale používají intervalovou aritmetiku.
+\item Důsledky:
+   \begin{itemize}
+   \item Umožňují intervalové počáteční podmínky ODE.
+   \item Garantují maximální dosaženou chybu.
+   \item Ale jsou \textbf{pomalé}.
+   \end{itemize}
+\end{itemize}
+\end{block} %%Současný stav
+
+\vfill
+
+\begin{exampleblock}{Cíl práce}
+K~řešení ODE použít \textbf{klasické numerické metody}:
+\begin{itemize}
+\item Vyžadují jednoznačné počáteční podmínky.
+\item Garantují (jen) \textit{konvergenci} dosažené chyby.
+\item Mohou být méně přesné, ale jsou rychlejší.
+\end{itemize}
+\end{exampleblock} %%Cíl práce
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Cíle práce}
+\begin{enumerate}
+\item Ověřit koncept, který k~řešení ODE používá
+   klasické numerické metody.
+\item Kombinovat zvolené řešení ODE s~řešením problému SMT.
+   \begin{itemize}
+   \item SMT: Satisfiability Modulo Theories
+      (rozšíření SAT o~aritmetické teorie).
+   \end{itemize}
+\item Realizovat prototypovou implementaci řešiče SMT a ODE.
+\item Srovnat výkonnost prototypu se~stávajícím řešičem dReal.
+   \begin{itemize}
+   \item dReal pochází z~disertační práce na~Carnegie Mellon University.
+   \end{itemize}
+\end{enumerate}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Výsledky}
+\begin{itemize}
+\item Náš prototyp si v~některých úlohách počíná mnohem \textbf{rychleji}
+   než dReal.
+   \begin{itemize}
+   \item Zatím se jedná zejména o~úlohy řízené časem.
+   \end{itemize}
+\item Tj.~podařilo se mi \textbf{potvrdit},
+   že zvolený \textbf{koncept} je \textbf{nadějný}
+   pro~lepší použití \textbf{v~praxi}.
+\item Velký rozdíl ve~výpočtu úloh s~pevnými a intervalovými podmínkami.
+   \begin{itemize}
+   \item Intervalové podmínky lze aproximovat výčtem hodnot v~logickém součtu.
+   \item I~dReal si pak počíná mnohem rychleji.
+   \end{itemize}
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Ukázkové úlohy (1)}
+\textbf{Termostat}
+\begin{itemize}
+\item $x$ \dots provozní teplota.
+\item Nutné dodržet invariant $70 \leq x \leq 80$.
+\item Systém je řízen \textit{časem} o~fixní periodě.
+\item Srovnání délky výpočtu dReal a našeho prototypu: $46$ a $0{,}5$ s.
+\end{itemize}
+
+\vfill
+
+\begin{figure}
+   \begin{subfigure}{.45\textwidth}
+      \centering
+      \caption{dReal}
+      \label{plot:thermostat:dreal}
+      \includegraphics[width=1.\linewidth]{\picFn{thermostat_dreal_x.pdf}}
+   \end{subfigure}
+   \begin{subfigure}{.49\textwidth}
+      \centering
+      \caption{Náš koncept}
+      \label{plot:thermostat:0.4}
+      \includegraphics[width=1.\linewidth]{\picFn{thermostat_0_4.pdf}}
+   \end{subfigure}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Ukázkové úlohy (2)}
+\textbf{Skákající míč}
+\begin{itemize}
+\item $x$ \dots výška míče, $v$ \dots rychlost.
+\item Nutné dodržet invariant $x \geq 0$ nezávisle na~časové periodě.
+\item Systém je řízen \textit{událostmi} (změna pád/odraz).
+\item Srovnání délky výpočtu dReal a našeho prototypu: $0{,}1$ a $0{,}5$ s.
+\item Naše \textit{implementace} je nevhodná
+   kvůli nezávislosti na~časové periodě.
+\end{itemize}
+
+\vfill
+
+\begin{figure}
+   \begin{subfigure}{.49\textwidth}
+      \centering
+      \caption{dReal}
+      \label{plot:ball:dreal}
+      \includegraphics[width=1.\linewidth]{\picFn{ball_dreal.pdf}}
+   \end{subfigure}
+   \begin{subfigure}{.49\textwidth}
+      \centering
+      \caption{Náš koncept}
+      \label{plot:ball:0.2}
+      \includegraphics[width=1.\linewidth]{\picFn{ball_0_2.pdf}}
+   \end{subfigure}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Realizace}
+\begin{itemize}
+\item Vstupní jazyk je podobný standardu SMT-LIB.
+   \begin{itemize}
+   \item Přidány makra pro~parametrizované generování kódu.
+   \end{itemize}
+\item SMT i~ODE řešič realizovány jako výměnné samostatné komponenty.
+\item Centrální komponenta zajišťuje:
+   \begin{itemize}
+   \item vzájemnou komunikaci řešičů,
+   \item prohledání všech potřebných vstupních kombinací.
+   \end{itemize}
+\end{itemize}
+
+\vfill
+
+\pic{comp_design.pdf}{comp:design}{0.6}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Závěr}
+\begin{itemize}
+\item Cílem bylo aplikovat \textbf{odlišný přístup} v~integraci ODE.
+   \begin{itemize}
+   \item Použít potenciálně méně přesné, ale rychlejší metody.
+   \item Kombinovat ODE s~problémem SAT či jeho rozšířením.
+   \end{itemize}
+\item Navržený koncept jsem aplikoval v~prototypové implementaci.
+\item Prototyp jsem srovnal se~stávajícím řešičem dReal.
+   \begin{itemize}
+   \item V~některých úlohách jsem dosáhl výrazně \textbf{rychlejšího výpočtu}.
+   \item Podařilo se mi \textbf{potvrdit zvolený koncept}.
+   \end{itemize}
+\item Prototyp přijímá vstupní jazyk, který lze parametrizovat pomocí maker.
+\end{itemize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+% \appendix
+% \newcounter{finalframe}
+% \setcounter{finalframe}{\value{framenumber}}
+
+% \begin{frame}\frametitle{Další úlohy, které robot vykonává}
+% \end{frame}
+
+% \setcounter{framenumber}{\value{finalframe}}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\end{document}

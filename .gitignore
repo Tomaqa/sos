@@ -20,4 +20,6 @@ doc/odeint
 *.lo*
 *.out
 *.toc
+*.nav
+*.snm
 *~
