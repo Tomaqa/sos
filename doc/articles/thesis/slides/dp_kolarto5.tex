@@ -231,20 +231,22 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 \item Nutné dodržet invariant $x \geq 0$ nezávisle na~časové periodě.
 \item Systém je řízen \textit{událostmi} (změna pád/odraz).
 \item Srovnání délky výpočtu dReal a našeho prototypu: $0{,}1$ a $0{,}5$ s.
-\item Naše \textit{implementace} je nevhodná
-   kvůli nezávislosti na~časové periodě.
+\item Naše \textit{implementace} je (zatím) nevhodná.
+   \begin{itemize}
+   \item Kvůli nezávislosti invariant na~časové periodě.
+   \end{itemize}
 \end{itemize}
 
 \vfill
 
 \begin{figure}
-   \begin{subfigure}{.49\textwidth}
+   \begin{subfigure}{.45\textwidth}
       \centering
       \caption{dReal}
       \label{plot:ball:dreal}
       \includegraphics[width=1.\linewidth]{\picFn{ball_dreal.pdf}}
    \end{subfigure}
-   \begin{subfigure}{.49\textwidth}
+   \begin{subfigure}{.45\textwidth}
       \centering
       \caption{Náš koncept}
       \label{plot:ball:0.2}
