@@ -1,5 +1,11 @@
 \documentclass[t]{beamer}
 
+\beamertemplatenavigationsymbolsempty
+
+\addtobeamertemplate{frametitle}{}{%
+   \vspace{-0.3cm}%
+}
+
 \usepackage[utf8]{inputenc}
 \usepackage{default}
 \usepackage[T1]{fontenc}
@@ -63,10 +69,11 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 
 \begin{frame}\frametitle{Obsah prezentace}
 \begin{enumerate}
+%% Komentovat jen prvni bod.
 \item Motivace.
 \item Cíle práce.
+\item Ukázkové úlohy.
 \item Výsledky.
-\item Ukázka úloh.
 \item Realizace.
 \end{enumerate}
 \end{frame}
@@ -79,6 +86,11 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 \item Ke~\textit{spolehlivé} činnosti přístroje
    je nutné dodržet provozní teplotu.
 \item Řešení: použití \textit{termostatu}.
+\end{itemize}
+
+\pic{thermostat_model.pdf}{themostat:model}{0.7}
+
+\begin{itemize}
 \item Termostat popíšeme \textit{automatem}.
    \begin{itemize}
    \item Rozsah povolené teploty specifikujeme jako invarianty
@@ -89,10 +101,6 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
    \item Tj.~dodržení invariant.
    \end{itemize}
 \end{itemize}
-
-\vfill
-
-\pic{thermostat_model.pdf}{themostat:model}{0.7}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%
@@ -106,6 +114,10 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
    \item K~tomu je nutné sestavit matematický \textit{model} systému.
    \end{itemize}
 \item Dnes hojně využívaný způsob: \textbf{SAT}.
+   \begin{itemize}
+   \item SAT: Problém Booleovské splnitelnosti
+      (angl. Boolean satisfiability).
+   \end{itemize}
 \end{itemize}
 
 \begin{alertblock}{Problém}
@@ -127,7 +139,7 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 \begin{frame}\frametitle{Motivace (2)}
 \begin{block}{Současný stav}
 \begin{itemize}
-\item Řešice kombinující SAT a soustavy ODE již existují.
+\item Řešiče kombinující SAT a soustavy ODE již existují.
 \item K~řešení ODE ale používají intervalovou aritmetiku.
 \item Důsledky:
    \begin{itemize}
@@ -146,6 +158,9 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 \item Vyžadují jednoznačné počáteční podmínky.
 \item Garantují (jen) \textit{konvergenci} dosažené chyby.
 \item Mohou být méně přesné, ale jsou rychlejší.
+   \begin{itemize}
+   \item Jsou používány v~průmyslových aplikacích.
+   \end{itemize}
 \end{itemize}
 \end{exampleblock} %%Cíl práce
 \end{frame}
@@ -157,38 +172,20 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 \begin{enumerate}
 \item Ověřit koncept, který k~řešení ODE používá
    klasické numerické metody.
-\item Kombinovat zvolené řešení ODE s~řešením problému SMT.
    \begin{itemize}
-   \item SMT: Satisfiability Modulo Theories
-      (rozšíření SAT o~aritmetické teorie).
+   \item Kombinovat zvolené řešení ODE s~řešením problému SMT.
+      \begin{itemize}
+      \item SMT: Satisfiability Modulo Theories
+         (rozšíření SAT o~aritmetické teorie).
+      \end{itemize}
+   \item Realizovat prototypovou implementaci řešiče SMT a ODE.
    \end{itemize}
-\item Realizovat prototypovou implementaci řešiče SMT a ODE.
 \item Srovnat výkonnost prototypu se~stávajícím řešičem dReal.
    \begin{itemize}
    \item dReal pochází z~disertační práce na~Carnegie Mellon University.
+   %% Vedoucí práce: Edmund M. Clarke, držitel Turingovy ceny
    \end{itemize}
 \end{enumerate}
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}\frametitle{Výsledky}
-\begin{itemize}
-\item Náš prototyp si v~některých úlohách počíná mnohem \textbf{rychleji}
-   než dReal.
-   \begin{itemize}
-   \item Zatím se jedná zejména o~úlohy řízené časem.
-   \end{itemize}
-\item Tj.~podařilo se mi \textbf{potvrdit},
-   že zvolený \textbf{koncept} je \textbf{nadějný}
-   pro~lepší použití \textbf{v~praxi}.
-\item Velký rozdíl ve~výpočtu úloh s~pevnými a intervalovými podmínkami.
-   \begin{itemize}
-   \item Intervalové podmínky lze aproximovat výčtem hodnot v~logickém součtu.
-   \item I~dReal si pak počíná mnohem rychleji.
-   \end{itemize}
-\end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%
@@ -210,13 +207,19 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
       \centering
       \caption{dReal}
       \label{plot:thermostat:dreal}
-      \includegraphics[width=1.\linewidth]{\picFn{thermostat_dreal_x.pdf}}
+      \includegraphics[height=3.3cm, width=\textwidth]{%
+         \picFn{thermostat_dreal_x.pdf}%
+      }
    \end{subfigure}
+   \quad
    \begin{subfigure}{.49\textwidth}
       \centering
       \caption{Náš koncept}
       \label{plot:thermostat:0.4}
-      \includegraphics[width=1.\linewidth]{\picFn{thermostat_0_4.pdf}}
+      \includegraphics[height=3.9cm, width=\textwidth]{%
+         \picFn{thermostat_0_4.pdf}%
+      }
+      \vspace{-0.75cm}
    \end{subfigure}
 \end{figure}
 \end{frame}
@@ -228,31 +231,58 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 \textbf{Skákající míč}
 \begin{itemize}
 \item $x$ \dots výška míče, $v$ \dots rychlost.
-\item Nutné dodržet invariant $x \geq 0$ nezávisle na~časové periodě.
+\item Nutné dodržet invariant $x \geq 0$ (nezávisle na~časové periodě).
 \item Systém je řízen \textit{událostmi} (změna pád/odraz).
 \item Srovnání délky výpočtu dReal a našeho prototypu: $0{,}1$ a $0{,}5$ s.
 \item Naše \textit{implementace} je (zatím) nevhodná.
    \begin{itemize}
-   \item Kvůli nezávislosti invariant na~časové periodě.
+   \item Kvůli nutnosti časté kontroly invariant
+      (nezávisle na~časové periodě).
    \end{itemize}
 \end{itemize}
 
 \vfill
 
 \begin{figure}
-   \begin{subfigure}{.45\textwidth}
+   \begin{subfigure}{.49\textwidth}
       \centering
       \caption{dReal}
       \label{plot:ball:dreal}
-      \includegraphics[width=1.\linewidth]{\picFn{ball_dreal.pdf}}
+      \includegraphics[height=3.3cm, width=\textwidth]{%
+         \picFn{ball_dreal.pdf}%
+      }
    \end{subfigure}
-   \begin{subfigure}{.45\textwidth}
+   \begin{subfigure}{.49\textwidth}
       \centering
       \caption{Náš koncept}
       \label{plot:ball:0.2}
-      \includegraphics[width=1.\linewidth]{\picFn{ball_0_2.pdf}}
+      \includegraphics[height=3.9cm, width=\textwidth]{%
+         \picFn{ball_0_2.pdf}%
+      }
+      \vspace{-0.85cm}
    \end{subfigure}
 \end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}\frametitle{Výsledky}
+\begin{itemize}
+\item Náš prototyp si v~některých úlohách počíná mnohem \textbf{rychleji}
+   než dReal.
+   \begin{itemize}
+   \item Zatím se jedná zejména o~úlohy řízené časem (časovou periodou).
+   \end{itemize}
+\item Tj.~podařilo se mi \textbf{potvrdit},
+   že zvolený \textbf{koncept} je \textbf{nadějný}
+   pro~lepší použití \textbf{v~praxi}.
+\item Velký rozdíl ve~výpočtu úloh s~pevnými a intervalovými podmínkami.
+   \begin{itemize}
+   \item Intervalové podmínky lze aproximovat výčtem hodnot v~logickém součtu.
+   \item I~dReal si pak počíná mnohem rychleji.
+   \end{itemize}
+\end{itemize}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%
@@ -294,6 +324,7 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
    \item Podařilo se mi \textbf{potvrdit zvolený koncept}.
    \end{itemize}
 \item Prototyp přijímá vstupní jazyk, který lze parametrizovat pomocí maker.
+\item Na~práci budu navazovat v~doktorském studiu.
 \end{itemize}
 \end{frame}
 
