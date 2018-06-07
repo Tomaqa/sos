@@ -1,0 +1,14 @@
+*.odt
+
+*.ac*
+*.alg
+*.aux
+*.bbl
+*.blg
+*.gl*
+*.ist
+*.lo*
+*.out
+*.toc
+*.nav
+*.snm

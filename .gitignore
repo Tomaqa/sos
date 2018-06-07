@@ -6,20 +6,8 @@ local/
 
 .backup/
 *log
+*~
+
 data/smt2
 data/ode
 doc/odeint
-
-*.ac*
-*.alg
-*.aux
-*.bbl
-*.blg
-*.gl*
-*.ist
-*.lo*
-*.out
-*.toc
-*.nav
-*.snm
-*~

@@ -73,8 +73,7 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 \item Motivace.
 \item Cíle práce.
 \item Ukázkové úlohy.
-\item Výsledky.
-\item Realizace.
+\item Model komponent.
 \end{enumerate}
 \end{frame}
 
@@ -93,12 +92,11 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 \begin{itemize}
 \item Termostat popíšeme \textit{automatem}.
    \begin{itemize}
-   \item Rozsah povolené teploty specifikujeme jako invarianty
-      (nejsou na~obrázku).
+   \item Rozsah povolené teploty: $70 \leq x \leq 80$.
    \end{itemize}
-\item Jak verifikovat správnou funkci termostatu?
+\item Jak \textbf{verifikovat správnou funkci} termostatu?
    \begin{itemize}
-   \item Tj.~dodržení invariant.
+   \item Tj.~dodržení rozsahu teploty.
    \end{itemize}
 \end{itemize}
 \end{frame}
@@ -106,41 +104,23 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Motivace (1)}
+\begin{frame}\frametitle{Motivace}
 \begin{itemize}
-\item Používanou spolehlivou metodou \textit{garance}
-   dodržení specifikací je \textbf{formální verifikace}.
+\item Vestavné systémy typicky vyžadují popis
+   pomocí \textbf{diferenciálních~rovnic} (ODE).
    \begin{itemize}
-   \item K~tomu je nutné sestavit matematický \textit{model} systému.
+   \item ODE: Ordinary Differential Equation.
    \end{itemize}
-\item Dnes hojně využívaný způsob: \textbf{SAT}.
+\item Samotný problém SAT \textit{neovládá} ODE.
    \begin{itemize}
-   \item SAT: Problém Booleovské splnitelnosti
-      (angl. Boolean satisfiability).
+   \item Ani jeho aritmetická rozšíření je neovládají.
    \end{itemize}
 \end{itemize}
 
-\begin{alertblock}{Problém}
-\begin{itemize}
-\item \textit{Vestavné systémy} interagují
-   s~\textit{fyzikálním okolím}.
-\item Přirozený popis fyzikálních jevů: \textbf{diferenciální rovnice}.
-   \begin{itemize}
-   \item Ordinary differential equation (ODE).
-   \end{itemize}
-\item SAT (ani jeho aritmetická rozšíření) \textit{neumí} ODE.
-\end{itemize}
-\end{alertblock} %%Problém
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}\frametitle{Motivace (2)}
 \begin{block}{Současný stav}
 \begin{itemize}
 \item Řešiče kombinující SAT a soustavy ODE již existují.
-\item K~řešení ODE ale používají intervalovou aritmetiku.
+\item K~řešení ODE ale používají \textit{intervalovou aritmetiku}.
 \item Důsledky:
    \begin{itemize}
    \item Umožňují intervalové počáteční podmínky ODE.
@@ -152,16 +132,8 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 
 \vfill
 
-\begin{exampleblock}{Cíl práce}
-K~řešení ODE použít \textbf{klasické numerické metody}:
-\begin{itemize}
-\item Vyžadují jednoznačné počáteční podmínky.
-\item Garantují (jen) \textit{konvergenci} dosažené chyby.
-\item Mohou být méně přesné, ale jsou rychlejší.
-   \begin{itemize}
-   \item Jsou používány v~průmyslových aplikacích.
-   \end{itemize}
-\end{itemize}
+\begin{exampleblock}{Cíl práce}\centering
+K~řešení ODE použít \textbf{klasické numerické metody}.
 \end{exampleblock} %%Cíl práce
 \end{frame}
 
@@ -171,16 +143,20 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 \begin{frame}\frametitle{Cíle práce}
 \begin{enumerate}
 \item Ověřit koncept, který k~řešení ODE používá
-   klasické numerické metody.
+   \textbf{klasické~numerické~metody}.
    \begin{itemize}
-   \item Kombinovat zvolené řešení ODE s~řešením problému SMT.
-      \begin{itemize}
-      \item SMT: Satisfiability Modulo Theories
-         (rozšíření SAT o~aritmetické teorie).
-      \end{itemize}
-   \item Realizovat prototypovou implementaci řešiče SMT a ODE.
+   \item Vyžadují jednoznačné počáteční podmínky.
+   \item Mohou být méně přesné, ale jsou \textbf{rychlejší}.
    \end{itemize}
-\item Srovnat výkonnost prototypu se~stávajícím řešičem dReal.
+\item Použít zvolené řešení ODE pro~účely \textbf{formální verifikace}.
+   \begin{itemize}
+      \item Kombinovat ODE a problém SMT.
+         \begin{itemize}
+         \item SMT: Satisfiability Modulo Theories.
+         \item SMT rozšiřuje SAT o~aritmetické teorie.
+         \end{itemize}
+   \end{itemize}
+\item \textbf{Srovnat výkonnost} prototypu se~stávajícím řešičem dReal.
    \begin{itemize}
    \item dReal pochází z~disertační práce na~Carnegie Mellon University.
    %% Vedoucí práce: Edmund M. Clarke, držitel Turingovy ceny
@@ -195,32 +171,27 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 \textbf{Termostat}
 \begin{itemize}
 \item $x$ \dots provozní teplota.
-\item Nutné dodržet invariant $70 \leq x \leq 80$.
-\item Systém je řízen \textit{časem} o~fixní periodě.
-\item Srovnání délky výpočtu dReal a našeho prototypu: $46$ a $0{,}5$ s.
+\item Nutné dodržet meze teploty: $70 \leq x \leq 80$.
+\item Systém je řízen \textit{časem}:
+   \begin{itemize}
+   \item předem dané časové okamžiky,
+   \item v~nichž dochází k~přechodům a kontrole specifikací.
+   \end{itemize}
+\item Srovnání délky výpočtu dReal a našeho prototypu:
+   \textbf{46} a \textbf{0${,}$5} s.
+   \begin{itemize}
+   \item Tj. téměř \textbf{stonásobné zrychlení}.
+   \end{itemize}
 \end{itemize}
 
 \vfill
 
 \begin{figure}
-   \begin{subfigure}{.45\textwidth}
-      \centering
-      \caption{dReal}
-      \label{plot:thermostat:dreal}
-      \includegraphics[height=3.3cm, width=\textwidth]{%
-         \picFn{thermostat_dreal_x.pdf}%
-      }
-   \end{subfigure}
-   \quad
-   \begin{subfigure}{.49\textwidth}
-      \centering
-      \caption{Náš koncept}
-      \label{plot:thermostat:0.4}
-      \includegraphics[height=3.9cm, width=\textwidth]{%
-         \picFn{thermostat_0_4.pdf}%
-      }
-      \vspace{-0.75cm}
-   \end{subfigure}
+\centering
+\label{plot:thermostat}
+\includegraphics[width=.55\textwidth]{%
+   \picFn{thermostat_0_4_10s.pdf}%
+}
 \end{figure}
 \end{frame}
 
@@ -231,13 +202,14 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 \textbf{Skákající míč}
 \begin{itemize}
 \item $x$ \dots výška míče, $v$ \dots rychlost.
-\item Nutné dodržet invariant $x \geq 0$ (nezávisle na~časové periodě).
-\item Systém je řízen \textit{událostmi} (změna pád/odraz).
-\item Srovnání délky výpočtu dReal a našeho prototypu: $0{,}1$ a $0{,}5$ s.
-\item Naše \textit{implementace} je (zatím) nevhodná.
+\item Míček musí setrvat nad~podložkou: $x \geq 0$.
+\item Systém \textit{není} řízen časem:
    \begin{itemize}
-   \item Kvůli nutnosti časté kontroly invariant
-      (nezávisle na~časové periodě).
+   \item nutno často kontrolovat přechody a specifikace.
+   \end{itemize}
+\item Srovnání délky výpočtu dReal a našeho prototypu: $0{,}1$ a $0{,}5$ s.
+   \begin{itemize}
+   \item Naše \textit{implementace} je zatím pro~tyto úlohy neefektivní.
    \end{itemize}
 \end{itemize}
 
@@ -267,20 +239,18 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Výsledky}
+\begin{frame}\frametitle{Pozorování}
 \begin{itemize}
-\item Náš prototyp si v~některých úlohách počíná mnohem \textbf{rychleji}
-   než dReal.
+\item Náš \textit{prototyp} si v~některých úlohách počíná
+   mnohem \textbf{rychleji} než~dReal.
    \begin{itemize}
-   \item Zatím se jedná zejména o~úlohy řízené časem (časovou periodou).
+   \item Zejména v~úlohách řízených časem.
    \end{itemize}
 \item Tj.~podařilo se mi \textbf{potvrdit},
    že zvolený \textbf{koncept} je \textbf{nadějný}
    pro~lepší použití \textbf{v~praxi}.
-\item Velký rozdíl ve~výpočtu úloh s~pevnými a intervalovými podmínkami.
    \begin{itemize}
-   \item Intervalové podmínky lze aproximovat výčtem hodnot v~logickém součtu.
-   \item I~dReal si pak počíná mnohem rychleji.
+   \item Průmyslové instance mohou být velmi rozsáhlé.
    \end{itemize}
 \end{itemize}
 \end{frame}
@@ -288,23 +258,21 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}\frametitle{Realizace}
+\begin{frame}\frametitle{Model komponent}
 \begin{itemize}
 \item Vstupní jazyk je podobný standardu SMT-LIB.
    \begin{itemize}
    \item Přidány makra pro~parametrizované generování kódu.
    \end{itemize}
 \item SMT i~ODE řešič realizovány jako výměnné samostatné komponenty.
-\item Centrální komponenta zajišťuje:
    \begin{itemize}
-   \item vzájemnou komunikaci řešičů,
-   \item prohledání všech potřebných vstupních kombinací.
+   \item Lze použít libovolný SMT řešič konformní s~SMT-LIB standardem.
    \end{itemize}
 \end{itemize}
 
 \vfill
 
-\pic{comp_design.pdf}{comp:design}{0.6}
+\pic{comp_design_api.pdf}{comp:design:api}{0.98}
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%
@@ -312,19 +280,16 @@ K~řešení ODE použít \textbf{klasické numerické metody}:
 
 \begin{frame}\frametitle{Závěr}
 \begin{itemize}
-\item Cílem bylo aplikovat \textbf{odlišný přístup} v~integraci ODE.
+\item Cíl: aplikovat \textbf{odlišný přístup} v~integraci ODE.
    \begin{itemize}
-   \item Použít potenciálně méně přesné, ale rychlejší metody.
-   \item Kombinovat ODE s~problémem SAT či jeho rozšířením.
+   \item Méně přesné, ale \textbf{rychlejší} metody.
    \end{itemize}
-\item Navržený koncept jsem aplikoval v~prototypové implementaci.
-\item Prototyp jsem srovnal se~stávajícím řešičem dReal.
+\item Prototyp srovnán s~řešičem dReal.
    \begin{itemize}
-   \item V~některých úlohách jsem dosáhl výrazně \textbf{rychlejšího výpočtu}.
-   \item Podařilo se mi \textbf{potvrdit zvolený koncept}.
+   \item Naše řešení je výrazně \textbf{rychlejší} v~některých úlohách.
    \end{itemize}
-\item Prototyp přijímá vstupní jazyk, který lze parametrizovat pomocí maker.
-\item Na~práci budu navazovat v~doktorském studiu.
+\item Zvolený \textbf{koncept} se mi podařilo \textbf{potvrdit}.
+\item Na~práci budu dále pokračovat.
 \end{itemize}
 \end{frame}
 
