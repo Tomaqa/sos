@@ -107,7 +107,7 @@ Vedoucí práce: doc. Dipl.-Ing. Dr. techn. Stefan Ratschan
 
 \begin{frame}\frametitle{Motivace}
 \begin{itemize}
-\item Vestavné systémy typicky vyžadují popis
+\item Okolí \textit{vestavných systémů} typicky vyžaduje popis
    pomocí \textbf{diferenciálních~rovnic} (ODE).
    \begin{itemize}
    \item ODE: Ordinary Differential Equation.
@@ -262,9 +262,6 @@ K~řešení ODE použít \textbf{klasické numerické metody}.
 \begin{frame}\frametitle{Model komponent}
 \begin{itemize}
 \item Vstupní jazyk je podobný standardu SMT-LIB.
-   \begin{itemize}
-   \item Přidány makra pro~parametrizované generování kódu.
-   \end{itemize}
 \item SMT i~ODE řešič realizovány jako výměnné samostatné komponenty.
    \begin{itemize}
    \item Lze použít libovolný SMT řešič konformní s~SMT-LIB standardem.
@@ -298,14 +295,39 @@ K~řešení ODE použít \textbf{klasické numerické metody}.
 %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
 
-% \appendix
-% \newcounter{finalframe}
-% \setcounter{finalframe}{\value{framenumber}}
+\appendix
+\newcounter{finalframe}
+\setcounter{finalframe}{\value{framenumber}}
 
-% \begin{frame}\frametitle{Další úlohy, které robot vykonává}
-% \end{frame}
+\begin{frame}\frametitle{Zvýšení výkonu řešiče}
+\begin{itemize}
+\item Algoritmické nedostatky převažují nad~implementačními.
+   \begin{itemize}
+   \item Chybí sofistikovanější prohledávání stavového prostoru.
+   \item SMT řešič počítá exaktně (zbytečně).
+   \item Srovnání délky výpočtu SMT a ODE řešiče: 95~\% a 5~\%.
+      \begin{itemize}
+      \item[$\rightarrow$] Zajistit efektivnější rozdělení zátěže
+         (s~ohledem na~prohledávaný prostor).
+      \end{itemize}
+   \item Úlohy, které nejsou řízeny časem, jsou počítány neefektivně.
+   \item Není využit paralelismus.
+   \end{itemize}
+\item Nejprve řešit algoritmickou stránku, až poté efektivní implementaci.
+\item Možnosti vyšší efektivity implementace:
+   \begin{itemize}
+   \item (Jiné než procesorové architektury nepřichází v~úvahu.)
+   \item Přizpůsobení kódu optimalizacím překladače
+      (odstranění rekurze, vektorizace \dots).
+   \item Efektivní implementace paralelismu.
+      \begin{itemize}
+      \item Využití cache pamětí.
+      \end{itemize}
+   \end{itemize}
+\end{itemize}
+\end{frame}
 
-% \setcounter{framenumber}{\value{finalframe}}
+\setcounter{framenumber}{\value{finalframe}}
 
 %%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%
