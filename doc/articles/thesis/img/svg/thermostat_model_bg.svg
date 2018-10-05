@@ -11,11 +11,11 @@
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    id="svg310"
    version="1.1"
-   viewBox="0 0 179.39415 81.367386"
-   height="81.367386mm"
-   width="179.39415mm"
+   viewBox="0 0 202.15689 94.158165"
+   height="94.158165mm"
+   width="202.15689mm"
    inkscape:version="0.92.2 2405546, 2018-03-11"
-   sodipodi:docname="thermostat_model.svg">
+   sodipodi:docname="thermostat_model_bg.svg">
   <sodipodi:namedview
      fit-margin-bottom="0"
      fit-margin-right="0"
@@ -29,15 +29,16 @@
      showgrid="false"
      inkscape:current-layer="layer1"
      inkscape:document-units="mm"
-     inkscape:cy="80.911141"
-     inkscape:cx="324.4153"
+     inkscape:cy="116.43874"
+     inkscape:cx="313.00988"
      inkscape:zoom="0.98994949"
      inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
+     inkscape:pageopacity="1"
      borderopacity="1.0"
      bordercolor="#666666"
      pagecolor="#ffffff"
-     id="base" />
+     id="base"
+     inkscape:pagecheckerboard="true" />
   <defs
      id="defs304">
     <marker
@@ -79,7 +80,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -87,7 +88,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-13.830596,-19.05593)">
+     transform="translate(-2.4492233,-12.660542)">
     <a
        id="a4838">
       <path
@@ -99,25 +100,29 @@
          d=""
          inkscape:connector-curvature="0" />
     </a>
+    <rect
+       style="opacity:1;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.4165082;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="rect1464"
+       width="201.74039"
+       height="93.741653"
+       x="2.6574774"
+       y="12.868796" />
     <a
        id="a4841"
-       transform="translate(118.38586,-0.30238106)"
-       style="fill:#008000">
+       transform="translate(118.38586,-0.30238106)">
       <flowRoot
          transform="matrix(0.26458333,0,0,0.26458333,0,-5.8208336)"
-         style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#008000;fill-opacity:1;stroke:none"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
          id="flowRoot4822"
          xml:space="preserve"><flowRegion
-           id="flowRegion4824"
-           style="fill:#008000"><rect
+           id="flowRegion4824"><rect
              ry="0"
              y="193.94826"
              x="112.85714"
              height="60.000011"
              width="82.857155"
-             id="rect4826"
-             style="fill:#008000" /></flowRegion><flowPara
-           style="font-weight:bold;text-align:center;text-anchor:middle;fill:#008000"
+             id="rect4826" /></flowRegion><flowPara
+           style="font-weight:bold;text-align:center;text-anchor:middle;fill:#00ff00"
            id="flowPara4828">On</flowPara></flowRoot>    </a>
     <flowRoot
        xml:space="preserve"
