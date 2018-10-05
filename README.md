@@ -4,13 +4,17 @@ This work is the result of diploma thesis at FIT-CTU in Prague.
 
 ## Announcement
 
+**Project migrated to GitLab** in 8/2018.
+
 This software is only a prototype,
 do not expect user-friendly interface and bug-free usage.
 Users are welcome to use this software, and asked to report discovered bugs to GitHub.
 
 ## Download
 
-[GitHub](https://github.com/Tomaqa/sos) repository
+[GitLab](https://gitlab.com/Tomaqa/sos) repository
+
+*[GitHub](https://github.com/Tomaqa/sos) repository - old version until 8/2018*
 
 ## Installation
 
@@ -59,8 +63,8 @@ Calling `make clean` is also likely to be appropriate.
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at
-https://github.com/Tomaqa/sos.
+Bug reports and pull requests are welcome on GitLab at
+https://gitlab.com/Tomaqa/sos.
 
 ## License
 
